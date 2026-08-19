@@ -1,0 +1,13 @@
+{
+  "itemGroup.cosmicpve": "Example Mod Tab",
+  "block.cosmicpve.example_block": "Example Block",
+  "item.cosmicpve.example_item": "Example Item",
+
+  "cosmicpve.configuration.title": "CosmicPVE Configs",
+  "cosmicpve.configuration.section.cosmicpve.common.toml": "CosmicPVE Configs",
+  "cosmicpve.configuration.section.cosmicpve.common.toml.title": "CosmicPVE Configs",
+  "cosmicpve.configuration.items": "Item List",
+  "cosmicpve.configuration.logDirtBlock": "Log Dirt Block",
+  "cosmicpve.configuration.magicNumberIntroduction": "Magic Number Text",
+  "cosmicpve.configuration.magicNumber": "Magic Number"
+}
