@@ -1,5 +1,6 @@
 package com.cosmicpve;
 
+import com.cosmicpve.content.CosmicContent;
 import com.cosmicpve.network.CosmicNetwork;
 import com.cosmicpve.registry.ModAttachments;
 import com.cosmicpve.registry.ModDataComponents;
@@ -20,6 +21,7 @@ public final class CosmicPVE {
         ModAttachments.register(modBus);
         ModItems.register(modBus);
         modBus.addListener(CosmicNetwork::registerPayloads);
+        CosmicContent.register();
     }
 
     public static Identifier id(String path) {
