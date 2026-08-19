@@ -1,5 +1,8 @@
 package com.cosmicpve;
 
+import com.cosmicpve.combat.CosmicCombat;
+import com.cosmicpve.combat.legacy.LegacyCombatService;
+import com.cosmicpve.command.CosmicCommands;
 import com.cosmicpve.content.CosmicContent;
 import com.cosmicpve.network.CosmicNetwork;
 import com.cosmicpve.registry.ModAttachments;
@@ -9,6 +12,7 @@ import com.mojang.logging.LogUtils;
 import net.minecraft.resources.Identifier;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.neoforge.common.NeoForge;
 import org.slf4j.Logger;
 
 @Mod(CosmicPVE.MOD_ID)
@@ -22,6 +26,9 @@ public final class CosmicPVE {
         ModItems.register(modBus);
         modBus.addListener(CosmicNetwork::registerPayloads);
         CosmicContent.register();
+        LegacyCombatService.register(modBus);
+        CosmicCombat.register();
+        NeoForge.EVENT_BUS.addListener(CosmicCommands::register);
     }
 
     public static Identifier id(String path) {
