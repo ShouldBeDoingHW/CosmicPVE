@@ -8,6 +8,9 @@ import com.cosmicpve.network.CosmicNetwork;
 import com.cosmicpve.registry.ModAttachments;
 import com.cosmicpve.registry.ModDataComponents;
 import com.cosmicpve.registry.ModItems;
+import com.cosmicpve.equipment.armor.ArmorCrystalEventBridge;
+import com.cosmicpve.equipment.EquipmentTooltipService;
+import com.cosmicpve.equipment.enchantment.EnchantingEventBridge;
 import com.mojang.logging.LogUtils;
 import net.minecraft.resources.Identifier;
 import net.neoforged.bus.api.IEventBus;
@@ -29,6 +32,12 @@ public final class CosmicPVE {
         LegacyCombatService.register(modBus);
         CosmicCombat.register();
         NeoForge.EVENT_BUS.addListener(CosmicCommands::register);
+        var crystals = new ArmorCrystalEventBridge();
+        NeoForge.EVENT_BUS.addListener(crystals::onStacked);
+        var tooltips = new EquipmentTooltipService();
+        NeoForge.EVENT_BUS.addListener(tooltips::onTooltip);
+        var enchanting = new EnchantingEventBridge();
+        NeoForge.EVENT_BUS.addListener(enchanting::onStacked);
     }
 
     public static Identifier id(String path) {

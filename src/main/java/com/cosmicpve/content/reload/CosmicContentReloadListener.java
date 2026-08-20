@@ -6,6 +6,7 @@ import com.cosmicpve.content.ContentSnapshot;
 import com.cosmicpve.content.CosmicContentRepository;
 import com.cosmicpve.content.definition.scaling.ScalingProfileData;
 import com.cosmicpve.content.definition.stack.StackDefinitionData;
+import com.cosmicpve.content.definition.armor.ArmorSetDefinitionData;
 import com.cosmicpve.content.validation.ContentDiagnostic;
 import com.cosmicpve.content.validation.ValidationResult;
 import com.google.gson.JsonElement;
@@ -31,6 +32,8 @@ public final class CosmicContentReloadListener
             FileToIdConverter.json("cosmicpve/scaling_profiles");
     private static final FileToIdConverter STACK_DEFINITIONS =
             FileToIdConverter.json("cosmicpve/stack_definitions");
+    private static final FileToIdConverter ARMOR_SET_DEFINITIONS =
+            FileToIdConverter.json("cosmicpve/armor_sets");
 
     private final CosmicContentRepository repository;
 
@@ -53,6 +56,12 @@ public final class CosmicContentReloadListener
                 StackDefinitionData.CODEC,
                 candidate,
                 candidate::addStackDefinition);
+        loadDefinitions(
+                resourceManager,
+                ARMOR_SET_DEFINITIONS,
+                ArmorSetDefinitionData.CODEC,
+                candidate,
+                candidate::addArmorSetDefinition);
         return candidate.build();
     }
 
@@ -69,12 +78,14 @@ public final class CosmicContentReloadListener
 
         ContentSnapshot active = repository.snapshot();
         CosmicPVE.LOGGER.info(
-                "Published CosmicPVE content revision {}: {} scaling profile(s), {} stack definition(s)",
+                "Published CosmicPVE content revision {}: {} scaling profile(s), {} stack definition(s), {} armor set(s)",
                 active.revision(),
                 active.scalingProfiles().size(),
-                active.stackDefinitions().size());
+                active.stackDefinitions().size(),
+                active.armorSetDefinitions().size());
         CosmicPVE.LOGGER.debug("Scaling profiles: {}", active.scalingProfiles().keySet());
         CosmicPVE.LOGGER.debug("Stack definitions: {}", active.stackDefinitions().keySet());
+        CosmicPVE.LOGGER.debug("Armor sets: {}", active.armorSetDefinitions().keySet());
     }
 
     private static <T> void loadDefinitions(

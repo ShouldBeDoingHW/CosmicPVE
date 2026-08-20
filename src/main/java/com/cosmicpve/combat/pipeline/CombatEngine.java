@@ -14,13 +14,15 @@ public final class CombatEngine {
         validateBaseAndAdditive(request.baseOrdinaryDamage(), additiveBonus);
         validateMultipliers(request.separateOutgoingMultipliers());
         validateMultipliers(request.incomingMultipliers());
+        validateMultipliers(request.incomingContributions().stream().map(IncomingDamageContribution::multiplier).toList());
 
         double base = Math.max(0.0, request.baseOrdinaryDamage());
         double afterAdditive = Math.max(0.0, base * (1.0 + additiveBonus));
         double outgoingProduct = product(request.separateOutgoingMultipliers());
         double afterOutgoing = afterAdditive * outgoingProduct;
         double afterPreDefenseBounds = request.preDefenseBounds().apply(afterOutgoing);
-        double incomingProduct = product(request.incomingMultipliers());
+        double incomingProduct = product(request.incomingMultipliers())
+                * product(request.incomingContributions().stream().map(IncomingDamageContribution::multiplier).toList());
         double afterIncoming = afterPreDefenseBounds * incomingProduct;
         double finalOrdinary = request.finalOrdinaryBounds().apply(afterIncoming);
 
@@ -34,6 +36,7 @@ public final class CombatEngine {
                 afterOutgoing,
                 afterPreDefenseBounds,
                 request.incomingMultipliers(),
+                request.incomingContributions(),
                 incomingProduct,
                 afterIncoming,
                 finalOrdinary);

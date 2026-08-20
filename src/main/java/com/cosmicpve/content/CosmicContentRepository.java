@@ -2,6 +2,7 @@ package com.cosmicpve.content;
 
 import com.cosmicpve.content.definition.scaling.ScalingProfile;
 import com.cosmicpve.content.definition.stack.StackDefinition;
+import com.cosmicpve.content.definition.armor.ArmorSetDefinition;
 import com.cosmicpve.content.validation.ValidationResult;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
@@ -30,6 +31,15 @@ public final class CosmicContentRepository {
     public StackDefinition requireStackDefinition(Identifier id) {
         return findStackDefinition(id)
                 .orElseThrow(() -> new UnknownContentDefinitionException("stack", id));
+    }
+
+    public Optional<ArmorSetDefinition> findArmorSetDefinition(Identifier id) {
+        return Optional.ofNullable(snapshot().armorSetDefinitions().get(id));
+    }
+
+    public ArmorSetDefinition requireArmorSetDefinition(Identifier id) {
+        return findArmorSetDefinition(id)
+                .orElseThrow(() -> new UnknownContentDefinitionException("armor set", id));
     }
 
     public synchronized boolean publish(ValidationResult<ContentSnapshot> candidate) {

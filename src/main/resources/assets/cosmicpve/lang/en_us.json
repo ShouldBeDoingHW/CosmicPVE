@@ -10,5 +10,79 @@
   "enchantment.cosmicpve.poison": "Poison",
   "enchantment.cosmicpve.pummel": "Pummel",
   "death.attack.cosmicpve.doublestrike": "%1$s was struck twice",
-  "death.attack.cosmicpve.doublestrike.player": "%1$s was struck twice by %2$s"
+  "death.attack.cosmicpve.doublestrike.player": "%1$s was struck twice by %2$s",
+  "item.cosmicpve.armor_set_crystal": "Armor Set Crystal",
+  "item.cosmicpve.armor_set_crystal.named": "%s Armor Crystal",
+  "armor_set.cosmicpve.phantom": "Phantom",
+  "armor_set.cosmicpve.phantom.bonus.outgoing": "+25% outgoing damage",
+  "armor_set.cosmicpve.phantom.bonus.incoming": "+10% incoming damage",
+  "armor_set.cosmicpve.phantom.bonus.mastery": "Mastery enchantment proc chances +25%",
+  "armor_set.cosmicpve.yeti": "Yeti",
+  "armor_set.cosmicpve.yeti.bonus.outgoing": "+10% outgoing damage",
+  "armor_set.cosmicpve.yeti.bonus.incoming": "-10% incoming damage",
+  "armor_set.cosmicpve.yeti.bonus.immunity": "Immune to freezing and ice effects",
+  "tooltip.cosmicpve.armor_set.identity": "%s Armor",
+  "tooltip.cosmicpve.armor_set.full_bonus": "Full Set Bonus (4 pieces):",
+  "tooltip.cosmicpve.crystal.success": "Success Rate: %s%%",
+  "tooltip.cosmicpve.crystal.destroy": "Destroy Rate: %s%%",
+  "tooltip.cosmicpve.crystal.instruction": "Drag and drop onto armor to apply.",
+  "message.cosmicpve.armor_crystal.success": "Armor Set Crystal applied successfully.",
+  "message.cosmicpve.armor_crystal.failure": "The crystal failed and destroyed the armor.",
+  "message.cosmicpve.armor_crystal.already_set": "That armor already has a set identity.",
+  "message.cosmicpve.armor_crystal.invalid_target": "Armor Set Crystals can only be applied to armor.",
+  "message.cosmicpve.armor_crystal.stale": "The armor slot changed; no crystal was used.",
+  "message.cosmicpve.armor_crystal.invalid": "That Armor Set Crystal is invalid.",
+  "command.cosmicpve.armor.unknown_set": "Unknown armor set: %s",
+  "command.cosmicpve.armor.given": "Gave %3$s a %1$s Armor Set Crystal with %2$s%% success.",
+  "command.cosmicpve.feed": "Food restored.",
+  "command.cosmicpve.heal": "Health restored.",
+  "command.cosmicpve.restore": "Health and food restored."
+  ,"item.cosmicpve.cosmic_enchantment_book":"Cosmic Enchantment Book"
+  ,"item.cosmicpve.white_scroll":"White Scroll"
+  ,"tooltip.cosmicpve.book.rarity":"Rarity: %s"
+  ,"tooltip.cosmicpve.book.success":"Success Rate: %s%%"
+  ,"tooltip.cosmicpve.book.destroy":"Destroy Rate: %s%%"
+  ,"tooltip.cosmicpve.book.instruction":"Drag and drop onto compatible equipment to apply."
+  ,"tooltip.cosmicpve.white_scroll.purpose":"Protects equipment from one destructive application."
+  ,"tooltip.cosmicpve.white_scroll.instruction":"Drag and drop onto equipment to apply."
+  ,"tooltip.cosmicpve.protected":"Protected"
+  ,"tooltip.cosmicpve.enchant_capacity":"Cosmic Enchants: %s / %s"
+  ,"cosmic_tier.cosmicpve.simple":"Simple"
+  ,"cosmic_tier.cosmicpve.unique":"Unique"
+  ,"cosmic_tier.cosmicpve.elite":"Elite"
+  ,"cosmic_tier.cosmicpve.ultimate":"Ultimate"
+  ,"cosmic_tier.cosmicpve.legendary":"Legendary"
+  ,"cosmic_tier.cosmicpve.mastery":"Mastery"
+  ,"message.cosmicpve.book.success":"Cosmic enchantment applied."
+  ,"message.cosmicpve.book.failed_survived":"Enchantment failed; the item survived."
+  ,"message.cosmicpve.book.failed_destroyed":"Enchantment failed and destroyed the item."
+  ,"message.cosmicpve.book.failed_protected":"Enchantment failed; White Scroll protection saved the item."
+  ,"message.cosmicpve.book.capacity":"Cosmic enchantment capacity is full."
+  ,"message.cosmicpve.book.existing":"That enchantment level cannot be applied."
+  ,"message.cosmicpve.book.incompatible":"That enchantment is incompatible with this item."
+  ,"message.cosmicpve.book.invalid":"That Cosmic Enchantment Book is invalid."
+  ,"message.cosmicpve.white_scroll.already":"That item is already protected."
+  ,"message.cosmicpve.white_scroll.applied":"White Scroll protection applied."
+  ,"message.cosmicpve.armor_crystal.protected":"The crystal failed; White Scroll protection saved the armor."
+  ,"item.cosmicpve.transmog_scroll":"Transmog Scroll"
+  ,"item.cosmicpve.armor_enchantment_orb":"Armor Enchantment Orb"
+  ,"item.cosmicpve.weapon_enchantment_orb":"Weapon Enchantment Orb"
+  ,"tooltip.cosmicpve.transmog.purpose":"Organizes enchantments by rarity and level."
+  ,"tooltip.cosmicpve.transmog.instruction":"Drag and drop onto equipment to apply."
+  ,"tooltip.cosmicpve.orb.armor_purpose":"Increases an armor piece's maximum Cosmic enchantments by 1."
+  ,"tooltip.cosmicpve.orb.weapon_purpose":"Increases a weapon's maximum Cosmic enchantments by 1."
+  ,"tooltip.cosmicpve.orb.success":"Success Rate: %s%%"
+  ,"tooltip.cosmicpve.orb.destroy":"Destroy Rate: %s%%"
+  ,"tooltip.cosmicpve.orb.armor_instruction":"Drag and drop onto armor to apply."
+  ,"tooltip.cosmicpve.orb.weapon_instruction":"Drag and drop onto a weapon to apply."
+  ,"message.cosmicpve.transmog.applied":"Transmog sorting applied."
+  ,"message.cosmicpve.transmog.already":"That equipment is already Transmog-sorted."
+  ,"message.cosmicpve.transmog.invalid":"The Transmog Scroll could not be applied."
+  ,"message.cosmicpve.orb.success":"Enchantment capacity increased."
+  ,"message.cosmicpve.orb.failed_survived":"The Orb failed; the item survived."
+  ,"message.cosmicpve.orb.failed_protected":"The Orb failed; White Scroll protection saved the item."
+  ,"message.cosmicpve.orb.failed_destroyed":"The Orb failed and destroyed the item."
+  ,"message.cosmicpve.orb.target":"That Orb is incompatible with this item."
+  ,"message.cosmicpve.orb.maximum":"That item has reached its maximum Orb capacity."
+  ,"message.cosmicpve.orb.invalid":"That Enchantment Orb is invalid."
 }

@@ -1,0 +1,12 @@
+{
+  "display_name": {"translate": "armor_set.cosmicpve.phantom"},
+  "color": "#FF6969",
+  "full_set_bonus": [
+    {"translate": "armor_set.cosmicpve.phantom.bonus.outgoing"},
+    {"translate": "armor_set.cosmicpve.phantom.bonus.incoming"},
+    {"translate": "armor_set.cosmicpve.phantom.bonus.mastery"}
+  ],
+  "additive_outgoing_bonus": 0.25,
+  "incoming_multiplier": 1.10,
+  "proc_chance_multipliers": {"cosmicpve:mastery": 1.25}
+}

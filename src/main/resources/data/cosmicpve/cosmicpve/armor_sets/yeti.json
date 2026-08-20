@@ -1,0 +1,12 @@
+{
+  "display_name": {"translate": "armor_set.cosmicpve.yeti"},
+  "color": "#A3FFF5",
+  "full_set_bonus": [
+    {"translate": "armor_set.cosmicpve.yeti.bonus.outgoing"},
+    {"translate": "armor_set.cosmicpve.yeti.bonus.incoming"},
+    {"translate": "armor_set.cosmicpve.yeti.bonus.immunity"}
+  ],
+  "additive_outgoing_bonus": 0.10,
+  "incoming_multiplier": 0.90,
+  "immunities": ["cosmicpve:freeze", "cosmicpve:frozen", "cosmicpve:permafrost", "cosmicpve:ice_aspect"]
+}

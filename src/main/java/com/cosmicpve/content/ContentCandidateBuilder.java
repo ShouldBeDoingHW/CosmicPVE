@@ -4,6 +4,8 @@ import com.cosmicpve.content.definition.scaling.ScalingProfile;
 import com.cosmicpve.content.definition.scaling.ScalingProfileData;
 import com.cosmicpve.content.definition.stack.StackDefinition;
 import com.cosmicpve.content.definition.stack.StackDefinitionData;
+import com.cosmicpve.content.definition.armor.ArmorSetDefinition;
+import com.cosmicpve.content.definition.armor.ArmorSetDefinitionData;
 import com.cosmicpve.content.validation.ContentDiagnostic;
 import com.cosmicpve.content.validation.ValidationResult;
 import java.util.ArrayList;
@@ -15,6 +17,7 @@ import net.minecraft.resources.Identifier;
 public final class ContentCandidateBuilder {
     private final Map<Identifier, ScalingProfile> scalingProfiles = new LinkedHashMap<>();
     private final Map<Identifier, StackDefinition> stackDefinitions = new LinkedHashMap<>();
+    private final Map<Identifier, ArmorSetDefinition> armorSetDefinitions = new LinkedHashMap<>();
     private final List<ContentDiagnostic> diagnostics = new ArrayList<>();
 
     public void addScalingProfile(Identifier id, ScalingProfileData data) {
@@ -25,6 +28,17 @@ public final class ContentCandidateBuilder {
         }
         if (scalingProfiles.putIfAbsent(id, result.valueOrThrow()) != null) {
             diagnostics.add(ContentDiagnostic.error(id.toString(), "Duplicate scaling profile ID"));
+        }
+    }
+
+    public void addArmorSetDefinition(Identifier id, ArmorSetDefinitionData data) {
+        ValidationResult<ArmorSetDefinition> result = data.resolve(id);
+        if (!result.isSuccess()) {
+            diagnostics.addAll(result.diagnostics());
+            return;
+        }
+        if (armorSetDefinitions.putIfAbsent(id, result.valueOrThrow()) != null) {
+            diagnostics.add(ContentDiagnostic.error(id.toString(), "Duplicate armor-set definition ID"));
         }
     }
 
@@ -48,7 +62,7 @@ public final class ContentCandidateBuilder {
             return ValidationResult.failure(diagnostics);
         }
         return ValidationResult.success(
-                new ContentSnapshot(0L, scalingProfiles, stackDefinitions),
+                new ContentSnapshot(0L, scalingProfiles, stackDefinitions, armorSetDefinitions),
                 diagnostics);
     }
 }

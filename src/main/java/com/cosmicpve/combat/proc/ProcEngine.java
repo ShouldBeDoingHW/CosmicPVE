@@ -32,8 +32,11 @@ public final class ProcEngine {
 
     private ProcEvaluation evaluateOne(
             ProcEvent event, ProcCandidate candidate, Set<Identifier> claimedOnceKeys) {
-        double multiplier = ProcChance.multiplierProduct(event.chanceMultipliers());
-        double finalChance = ProcChance.calculate(candidate.baseProbability(), event.chanceMultipliers());
+        var chanceMultipliers = new ArrayList<Double>(event.chanceMultipliers());
+        candidate.classifications().stream().map(event.namedChanceMultipliers()::get)
+                .filter(java.util.Objects::nonNull).forEach(chanceMultipliers::add);
+        double multiplier = ProcChance.multiplierProduct(chanceMultipliers);
+        double finalChance = ProcChance.calculate(candidate.baseProbability(), chanceMultipliers);
 
         if (candidate.hook() != event.hook()) {
             return skipped(candidate, multiplier, finalChance, ProcEvaluationStatus.HOOK_MISMATCH, true);

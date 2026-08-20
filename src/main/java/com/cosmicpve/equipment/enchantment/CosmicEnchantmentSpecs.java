@@ -2,6 +2,8 @@ package com.cosmicpve.equipment.enchantment;
 
 import com.cosmicpve.registry.ModEnchantments;
 import java.util.List;
+import java.util.Optional;
+import net.minecraft.resources.Identifier;
 
 /** Cosmic metadata not represented by Minecraft's dynamic enchantment record. */
 public final class CosmicEnchantmentSpecs {
@@ -28,4 +30,8 @@ public final class CosmicEnchantmentSpecs {
             List.of(EXECUTE, ANGELIC, LIGHTNING, ENDER_SHIFT, DOUBLESTRIKE, BLEED, LUCK, POISON, PUMMEL);
 
     private CosmicEnchantmentSpecs() {}
+
+    public static Optional<CosmicEnchantmentSpec> find(Identifier id) {
+        return ALL.stream().filter(spec -> spec.id().equals(id)).findFirst();
+    }
 }

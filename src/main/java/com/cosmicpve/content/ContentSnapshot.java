@@ -2,14 +2,16 @@ package com.cosmicpve.content;
 
 import com.cosmicpve.content.definition.scaling.ScalingProfile;
 import com.cosmicpve.content.definition.stack.StackDefinition;
+import com.cosmicpve.content.definition.armor.ArmorSetDefinition;
 import java.util.Map;
 import net.minecraft.resources.Identifier;
 
 public record ContentSnapshot(
         long revision,
         Map<Identifier, ScalingProfile> scalingProfiles,
-        Map<Identifier, StackDefinition> stackDefinitions) {
-    public static final ContentSnapshot EMPTY = new ContentSnapshot(0L, Map.of(), Map.of());
+        Map<Identifier, StackDefinition> stackDefinitions,
+        Map<Identifier, ArmorSetDefinition> armorSetDefinitions) {
+    public static final ContentSnapshot EMPTY = new ContentSnapshot(0L, Map.of(), Map.of(), Map.of());
 
     public ContentSnapshot {
         if (revision < 0L) {
@@ -17,9 +19,15 @@ public record ContentSnapshot(
         }
         scalingProfiles = Map.copyOf(scalingProfiles);
         stackDefinitions = Map.copyOf(stackDefinitions);
+        armorSetDefinitions = Map.copyOf(armorSetDefinitions);
+    }
+
+    public ContentSnapshot(long revision, Map<Identifier, ScalingProfile> scalingProfiles,
+            Map<Identifier, StackDefinition> stackDefinitions) {
+        this(revision, scalingProfiles, stackDefinitions, Map.of());
     }
 
     public ContentSnapshot withRevision(long nextRevision) {
-        return new ContentSnapshot(nextRevision, scalingProfiles, stackDefinitions);
+        return new ContentSnapshot(nextRevision, scalingProfiles, stackDefinitions, armorSetDefinitions);
     }
 }

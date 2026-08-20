@@ -12,6 +12,7 @@ import com.cosmicpve.combat.pipeline.AttackSequenceService;
 import com.cosmicpve.combat.pipeline.CombatCalculationRequest;
 import com.cosmicpve.combat.pipeline.CombatEngine;
 import com.cosmicpve.combat.pipeline.OutgoingDamageContributor;
+import com.cosmicpve.combat.pipeline.IncomingDamageContributor;
 import com.cosmicpve.combat.proc.ProcEventService;
 import com.cosmicpve.equipment.enchantment.EffectiveEnchantmentsResolver;
 import java.util.List;
@@ -36,6 +37,7 @@ public final class CombatEventBridge {
     private final EffectiveEnchantmentsResolver enchantments;
     private final ProcEventService procEvents;
     private final OutgoingDamageContributor outgoingContributors;
+    private final IncomingDamageContributor incomingContributors;
     private final Map<DamageContainer, CombatResult> incomingCandidates =
             Collections.synchronizedMap(new WeakHashMap<>());
     private final ThreadLocal<Deque<CombatResult>> acceptedDamageStack =
@@ -48,7 +50,8 @@ public final class CombatEventBridge {
             CombatTraceService traces,
             EffectiveEnchantmentsResolver enchantments,
             ProcEventService procEvents,
-            OutgoingDamageContributor outgoingContributors) {
+            OutgoingDamageContributor outgoingContributors,
+            IncomingDamageContributor incomingContributors) {
         this.engine = engine;
         this.attribution = attribution;
         this.sequences = sequences;
@@ -56,6 +59,7 @@ public final class CombatEventBridge {
         this.enchantments = enchantments;
         this.procEvents = procEvents;
         this.outgoingContributors = outgoingContributors;
+        this.incomingContributors = incomingContributors;
     }
 
     public void onIncomingDamage(LivingIncomingDamageEvent event) {
@@ -92,7 +96,7 @@ public final class CombatEventBridge {
                 unchanged.baseOrdinaryDamage(), unchanged.additiveOutgoingBonus(),
                 unchanged.separateOutgoingMultipliers(), unchanged.preDefenseBounds(),
                 unchanged.incomingMultipliers(), unchanged.finalOrdinaryBounds(), unchanged.trueDamagePackets(),
-                outgoingContributors.resolve(context));
+                outgoingContributors.resolve(context), incomingContributors.resolveIncoming(context));
         CombatResult provisional = engine.calculate(context, request);
         event.setAmount((float) Math.min(Float.MAX_VALUE, provisional.breakdown().finalOrdinaryDamage()));
         incomingCandidates.put(event.getContainer(), provisional);
@@ -132,7 +136,10 @@ public final class CombatEventBridge {
                             0.0, 0.0, List.of(), com.cosmicpve.combat.api.DamageBounds.UNBOUNDED,
                             List.of(), com.cosmicpve.combat.api.DamageBounds.UNBOUNDED, List.of(packet)));
         } else {
-            provisional = engine.calculate(context, CombatCalculationRequest.unchanged(event.getAmount()));
+            var unchanged = CombatCalculationRequest.unchanged(event.getAmount());
+            provisional = engine.calculate(context, new CombatCalculationRequest(
+                    unchanged.baseOrdinaryDamage(), 0.0, List.of(), unchanged.preDefenseBounds(), List.of(),
+                    unchanged.finalOrdinaryBounds(), List.of(), List.of(), incomingContributors.resolveIncoming(context)));
             event.setAmount((float) Math.min(Float.MAX_VALUE, provisional.breakdown().finalOrdinaryDamage()));
         }
         incomingCandidates.put(event.getContainer(), provisional);

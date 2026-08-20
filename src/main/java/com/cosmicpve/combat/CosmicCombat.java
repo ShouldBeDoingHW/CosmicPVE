@@ -9,6 +9,12 @@ import com.cosmicpve.combat.execution.ExecutionService;
 import com.cosmicpve.combat.pipeline.AttackSequenceService;
 import com.cosmicpve.combat.pipeline.CombatEngine;
 import com.cosmicpve.combat.pipeline.OutgoingDamageContributorRegistry;
+import com.cosmicpve.combat.pipeline.IncomingDamageContributorRegistry;
+import com.cosmicpve.equipment.armor.ArmorSetResolver;
+import com.cosmicpve.equipment.armor.ArmorSetCombatContributor;
+import com.cosmicpve.equipment.armor.ArmorSetProcModifierResolver;
+import com.cosmicpve.equipment.armor.ArmorSetImmunityResolver;
+import com.cosmicpve.equipment.armor.ArmorSetEventBridge;
 import com.cosmicpve.combat.enchantment.CosmicEnchantmentBehaviorResolver;
 import com.cosmicpve.combat.enchantment.ExecuteBehavior;
 import com.cosmicpve.combat.enchantment.LuckBehavior;
@@ -38,6 +44,11 @@ public final class CosmicCombat {
     private static final ProcCandidateSourceRegistry PROC_SOURCES = new ProcCandidateSourceRegistry();
     private static final ProcModifierSourceRegistry PROC_MODIFIERS = new ProcModifierSourceRegistry();
     private static final OutgoingDamageContributorRegistry OUTGOING = new OutgoingDamageContributorRegistry();
+    private static final IncomingDamageContributorRegistry INCOMING = new IncomingDamageContributorRegistry();
+    private static final ArmorSetResolver ARMOR_SETS = new ArmorSetResolver(CosmicContent.repository());
+    private static final ArmorSetCombatContributor ARMOR_SET_COMBAT = new ArmorSetCombatContributor(ARMOR_SETS);
+    private static final ArmorSetImmunityResolver ARMOR_SET_IMMUNITIES = new ArmorSetImmunityResolver(ARMOR_SETS);
+    private static final ArmorSetEventBridge ARMOR_SET_EVENTS = new ArmorSetEventBridge(ARMOR_SET_IMMUNITIES);
     private static final ProcEngine PROCS = new ProcEngine(COOLDOWNS, PROC_TRACES);
     private static final ProcEventService PROC_EVENTS =
             new ProcEventService(PROCS, PROC_SOURCES, SEQUENCES, ENCHANTMENTS, PROC_MODIFIERS);
@@ -49,7 +60,7 @@ public final class CosmicCombat {
             new CosmicEnchantmentBehaviorResolver(CHILD_ACTIONS, STACKS, BLEED_RUNTIME);
     private static final ExecutionService EXECUTIONS = new ExecutionService(SEQUENCES, TRACES);
     private static final CombatEventBridge EVENTS =
-            new CombatEventBridge(ENGINE, ATTRIBUTION, SEQUENCES, TRACES, ENCHANTMENTS, PROC_EVENTS, OUTGOING);
+            new CombatEventBridge(ENGINE, ATTRIBUTION, SEQUENCES, TRACES, ENCHANTMENTS, PROC_EVENTS, OUTGOING, INCOMING);
     private static final ProcHookEventBridge PROC_HOOKS = new ProcHookEventBridge(PROC_EVENTS, EXECUTIONS);
     private static final CombatStackEventBridge STACK_EVENTS = new CombatStackEventBridge(STACKS, BLEED_RUNTIME);
 
@@ -57,7 +68,10 @@ public final class CosmicCombat {
 
     public static void register() {
         OUTGOING.register(new ExecuteBehavior());
+        OUTGOING.register(ARMOR_SET_COMBAT);
+        INCOMING.register(ARMOR_SET_COMBAT);
         PROC_MODIFIERS.register(new LuckBehavior());
+        PROC_MODIFIERS.register(new ArmorSetProcModifierResolver(ARMOR_SETS));
         PROC_SOURCES.register(ENCHANTMENT_BEHAVIORS);
         NeoForge.EVENT_BUS.addListener(EVENTS::onIncomingDamage);
         NeoForge.EVENT_BUS.addListener(EVENTS::onDamageAccepted);
@@ -70,6 +84,8 @@ public final class CosmicCombat {
         NeoForge.EVENT_BUS.addListener(STACK_EVENTS::onPlayerTick);
         NeoForge.EVENT_BUS.addListener(STACK_EVENTS::onEntityTick);
         NeoForge.EVENT_BUS.addListener(STACK_EVENTS::onPlayerClone);
+        NeoForge.EVENT_BUS.addListener(ARMOR_SET_EVENTS::onPlayerTick);
+        NeoForge.EVENT_BUS.addListener(ARMOR_SET_EVENTS::onEntityTick);
     }
 
     public static CombatTraceService traces() {
@@ -115,4 +131,7 @@ public final class CosmicCombat {
     public static CombatStackService stacks() {
         return STACKS;
     }
+
+    public static ArmorSetResolver armorSets() { return ARMOR_SETS; }
+    public static ArmorSetImmunityResolver armorSetImmunities() { return ARMOR_SET_IMMUNITIES; }
 }

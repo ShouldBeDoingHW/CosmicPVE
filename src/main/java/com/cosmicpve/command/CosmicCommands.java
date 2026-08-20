@@ -66,7 +66,40 @@ public final class CosmicCommands {
                 .then(combat)
                 .then(proc)
                 .then(cooldown)
+                .then(ArmorSetCommands.create())
+                .then(EnchantingCommands.create())
                 .then(CombatStackCommands.create()));
+
+        event.getDispatcher().register(Commands.literal("feed")
+                .requires(Commands.hasPermission(new PermissionCheck.Require(Permissions.COMMANDS_GAMEMASTER)))
+                .executes(context -> feed(context.getSource())));
+        event.getDispatcher().register(Commands.literal("heal")
+                .requires(Commands.hasPermission(new PermissionCheck.Require(Permissions.COMMANDS_GAMEMASTER)))
+                .executes(context -> heal(context.getSource())));
+        event.getDispatcher().register(Commands.literal("restore")
+                .requires(Commands.hasPermission(new PermissionCheck.Require(Permissions.COMMANDS_GAMEMASTER)))
+                .executes(context -> restore(context.getSource())));
+    }
+
+    private static int feed(net.minecraft.commands.CommandSourceStack source)
+            throws com.mojang.brigadier.exceptions.CommandSyntaxException {
+        PlayerUtilityService.feed(source.getPlayerOrException());
+        source.sendSuccess(() -> Component.translatable("command.cosmicpve.feed"), false);
+        return 1;
+    }
+
+    private static int heal(net.minecraft.commands.CommandSourceStack source)
+            throws com.mojang.brigadier.exceptions.CommandSyntaxException {
+        PlayerUtilityService.heal(source.getPlayerOrException());
+        source.sendSuccess(() -> Component.translatable("command.cosmicpve.heal"), false);
+        return 1;
+    }
+
+    private static int restore(net.minecraft.commands.CommandSourceStack source)
+            throws com.mojang.brigadier.exceptions.CommandSyntaxException {
+        PlayerUtilityService.restore(source.getPlayerOrException());
+        source.sendSuccess(() -> Component.translatable("command.cosmicpve.restore"), false);
+        return 1;
     }
 
     private static int trueDamageTarget(

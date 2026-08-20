@@ -12,12 +12,14 @@ public record CombatCalculationRequest(
         List<Double> incomingMultipliers,
         DamageBounds finalOrdinaryBounds,
         List<TrueDamagePacket> trueDamagePackets,
-        List<OutgoingDamageContribution> additiveContributions) {
+        List<OutgoingDamageContribution> additiveContributions,
+        List<IncomingDamageContribution> incomingContributions) {
     public CombatCalculationRequest {
         separateOutgoingMultipliers = List.copyOf(separateOutgoingMultipliers);
         incomingMultipliers = List.copyOf(incomingMultipliers);
         trueDamagePackets = List.copyOf(trueDamagePackets);
         additiveContributions = List.copyOf(additiveContributions);
+        incomingContributions = List.copyOf(incomingContributions);
     }
 
     public CombatCalculationRequest(
@@ -29,7 +31,7 @@ public record CombatCalculationRequest(
             DamageBounds finalOrdinaryBounds,
             List<TrueDamagePacket> trueDamagePackets) {
         this(baseOrdinaryDamage, additiveOutgoingBonus, separateOutgoingMultipliers, preDefenseBounds,
-                incomingMultipliers, finalOrdinaryBounds, trueDamagePackets, List.of());
+                incomingMultipliers, finalOrdinaryBounds, trueDamagePackets, List.of(), List.of());
     }
 
     public static CombatCalculationRequest unchanged(double ordinaryDamage) {
@@ -41,6 +43,14 @@ public record CombatCalculationRequest(
                 List.of(),
                 DamageBounds.UNBOUNDED,
                 List.of(),
-                List.of());
+                List.of(), List.of());
+    }
+
+    public CombatCalculationRequest(
+            double baseOrdinaryDamage, double additiveOutgoingBonus, List<Double> separateOutgoingMultipliers,
+            DamageBounds preDefenseBounds, List<Double> incomingMultipliers, DamageBounds finalOrdinaryBounds,
+            List<TrueDamagePacket> trueDamagePackets, List<OutgoingDamageContribution> additiveContributions) {
+        this(baseOrdinaryDamage, additiveOutgoingBonus, separateOutgoingMultipliers, preDefenseBounds,
+                incomingMultipliers, finalOrdinaryBounds, trueDamagePackets, additiveContributions, List.of());
     }
 }

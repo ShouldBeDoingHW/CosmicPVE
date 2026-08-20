@@ -4,6 +4,7 @@ import com.cosmicpve.combat.cooldown.CooldownScope;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import net.minecraft.resources.Identifier;
 
 /** Immutable, programmatic Step 4A proc definition. Later content may resolve into this type. */
@@ -19,6 +20,7 @@ public record ProcCandidate(
         List<ProcCondition> conditions,
         Optional<Identifier> oncePerEventKey,
         ChildProcEligibility childEligibility,
+        Set<Identifier> classifications,
         Identifier behaviorId,
         ProcAction action,
         ProcProvenance provenance) {
@@ -44,8 +46,20 @@ public record ProcCandidate(
         conditions = List.copyOf(conditions);
         oncePerEventKey = oncePerEventKey == null ? Optional.empty() : oncePerEventKey;
         childEligibility = Objects.requireNonNull(childEligibility);
+        classifications = Set.copyOf(classifications);
         behaviorId = Objects.requireNonNull(behaviorId);
         action = Objects.requireNonNull(action);
         provenance = Objects.requireNonNull(provenance);
+    }
+
+    public ProcCandidate(
+            Identifier effectId, ProcHook hook, double baseProbability, Optional<Identifier> cooldownKey,
+            long baseCooldownTicks, CooldownScope cooldownScope, Optional<Identifier> cooldownScopeId,
+            List<Double> cooldownDurationMultipliers, List<ProcCondition> conditions,
+            Optional<Identifier> oncePerEventKey, ChildProcEligibility childEligibility,
+            Identifier behaviorId, ProcAction action, ProcProvenance provenance) {
+        this(effectId, hook, baseProbability, cooldownKey, baseCooldownTicks, cooldownScope, cooldownScopeId,
+                cooldownDurationMultipliers, conditions, oncePerEventKey, childEligibility, Set.of(),
+                behaviorId, action, provenance);
     }
 }
