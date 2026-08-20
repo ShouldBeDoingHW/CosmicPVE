@@ -17,6 +17,7 @@ import com.cosmicpve.combat.pipeline.PreDefenseBoundsContributor;
 import com.cosmicpve.combat.memory.RecentCombatMemoryService;
 import com.cosmicpve.combat.proc.ProcEventService;
 import com.cosmicpve.equipment.enchantment.EffectiveEnchantmentsResolver;
+import com.cosmicpve.equipment.skin.WeaponSkinResolver;
 import java.util.List;
 import java.util.ArrayDeque;
 import java.util.Collections;
@@ -42,6 +43,7 @@ public final class CombatEventBridge {
     private final IncomingDamageContributor incomingContributors;
     private final PreDefenseBoundsContributor preDefenseBounds;
     private final RecentCombatMemoryService recentCombatMemory;
+    private final WeaponSkinResolver weaponSkins;
     private final Map<DamageContainer, CombatResult> incomingCandidates =
             Collections.synchronizedMap(new WeakHashMap<>());
     private final ThreadLocal<Deque<CombatResult>> acceptedDamageStack =
@@ -57,7 +59,8 @@ public final class CombatEventBridge {
             OutgoingDamageContributor outgoingContributors,
             IncomingDamageContributor incomingContributors,
             PreDefenseBoundsContributor preDefenseBounds,
-            RecentCombatMemoryService recentCombatMemory) {
+            RecentCombatMemoryService recentCombatMemory,
+            WeaponSkinResolver weaponSkins) {
         this.engine = engine;
         this.attribution = attribution;
         this.sequences = sequences;
@@ -68,6 +71,7 @@ public final class CombatEventBridge {
         this.incomingContributors = incomingContributors;
         this.preDefenseBounds = preDefenseBounds;
         this.recentCombatMemory = recentCombatMemory;
+        this.weaponSkins = weaponSkins;
     }
 
     public void onIncomingDamage(LivingIncomingDamageEvent event) {
@@ -94,7 +98,8 @@ public final class CombatEventBridge {
                 DamageChannel.ORDINARY,
                 resolved.flags(),
                 resolved.weaponSnapshot(),
-                enchantments.resolve(resolved.weaponSnapshot().stack(), List.of()),
+                enchantments.resolve(resolved.weaponSnapshot().stack(),
+                        weaponSkins.virtualEnchantments(resolved.weaponSnapshot().stack())),
                 sequence.id(),
                 sequence.parentId(),
                 RecursionPolicy.NORMAL,

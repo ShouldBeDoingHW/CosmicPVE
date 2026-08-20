@@ -77,6 +77,20 @@ public final class EquipmentTooltipService {
             event.getToolTip().add(Component.translatable("tooltip.cosmicpve.black_scroll.purpose"));
             event.getToolTip().add(Component.translatable("tooltip.cosmicpve.black_scroll.instruction"));
         }
+        var skinItem = stack.get(ModDataComponents.WEAPON_SKIN_ITEM.get());
+        if (skinItem != null) {
+            com.cosmicpve.equipment.skin.WeaponSkinDefinitions.find(skinItem.skinId()).ifPresent(definition -> {
+                event.getToolTip().add(Component.translatable("tooltip.cosmicpve.skin.applies_to",
+                        Component.translatable("weapon_kind.cosmicpve." + definition.weaponKind().name().toLowerCase())));
+                event.getToolTip().add(Component.translatable("tooltip.cosmicpve.skin.instruction"));
+            });
+        }
+        var activeSkin = stack.get(ModDataComponents.WEAPON_SKIN.get());
+        if (activeSkin != null) {
+            com.cosmicpve.equipment.skin.WeaponSkinDefinitions.find(activeSkin.skinId()).ifPresent(definition ->
+                    event.getToolTip().add(Component.translatable(
+                            "tooltip.cosmicpve.skin.active", definition.displayName()).withColor(0x55FFFF)));
+        }
         var capacity = new CustomEnchantCapacityService();
         int used = capacity.used(stack);
         if (used > 0 || CustomEnchantCapacityService.isArmor(stack) || CustomEnchantCapacityService.isWeapon(stack))

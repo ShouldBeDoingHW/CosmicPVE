@@ -38,6 +38,8 @@ import com.cosmicpve.combat.stack.CombatStackService;
 import com.cosmicpve.combat.stack.BleedRuntimeService;
 import com.cosmicpve.content.CosmicContent;
 import com.cosmicpve.equipment.enchantment.EffectiveEnchantmentsResolver;
+import com.cosmicpve.equipment.skin.WeaponSkinResolver;
+import com.cosmicpve.equipment.skin.WeaponSkinCombatResolver;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.bus.api.EventPriority;
 
@@ -69,12 +71,15 @@ public final class CosmicCombat {
     private static final ChildCombatActionService CHILD_ACTIONS = new ChildCombatActionService(SEQUENCES, TRUE_DAMAGE);
     private static final CombatStackService STACKS = new CombatStackService(CosmicContent.repository());
     private static final BleedRuntimeService BLEED_RUNTIME = new BleedRuntimeService(CHILD_ACTIONS);
+    private static final WeaponSkinResolver WEAPON_SKINS = new WeaponSkinResolver();
+    private static final WeaponSkinCombatResolver WEAPON_SKIN_COMBAT =
+            new WeaponSkinCombatResolver(WEAPON_SKINS, STACKS, CHILD_ACTIONS);
     private static final CosmicEnchantmentBehaviorResolver ENCHANTMENT_BEHAVIORS =
             new CosmicEnchantmentBehaviorResolver(CHILD_ACTIONS, STACKS, BLEED_RUNTIME);
     private static final ExecutionService EXECUTIONS = new ExecutionService(SEQUENCES, TRACES);
     private static final CombatEventBridge EVENTS =
             new CombatEventBridge(ENGINE, ATTRIBUTION, SEQUENCES, TRACES, ENCHANTMENTS, PROC_EVENTS,
-                    OUTGOING, INCOMING, PRE_DEFENSE_BOUNDS, RECENT_COMBAT_MEMORY);
+                    OUTGOING, INCOMING, PRE_DEFENSE_BOUNDS, RECENT_COMBAT_MEMORY, WEAPON_SKINS);
     private static final ProcHookEventBridge PROC_HOOKS = new ProcHookEventBridge(PROC_EVENTS, EXECUTIONS);
     private static final CombatStackEventBridge STACK_EVENTS = new CombatStackEventBridge(STACKS, BLEED_RUNTIME);
 
@@ -87,11 +92,14 @@ public final class CosmicCombat {
         OUTGOING.register(new EagleEyeBehavior());
         OUTGOING.register(new RageBehavior(RECENT_COMBAT_MEMORY));
         OUTGOING.register(ARMOR_SET_COMBAT);
+        OUTGOING.register(WEAPON_SKIN_COMBAT);
         INCOMING.register(ARMOR_SET_COMBAT);
+        INCOMING.register(WEAPON_SKIN_COMBAT);
         PRE_DEFENSE_BOUNDS.register(new AegisBehavior(ENCHANTMENTS));
         PROC_MODIFIERS.register(new LuckBehavior());
         PROC_MODIFIERS.register(new ArmorSetProcModifierResolver(ARMOR_SETS));
         PROC_SOURCES.register(ENCHANTMENT_BEHAVIORS);
+        PROC_SOURCES.register(WEAPON_SKIN_COMBAT);
         NeoForge.EVENT_BUS.addListener(EVENTS::onIncomingDamage);
         NeoForge.EVENT_BUS.addListener(EVENTS::onDamageAccepted);
         NeoForge.EVENT_BUS.addListener(EVENTS::onDamageCommitted);
@@ -155,4 +163,5 @@ public final class CosmicCombat {
     public static ArmorSetResolver armorSets() { return ARMOR_SETS; }
     public static ArmorSetImmunityResolver armorSetImmunities() { return ARMOR_SET_IMMUNITIES; }
     public static RecentCombatMemoryService recentCombatMemory() { return RECENT_COMBAT_MEMORY; }
+    public static WeaponSkinResolver weaponSkins() { return WEAPON_SKINS; }
 }

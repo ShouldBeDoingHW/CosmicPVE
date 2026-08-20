@@ -1,8 +1,8 @@
 # CosmicPVE Development Handoff
 
-Current verified and accepted gameplay commit: `7530ab293610a8ea6c1a02b396df9539454b36bb` (`Add Aegis Rage Eagle Eye and Ancient set`). This is the accepted Steps 6A–6D baseline.
+Current verified and accepted gameplay state: Steps 6A–6E. The Step 6E gameplay commit is being created as part of this accepted milestone closure; its resulting hash is recorded by the follow-up handoff commit.
 
-Repository state after Step 6D closure: clean at gameplay commit `7530ab293610a8ea6c1a02b396df9539454b36bb`, apart from the deliberately untracked root `assets` folder containing user-supplied Step 6E source artwork and this documentation follow-up.
+Repository state at Step 6E closure: the accepted Step 6E implementation is ready for its dedicated gameplay commit. The root `assets` folder retains the three user-supplied source images and remains deliberately untracked. The user-replaced canonical `Cosmic_Design.md` is reserved for the separate documentation-baseline commit.
 
 Last handoff update: 2026-08-20
 
@@ -99,6 +99,16 @@ Implemented typed Black Scrolls and the real Greatsword, Insanity, and Venom enc
 ### Step 6D — COMPLETE; MANUALLY VERIFIED AND ACCEPTED
 
 Implemented real Aegis, Eagle Eye, and Rage enchantments plus the Ancient armor set. Aegis uses the generalized ordinary pre-defense bounds seam; Rage uses bounded recent committed-combat memory keyed by damaging and damaged entity UUID; Ancient uses its reloadable set definition plus a small health-dependent Java behavior module. The full build and all 124 tests passed, the dedicated server published all three armor sets and reached ready, and the client completed resource loading. The user manually verified Aegis, Eagle Eye, Rage, and Ancient in-world and accepted the milestone.
+
+### Step 6E — COMPLETE; MANUALLY VERIFIED AND ACCEPTED
+
+Implemented the typed/versioned weapon-skin foundation and the first three skins: Boosted Chainsaw, Maui's Hook, and Stormbringer. One generic non-stackable application item carries a stable skin ID; the active identity is stored on the original weapon together with its exact previous item-model component, so removal restores presentation without reconstructing or replacing the stack. Drag + left-click applies to a compatible weapon. With an empty cursor, right-clicking a skinned weapon in an inventory removes the skin and returns the corresponding application item directly to the cursor. One active skin is allowed, and both transactions revalidate authoritative stack identity before mutation.
+
+Boosted Chainsaw grants runtime-only Doublestrike III with `cosmicpve:boosted_chainsaw` virtual provenance. It writes no actual enchantment, consumes no capacity, is invisible to Black Scroll extraction, and disappears on removal. Maui's Hook contributes +4% to the shared additive ordinary outgoing bucket and exposes a 10% Luck-modified ProcEngine candidate only when the target has an eligible transferable POSITIVE stack; activation delegates the deterministic one-instance move to `CombatStackService`. Stormbringer exposes a 3% Luck-modified limited-offensive-reroll candidate that creates visual-only lightning, applies Slowness II for 30 ticks, and delivers exactly 2 HP standard true damage with `NO_PROCS`. Holding the skinned axe in the main hand contributes ×0.98 ordinary incoming damage; true damage and execution bypass this ordinary seam.
+
+The three supplied transparent source images were converted with nearest-neighbor scaling and centered on transparent 32×32 canvases: `Boosted Chainsaw.png` → `boosted_chainsaw.png`, `Maui's Hook.png` → `mauis_hook.png`, and `Stormbringer.png` → `stormbringer.png`. Item presentation uses the 1.21.11 `minecraft:item_model` stack component, with the prior value persisted for exact restoration. Applying a skin plays leather-armor equip at normal pitch; removal uses the same sound at pitch 0.7. Black Scroll's model now uses vanilla Ink Sac presentation only; its data and extraction path are unchanged.
+
+The full build and all 134 tests passed; 71 JSON resources validated. The dedicated server reached `Done`, and the client completed resource reload/model-atlas creation with no missing-texture or invalid-model errors. The user manually verified the weapon-skin foundation, all three implemented skin passives and interactions, supplied artwork presentation, and the Black Scroll Ink Sac appearance, then accepted the milestone.
 
 ## 3. Current Real Enchantments
 
@@ -312,7 +322,7 @@ The following remain future content or infrastructure:
 - all enchantments beyond the 15 listed above, including every Mastery enchantment
 - Dimensional Traveler, Engineer, Ranger, and Yjiki armor sets
 - masks and Multi-Masks
-- weapon skins and their virtual/passive behaviors. The settled inventory UX is drag and left-click to apply a skin to an appropriate item; the skin becomes tied to that item and a simple right-click removes it. This supersedes older design text that reverses those gestures.
+- Whisk Taker, Spinal Tap, Party Blade, and Doomsday Machete weapon skins. Boosted Chainsaw, Maui's Hook, and Stormbringer are implemented. The settled inventory UX is drag and left-click to apply; empty-cursor inventory right-click removes and returns the skin item. This supersedes older design text that reverses those gestures.
 - Feeding Frenzy and Hysteria runtime behavior
 - Heroic equipment/portals and repair semantics
 - armor-set signature weapons
@@ -354,6 +364,7 @@ The following are confirmed in current source and permission-gated under `/cosmi
 - `/cosmic enchant transmog give <player> [count]`
 - `/cosmic enchant orb give <player> <armor|weapon> <success> <destroy>`
 - `/cosmic enchant orb give-random <player> <armor|weapon>`
+- `/cosmic skin give <player> <skin-id>`
 - `/feed`, `/heal`, and `/restore` are separate permission-gated development convenience commands.
 
 Commands call gameplay services or create the same typed components used by gameplay; production loot acquisition remains deferred.
@@ -374,7 +385,7 @@ The final post-Orb capacity is no longer unresolved for current target classes: 
 
 ## 16. Current Next Milestone
 
-The next bounded milestone is Step 6E: the weapon-skin foundation with Boosted Chainsaw, Maui's Hook, Stormbringer, and the Black Scroll Ink Sac presentation cleanup. All other skins and adjacent content remain deferred.
+The next bounded milestone is Step 6F: standardized Weapon Skin and Cosmic Enchantment Book lore plus real Molten IV and Nutrition III. All other enchantments, skins, and adjacent content remain deferred.
 
 ## 17. Development Workflow
 

@@ -7,6 +7,8 @@ import com.cosmicpve.data.component.ArmorSetCrystalData;
 import com.cosmicpve.data.component.CosmicEnchantmentBookData;
 import com.cosmicpve.data.component.EnchantmentOrbData;
 import com.cosmicpve.data.component.BlackScrollData;
+import com.cosmicpve.data.component.WeaponSkinIdentity;
+import com.cosmicpve.data.component.WeaponSkinItemData;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -48,6 +50,16 @@ public final class ModDataComponents {
             COMPONENTS.registerComponentType("black_scroll",
                     builder -> builder.persistent(BlackScrollData.CODEC)
                             .networkSynchronized(ByteBufCodecs.fromCodecWithRegistries(BlackScrollData.CODEC)).cacheEncoding());
+
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<WeaponSkinIdentity>> WEAPON_SKIN =
+            COMPONENTS.registerComponentType("weapon_skin",
+                    builder -> builder.persistent(WeaponSkinIdentity.CODEC)
+                            .networkSynchronized(ByteBufCodecs.fromCodecWithRegistries(WeaponSkinIdentity.CODEC)).cacheEncoding());
+
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<WeaponSkinItemData>> WEAPON_SKIN_ITEM =
+            COMPONENTS.registerComponentType("weapon_skin_item",
+                    builder -> builder.persistent(WeaponSkinItemData.CODEC)
+                            .networkSynchronized(ByteBufCodecs.fromCodecWithRegistries(WeaponSkinItemData.CODEC)).cacheEncoding());
 
     private ModDataComponents() {}
 

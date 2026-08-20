@@ -289,6 +289,29 @@ public final class CombatStackService {
         return result;
     }
 
+    /** Read-only eligibility check used to keep impossible steal candidates out of the proc RNG stream. */
+    public boolean canStealOne(LivingEntity source, LivingEntity recipient, long currentTick) {
+        requireServer(source);
+        requireServer(recipient);
+        if (source == recipient) return false;
+        var sourceContainer = source.getExistingDataOrNull(ModAttachments.COMBAT_STACKS);
+        if (sourceContainer == null) return false;
+        expireDue(sourceContainer, currentTick);
+        var recipientContainer = recipient.getExistingDataOrNull(ModAttachments.COMBAT_STACKS);
+        if (recipientContainer != null) expireDue(recipientContainer, currentTick);
+        removeAttachmentIfEmpty(source, sourceContainer);
+        if (recipientContainer != null) removeAttachmentIfEmpty(recipient, recipientContainer);
+        if (sourceContainer.isEmpty()) return false;
+        ContentSnapshot snapshot = content.snapshot();
+        for (Identifier id : eligibleDefinitions(
+                sourceContainer, snapshot, StackPolarity.POSITIVE, false, true)) {
+            StackDefinition definition = snapshot.stackDefinitions().get(id);
+            int recipientCount = recipientContainer == null ? 0 : recipientContainer.count(id);
+            if (definition != null && recipientCount < definition.maximumStacks()) return true;
+        }
+        return false;
+    }
+
     public StackTransferResult transferOne(
             LivingEntity source,
             LivingEntity recipient,

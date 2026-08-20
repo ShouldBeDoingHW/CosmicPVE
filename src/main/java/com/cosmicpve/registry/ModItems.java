@@ -9,6 +9,7 @@ import com.cosmicpve.equipment.armor.ArmorSetCrystalItem;
 import com.cosmicpve.equipment.enchantment.CosmicEnchantmentBookItem;
 import com.cosmicpve.equipment.enchantment.EnchantmentOrbItem;
 import com.cosmicpve.equipment.enchantment.BlackScrollItem;
+import com.cosmicpve.equipment.skin.WeaponSkinItem;
 
 public final class ModItems {
     private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(CosmicPVE.MOD_ID);
@@ -41,6 +42,9 @@ public final class ModItems {
     public static final DeferredItem<BlackScrollItem> BLACK_SCROLL = ITEMS.registerItem(
             "black_scroll", BlackScrollItem::new,
             properties -> properties.stacksTo(BlackScrollItem.MAX_STACK_SIZE));
+
+    public static final DeferredItem<WeaponSkinItem> WEAPON_SKIN = ITEMS.registerItem(
+            "weapon_skin", WeaponSkinItem::new, properties -> properties.stacksTo(1));
 
     private ModItems() {}
 
