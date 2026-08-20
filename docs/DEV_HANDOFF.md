@@ -1,8 +1,8 @@
 # CosmicPVE Development Handoff
 
-Current verified Git commit: `ab61d4d989f811440e64a10e480334846caa79b8` (`Add Bleed Luck Poison and Pummel`). The accepted armor-set foundation and Steps 6A–6B are currently in the working tree pending the milestone closure commit; this line must be replaced with that commit's identity during closure.
+Current verified gameplay commit: `fb33a1d3af3427ec87a6565b293c1614e60d066b` (`Complete armor sets and Cosmic enchanting loop`). This is the accepted armor-set foundation and Steps 6A–6B milestone.
 
-Working tree: **dirty pending the accepted milestone closure commit**. It contains the Phantom/Yeti armor-set foundation, Armor Set Crystals, equipment presentation work, Cosmic Enchantment Books, White Scrolls, Transmog Scrolls, Armor/Weapon Enchantment Orbs, their supporting combat/content integration, resources, and tests. These changes have passed automated/runtime verification and the user's in-world acceptance checks; do not discard them or infer that the last commit represents the complete implementation.
+Repository state: **clean after the documentation follow-up commit**. The follow-up commit is intentionally documentation-only and named `Update development handoff`; the gameplay hash above remains the canonical verified implementation identity.
 
 Last handoff update: 2026-08-20
 
@@ -373,7 +373,7 @@ At the accepted end of Step 6B:
 - Pinned environment values remained unchanged.
 - No Black Scroll implementation exists.
 
-Until the closure commit is created, this snapshot describes the accepted working tree rather than commit `ab61d4d` alone.
+This snapshot describes gameplay commit `fb33a1d3af3427ec87a6565b293c1614e60d066b`. The immediately following documentation-only commit updates this handoff and does not alter the verified implementation.
 
 ## Maintaining This Handoff
 
