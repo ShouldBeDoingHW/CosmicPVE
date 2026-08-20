@@ -1,8 +1,8 @@
 # CosmicPVE Development Handoff
 
-Current verified and accepted gameplay baseline: Steps 6A–6C. The Step 6C closure commit is recorded below after the accepted implementation is committed.
+Current verified and accepted gameplay commit: `0e8a21c93fa13760f6a3424e1c7ebc526cdab564` (`Add Black Scrolls and new Cosmic enchantments`). This is the accepted Steps 6A–6C baseline.
 
-Repository state: **Step 6C accepted and ready for its closure commit**, layered on documentation commit `3cab9c976403b76109596af62216463ad25faaa1`.
+Repository state: **clean after the Step 6C gameplay closure and this documentation follow-up**. Step 6D begins from that committed baseline.
 
 Last handoff update: 2026-08-20
 
@@ -390,7 +390,7 @@ At the accepted end of Step 6C:
 - Pinned environment values remained unchanged.
 - The user manually verified Black Scrolls, Greatsword, Insanity, and Venom and accepted the milestone.
 
-The Step 6C gameplay commit and final clean repository state are recorded after closure.
+This snapshot describes gameplay commit `0e8a21c93fa13760f6a3424e1c7ebc526cdab564` (`Add Black Scrolls and new Cosmic enchantments`). The immediately following documentation-only commit records the final accepted baseline and does not alter gameplay.
 
 ## Maintaining This Handoff
 
