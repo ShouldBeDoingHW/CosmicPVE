@@ -36,6 +36,12 @@ public final class CosmicCommands {
                                         .executes(context -> trueDamageTarget(
                                                 context.getSource(),
                                                 EntityArgument.getEntity(context, "target"),
+                                                FloatArgumentType.getFloat(context, "amount"))))))
+                .then(Commands.literal("set-health")
+                        .then(Commands.argument("target", EntityArgument.entity())
+                                .then(Commands.argument("amount", FloatArgumentType.floatArg(0.001F))
+                                        .executes(context -> setHealth(
+                                                context.getSource(), EntityArgument.getEntity(context, "target"),
                                                 FloatArgumentType.getFloat(context, "amount"))))));
         var proc = Commands.literal("proc")
                 .then(Commands.literal("trace")
@@ -119,6 +125,20 @@ public final class CosmicCommands {
                         + " (parent " + outcome.parentSequenceId() + ") dealt "
                         + outcome.healthDamage() + " health damage."), true);
         return outcome.accepted() ? 1 : 0;
+    }
+
+    private static int setHealth(
+            net.minecraft.commands.CommandSourceStack source,
+            net.minecraft.world.entity.Entity entity,
+            float amount) {
+        if (!(entity instanceof net.minecraft.world.entity.LivingEntity target)) {
+            source.sendFailure(Component.literal("The health target must be a living entity."));
+            return 0;
+        }
+        target.setHealth(Math.min(amount, target.getMaxHealth()));
+        source.sendSuccess(() -> Component.literal("Set " + target.getName().getString()
+                + " to " + target.getHealth() + " health."), true);
+        return 1;
     }
 
     private static int executeTarget(net.minecraft.commands.CommandSourceStack source, net.minecraft.world.entity.Entity entity)

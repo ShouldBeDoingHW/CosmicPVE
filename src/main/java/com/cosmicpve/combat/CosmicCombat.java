@@ -10,6 +10,9 @@ import com.cosmicpve.combat.pipeline.AttackSequenceService;
 import com.cosmicpve.combat.pipeline.CombatEngine;
 import com.cosmicpve.combat.pipeline.OutgoingDamageContributorRegistry;
 import com.cosmicpve.combat.pipeline.IncomingDamageContributorRegistry;
+import com.cosmicpve.combat.pipeline.PreDefenseBoundsContributorRegistry;
+import com.cosmicpve.combat.memory.RecentCombatMemoryService;
+import com.cosmicpve.combat.memory.RecentCombatMemoryEventBridge;
 import com.cosmicpve.equipment.armor.ArmorSetResolver;
 import com.cosmicpve.equipment.armor.ArmorSetCombatContributor;
 import com.cosmicpve.equipment.armor.ArmorSetProcModifierResolver;
@@ -20,6 +23,9 @@ import com.cosmicpve.combat.enchantment.ExecuteBehavior;
 import com.cosmicpve.combat.enchantment.LuckBehavior;
 import com.cosmicpve.combat.enchantment.GreatswordBehavior;
 import com.cosmicpve.combat.enchantment.InsanityBehavior;
+import com.cosmicpve.combat.enchantment.AegisBehavior;
+import com.cosmicpve.combat.enchantment.EagleEyeBehavior;
+import com.cosmicpve.combat.enchantment.RageBehavior;
 import com.cosmicpve.combat.cooldown.CooldownService;
 import com.cosmicpve.combat.proc.ProcCandidateSourceRegistry;
 import com.cosmicpve.combat.proc.ProcEngine;
@@ -47,6 +53,11 @@ public final class CosmicCombat {
     private static final ProcModifierSourceRegistry PROC_MODIFIERS = new ProcModifierSourceRegistry();
     private static final OutgoingDamageContributorRegistry OUTGOING = new OutgoingDamageContributorRegistry();
     private static final IncomingDamageContributorRegistry INCOMING = new IncomingDamageContributorRegistry();
+    private static final PreDefenseBoundsContributorRegistry PRE_DEFENSE_BOUNDS =
+            new PreDefenseBoundsContributorRegistry();
+    private static final RecentCombatMemoryService RECENT_COMBAT_MEMORY = new RecentCombatMemoryService(200L);
+    private static final RecentCombatMemoryEventBridge RECENT_COMBAT_MEMORY_EVENTS =
+            new RecentCombatMemoryEventBridge(RECENT_COMBAT_MEMORY);
     private static final ArmorSetResolver ARMOR_SETS = new ArmorSetResolver(CosmicContent.repository());
     private static final ArmorSetCombatContributor ARMOR_SET_COMBAT = new ArmorSetCombatContributor(ARMOR_SETS);
     private static final ArmorSetImmunityResolver ARMOR_SET_IMMUNITIES = new ArmorSetImmunityResolver(ARMOR_SETS);
@@ -62,7 +73,8 @@ public final class CosmicCombat {
             new CosmicEnchantmentBehaviorResolver(CHILD_ACTIONS, STACKS, BLEED_RUNTIME);
     private static final ExecutionService EXECUTIONS = new ExecutionService(SEQUENCES, TRACES);
     private static final CombatEventBridge EVENTS =
-            new CombatEventBridge(ENGINE, ATTRIBUTION, SEQUENCES, TRACES, ENCHANTMENTS, PROC_EVENTS, OUTGOING, INCOMING);
+            new CombatEventBridge(ENGINE, ATTRIBUTION, SEQUENCES, TRACES, ENCHANTMENTS, PROC_EVENTS,
+                    OUTGOING, INCOMING, PRE_DEFENSE_BOUNDS, RECENT_COMBAT_MEMORY);
     private static final ProcHookEventBridge PROC_HOOKS = new ProcHookEventBridge(PROC_EVENTS, EXECUTIONS);
     private static final CombatStackEventBridge STACK_EVENTS = new CombatStackEventBridge(STACKS, BLEED_RUNTIME);
 
@@ -72,8 +84,11 @@ public final class CosmicCombat {
         OUTGOING.register(new ExecuteBehavior());
         OUTGOING.register(new GreatswordBehavior());
         OUTGOING.register(new InsanityBehavior());
+        OUTGOING.register(new EagleEyeBehavior());
+        OUTGOING.register(new RageBehavior(RECENT_COMBAT_MEMORY));
         OUTGOING.register(ARMOR_SET_COMBAT);
         INCOMING.register(ARMOR_SET_COMBAT);
+        PRE_DEFENSE_BOUNDS.register(new AegisBehavior(ENCHANTMENTS));
         PROC_MODIFIERS.register(new LuckBehavior());
         PROC_MODIFIERS.register(new ArmorSetProcModifierResolver(ARMOR_SETS));
         PROC_SOURCES.register(ENCHANTMENT_BEHAVIORS);
@@ -90,6 +105,7 @@ public final class CosmicCombat {
         NeoForge.EVENT_BUS.addListener(STACK_EVENTS::onPlayerClone);
         NeoForge.EVENT_BUS.addListener(ARMOR_SET_EVENTS::onPlayerTick);
         NeoForge.EVENT_BUS.addListener(ARMOR_SET_EVENTS::onEntityTick);
+        NeoForge.EVENT_BUS.addListener(RECENT_COMBAT_MEMORY_EVENTS::onServerTick);
     }
 
     public static CombatTraceService traces() {
@@ -138,4 +154,5 @@ public final class CosmicCombat {
 
     public static ArmorSetResolver armorSets() { return ARMOR_SETS; }
     public static ArmorSetImmunityResolver armorSetImmunities() { return ARMOR_SET_IMMUNITIES; }
+    public static RecentCombatMemoryService recentCombatMemory() { return RECENT_COMBAT_MEMORY; }
 }

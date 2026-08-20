@@ -96,4 +96,11 @@
   ,"message.cosmicpve.black_scroll.success":"Extracted %s %s into a Cosmic Enchantment Book."
   ,"message.cosmicpve.black_scroll.no_eligible":"That item has no eligible actual Cosmic enchantments."
   ,"message.cosmicpve.black_scroll.invalid":"The Black Scroll could not be applied."
+  ,"enchantment.cosmicpve.aegis":"Aegis"
+  ,"enchantment.cosmicpve.eagle_eye":"Eagle Eye"
+  ,"enchantment.cosmicpve.rage":"Rage"
+  ,"armor_set.cosmicpve.ancient":"Ancient"
+  ,"armor_set.cosmicpve.ancient.bonus.outgoing":"+7.5% outgoing damage"
+  ,"armor_set.cosmicpve.ancient.bonus.incoming":"-7.5% incoming damage"
+  ,"armor_set.cosmicpve.ancient.bonus.low_health":"Both bonuses double below 50% health"
 }

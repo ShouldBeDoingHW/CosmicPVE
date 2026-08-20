@@ -235,6 +235,55 @@ class CosmicEnchantmentBehaviorTest {
         assertTrue(behaviorResolver().resolve(procEvent(ProcHook.ON_VALID_HIT, effective)).isEmpty());
     }
 
+    @Test
+    void aegisLevelsCapOnlyPreDefenseOrdinaryDamageAndEffectiveResolutionSupportsVirtualSources() {
+        assertEquals(13.0, AegisBehavior.capHp(1));
+        assertEquals(12.0, AegisBehavior.capHp(2));
+        assertEquals(11.0, AegisBehavior.capHp(3));
+        assertEquals(10.0, AegisBehavior.capHp(4));
+        assertEquals(9.0, AegisBehavior.capHp(5));
+        assertEquals(8.0, AegisBehavior.capHp(6));
+        var effective = new EffectiveEnchantmentsResolver().resolveSources(
+                List.of(new ActualEnchantmentGrant(ModEnchantments.AEGIS.identifier(), 2, CosmicPVE.id("chest"))),
+                List.of(new VirtualEnchantmentGrant(ModEnchantments.AEGIS.identifier(), 6, CosmicPVE.id("skin"))));
+        assertEquals(6, effective.level(ModEnchantments.AEGIS.identifier()));
+
+        var truePacket = TrueDamagePacket.standard(CosmicPVE.id("separate_true"), 2.0);
+        var below = new CombatCalculationRequest(7.0, 0.0, List.of(),
+                new com.cosmicpve.combat.api.DamageBounds(0.0, 8.0), List.of(),
+                com.cosmicpve.combat.api.DamageBounds.UNBOUNDED, List.of(truePacket));
+        var exact = new CombatCalculationRequest(8.0, 0.0, List.of(),
+                new com.cosmicpve.combat.api.DamageBounds(0.0, 8.0), List.of(),
+                com.cosmicpve.combat.api.DamageBounds.UNBOUNDED, List.of(truePacket));
+        var aboveWithLaterIncoming = new CombatCalculationRequest(20.0, 0.0, List.of(),
+                new com.cosmicpve.combat.api.DamageBounds(0.0, 8.0), List.of(0.5),
+                com.cosmicpve.combat.api.DamageBounds.UNBOUNDED, List.of(truePacket));
+        assertEquals(7.0, new CombatEngine().calculate(context(EffectiveEnchantments.EMPTY), below)
+                .breakdown().finalOrdinaryDamage());
+        assertEquals(8.0, new CombatEngine().calculate(context(EffectiveEnchantments.EMPTY), exact)
+                .breakdown().finalOrdinaryDamage());
+        var integrated = new CombatEngine().calculate(context(EffectiveEnchantments.EMPTY), aboveWithLaterIncoming);
+        assertEquals(8.0, integrated.breakdown().afterPreDefenseBounds());
+        assertEquals(4.0, integrated.breakdown().finalOrdinaryDamage());
+        assertEquals(2.0, integrated.totalQueuedTrueDamage());
+        assertFalse(truePacket.bypassesAbsorption());
+    }
+
+    @Test
+    void eagleEyeUsesInclusiveDistanceAndComposesInSharedAdditiveBucket() {
+        assertEquals(0.0, EagleEyeBehavior.bonus(6, 17.999), 1.0E-12);
+        assertEquals(0.18, EagleEyeBehavior.bonus(6, 18.0), 1.0E-12);
+        assertEquals(0.03, EagleEyeBehavior.bonus(1, 30.0), 1.0E-12);
+        var request = new CombatCalculationRequest(
+                10.0, 0.0, List.of(), com.cosmicpve.combat.api.DamageBounds.UNBOUNDED,
+                List.of(), com.cosmicpve.combat.api.DamageBounds.UNBOUNDED, List.of(),
+                List.of(new OutgoingDamageContribution(CosmicPVE.id("phantom"), 0.25),
+                        new OutgoingDamageContribution(ModEnchantments.EAGLE_EYE.identifier(), 0.18)));
+        var result = new CombatEngine().calculate(context(EffectiveEnchantments.EMPTY), request);
+        assertEquals(0.43, result.breakdown().additiveOutgoingBonus(), 1.0E-12);
+        assertEquals(14.3, result.breakdown().finalOrdinaryDamage(), 1.0E-12);
+    }
+
     private static ProcEvent procEvent(EffectiveEnchantments enchantments) {
         return procEvent(ProcHook.ON_VALID_HIT, enchantments);
     }

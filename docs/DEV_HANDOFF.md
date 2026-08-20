@@ -1,8 +1,8 @@
 # CosmicPVE Development Handoff
 
-Current verified and accepted gameplay commit: `0e8a21c93fa13760f6a3424e1c7ebc526cdab564` (`Add Black Scrolls and new Cosmic enchantments`). This is the accepted Steps 6A–6C baseline.
+Current verified and accepted gameplay state: Steps 6A–6D. The Step 6D gameplay commit is being created as part of this accepted milestone closure; its resulting hash is recorded by the follow-up handoff commit.
 
-Repository state: **clean after the Step 6C gameplay closure and this documentation follow-up**. Step 6D begins from that committed baseline.
+Repository state at Step 6D closure: the accepted Step 6D implementation is ready for its dedicated gameplay commit. The root `assets` folder contains user-supplied Step 6E source artwork and is deliberately excluded from Step 6D.
 
 Last handoff update: 2026-08-20
 
@@ -96,6 +96,10 @@ Implemented Cosmic Book sound feedback, Transmog Scrolls, Armor Enchantment Orbs
 
 Implemented typed Black Scrolls and the real Greatsword, Insanity, and Venom enchantments. A valid Black Scroll always extracts one uniformly selected eligible actual Simple-through-Legendary Cosmic enchantment; its displayed percentage becomes the returned book's Success Rate, while Destroy Rate is rolled independently from 1–100. Mastery, vanilla, and virtual enchantments are excluded. The full build and all 115 tests passed, the dedicated server reached ready, and the client completed resource/model loading. The user manually verified all four additions and accepted the milestone.
 
+### Step 6D — COMPLETE; MANUALLY VERIFIED AND ACCEPTED
+
+Implemented real Aegis, Eagle Eye, and Rage enchantments plus the Ancient armor set. Aegis uses the generalized ordinary pre-defense bounds seam; Rage uses bounded recent committed-combat memory keyed by damaging and damaged entity UUID; Ancient uses its reloadable set definition plus a small health-dependent Java behavior module. The full build and all 124 tests passed, the dedicated server published all three armor sets and reached ready, and the client completed resource loading. The user manually verified Aegis, Eagle Eye, Rage, and Ancient in-world and accepted the milestone.
+
 ## 3. Current Real Enchantments
 
 These are registered through Minecraft's enchantment infrastructure, use actual enchantment data on the item, and are not present in normal enchanting-table, librarian, random-loot, random-equipment, or mob-equipment acquisition pools.
@@ -116,10 +120,13 @@ These are registered through Minecraft's enchantment infrastructure, use actual 
 | `cosmicpve:greatsword` | IV | Sword | Elite | At an inclusive attacker-to-target entity distance of 2.5 blocks or farther, adds 5% ordinary outgoing damage per level in the shared additive bucket. |
 | `cosmicpve:insanity` | VIII | Axe | Legendary | Adds 1% ordinary outgoing damage per missing heart, including fractional hearts, capped at 2% per level in the shared additive bucket. |
 | `cosmicpve:venom` | III | Bow/crossbow | Elite | On a committed positive red-health projectile hit, has 15% per level to apply Poison I for 60 ticks/3 seconds through the shared proc system. |
+| `cosmicpve:aegis` | VI | Chestplate | Legendary | Caps the outgoing-finalized ordinary attack component at `14 - level` HP in the pre-defense bounds stage. Aegis VI caps at 8 HP; later incoming/vanilla mitigation still applies, while true damage and execution bypass it. |
+| `cosmicpve:eagle_eye` | VI | Bow/crossbow | Ultimate | At an inclusive attacker-to-target entity distance of 18 blocks or farther, adds 3% ordinary outgoing damage per level in the shared additive bucket. |
+| `cosmicpve:rage` | VI | Sword/axe | Legendary | Adds exactly 5% ordinary outgoing damage when this exact target damaged the attacker at least three committed positive-red-health times within the rolling `(4 + level)`-second window. History is not consumed. |
 
 ### DESIGNED BUT NOT IMPLEMENTED
 
-The design also names Aegis, Armored, Auto Smelt, Death Pact, Divine Immolation, Eagle Eye, Experience, Gears, Glowing, Hero Killer, Molten, Mortal Coil, Nutrition, Obsidianshield, Oxygenate, Pheonix/Phoenix, Rage, Self Destruct, and Virus. None currently has a registered real enchantment or runtime behavior. There are exactly 12 implemented real Cosmic enchantments. No Mastery enchantment is implemented. Do not add behavior assumptions beyond `Cosmic_Design.md`; the `Pheonix`/`Phoenix` spelling should be settled before choosing its stable ID.
+The design also names Armored, Auto Smelt, Death Pact, Divine Immolation, Experience, Gears, Glowing, Hero Killer, Molten, Mortal Coil, Nutrition, Obsidianshield, Oxygenate, Pheonix/Phoenix, Self Destruct, and Virus. None currently has a registered real enchantment or runtime behavior. There are exactly 15 implemented real Cosmic enchantments. No Mastery enchantment is implemented. Do not add behavior assumptions beyond `Cosmic_Design.md`; the `Pheonix`/`Phoenix` spelling should be settled before choosing its stable ID.
 
 ## 4. Critical Combat Semantics
 
@@ -134,6 +141,8 @@ The design also names Aegis, Armored, Auto Smelt, Death Pact, Divine Immolation,
 ### Valid proc hit
 
 Ordinary hit procs begin only after the logical server commits positive red-health damage in `LivingDamageEvent.Post`. Raw clicks, candidates rejected by target immunity, canceled attacks, zero-damage events, and absorption-only events are not normal proc hits. Execution never enters the proc engine.
+
+The same commit boundary records bounded recent-combat memory for Rage. History is keyed by the responsible living attacker's UUID and damaged entity's UUID, so credited projectile owners and attributed child attacks follow normal combat attribution rather than using projectile identity. Queries count timestamps in an inclusive rolling server-tick window and do not consume them. Periodic pruning removes stale relationships, and tick-timeline regression clears memory between server lifecycles.
 
 ### Damage composition
 
@@ -194,8 +203,9 @@ Implemented sets:
 
 - **Phantom** (`cosmicpve:phantom`, `#FF6969`): +25% additive ordinary outgoing damage, ×1.10 incoming damage, and a `×1.25` chance modifier for probabilistic Mastery procs. No real Mastery proc exists yet, so the final behavior is currently a tested integration seam.
 - **Yeti** (`cosmicpve:yeti`, `#A3FFF5`): +10% additive ordinary outgoing damage, ×0.90 incoming damage, and immunity IDs for freeze, frozen, permafrost, and ice aspect. Current vanilla integration clears freezing for players and mobs wearing the full set; the custom named effects do not exist yet.
+- **Ancient** (`cosmicpve:ancient`, `#050C59`): at or above exactly 50% health, +7.5% additive ordinary outgoing damage and ×0.925 ordinary incoming damage. Strictly below 50%, these become +15% and ×0.85. Outgoing reads attacker health at calculation; incoming reads target health before the current hit, so a threshold-crossing hit affects only later events. Standard true damage bypasses the set's ordinary reduction.
 
-Dimensional Traveler, Engineer, Ancient, Ranger, and Yjiki are designed but not implemented. Do not infer set behavior merely because the design table names it.
+There are exactly three implemented armor sets. Dimensional Traveler, Engineer, Ranger, and Yjiki are designed but not implemented. Do not infer set behavior merely because the design table names it.
 
 ## 8. Item Application and Enchanting Economy
 
@@ -299,8 +309,8 @@ This Invasion rule supersedes older design text that described Invasions as keep
 
 The following remain future content or infrastructure:
 
-- all enchantments beyond the 12 listed above, including every Mastery enchantment
-- Dimensional Traveler, Engineer, Ancient, Ranger, and Yjiki armor sets
+- all enchantments beyond the 15 listed above, including every Mastery enchantment
+- Dimensional Traveler, Engineer, Ranger, and Yjiki armor sets
 - masks and Multi-Masks
 - weapon skins and their virtual/passive behaviors. The settled inventory UX is drag and left-click to apply a skin to an appropriate item; the skin becomes tied to that item and a simple right-click removes it. This supersedes older design text that reverses those gestures.
 - Feeding Frenzy and Hysteria runtime behavior
@@ -324,6 +334,7 @@ The following are confirmed in current source and permission-gated under `/cosmi
 
 - `/cosmic combat trace on|off|last`
 - `/cosmic combat true-damage <target> <amount>`
+- `/cosmic combat set-health <target> <amount>`
 - `/cosmic combat execute <target>`
 - `/cosmic proc trace on|off|last`
 - `/cosmic proc test hit|no-procs`
@@ -363,7 +374,7 @@ The final post-Orb capacity is no longer unresolved for current target classes: 
 
 ## 16. Current Next Milestone
 
-Step 6C is accepted. Begin only the next explicitly selected bounded milestone; do not infer broader work from the remaining design list.
+The next bounded milestone is Step 6E: the weapon-skin foundation with Boosted Chainsaw, Maui's Hook, Stormbringer, and the Black Scroll Ink Sac presentation cleanup. All other skins and adjacent content remain deferred.
 
 ## 17. Development Workflow
 
@@ -380,17 +391,18 @@ Preserve unrelated dirty changes. Never change pinned versions as a side effect 
 
 ## 18. Verification Snapshot
 
-At the accepted end of Step 6C:
+For the current uncommitted Step 6D implementation:
 
 - `gradlew.bat build` succeeded.
-- 115 automated tests passed with 0 failures and 0 errors.
-- Dedicated-server startup loaded CosmicPVE content and reached `Done`.
+- 124 automated tests passed with 0 failures and 0 errors.
+- Dedicated-server startup published three armor sets, including `cosmicpve:ancient`, and reached `Done`.
 - Client startup completed mod/resource loading and item-atlas creation without CosmicPVE model/resource errors.
-- Changed JSON resources decoded successfully; the three enchantment definitions loaded on the dedicated server.
+- Changed JSON resources decoded successfully; Aegis, Eagle Eye, Rage, and Ancient resources loaded at runtime.
 - Pinned environment values remained unchanged.
-- The user manually verified Black Scrolls, Greatsword, Insanity, and Venom and accepted the milestone.
+- Step 6C remains manually accepted at gameplay commit `0e8a21c93fa13760f6a3424e1c7ebc526cdab564`.
+- Manual in-world Step 6D verification and acceptance remain pending.
 
-This snapshot describes gameplay commit `0e8a21c93fa13760f6a3424e1c7ebc526cdab564` (`Add Black Scrolls and new Cosmic enchantments`). The immediately following documentation-only commit records the final accepted baseline and does not alter gameplay.
+This snapshot describes the current uncommitted working tree layered on accepted Step 6C gameplay commit `0e8a21c93fa13760f6a3424e1c7ebc526cdab564` and documentation closure commit `a7c49917e37c620db4fddd9a7c13852dd7f099bf`. Do not mark Step 6D accepted or assign it a commit hash until manual acceptance and commit actually occur.
 
 ## Maintaining This Handoff
 

@@ -17,7 +17,10 @@ public final class ArmorSetCombatContributor implements OutgoingDamageContributo
         return sets.resolve(context.attacker())
                 .filter(definition -> definition.additiveOutgoingBonus() != 0.0)
                 .map(definition -> List.of(new OutgoingDamageContribution(
-                        definition.id(), definition.additiveOutgoingBonus())))
+                        definition.id(), definition.id().equals(ArmorSetIds.ANCIENT)
+                                ? AncientArmorSetBehavior.outgoing(
+                                        context.attacker().getHealth(), context.attacker().getMaxHealth())
+                                : definition.additiveOutgoingBonus())))
                 .orElseGet(List::of);
     }
 
@@ -25,7 +28,10 @@ public final class ArmorSetCombatContributor implements OutgoingDamageContributo
         return sets.resolve(context.target())
                 .filter(definition -> definition.incomingMultiplier() != 1.0)
                 .map(definition -> List.of(new IncomingDamageContribution(
-                        definition.id(), definition.incomingMultiplier())))
+                        definition.id(), definition.id().equals(ArmorSetIds.ANCIENT)
+                                ? AncientArmorSetBehavior.incoming(
+                                        context.target().getHealth(), context.target().getMaxHealth())
+                                : definition.incomingMultiplier())))
                 .orElseGet(List::of);
     }
 }

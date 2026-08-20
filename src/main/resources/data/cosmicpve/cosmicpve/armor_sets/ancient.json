@@ -1,0 +1,11 @@
+{
+  "display_name": {"translate": "armor_set.cosmicpve.ancient"},
+  "color": "#050C59",
+  "full_set_bonus": [
+    {"translate": "armor_set.cosmicpve.ancient.bonus.outgoing"},
+    {"translate": "armor_set.cosmicpve.ancient.bonus.incoming"},
+    {"translate": "armor_set.cosmicpve.ancient.bonus.low_health"}
+  ],
+  "additive_outgoing_bonus": 0.075,
+  "incoming_multiplier": 0.925
+}

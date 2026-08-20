@@ -26,7 +26,10 @@ class CosmicEnchantmentRegistrationTest {
                 Map.entry("pummel", 3),
                 Map.entry("greatsword", 4),
                 Map.entry("insanity", 8),
-                Map.entry("venom", 3));
+                Map.entry("venom", 3),
+                Map.entry("aegis", 6),
+                Map.entry("eagle_eye", 6),
+                Map.entry("rage", 6));
         for (var entry : expected.entrySet()) {
             var resource = getClass().getClassLoader()
                     .getResourceAsStream("data/cosmicpve/enchantment/" + entry.getKey() + ".json");
@@ -35,9 +38,17 @@ class CosmicEnchantmentRegistrationTest {
                 var json = JsonParser.parseReader(reader).getAsJsonObject();
                 assertEquals(entry.getValue().intValue(), json.get("max_level").getAsInt());
                 assertEquals(0, json.getAsJsonObject("effects").size());
+                if (entry.getKey().equals("aegis")) {
+                    assertEquals("#cosmicpve:enchantable/chestplate", json.get("supported_items").getAsString());
+                    assertEquals("chest", json.getAsJsonArray("slots").get(0).getAsString());
+                } else if (entry.getKey().equals("eagle_eye")) {
+                    assertEquals("#cosmicpve:enchantable/bow_or_crossbow", json.get("supported_items").getAsString());
+                } else if (entry.getKey().equals("rage")) {
+                    assertEquals("#cosmicpve:enchantable/sword_or_axe", json.get("supported_items").getAsString());
+                }
             }
         }
-        assertEquals(12, CosmicEnchantmentSpecs.ALL.size());
+        assertEquals(15, CosmicEnchantmentSpecs.ALL.size());
         assertEquals(CosmicEnchantmentTier.ELITE, CosmicEnchantmentSpecs.EXECUTE.tier());
         assertEquals(CosmicEnchantmentTier.ULTIMATE, CosmicEnchantmentSpecs.ANGELIC.tier());
         assertEquals(CosmicEnchantmentTier.SIMPLE, CosmicEnchantmentSpecs.LIGHTNING.tier());
@@ -50,6 +61,9 @@ class CosmicEnchantmentRegistrationTest {
         assertEquals(CosmicEnchantmentTier.ELITE, CosmicEnchantmentSpecs.GREATSWORD.tier());
         assertEquals(CosmicEnchantmentTier.LEGENDARY, CosmicEnchantmentSpecs.INSANITY.tier());
         assertEquals(CosmicEnchantmentTier.ELITE, CosmicEnchantmentSpecs.VENOM.tier());
+        assertEquals(CosmicEnchantmentTier.LEGENDARY, CosmicEnchantmentSpecs.AEGIS.tier());
+        assertEquals(CosmicEnchantmentTier.ULTIMATE, CosmicEnchantmentSpecs.EAGLE_EYE.tier());
+        assertEquals(CosmicEnchantmentTier.LEGENDARY, CosmicEnchantmentSpecs.RAGE.tier());
     }
 
     @Test

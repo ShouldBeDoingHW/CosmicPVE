@@ -13,6 +13,8 @@ import com.cosmicpve.combat.pipeline.CombatCalculationRequest;
 import com.cosmicpve.combat.pipeline.CombatEngine;
 import com.cosmicpve.combat.pipeline.OutgoingDamageContributor;
 import com.cosmicpve.combat.pipeline.IncomingDamageContributor;
+import com.cosmicpve.combat.pipeline.PreDefenseBoundsContributor;
+import com.cosmicpve.combat.memory.RecentCombatMemoryService;
 import com.cosmicpve.combat.proc.ProcEventService;
 import com.cosmicpve.equipment.enchantment.EffectiveEnchantmentsResolver;
 import java.util.List;
@@ -38,6 +40,8 @@ public final class CombatEventBridge {
     private final ProcEventService procEvents;
     private final OutgoingDamageContributor outgoingContributors;
     private final IncomingDamageContributor incomingContributors;
+    private final PreDefenseBoundsContributor preDefenseBounds;
+    private final RecentCombatMemoryService recentCombatMemory;
     private final Map<DamageContainer, CombatResult> incomingCandidates =
             Collections.synchronizedMap(new WeakHashMap<>());
     private final ThreadLocal<Deque<CombatResult>> acceptedDamageStack =
@@ -51,7 +55,9 @@ public final class CombatEventBridge {
             EffectiveEnchantmentsResolver enchantments,
             ProcEventService procEvents,
             OutgoingDamageContributor outgoingContributors,
-            IncomingDamageContributor incomingContributors) {
+            IncomingDamageContributor incomingContributors,
+            PreDefenseBoundsContributor preDefenseBounds,
+            RecentCombatMemoryService recentCombatMemory) {
         this.engine = engine;
         this.attribution = attribution;
         this.sequences = sequences;
@@ -60,6 +66,8 @@ public final class CombatEventBridge {
         this.procEvents = procEvents;
         this.outgoingContributors = outgoingContributors;
         this.incomingContributors = incomingContributors;
+        this.preDefenseBounds = preDefenseBounds;
+        this.recentCombatMemory = recentCombatMemory;
     }
 
     public void onIncomingDamage(LivingIncomingDamageEvent event) {
@@ -94,7 +102,7 @@ public final class CombatEventBridge {
         var unchanged = CombatCalculationRequest.unchanged(event.getAmount());
         var request = new CombatCalculationRequest(
                 unchanged.baseOrdinaryDamage(), unchanged.additiveOutgoingBonus(),
-                unchanged.separateOutgoingMultipliers(), unchanged.preDefenseBounds(),
+                unchanged.separateOutgoingMultipliers(), preDefenseBounds.resolvePreDefenseBounds(context),
                 unchanged.incomingMultipliers(), unchanged.finalOrdinaryBounds(), unchanged.trueDamagePackets(),
                 outgoingContributors.resolve(context), incomingContributors.resolveIncoming(context));
         CombatResult provisional = engine.calculate(context, request);
@@ -138,7 +146,7 @@ public final class CombatEventBridge {
         } else {
             var unchanged = CombatCalculationRequest.unchanged(event.getAmount());
             provisional = engine.calculate(context, new CombatCalculationRequest(
-                    unchanged.baseOrdinaryDamage(), 0.0, List.of(), unchanged.preDefenseBounds(), List.of(),
+                    unchanged.baseOrdinaryDamage(), 0.0, List.of(), preDefenseBounds.resolvePreDefenseBounds(context), List.of(),
                     unchanged.finalOrdinaryBounds(), List.of(), List.of(), incomingContributors.resolveIncoming(context)));
             event.setAmount((float) Math.min(Float.MAX_VALUE, provisional.breakdown().finalOrdinaryDamage()));
         }
@@ -169,6 +177,8 @@ public final class CombatEventBridge {
 
         var committed = provisional.commit(event.getNewDamage());
         traces.recordCommitted(committed);
+        var server = event.getEntity().level().getServer();
+        if (server != null) recentCombatMemory.recordCommitted(committed, server.getTickCount());
         procEvents.onCommittedDamage(committed);
     }
 }

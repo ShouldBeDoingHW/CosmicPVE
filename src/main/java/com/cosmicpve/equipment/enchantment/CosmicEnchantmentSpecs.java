@@ -31,10 +31,16 @@ public final class CosmicEnchantmentSpecs {
             ModEnchantments.INSANITY.identifier(), 8, CosmicEnchantmentTier.LEGENDARY, "axe");
     public static final CosmicEnchantmentSpec VENOM = new CosmicEnchantmentSpec(
             ModEnchantments.VENOM.identifier(), 3, CosmicEnchantmentTier.ELITE, "bow_or_crossbow");
+    public static final CosmicEnchantmentSpec AEGIS = new CosmicEnchantmentSpec(
+            ModEnchantments.AEGIS.identifier(), 6, CosmicEnchantmentTier.LEGENDARY, "chestplate");
+    public static final CosmicEnchantmentSpec EAGLE_EYE = new CosmicEnchantmentSpec(
+            ModEnchantments.EAGLE_EYE.identifier(), 6, CosmicEnchantmentTier.ULTIMATE, "bow_or_crossbow");
+    public static final CosmicEnchantmentSpec RAGE = new CosmicEnchantmentSpec(
+            ModEnchantments.RAGE.identifier(), 6, CosmicEnchantmentTier.LEGENDARY, "sword_or_axe");
 
     public static final List<CosmicEnchantmentSpec> ALL =
             List.of(EXECUTE, ANGELIC, LIGHTNING, ENDER_SHIFT, DOUBLESTRIKE, BLEED, LUCK, POISON, PUMMEL,
-                    GREATSWORD, INSANITY, VENOM);
+                    GREATSWORD, INSANITY, VENOM, AEGIS, EAGLE_EYE, RAGE);
 
     private CosmicEnchantmentSpecs() {}
 
