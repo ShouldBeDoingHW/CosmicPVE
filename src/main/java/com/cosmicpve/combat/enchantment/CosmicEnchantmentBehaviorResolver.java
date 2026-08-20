@@ -49,6 +49,7 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
             addPummel(event, result);
         } else if (event.hook() == ProcHook.ON_PROJECTILE_HIT) {
             addLightning(event, result);
+            addVenom(event, result);
         } else if (event.hook() == ProcHook.ON_DAMAGE_TAKEN) {
             addAngelic(event, result);
             addEnderShift(event, result);
@@ -137,6 +138,17 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
                 ChildProcEligibility.LIMITED_OFFENSIVE_REROLL,
                 activation -> LightningBehavior.activate(activation, childActions),
                 provenance(event, ModEnchantments.LIGHTNING.identifier())));
+    }
+
+    private void addVenom(ProcEvent event, List<ProcCandidate> result) {
+        int level = event.effectiveEnchantments().level(ModEnchantments.VENOM.identifier());
+        if (level <= 0) return;
+        result.add(candidate(
+                ModEnchantments.VENOM.identifier(), ProcHook.ON_PROJECTILE_HIT,
+                VenomBehavior.chance(level), Optional.empty(), 0L, Optional.empty(),
+                ChildProcEligibility.ROOT_ONLY,
+                activation -> VenomBehavior.activate(activation.event()),
+                provenance(event, ModEnchantments.VENOM.identifier())));
     }
 
     private void addAngelic(ProcEvent event, List<ProcCandidate> result) {

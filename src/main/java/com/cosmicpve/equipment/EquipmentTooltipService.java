@@ -69,6 +69,14 @@ public final class EquipmentTooltipService {
             event.getToolTip().add(Component.translatable(armor
                     ? "tooltip.cosmicpve.orb.armor_instruction" : "tooltip.cosmicpve.orb.weapon_instruction"));
         }
+        var blackScroll = stack.get(ModDataComponents.BLACK_SCROLL.get());
+        if (blackScroll != null) {
+            event.getToolTip().add(Component.translatable(
+                    "tooltip.cosmicpve.black_scroll.rate", blackScroll.returnedSuccessRate())
+                    .withColor(ItemApplicationColors.SUCCESS));
+            event.getToolTip().add(Component.translatable("tooltip.cosmicpve.black_scroll.purpose"));
+            event.getToolTip().add(Component.translatable("tooltip.cosmicpve.black_scroll.instruction"));
+        }
         var capacity = new CustomEnchantCapacityService();
         int used = capacity.used(stack);
         if (used > 0 || CustomEnchantCapacityService.isArmor(stack) || CustomEnchantCapacityService.isWeapon(stack))

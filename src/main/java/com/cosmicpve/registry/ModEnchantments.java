@@ -15,6 +15,9 @@ public final class ModEnchantments {
     public static final ResourceKey<Enchantment> LUCK = createKey("luck");
     public static final ResourceKey<Enchantment> POISON = createKey("poison");
     public static final ResourceKey<Enchantment> PUMMEL = createKey("pummel");
+    public static final ResourceKey<Enchantment> GREATSWORD = createKey("greatsword");
+    public static final ResourceKey<Enchantment> INSANITY = createKey("insanity");
+    public static final ResourceKey<Enchantment> VENOM = createKey("venom");
 
     private ModEnchantments() {}
 

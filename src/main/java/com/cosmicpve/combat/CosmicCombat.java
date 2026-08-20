@@ -18,6 +18,8 @@ import com.cosmicpve.equipment.armor.ArmorSetEventBridge;
 import com.cosmicpve.combat.enchantment.CosmicEnchantmentBehaviorResolver;
 import com.cosmicpve.combat.enchantment.ExecuteBehavior;
 import com.cosmicpve.combat.enchantment.LuckBehavior;
+import com.cosmicpve.combat.enchantment.GreatswordBehavior;
+import com.cosmicpve.combat.enchantment.InsanityBehavior;
 import com.cosmicpve.combat.cooldown.CooldownService;
 import com.cosmicpve.combat.proc.ProcCandidateSourceRegistry;
 import com.cosmicpve.combat.proc.ProcEngine;
@@ -68,6 +70,8 @@ public final class CosmicCombat {
 
     public static void register() {
         OUTGOING.register(new ExecuteBehavior());
+        OUTGOING.register(new GreatswordBehavior());
+        OUTGOING.register(new InsanityBehavior());
         OUTGOING.register(ARMOR_SET_COMBAT);
         INCOMING.register(ARMOR_SET_COMBAT);
         PROC_MODIFIERS.register(new LuckBehavior());

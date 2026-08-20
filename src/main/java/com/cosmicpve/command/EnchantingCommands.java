@@ -2,6 +2,7 @@ package com.cosmicpve.command;
 
 import com.cosmicpve.data.component.CosmicEnchantmentBookData;
 import com.cosmicpve.data.component.EnchantmentOrbData;
+import com.cosmicpve.data.component.BlackScrollData;
 import com.cosmicpve.equipment.enchantment.OrbType;
 import com.cosmicpve.equipment.enchantment.CosmicEnchantmentSpecs;
 import com.cosmicpve.registry.ModDataComponents;
@@ -51,8 +52,13 @@ public final class EnchantingCommands {
         var orbRandom = Commands.literal("give-random").then(Commands.argument("player", EntityArgument.player())
                 .then(orbType("armor", OrbType.ARMOR, true)).then(orbType("weapon", OrbType.WEAPON, true)));
         var orbs = Commands.literal("orb").then(orbGive).then(orbRandom);
+        var blackScroll = Commands.literal("black-scroll").then(Commands.literal("give")
+                .then(Commands.argument("player", EntityArgument.player())
+                        .then(Commands.argument("returned-success", IntegerArgumentType.integer(1, 100))
+                                .executes(c -> giveBlackScroll(EntityArgument.getPlayer(c, "player"),
+                                        IntegerArgumentType.getInteger(c, "returned-success"))))));
         return Commands.literal("enchant").then(Commands.literal("book").then(give).then(random))
-                .then(scroll).then(transmog).then(orbs);
+                .then(scroll).then(blackScroll).then(transmog).then(orbs);
     }
     private static int giveBook(net.minecraft.commands.CommandSourceStack source, net.minecraft.server.level.ServerPlayer player,
             net.minecraft.resources.Identifier id,int level,int success,int destroy){
@@ -96,5 +102,13 @@ public final class EnchantingCommands {
     private static int giveSimple(net.minecraft.server.level.ServerPlayer player, net.minecraft.world.item.Item item, int count) {
         player.getInventory().placeItemBackInInventory(new ItemStack(item, count));
         return count;
+    }
+
+    private static int giveBlackScroll(net.minecraft.server.level.ServerPlayer player, int returnedSuccessRate) {
+        var stack = new ItemStack(ModItems.BLACK_SCROLL.get());
+        stack.set(ModDataComponents.BLACK_SCROLL.get(), new BlackScrollData(
+                BlackScrollData.CURRENT_DATA_VERSION, returnedSuccessRate));
+        player.getInventory().placeItemBackInInventory(stack);
+        return 1;
     }
 }

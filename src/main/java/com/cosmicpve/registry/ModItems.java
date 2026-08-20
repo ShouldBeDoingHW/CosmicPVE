@@ -8,6 +8,7 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 import com.cosmicpve.equipment.armor.ArmorSetCrystalItem;
 import com.cosmicpve.equipment.enchantment.CosmicEnchantmentBookItem;
 import com.cosmicpve.equipment.enchantment.EnchantmentOrbItem;
+import com.cosmicpve.equipment.enchantment.BlackScrollItem;
 
 public final class ModItems {
     private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(CosmicPVE.MOD_ID);
@@ -36,6 +37,10 @@ public final class ModItems {
     public static final DeferredItem<EnchantmentOrbItem> WEAPON_ENCHANTMENT_ORB = ITEMS.registerItem(
             "weapon_enchantment_orb", EnchantmentOrbItem::new,
             properties -> properties.stacksTo(EnchantmentOrbItem.MAX_STACK_SIZE));
+
+    public static final DeferredItem<BlackScrollItem> BLACK_SCROLL = ITEMS.registerItem(
+            "black_scroll", BlackScrollItem::new,
+            properties -> properties.stacksTo(BlackScrollItem.MAX_STACK_SIZE));
 
     private ModItems() {}
 

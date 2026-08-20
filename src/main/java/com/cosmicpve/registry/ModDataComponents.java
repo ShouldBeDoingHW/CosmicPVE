@@ -6,6 +6,7 @@ import com.cosmicpve.data.component.ArmorSetIdentity;
 import com.cosmicpve.data.component.ArmorSetCrystalData;
 import com.cosmicpve.data.component.CosmicEnchantmentBookData;
 import com.cosmicpve.data.component.EnchantmentOrbData;
+import com.cosmicpve.data.component.BlackScrollData;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -42,6 +43,11 @@ public final class ModDataComponents {
             COMPONENTS.registerComponentType("enchantment_orb",
                     builder -> builder.persistent(EnchantmentOrbData.CODEC)
                             .networkSynchronized(ByteBufCodecs.fromCodecWithRegistries(EnchantmentOrbData.CODEC)).cacheEncoding());
+
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<BlackScrollData>> BLACK_SCROLL =
+            COMPONENTS.registerComponentType("black_scroll",
+                    builder -> builder.persistent(BlackScrollData.CODEC)
+                            .networkSynchronized(ByteBufCodecs.fromCodecWithRegistries(BlackScrollData.CODEC)).cacheEncoding());
 
     private ModDataComponents() {}
 

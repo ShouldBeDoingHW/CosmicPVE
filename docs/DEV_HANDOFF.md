@@ -1,8 +1,8 @@
 # CosmicPVE Development Handoff
 
-Current verified gameplay commit: `fb33a1d3af3427ec87a6565b293c1614e60d066b` (`Complete armor sets and Cosmic enchanting loop`). This is the accepted armor-set foundation and Steps 6A–6B milestone.
+Current verified and accepted gameplay baseline: Steps 6A–6C. The Step 6C closure commit is recorded below after the accepted implementation is committed.
 
-Repository state: **clean after the documentation follow-up commit**. The follow-up commit is intentionally documentation-only and named `Update development handoff`; the gameplay hash above remains the canonical verified implementation identity.
+Repository state: **Step 6C accepted and ready for its closure commit**, layered on documentation commit `3cab9c976403b76109596af62216463ad25faaa1`.
 
 Last handoff update: 2026-08-20
 
@@ -74,7 +74,7 @@ Implemented real Minecraft enchantments and behavior for Execute, Angelic, Light
 
 ### Step 5B — COMPLETE: Stack and Proc Enchantment Slice
 
-Implemented Bleed, Luck, Poison, and Pummel as real enchantments. Bleed uses the generalized stack system; Luck contributes a generic relative proc modifier. These nine total enchantments are the only real Cosmic enchantments currently implemented.
+Implemented Bleed, Luck, Poison, and Pummel as real enchantments. Bleed uses the generalized stack system; Luck contributes a generic relative proc modifier. These additions brought the implemented total to nine at this milestone.
 
 ### Armor Set Foundation — COMPLETE
 
@@ -91,6 +91,10 @@ Implemented generic typed Cosmic Enchantment Books, actual Minecraft enchantment
 ### Step 6B — COMPLETE; MANUALLY VERIFIED AND ACCEPTED
 
 Implemented Cosmic Book sound feedback, Transmog Scrolls, Armor Enchantment Orbs, Weapon Enchantment Orbs, persistent capacity upgrades, Orb destruction/White Scroll semantics, commands, models, tooltips, and focused tests. The final Step 6B build passed, all 107 tests passed, the dedicated server reached ready, and the client completed resource/model loading. The user also manually verified the important in-world inventory, drag/drop, tooltip, visual, capacity, and audio interactions and accepted the milestone.
+
+### Step 6C — COMPLETE; MANUALLY VERIFIED AND ACCEPTED
+
+Implemented typed Black Scrolls and the real Greatsword, Insanity, and Venom enchantments. A valid Black Scroll always extracts one uniformly selected eligible actual Simple-through-Legendary Cosmic enchantment; its displayed percentage becomes the returned book's Success Rate, while Destroy Rate is rolled independently from 1–100. Mastery, vanilla, and virtual enchantments are excluded. The full build and all 115 tests passed, the dedicated server reached ready, and the client completed resource/model loading. The user manually verified all four additions and accepted the milestone.
 
 ## 3. Current Real Enchantments
 
@@ -109,10 +113,13 @@ These are registered through Minecraft's enchantment infrastructure, use actual 
 | `cosmicpve:luck` | X | Boots/leggings | Ultimate | Each total equipped level multiplies eligible proc chances by 1.01 relative to base. Levels on boots and leggings add. |
 | `cosmicpve:poison` | III | Sword | Elite | On committed melee damage, has 5% per level to apply Poison I for 60 ticks/3 seconds. |
 | `cosmicpve:pummel` | III | Axe | Elite | On committed melee damage, has 2% per level to apply Slowness III for 50 ticks/2.5 seconds. |
+| `cosmicpve:greatsword` | IV | Sword | Elite | At an inclusive attacker-to-target entity distance of 2.5 blocks or farther, adds 5% ordinary outgoing damage per level in the shared additive bucket. |
+| `cosmicpve:insanity` | VIII | Axe | Legendary | Adds 1% ordinary outgoing damage per missing heart, including fractional hearts, capped at 2% per level in the shared additive bucket. |
+| `cosmicpve:venom` | III | Bow/crossbow | Elite | On a committed positive red-health projectile hit, has 15% per level to apply Poison I for 60 ticks/3 seconds through the shared proc system. |
 
 ### DESIGNED BUT NOT IMPLEMENTED
 
-The design also names Aegis, Armored, Auto Smelt, Death Pact, Divine Immolation, Eagle Eye, Experience, Gears, Glowing, Greatsword, Hero Killer, Insanity, Molten, Mortal Coil, Nutrition, Obsidianshield, Oxygenate, Pheonix/Phoenix, Rage, Self Destruct, Venom, and Virus. None currently has a registered real enchantment or runtime behavior. No Mastery enchantment is implemented. Do not add behavior assumptions beyond `Cosmic_Design.md`; the `Pheonix`/`Phoenix` spelling should be settled before choosing its stable ID.
+The design also names Aegis, Armored, Auto Smelt, Death Pact, Divine Immolation, Eagle Eye, Experience, Gears, Glowing, Hero Killer, Molten, Mortal Coil, Nutrition, Obsidianshield, Oxygenate, Pheonix/Phoenix, Rage, Self Destruct, and Virus. None currently has a registered real enchantment or runtime behavior. There are exactly 12 implemented real Cosmic enchantments. No Mastery enchantment is implemented. Do not add behavior assumptions beyond `Cosmic_Design.md`; the `Pheonix`/`Phoenix` spelling should be settled before choosing its stable ID.
 
 ## 4. Critical Combat Semantics
 
@@ -221,6 +228,16 @@ Book feedback is authoritative and exactly once: success plays `PLAYER_LEVELUP`;
 
 White Scroll protection is a persistent boolean in `CUSTOM_ENCHANT_META`. It is one-time protection against item destruction, not a chance modifier. It remains after success or a naturally non-destructive failure and is consumed only when it prevents an otherwise destructive outcome. It currently protects Cosmic Book failures, Armor Set Crystal failures, and Armor/Weapon Orb failures.
 
+### Black Scroll
+
+- One generic, non-stackable item carries versioned typed data containing a returned-book Success Rate from 1–100.
+- The displayed percentage is not an extraction chance: every valid application extracts exactly one enchantment.
+- Candidates are actual Minecraft enchantments whose registered Cosmic tier is Simple, Unique, Elite, Ultimate, or Legendary. Vanilla enchantments, Mastery enchantments, and virtual grants are never candidates.
+- Eligible IDs are sorted deterministically, then one is selected uniformly when more than one exists. A single candidate consumes no selection RNG.
+- The selected exact ID and level are removed in place. The cursor's consumed Black Scroll is atomically replaced with a real generic Cosmic Book using the stored Success Rate and an independently rolled 1–100 Destroy Rate, so a full inventory cannot lose or duplicate the output.
+- The target stack is not reconstructed; all unrelated enchantments, durability, name, armor-set identity, White Scroll protection, Orb upgrades, Transmog state, and other components remain.
+- Invalid or stale applications consume nothing, mutate nothing, create no output, and consume no RNG. Black Scroll extraction has no destructive result, so White Scroll protection is irrelevant.
+
 ### Custom enchant capacity and Orbs
 
 - Base capacity is five distinct **actual** Cosmic enchantment IDs.
@@ -282,8 +299,7 @@ This Invasion rule supersedes older design text that described Invasions as keep
 
 The following remain future content or infrastructure:
 
-- all enchantments beyond the nine listed above, including every Mastery enchantment
-- Black Scrolls
+- all enchantments beyond the 12 listed above, including every Mastery enchantment
 - Dimensional Traveler, Engineer, Ancient, Ranger, and Yjiki armor sets
 - masks and Multi-Masks
 - weapon skins and their virtual/passive behaviors. The settled inventory UX is drag and left-click to apply a skin to an appropriate item; the skin becomes tied to that item and a simple right-click removes it. This supersedes older design text that reverses those gestures.
@@ -322,6 +338,7 @@ The following are confirmed in current source and permission-gated under `/cosmi
 - `/cosmic armor crystal give <player> <set-id> <success-rate>`
 - `/cosmic enchant book give <player> <enchantment-id> <level> <success> <destroy>`
 - `/cosmic enchant book give-random <player> <enchantment-id> <level>`
+- `/cosmic enchant black-scroll give <player> <returned-success>`
 - `/cosmic enchant white-scroll give <player> [count]`
 - `/cosmic enchant transmog give <player> [count]`
 - `/cosmic enchant orb give <player> <armor|weapon> <success> <destroy>`
@@ -346,7 +363,7 @@ The final post-Orb capacity is no longer unresolved for current target classes: 
 
 ## 16. Current Next Milestone
 
-The next bounded gameplay milestone is **Step 6C — Black Scrolls**. It should select and remove one eligible **actual** Simple-through-Legendary Cosmic enchantment, exclude virtual grants, preserve all unrelated target-item data, and return a real generic Cosmic Enchantment Book carrying the removed enchantment and level. The returned book should use the approved Black Scroll success-rate rule and a random destroy rate, and the operation must use the established safe, server-authoritative item transaction pattern. This is planning context, not implemented behavior; the exact Step 6C prompt remains authoritative for its scope. Mastery enchantments and Mastery extraction are outside Step 6C.
+Step 6C is accepted. Begin only the next explicitly selected bounded milestone; do not infer broader work from the remaining design list.
 
 ## 17. Development Workflow
 
@@ -363,17 +380,17 @@ Preserve unrelated dirty changes. Never change pinned versions as a side effect 
 
 ## 18. Verification Snapshot
 
-At the accepted end of Step 6B:
+At the accepted end of Step 6C:
 
 - `gradlew.bat build` succeeded.
-- 107 automated tests passed with 0 failures and 0 errors.
+- 115 automated tests passed with 0 failures and 0 errors.
 - Dedicated-server startup loaded CosmicPVE content and reached `Done`.
 - Client startup completed mod/resource loading and item-atlas creation without CosmicPVE model/resource errors.
-- The user manually verified the important in-world inventory, tooltip, visual, capacity, and audio interactions and accepted the milestone.
+- Changed JSON resources decoded successfully; the three enchantment definitions loaded on the dedicated server.
 - Pinned environment values remained unchanged.
-- No Black Scroll implementation exists.
+- The user manually verified Black Scrolls, Greatsword, Insanity, and Venom and accepted the milestone.
 
-This snapshot describes gameplay commit `fb33a1d3af3427ec87a6565b293c1614e60d066b`. The immediately following documentation-only commit updates this handoff and does not alter the verified implementation.
+The Step 6C gameplay commit and final clean repository state are recorded after closure.
 
 ## Maintaining This Handoff
 

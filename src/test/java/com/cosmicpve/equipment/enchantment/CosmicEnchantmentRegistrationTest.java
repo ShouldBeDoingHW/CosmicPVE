@@ -14,16 +14,19 @@ import org.junit.jupiter.api.Test;
 class CosmicEnchantmentRegistrationTest {
     @Test
     void realDefinitionsHaveExpectedMaxLevelsAndEmptyVanillaEffects() throws Exception {
-        var expected = Map.of(
-                "execute", 5,
-                "angelic", 5,
-                "lightning", 4,
-                "ender_shift", 3,
-                "doublestrike", 3,
-                "bleed", 6,
-                "luck", 10,
-                "poison", 3,
-                "pummel", 3);
+        var expected = Map.ofEntries(
+                Map.entry("execute", 5),
+                Map.entry("angelic", 5),
+                Map.entry("lightning", 4),
+                Map.entry("ender_shift", 3),
+                Map.entry("doublestrike", 3),
+                Map.entry("bleed", 6),
+                Map.entry("luck", 10),
+                Map.entry("poison", 3),
+                Map.entry("pummel", 3),
+                Map.entry("greatsword", 4),
+                Map.entry("insanity", 8),
+                Map.entry("venom", 3));
         for (var entry : expected.entrySet()) {
             var resource = getClass().getClassLoader()
                     .getResourceAsStream("data/cosmicpve/enchantment/" + entry.getKey() + ".json");
@@ -34,7 +37,7 @@ class CosmicEnchantmentRegistrationTest {
                 assertEquals(0, json.getAsJsonObject("effects").size());
             }
         }
-        assertEquals(9, CosmicEnchantmentSpecs.ALL.size());
+        assertEquals(12, CosmicEnchantmentSpecs.ALL.size());
         assertEquals(CosmicEnchantmentTier.ELITE, CosmicEnchantmentSpecs.EXECUTE.tier());
         assertEquals(CosmicEnchantmentTier.ULTIMATE, CosmicEnchantmentSpecs.ANGELIC.tier());
         assertEquals(CosmicEnchantmentTier.SIMPLE, CosmicEnchantmentSpecs.LIGHTNING.tier());
@@ -44,6 +47,9 @@ class CosmicEnchantmentRegistrationTest {
         assertEquals(CosmicEnchantmentTier.ULTIMATE, CosmicEnchantmentSpecs.LUCK.tier());
         assertEquals(CosmicEnchantmentTier.ELITE, CosmicEnchantmentSpecs.POISON.tier());
         assertEquals(CosmicEnchantmentTier.ELITE, CosmicEnchantmentSpecs.PUMMEL.tier());
+        assertEquals(CosmicEnchantmentTier.ELITE, CosmicEnchantmentSpecs.GREATSWORD.tier());
+        assertEquals(CosmicEnchantmentTier.LEGENDARY, CosmicEnchantmentSpecs.INSANITY.tier());
+        assertEquals(CosmicEnchantmentTier.ELITE, CosmicEnchantmentSpecs.VENOM.tier());
     }
 
     @Test

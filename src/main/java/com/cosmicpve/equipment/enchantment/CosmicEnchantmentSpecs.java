@@ -25,9 +25,16 @@ public final class CosmicEnchantmentSpecs {
             ModEnchantments.POISON.identifier(), 3, CosmicEnchantmentTier.ELITE, "sword");
     public static final CosmicEnchantmentSpec PUMMEL = new CosmicEnchantmentSpec(
             ModEnchantments.PUMMEL.identifier(), 3, CosmicEnchantmentTier.ELITE, "axe");
+    public static final CosmicEnchantmentSpec GREATSWORD = new CosmicEnchantmentSpec(
+            ModEnchantments.GREATSWORD.identifier(), 4, CosmicEnchantmentTier.ELITE, "sword");
+    public static final CosmicEnchantmentSpec INSANITY = new CosmicEnchantmentSpec(
+            ModEnchantments.INSANITY.identifier(), 8, CosmicEnchantmentTier.LEGENDARY, "axe");
+    public static final CosmicEnchantmentSpec VENOM = new CosmicEnchantmentSpec(
+            ModEnchantments.VENOM.identifier(), 3, CosmicEnchantmentTier.ELITE, "bow_or_crossbow");
 
     public static final List<CosmicEnchantmentSpec> ALL =
-            List.of(EXECUTE, ANGELIC, LIGHTNING, ENDER_SHIFT, DOUBLESTRIKE, BLEED, LUCK, POISON, PUMMEL);
+            List.of(EXECUTE, ANGELIC, LIGHTNING, ENDER_SHIFT, DOUBLESTRIKE, BLEED, LUCK, POISON, PUMMEL,
+                    GREATSWORD, INSANITY, VENOM);
 
     private CosmicEnchantmentSpecs() {}
 

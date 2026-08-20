@@ -18,13 +18,15 @@ public final class EnchantingEventBridge {
         boolean scroll = event.getCarriedItem().is(ModItems.WHITE_SCROLL.get());
         boolean transmog = event.getCarriedItem().is(ModItems.TRANSMOG_SCROLL.get());
         boolean orb = OrbType.fromStack(event.getCarriedItem()).isPresent();
-        if (!book && !scroll && !transmog && !orb) return;
+        boolean blackScroll = event.getCarriedItem().is(ModItems.BLACK_SCROLL.get());
+        if (!book && !scroll && !transmog && !orb && !blackScroll) return;
         event.setCanceled(true);
         if (!(event.getPlayer() instanceof ServerPlayer player)) return;
         if (book) applyBook(event, player);
         else if (scroll) applyScroll(event, player);
         else if (transmog) applyTransmog(event, player);
-        else applyOrb(event, player);
+        else if (orb) applyOrb(event, player);
+        else applyBlackScroll(event, player);
     }
 
     private void applyBook(ItemStackedOnOtherEvent event, ServerPlayer player) {
@@ -91,6 +93,28 @@ public final class EnchantingEventBridge {
             case REJECTED_MAX_CAPACITY -> "message.cosmicpve.orb.maximum";
             default -> "message.cosmicpve.orb.invalid";
         };
+        player.displayClientMessage(Component.translatable(key), true);
+    }
+
+    private void applyBlackScroll(ItemStackedOnOtherEvent event, ServerPlayer player) {
+        var service = new BlackScrollExtractionService(
+                player.registryAccess().lookupOrThrow(Registries.ENCHANTMENT),
+                bound -> player.getRandom().nextInt(bound),
+                () -> player.getRandom().nextInt(100) + 1);
+        var result = service.apply(event.getCarriedItem(), event.getStackedOnItem(), event.getSlot().getItem());
+        if (result.succeeded()) {
+            // The non-stackable consumed scroll leaves the cursor empty, so the generated book can occupy it safely.
+            event.getCarriedSlotAccess().set(BlackScrollCursorOutput.afterApplication(
+                    event.getCarriedItem(), result));
+            event.getSlot().set(event.getSlot().getItem());
+            ItemApplicationFeedback.play(player, ItemApplicationFeedback.Cue.SUCCESS);
+            player.displayClientMessage(Component.translatable("message.cosmicpve.black_scroll.success",
+                    Component.translatable("enchantment." + result.enchantmentId().getNamespace() + "."
+                            + result.enchantmentId().getPath()), result.level()), true);
+            return;
+        }
+        String key = result.outcome() == BlackScrollExtractionResult.Outcome.REJECTED_NO_ELIGIBLE_ENCHANTMENTS
+                ? "message.cosmicpve.black_scroll.no_eligible" : "message.cosmicpve.black_scroll.invalid";
         player.displayClientMessage(Component.translatable(key), true);
     }
 }

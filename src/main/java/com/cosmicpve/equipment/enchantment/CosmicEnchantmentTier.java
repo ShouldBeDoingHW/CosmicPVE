@@ -18,6 +18,7 @@ public enum CosmicEnchantmentTier {
         this.maxDestroy = maxDestroy;
     }
     public int tooltipColor() { return tooltipColor; }
+    public boolean extractableByBlackScroll() { return this != MASTERY; }
     public boolean allowsRates(int success, int destroy) {
         return success >= minSuccess && success <= maxSuccess && destroy >= minDestroy && destroy <= maxDestroy;
     }

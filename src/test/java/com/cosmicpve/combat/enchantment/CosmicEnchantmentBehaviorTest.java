@@ -190,10 +190,59 @@ class CosmicEnchantmentBehaviorTest {
                 .count());
     }
 
+    @Test
+    void greatswordUsesInclusiveEntityDistanceAndSharedAdditiveBucket() {
+        assertEquals(0.0, GreatswordBehavior.bonus(4, 2.4999), 1.0E-12);
+        assertEquals(0.20, GreatswordBehavior.bonus(4, 2.5), 1.0E-12);
+        assertEquals(0.05, GreatswordBehavior.bonus(1, 10.0), 1.0E-12);
+        var request = new CombatCalculationRequest(
+                10.0, 0.05, List.of(), com.cosmicpve.combat.api.DamageBounds.UNBOUNDED,
+                List.of(), com.cosmicpve.combat.api.DamageBounds.UNBOUNDED, List.of(),
+                List.of(new OutgoingDamageContribution(ModEnchantments.GREATSWORD.identifier(), 0.20)));
+        var result = new CombatEngine().calculate(context(EffectiveEnchantments.EMPTY), request);
+        assertEquals(0.25, result.breakdown().additiveOutgoingBonus(), 1.0E-12);
+        assertEquals(12.5, result.breakdown().finalOrdinaryDamage(), 1.0E-12);
+    }
+
+    @Test
+    void insanityUsesFractionalMissingHeartsAndLevelCaps() {
+        assertEquals(0.0, InsanityBehavior.bonus(8, 20.0, 20.0), 1.0E-12);
+        assertEquals(0.035, InsanityBehavior.bonus(8, 13.0, 20.0), 1.0E-12);
+        assertEquals(0.005, InsanityBehavior.bonus(8, 19.0, 20.0), 1.0E-12);
+        assertEquals(0.02, InsanityBehavior.bonus(1, 0.0, 20.0), 1.0E-12);
+        assertEquals(0.08, InsanityBehavior.bonus(4, 0.0, 20.0), 1.0E-12);
+        assertEquals(0.16, InsanityBehavior.bonus(8, 0.0, 40.0), 1.0E-12);
+    }
+
+    @Test
+    void venomHasPinnedProjectileChanceDurationAndReceivesRelativeLuckMath() {
+        assertEquals(0.15, VenomBehavior.chance(1), 1.0E-12);
+        assertEquals(0.30, VenomBehavior.chance(2), 1.0E-12);
+        assertEquals(0.45, VenomBehavior.chance(3), 1.0E-12);
+        assertEquals(60, VenomBehavior.DURATION_TICKS);
+        assertEquals(0, VenomBehavior.AMPLIFIER);
+        assertEquals(0.54, com.cosmicpve.combat.proc.ProcChance.calculate(
+                VenomBehavior.chance(3), List.of(LuckBehavior.chanceMultiplier(20))), 1.0E-12);
+
+        var effective = new EffectiveEnchantmentsResolver().resolveSources(
+                List.of(new ActualEnchantmentGrant(
+                        ModEnchantments.VENOM.identifier(), 3, CosmicPVE.id("actual_bow"))), List.of());
+        var root = procEvent(ProcHook.ON_PROJECTILE_HIT, effective);
+        var candidates = behaviorResolver().resolve(root);
+        assertEquals(1, candidates.size());
+        assertEquals(ModEnchantments.VENOM.identifier(), candidates.getFirst().effectId());
+        assertEquals(ChildProcEligibility.ROOT_ONLY, candidates.getFirst().childEligibility());
+        assertTrue(behaviorResolver().resolve(procEvent(ProcHook.ON_VALID_HIT, effective)).isEmpty());
+    }
+
     private static ProcEvent procEvent(EffectiveEnchantments enchantments) {
+        return procEvent(ProcHook.ON_VALID_HIT, enchantments);
+    }
+
+    private static ProcEvent procEvent(ProcHook hook, EffectiveEnchantments enchantments) {
         UUID owner = UUID.randomUUID();
         return new ProcEvent(
-                ProcHook.ON_VALID_HIT, 1L, OptionalLong.empty(), RecursionPolicy.NORMAL, owner, Optional.of(owner),
+                hook, 1L, OptionalLong.empty(), RecursionPolicy.NORMAL, owner, Optional.of(owner),
                 0L, List.of(1.0), Set.of(), enchantments, null, null, () -> 0.5);
     }
 
