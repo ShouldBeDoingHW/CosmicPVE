@@ -8,14 +8,20 @@ import com.cosmicpve.combat.event.CombatEventBridge;
 import com.cosmicpve.combat.execution.ExecutionService;
 import com.cosmicpve.combat.pipeline.AttackSequenceService;
 import com.cosmicpve.combat.pipeline.CombatEngine;
+import com.cosmicpve.combat.pipeline.OutgoingDamageContributorRegistry;
+import com.cosmicpve.combat.enchantment.CosmicEnchantmentBehaviorResolver;
+import com.cosmicpve.combat.enchantment.ExecuteBehavior;
+import com.cosmicpve.combat.enchantment.LuckBehavior;
 import com.cosmicpve.combat.cooldown.CooldownService;
 import com.cosmicpve.combat.proc.ProcCandidateSourceRegistry;
 import com.cosmicpve.combat.proc.ProcEngine;
 import com.cosmicpve.combat.proc.ProcEventService;
 import com.cosmicpve.combat.proc.ProcHookEventBridge;
+import com.cosmicpve.combat.proc.ProcModifierSourceRegistry;
 import com.cosmicpve.combat.proc.ProcTraceService;
 import com.cosmicpve.combat.stack.CombatStackEventBridge;
 import com.cosmicpve.combat.stack.CombatStackService;
+import com.cosmicpve.combat.stack.BleedRuntimeService;
 import com.cosmicpve.content.CosmicContent;
 import com.cosmicpve.equipment.enchantment.EffectiveEnchantmentsResolver;
 import net.neoforged.neoforge.common.NeoForge;
@@ -30,21 +36,29 @@ public final class CosmicCombat {
     private static final CooldownService COOLDOWNS = new CooldownService();
     private static final ProcTraceService PROC_TRACES = new ProcTraceService();
     private static final ProcCandidateSourceRegistry PROC_SOURCES = new ProcCandidateSourceRegistry();
+    private static final ProcModifierSourceRegistry PROC_MODIFIERS = new ProcModifierSourceRegistry();
+    private static final OutgoingDamageContributorRegistry OUTGOING = new OutgoingDamageContributorRegistry();
     private static final ProcEngine PROCS = new ProcEngine(COOLDOWNS, PROC_TRACES);
     private static final ProcEventService PROC_EVENTS =
-            new ProcEventService(PROCS, PROC_SOURCES, SEQUENCES, ENCHANTMENTS);
+            new ProcEventService(PROCS, PROC_SOURCES, SEQUENCES, ENCHANTMENTS, PROC_MODIFIERS);
     private static final TrueDamageDeliveryService TRUE_DAMAGE = new TrueDamageDeliveryService();
     private static final ChildCombatActionService CHILD_ACTIONS = new ChildCombatActionService(SEQUENCES, TRUE_DAMAGE);
+    private static final CombatStackService STACKS = new CombatStackService(CosmicContent.repository());
+    private static final BleedRuntimeService BLEED_RUNTIME = new BleedRuntimeService(CHILD_ACTIONS);
+    private static final CosmicEnchantmentBehaviorResolver ENCHANTMENT_BEHAVIORS =
+            new CosmicEnchantmentBehaviorResolver(CHILD_ACTIONS, STACKS, BLEED_RUNTIME);
     private static final ExecutionService EXECUTIONS = new ExecutionService(SEQUENCES, TRACES);
     private static final CombatEventBridge EVENTS =
-            new CombatEventBridge(ENGINE, ATTRIBUTION, SEQUENCES, TRACES, ENCHANTMENTS, PROC_EVENTS);
+            new CombatEventBridge(ENGINE, ATTRIBUTION, SEQUENCES, TRACES, ENCHANTMENTS, PROC_EVENTS, OUTGOING);
     private static final ProcHookEventBridge PROC_HOOKS = new ProcHookEventBridge(PROC_EVENTS, EXECUTIONS);
-    private static final CombatStackService STACKS = new CombatStackService(CosmicContent.repository());
-    private static final CombatStackEventBridge STACK_EVENTS = new CombatStackEventBridge(STACKS);
+    private static final CombatStackEventBridge STACK_EVENTS = new CombatStackEventBridge(STACKS, BLEED_RUNTIME);
 
     private CosmicCombat() {}
 
     public static void register() {
+        OUTGOING.register(new ExecuteBehavior());
+        PROC_MODIFIERS.register(new LuckBehavior());
+        PROC_SOURCES.register(ENCHANTMENT_BEHAVIORS);
         NeoForge.EVENT_BUS.addListener(EVENTS::onIncomingDamage);
         NeoForge.EVENT_BUS.addListener(EVENTS::onDamageAccepted);
         NeoForge.EVENT_BUS.addListener(EVENTS::onDamageCommitted);

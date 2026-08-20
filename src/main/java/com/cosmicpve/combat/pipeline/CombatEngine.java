@@ -8,12 +8,15 @@ import java.util.List;
 /** Pure damage math. Event adapters are responsible for committing its provisional result. */
 public final class CombatEngine {
     public CombatResult calculate(CombatContext context, CombatCalculationRequest request) {
-        validateBaseAndAdditive(request.baseOrdinaryDamage(), request.additiveOutgoingBonus());
+        double contributedBonus = request.additiveContributions().stream()
+                .mapToDouble(OutgoingDamageContribution::bonus).sum();
+        double additiveBonus = request.additiveOutgoingBonus() + contributedBonus;
+        validateBaseAndAdditive(request.baseOrdinaryDamage(), additiveBonus);
         validateMultipliers(request.separateOutgoingMultipliers());
         validateMultipliers(request.incomingMultipliers());
 
         double base = Math.max(0.0, request.baseOrdinaryDamage());
-        double afterAdditive = Math.max(0.0, base * (1.0 + request.additiveOutgoingBonus()));
+        double afterAdditive = Math.max(0.0, base * (1.0 + additiveBonus));
         double outgoingProduct = product(request.separateOutgoingMultipliers());
         double afterOutgoing = afterAdditive * outgoingProduct;
         double afterPreDefenseBounds = request.preDefenseBounds().apply(afterOutgoing);
@@ -23,7 +26,8 @@ public final class CombatEngine {
 
         var breakdown = new CombatBreakdown(
                 base,
-                request.additiveOutgoingBonus(),
+                additiveBonus,
+                request.additiveContributions(),
                 afterAdditive,
                 request.separateOutgoingMultipliers(),
                 outgoingProduct,

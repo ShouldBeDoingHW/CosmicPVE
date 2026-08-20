@@ -1,3 +1,14 @@
 {
-  "item.cosmicpve.foundation_token": "Foundation Token"
+  "item.cosmicpve.foundation_token": "Foundation Token",
+  "enchantment.cosmicpve.execute": "Execute",
+  "enchantment.cosmicpve.angelic": "Angelic",
+  "enchantment.cosmicpve.lightning": "Lightning",
+  "enchantment.cosmicpve.ender_shift": "Ender Shift",
+  "enchantment.cosmicpve.doublestrike": "Doublestrike",
+  "enchantment.cosmicpve.bleed": "Bleed",
+  "enchantment.cosmicpve.luck": "Luck",
+  "enchantment.cosmicpve.poison": "Poison",
+  "enchantment.cosmicpve.pummel": "Pummel",
+  "death.attack.cosmicpve.doublestrike": "%1$s was struck twice",
+  "death.attack.cosmicpve.doublestrike.player": "%1$s was struck twice by %2$s"
 }

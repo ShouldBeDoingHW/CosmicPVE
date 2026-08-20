@@ -62,9 +62,13 @@ public final class CombatTraceService {
                 + " parent=" + parent
                 + " category=" + context.category()
                 + " policy=" + context.recursionPolicy()
+                + " excludedProcs=" + context.excludedProcEffectIds()
                 + " flags=" + context.flags()
                 + " base=" + formatNumber(breakdown.baseOrdinaryDamage())
                 + " additive=" + formatNumber(breakdown.additiveOutgoingBonus())
+                + " contributions=" + breakdown.additiveContributions().stream()
+                        .map(contribution -> contribution.sourceId() + "=" + formatNumber(contribution.bonus()))
+                        .collect(java.util.stream.Collectors.joining(",", "[", "]"))
                 + " outgoingProduct=" + formatNumber(breakdown.outgoingMultiplierProduct())
                 + " incomingProduct=" + formatNumber(breakdown.incomingMultiplierProduct())
                 + " ordinaryBeforeVanilla=" + formatNumber(breakdown.finalOrdinaryDamage())

@@ -67,10 +67,16 @@ public final class ProcEngine {
 
         candidate.oncePerEventKey().ifPresent(claimedOnceKeys::add);
         candidate.cooldownKey().ifPresent(key -> cooldowns.start(
-                event.ownerId(), key, candidate.baseCooldownTicks(), candidate.cooldownDurationMultipliers(),
+                event.ownerId(), key, candidate.baseCooldownTicks(), combinedCooldownMultipliers(event, candidate),
                 event.serverTick(), candidate.cooldownScope(), candidate.cooldownScopeId()));
         candidate.action().execute(new ProcActivation(event, candidate, finalChance, roll));
         return rolled(candidate, multiplier, finalChance, roll, ProcEvaluationStatus.ACTIVATED);
+    }
+
+    private static List<Double> combinedCooldownMultipliers(ProcEvent event, ProcCandidate candidate) {
+        var result = new ArrayList<Double>(event.cooldownDurationMultipliers());
+        result.addAll(candidate.cooldownDurationMultipliers());
+        return List.copyOf(result);
     }
 
     private static boolean recursionAllows(ProcEvent event, ProcCandidate candidate) {
@@ -78,7 +84,7 @@ public final class ProcEngine {
             return false;
         }
         if (event.recursionPolicy() == RecursionPolicy.LIMITED_OFFENSIVE_REROLL) {
-            return candidate.childEligibility() == ChildProcEligibility.LIMITED_OFFENSIVE_REROLL
+            return candidate.childEligibility() != ChildProcEligibility.ROOT_ONLY
                     && !event.excludedEffectIds().contains(candidate.effectId());
         }
         return true;

@@ -27,6 +27,28 @@ class CombatStackServiceTest {
     private static final Identifier NON_CLEANSABLE = CosmicPVE.id("test/non_cleansable");
     private static final Identifier NON_TRANSFERABLE = CosmicPVE.id("test/non_transferable");
     private static final Identifier PERSISTENT = CosmicPVE.id("test/persistent");
+    private static final Identifier BLEED = CosmicPVE.id("bleed");
+
+    @Test
+    void bleedKeepsTenIndependentAttributedUnitsWithExactLifetimes() {
+        var fixture = fixture();
+        var container = new CombatStackContainer();
+        UUID source = UUID.randomUUID();
+        UUID credited = UUID.randomUUID();
+        var application = StackApplication.ephemeral(Optional.of(source), Optional.of(credited));
+
+        var result = fixture.service.addStack(container, BLEED, 12, application, 20);
+
+        assertEquals(10, result.added());
+        assertEquals(StackMutationStatus.APPLIED, result.status());
+        assertEquals(10, container.count(BLEED));
+        assertTrue(container.snapshot().get(BLEED).stream().allMatch(stack ->
+                stack.applicationTick() == 20
+                        && stack.expirationTick() == 120
+                        && stack.originalSourceEntityId().equals(Optional.of(source))
+                        && stack.creditedPlayerId().equals(Optional.of(credited))));
+        assertEquals(10, fixture.service.expireDue(container, 120).expired());
+    }
 
     @Test
     void addsStacksAndEnforcesMaximum() {
@@ -239,6 +261,9 @@ class CombatStackServiceTest {
                 NON_CLEANSABLE, definition(NON_CLEANSABLE, StackPolarity.NEGATIVE, 2, 10, StackRefreshPolicy.REFRESH_ALL, false, false, false),
                 NON_TRANSFERABLE, definition(NON_TRANSFERABLE, StackPolarity.POSITIVE, 2, 10, StackRefreshPolicy.REFRESH_ALL, false, true, false),
                 PERSISTENT, definition(PERSISTENT, StackPolarity.POSITIVE, 2, 10, StackRefreshPolicy.REFRESH_ALL, true, true, true));
+        definitions = new java.util.HashMap<>(definitions);
+        definitions.put(BLEED, definition(
+                BLEED, StackPolarity.NEGATIVE, 10, 100, StackRefreshPolicy.INDEPENDENT, false, true, false));
         var repository = new CosmicContentRepository();
         assertTrue(repository.publish(ValidationResult.success(new ContentSnapshot(0, Map.of(), definitions))));
         return new Fixture(new CombatStackService(repository));

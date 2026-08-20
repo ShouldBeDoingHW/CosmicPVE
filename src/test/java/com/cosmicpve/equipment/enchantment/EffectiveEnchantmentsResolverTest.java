@@ -8,6 +8,8 @@ import com.cosmicpve.CosmicPVE;
 import java.util.List;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import com.cosmicpve.registry.ModEnchantments;
 import org.junit.jupiter.api.Test;
 
 class EffectiveEnchantmentsResolverTest {
@@ -41,5 +43,18 @@ class EffectiveEnchantmentsResolverTest {
         assertEquals(3, resolved.level(TEST_ENCHANT));
         assertTrue(ItemStack.matches(before, stack));
         assertFalse(net.minecraft.world.item.enchantment.EnchantmentHelper.hasAnyEnchantments(stack));
+    }
+
+    @Test
+    void boostedChainsawStyleVirtualDoublestrikeDoesNotMutateAxe() {
+        var axe = new ItemStack(Items.DIAMOND_AXE);
+        var before = axe.copy();
+        var resolved = new EffectiveEnchantmentsResolver().resolve(
+                axe, List.of(new VirtualEnchantmentGrant(
+                        ModEnchantments.DOUBLESTRIKE.identifier(), 3, CosmicPVE.id("boosted_chainsaw"))));
+
+        assertEquals(3, resolved.level(ModEnchantments.DOUBLESTRIKE.identifier()));
+        assertTrue(ItemStack.matches(before, axe));
+        assertFalse(EnchantmentHelper.hasAnyEnchantments(axe));
     }
 }

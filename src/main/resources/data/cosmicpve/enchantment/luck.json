@@ -1,0 +1,11 @@
+{
+  "anvil_cost": 8,
+  "description": {"translate": "enchantment.cosmicpve.luck"},
+  "effects": {},
+  "max_cost": {"base": 1, "per_level_above_first": 0},
+  "max_level": 10,
+  "min_cost": {"base": 1, "per_level_above_first": 0},
+  "slots": ["feet", "legs"],
+  "supported_items": "#cosmicpve:enchantable/boots_or_leggings",
+  "weight": 1
+}

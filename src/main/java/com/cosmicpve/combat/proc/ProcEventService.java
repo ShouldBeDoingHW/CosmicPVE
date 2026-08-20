@@ -23,16 +23,19 @@ public final class ProcEventService {
     private final ProcCandidateSourceRegistry candidates;
     private final AttackSequenceService sequences;
     private final EffectiveEnchantmentsResolver enchantments;
+    private final ProcModifierResolver modifiers;
 
     public ProcEventService(
             ProcEngine engine,
             ProcCandidateSourceRegistry candidates,
             AttackSequenceService sequences,
-            EffectiveEnchantmentsResolver enchantments) {
+            EffectiveEnchantmentsResolver enchantments,
+            ProcModifierResolver modifiers) {
         this.engine = engine;
         this.candidates = candidates;
         this.sequences = sequences;
         this.enchantments = enchantments;
+        this.modifiers = modifiers;
     }
 
     public void onCommittedDamage(CombatResult result) {
@@ -46,24 +49,28 @@ public final class ProcEventService {
             dispatch(create(
                     ProcHook.ON_VALID_HIT, context.attacker(), context.attacker(), context.target(),
                     context.attackSequenceId(), context.parentSequenceId(), context.recursionPolicy(),
-                    context.attributedPlayerId(), context.effectiveEnchantments(), random, Set.of()));
+                    context.attributedPlayerId(), context.effectiveEnchantments(), random,
+                    context.excludedProcEffectIds(), Optional.of(result)));
             if (context.category() == com.cosmicpve.combat.api.AttackCategory.PROJECTILE) {
                 dispatch(create(
                         ProcHook.ON_PROJECTILE_HIT, context.attacker(), context.attacker(), context.target(),
                         context.attackSequenceId(), context.parentSequenceId(), context.recursionPolicy(),
-                        context.attributedPlayerId(), context.effectiveEnchantments(), random, Set.of()));
+                        context.attributedPlayerId(), context.effectiveEnchantments(), random,
+                        context.excludedProcEffectIds(), Optional.of(result)));
             }
             if (context.target().isDeadOrDying()) {
                 dispatch(create(
                         ProcHook.ON_KILL, context.attacker(), context.attacker(), context.target(),
                         context.attackSequenceId(), context.parentSequenceId(), context.recursionPolicy(),
-                        context.attributedPlayerId(), context.effectiveEnchantments(), random, Set.of()));
+                        context.attributedPlayerId(), context.effectiveEnchantments(), random,
+                        context.excludedProcEffectIds(), Optional.of(result)));
             }
         }
         dispatch(create(
                 ProcHook.ON_DAMAGE_TAKEN, context.target(), context.attacker(), context.target(),
                 context.attackSequenceId(), context.parentSequenceId(), context.recursionPolicy(),
-                tracePlayer(context.target()), enchantments.resolve(context.target(), List.of()), random, Set.of()));
+                tracePlayer(context.target()), enchantments.resolve(context.target(), List.of()), random,
+                context.excludedProcEffectIds(), Optional.of(result)));
     }
 
     public ProcDispatchResult dispatchRoot(
@@ -74,7 +81,7 @@ public final class ProcEventService {
         var sequence = sequences.nextRoot();
         var event = create(
                 hook, owner, attacker, target, sequence.id(), sequence.parentId(), RecursionPolicy.NORMAL,
-                tracePlayer(owner), enchantments.resolve(owner, List.of()), serverRandom(owner), Set.of());
+                tracePlayer(owner), enchantments.resolve(owner, List.of()), serverRandom(owner), Set.of(), Optional.empty());
         return dispatch(event);
     }
 
@@ -86,7 +93,8 @@ public final class ProcEventService {
         var sequence = sequences.nextRoot();
         var event = create(
                 ProcHook.ON_VALID_HIT, owner, owner, null, sequence.id(), sequence.parentId(), policy,
-                tracePlayer(owner), enchantments.resolve(owner, List.of()), serverRandom(owner), excludedEffects);
+                tracePlayer(owner), enchantments.resolve(owner, List.of()), serverRandom(owner), excludedEffects,
+                Optional.empty());
         return engine.evaluate(event, fixtures);
     }
 
@@ -109,11 +117,15 @@ public final class ProcEventService {
             Optional<UUID> tracePlayerId,
             EffectiveEnchantments effectiveEnchantments,
             ProcRandomSource random,
-            Set<Identifier> excludedEffects) {
+            Set<Identifier> excludedEffects,
+            Optional<CombatResult> combatResult) {
         long tick = owner.level().getServer() == null ? 0L : owner.level().getServer().getTickCount();
+        ProcModifiers resolvedModifiers = modifiers.resolve(owner);
         return new ProcEvent(
                 hook, sequenceId, parentSequenceId, policy, owner.getUUID(), tracePlayerId, tick,
-                List.of(1.0), excludedEffects, effectiveEnchantments, attacker, target, random);
+                resolvedModifiers.chanceMultipliers(), resolvedModifiers.namedChanceMultipliers(),
+                resolvedModifiers.cooldownDurationMultipliers(),
+                excludedEffects, effectiveEnchantments, combatResult, attacker, target, random);
     }
 
     private static ProcRandomSource serverRandom(LivingEntity owner) {

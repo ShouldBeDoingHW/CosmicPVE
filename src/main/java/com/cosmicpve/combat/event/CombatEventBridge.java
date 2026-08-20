@@ -11,6 +11,7 @@ import com.cosmicpve.combat.debug.CombatTraceService;
 import com.cosmicpve.combat.pipeline.AttackSequenceService;
 import com.cosmicpve.combat.pipeline.CombatCalculationRequest;
 import com.cosmicpve.combat.pipeline.CombatEngine;
+import com.cosmicpve.combat.pipeline.OutgoingDamageContributor;
 import com.cosmicpve.combat.proc.ProcEventService;
 import com.cosmicpve.equipment.enchantment.EffectiveEnchantmentsResolver;
 import java.util.List;
@@ -22,6 +23,9 @@ import java.util.WeakHashMap;
 import net.neoforged.neoforge.common.damagesource.DamageContainer;
 import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import com.cosmicpve.registry.ModDamageTypes;
+import com.cosmicpve.registry.ModEnchantments;
+import java.util.Set;
 
 /** Thin NeoForge adapter; all damage arithmetic remains in {@link CombatEngine}. */
 public final class CombatEventBridge {
@@ -31,6 +35,7 @@ public final class CombatEventBridge {
     private final CombatTraceService traces;
     private final EffectiveEnchantmentsResolver enchantments;
     private final ProcEventService procEvents;
+    private final OutgoingDamageContributor outgoingContributors;
     private final Map<DamageContainer, CombatResult> incomingCandidates =
             Collections.synchronizedMap(new WeakHashMap<>());
     private final ThreadLocal<Deque<CombatResult>> acceptedDamageStack =
@@ -42,13 +47,15 @@ public final class CombatEventBridge {
             AttackSequenceService sequences,
             CombatTraceService traces,
             EffectiveEnchantmentsResolver enchantments,
-            ProcEventService procEvents) {
+            ProcEventService procEvents,
+            OutgoingDamageContributor outgoingContributors) {
         this.engine = engine;
         this.attribution = attribution;
         this.sequences = sequences;
         this.traces = traces;
         this.enchantments = enchantments;
         this.procEvents = procEvents;
+        this.outgoingContributors = outgoingContributors;
     }
 
     public void onIncomingDamage(LivingIncomingDamageEvent event) {
@@ -78,8 +85,15 @@ public final class CombatEventBridge {
                 enchantments.resolve(resolved.weaponSnapshot().stack(), List.of()),
                 sequence.id(),
                 sequence.parentId(),
-                RecursionPolicy.NORMAL);
-        CombatResult provisional = engine.calculate(context, CombatCalculationRequest.unchanged(event.getAmount()));
+                RecursionPolicy.NORMAL,
+                Set.of());
+        var unchanged = CombatCalculationRequest.unchanged(event.getAmount());
+        var request = new CombatCalculationRequest(
+                unchanged.baseOrdinaryDamage(), unchanged.additiveOutgoingBonus(),
+                unchanged.separateOutgoingMultipliers(), unchanged.preDefenseBounds(),
+                unchanged.incomingMultipliers(), unchanged.finalOrdinaryBounds(), unchanged.trueDamagePackets(),
+                outgoingContributors.resolve(context));
+        CombatResult provisional = engine.calculate(context, request);
         event.setAmount((float) Math.min(Float.MAX_VALUE, provisional.breakdown().finalOrdinaryDamage()));
         incomingCandidates.put(event.getContainer(), provisional);
     }
@@ -88,6 +102,14 @@ public final class CombatEventBridge {
         var context = scoped.context();
         if (context.target() != event.getEntity() || context.damageSource() != event.getSource()) {
             throw new IllegalStateException("Scoped child damage did not match its NeoForge callback");
+        }
+        if (scoped.doublestrikeBypass()
+                && (context.channel() != DamageChannel.ORDINARY
+                        || context.recursionPolicy() != RecursionPolicy.LIMITED_OFFENSIVE_REROLL
+                        || context.parentSequenceId().isEmpty()
+                        || !context.excludedProcEffectIds().contains(ModEnchantments.DOUBLESTRIKE.identifier())
+                        || !event.getSource().is(ModDamageTypes.DOUBLESTRIKE))) {
+            throw new IllegalStateException("Invalid Doublestrike hurt-immunity bypass scope");
         }
 
         CombatResult provisional;

@@ -3,6 +3,7 @@ package com.cosmicpve.command;
 import com.cosmicpve.combat.CosmicCombat;
 import com.cosmicpve.combat.stack.ActiveCombatStack;
 import com.cosmicpve.combat.stack.StackApplication;
+import com.cosmicpve.combat.enchantment.BleedBehavior;
 import com.cosmicpve.content.definition.stack.StackPolarity;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -146,19 +147,26 @@ final class CombatStackCommands {
     }
 
     private static String format(ActiveCombatStack active, long tick) {
-        String remaining = active.instances().stream()
-                .map(stack -> Math.max(0L, stack.expirationTick() - tick) + "t")
+        String instances = active.instances().stream()
+                .map(stack -> "{remaining=" + Math.max(0L, stack.expirationTick() - tick) + "t"
+                        + ",source=" + stack.originalSourceEntityId().map(Object::toString).orElse("none")
+                        + ",credited=" + stack.creditedPlayerId().map(Object::toString).orElse("none")
+                        + ",applied=" + stack.applicationTick() + "}")
                 .collect(java.util.stream.Collectors.joining(",", "[", "]"));
+        String effect = active.definitionId().equals(BleedBehavior.STACK_ID)
+                ? " movement=" + (-BleedBehavior.movementMultiplierAmount(active.count()) * 100.0) + "%_slower"
+                : "";
         return active.definition().map(definition -> active.definitionId()
                         + " count=" + active.count()
                         + " polarity=" + definition.polarity()
                         + " policy=" + definition.refreshPolicy()
-                        + " remaining=" + remaining
+                        + " instances=" + instances
+                        + effect
                         + " transferable=" + definition.transferable()
                         + " cleansable=" + definition.cleansable()
                         + " revision=" + active.oldestDefinitionRevision())
                 .orElseGet(() -> active.definitionId() + " count=" + active.count()
-                        + " definition=UNKNOWN remaining=" + remaining
+                        + " definition=UNKNOWN instances=" + instances
                         + " revision=" + active.oldestDefinitionRevision());
     }
 

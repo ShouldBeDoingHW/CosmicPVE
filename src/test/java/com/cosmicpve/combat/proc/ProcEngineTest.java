@@ -63,6 +63,26 @@ class ProcEngineTest {
     }
 
     @Test
+    void eventCooldownDurationModifiersAreAppliedCentrally() {
+        var cooldowns = new CooldownService();
+        var engine = new ProcEngine(cooldowns, new ProcTraceService());
+        UUID owner = UUID.randomUUID();
+        var base = event(30, owner, 100, RecursionPolicy.NORMAL,
+                new CountingRandom(0.0), List.of(1.0), Set.of());
+        var modified = new ProcEvent(
+                base.hook(), base.sequenceId(), base.parentSequenceId(), base.recursionPolicy(), base.ownerId(),
+                base.tracePlayerId(), base.serverTick(), base.chanceMultipliers(), List.of(0.8),
+                base.excludedEffectIds(), base.effectiveEnchantments(), base.combatResult(),
+                base.attacker(), base.target(), base.random());
+        engine.evaluate(modified, List.of(candidate(
+                "modified_cooldown", 1.0, 600, Optional.empty(),
+                ChildProcEligibility.ROOT_ONLY, new AtomicInteger())));
+
+        assertEquals(480L, cooldowns.remainingTicks(
+                owner, CosmicPVE.id("test/modified_cooldown_cooldown"), 100L));
+    }
+
+    @Test
     void oncePerEventSuppressesSecondSuccessfulSource() {
         var onceKey = Optional.of(CosmicPVE.id("test/once"));
         var random = new CountingRandom(0.0);

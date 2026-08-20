@@ -175,3 +175,71 @@ Development commands are permission-gated:
 The development datapack definitions are explicitly named `development_*`; none represent canonical Bleed, Feeding
 Frenzy, Hysteria, or other gameplay balance. Stack-driven damage, movement, Luck, healing, and proc behavior remain
 deferred.
+
+## Step 5A first Cosmic enchantment slice
+
+Execute, Angelic, Lightning, Ender Shift, and Doublestrike are real Minecraft dynamic-registry enchantments. Their
+definitions use CosmicPVE item tags for exact applicability, but are deliberately absent from Minecraft's
+`in_enchanting_table`, `tradeable`, `on_random_loot`, `on_traded_equipment`, and `on_mob_spawn_equipment` enchantment
+tags. For this milestone they are acquired with the permission-gated vanilla `/enchant` command.
+
+`CosmicEnchantmentBehaviorResolver` is the small Java composition layer for this slice. It is both a proc-candidate
+source and, through `ExecuteBehavior`, an ordinary outgoing-damage contributor. It is not a behavior scripting
+language. Execute contributes `0.02 * level` to the existing additive outgoing bucket only when the target's health
+is strictly below 50 percent immediately before incoming damage calculation. Named additive contributions are
+included in combat traces.
+
+Angelic sums the actual levels on head, chest, legs, and feet into one candidate, so one damage event consumes at
+most one roll and heals at most 1 HP. Lightning is an `ON_PROJECTILE_HIT` candidate. Its lightning bolt is
+`visualOnly`; the authoritative gameplay effect is a separate standard Cosmic true-damage child packet of exactly
+2 HP, retaining the parent's projectile-owner attribution and consuming absorption normally.
+
+Ender Shift tests the wearer's post-hit health directly: any committed damaging event leaving a living wearer
+strictly below 25 percent health is eligible; crossing the threshold from above is not required. It applies Speed I
+and Regeneration I for 60/120/180 ticks and uses the shared `cosmicpve:ender_shift` cooldown with a 600-tick base.
+Generic proc-event cooldown multipliers are combined centrally by `ProcEngine`, so future equipment cooldown
+modifiers do not require changes to Ender Shift.
+
+Doublestrike halves the parent's `CombatBreakdown.finalOrdinaryDamage`: the finalized ordinary amount entering
+vanilla target mitigation, before separately delivered true-damage proc packets. The child then passes through
+normal armor, absorption, custom reductions, and defensive reactions. It receives a unique sequence linked to the
+parent and `LIMITED_OFFENSIVE_REROLL`, with `cosmicpve:doublestrike` explicitly excluded. Other candidates that opt
+into the limited child policy may reroll, while Doublestrike itself cannot recurse.
+
+The child uses the internal `cosmicpve:doublestrike` ordinary damage type, whose only bypass tag is
+`minecraft:bypasses_cooldown`. This lets that one linked delivery survive hurt immunity created by its parent without
+reading, clearing, shortening, or restoring `invulnerableTime`. `CombatDeliveryScope` validates the child channel,
+policy, parent link, exclusion, target, source identity, and internal damage type. Unrelated hits still use normal
+hurt immunity.
+
+### Deferred death-order verification
+
+Before Phoenix or any other cancel-death behavior is implemented, test the pinned NeoForge 21.11.45 event ordering
+to prove that `ON_KILL` cannot activate for a death later prevented by `LivingDeathEvent`. Step 5A does not redesign
+kill dispatch or introduce death prevention.
+
+## Step 5B stack and proc enchantment slice
+
+Bleed, Luck, Poison, and Pummel are real Minecraft dynamic-registry enchantments and remain absent from vanilla
+acquisition pools. Their Java behaviors compose through the existing proc and stack services; no behavior scripting
+language or enchant-specific event adapter was added. Bleed, Poison, and Pummel listen only to committed damaging
+melee hits and opt into `LIMITED_OFFENSIVE_REROLL`, so a Doublestrike child may reroll them while Doublestrike remains
+excluded from its own child.
+
+The canonical `cosmicpve:bleed` stack definition is negative, independently timed, capped at 10 units, and lasts 100
+server ticks. Each unit preserves source/credited-player attribution and ticks for 1 HP of standard Cosmic true damage
+at 30, 60, and 90 ticks after its own application. The bridge expires due units before running effects, preventing a
+tick at or after expiry. Coincident units are delivered separately through `ChildCombatActionService` with
+`NO_PROCS`; the true-damage type bypasses hurt cooldown and armor/custom reductions but still consumes absorption.
+One transient movement-speed modifier represents the authoritative active count at -1 percent per unit and is removed
+after expiry, cleanse/removal, or a clone that does not retain Bleed.
+
+Luck is a generic `ProcModifierResolver` source rather than candidate-specific behavior. Actual Luck levels on boots
+and leggings are summed and contribute `1 + 0.01 * totalLevel` to the event's central relative chance multiplier.
+That means total Luck XX changes 1 percent to 1.2 percent and 20 percent to 24 percent for all probabilistic candidates,
+including Angelic, Lightning, Doublestrike, Bleed, Poison, and Pummel. Execute remains deterministic outgoing damage
+math and never enters this modifier path. Named modifier values are included in proc traces.
+
+Poison applies vanilla Poison I for 60 ticks at 5 percent per level. Pummel applies vanilla Slowness III for 50 ticks
+at 2 percent per level. Stack runtime generalization, additional stack effects, books, loot acquisition, GUIs, armor
+sets, masks, skins, instances, and all later enchantments remain deferred.

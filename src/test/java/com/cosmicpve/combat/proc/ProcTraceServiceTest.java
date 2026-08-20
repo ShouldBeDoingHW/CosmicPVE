@@ -10,6 +10,7 @@ import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.Set;
 import java.util.UUID;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 class ProcTraceServiceTest {
@@ -18,8 +19,9 @@ class ProcTraceServiceTest {
         UUID playerId = UUID.randomUUID();
         var event = new ProcEvent(
                 ProcHook.ON_VALID_HIT, 50, OptionalLong.of(49), RecursionPolicy.NORMAL,
-                playerId, Optional.of(playerId), 100, List.of(1.2), Set.of(),
-                EffectiveEnchantments.EMPTY, null, null, () -> 0.011);
+                playerId, Optional.of(playerId), 100, List.of(1.2),
+                Map.of(CosmicPVE.id("luck"), 1.2), List.of(1.0), Set.of(),
+                EffectiveEnchantments.EMPTY, Optional.empty(), null, null, () -> 0.011);
         var evaluation = new ProcEvaluation(
                 CosmicPVE.id("test/proc"), ProcHook.ON_VALID_HIT, 0.01, 1.2, 0.012,
                 java.util.OptionalDouble.of(0.011), ProcEvaluationStatus.ACTIVATED, true,
@@ -30,6 +32,7 @@ class ProcTraceServiceTest {
 
         String formatted = traces.format(traces.last(playerId).orElseThrow());
         assertTrue(formatted.contains("sequence=50 parent=49"));
+        assertTrue(formatted.contains("chanceModifiers={cosmicpve:luck=1.2}"));
         assertTrue(formatted.contains("base=0.010000"));
         assertTrue(formatted.contains("multiplier=1.200000"));
         assertTrue(formatted.contains("final=0.012000"));

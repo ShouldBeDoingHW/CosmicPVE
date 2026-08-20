@@ -43,6 +43,7 @@ public final class ProcTraceService {
                 + " parent=" + parent
                 + " hook=" + result.event().hook()
                 + " policy=" + result.event().recursionPolicy()
+                + " chanceModifiers=" + result.event().namedChanceMultipliers()
                 + " evaluations=" + evaluations;
     }
 
