@@ -1,0 +1,11 @@
+package com.cosmicpve.combat.proc;
+
+public enum ProcEvaluationStatus {
+    ACTIVATED,
+    ROLL_FAILED,
+    COOLDOWN_BLOCKED,
+    ONCE_PER_EVENT_SUPPRESSED,
+    RECURSION_FILTERED,
+    CONDITION_FAILED,
+    HOOK_MISMATCH
+}

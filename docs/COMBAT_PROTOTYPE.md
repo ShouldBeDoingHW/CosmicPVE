@@ -75,3 +75,53 @@ custom-enchantment slots, or become available to item-removal operations such as
 
 Step 3B still does not implement enchantment behavior, procs, cooldowns, stacks, Doublestrike, Hysteria, Bleed,
 Lightning, armor sets, masks, or weapon skins.
+
+## Step 4A proc and cooldown foundation
+
+### True-damage default clarification
+
+`TrueDamagePacket.standard` now bypasses armor, shields, the normal target hurt cooldown, ordinary Cosmic incoming
+reductions, and Aegis, but does **not** bypass absorption. Standard Cosmic true damage therefore consumes absorption
+before red health. The packet retains an explicit `bypassesAbsorption` flag for narrowly configured future effects.
+
+### Proc entry points
+
+`LivingDamageEvent.Post` remains the only offensive valid-hit entry point. After the combat result has positive
+committed health damage, the bridge dispatches `ON_VALID_HIT`, `ON_DAMAGE_TAKEN`, projectile-hit when applicable, and
+kill when applicable using the combat sequence and recursion policy. Rejected attacks, absorption-only hits, and
+zero-health-damage events do not enter these hooks. Execution never enters the proc engine.
+
+Thin logical-server adapters dispatch `ON_PRE_DEATH`, successful non-cancelled block breaks, completed food use, and
+periodic living-entity ticks. The pre-death adapter returns immediately during an `ExecutionService` execution. Candidate
+resolution is intentionally empty in Step 4A; future enchantments, sets, masks, and skins register candidate-source
+resolvers without changing event adapters or the engine. Development fixtures are reachable only through commands
+and tests and are not survival content.
+
+### Proc evaluation
+
+`ProcEngine` owns condition checks, recursion filtering, once-per-event claims, cooldown checks, probability math,
+the single authoritative roll, cooldown activation, action invocation, and tracing. Chance modifiers are relative:
+`baseChance * product(multipliers)`, clamped to `[0, 1]`. One server-seeded random source is created for an event and
+each eligible candidate consumes exactly one roll. Filtered or cooldown-blocked candidates do not roll.
+
+`NO_PROCS` rejects every candidate. `LIMITED_OFFENSIVE_REROLL` accepts only candidates that explicitly opt in and are
+not named in the event's excluded-effect set. This is the future Doublestrike seam: its child can exclude
+Doublestrike's own stable effect ID while allowing other eligible offensive effects.
+
+### Cooldowns and diagnostics
+
+`CooldownService` stores entity UUID plus stable cooldown key to an absolute server-tick expiry. Effective duration is
+calculated once with `ceil(baseTicks * product(durationMultipliers))`. Entries are classified as persistent-player,
+ephemeral-combat, or instance-session cooldowns. Step 4A stores them only in memory, but exposes immutable snapshots
+so a later persistence adapter does not change gameplay callers.
+
+Development commands are permission-gated:
+
+- `/cosmic proc trace on|off|last`
+- `/cosmic proc test hit|no-procs`
+- `/cosmic cooldown list`
+- `/cosmic cooldown set <namespaced-key> <ticks>`
+- `/cosmic cooldown clear <namespaced-key|all>`
+
+Actual enchantment behaviors, Luck, armor-set cooldown modifiers, runtime stacks, and Doublestrike delivery remain
+deferred.

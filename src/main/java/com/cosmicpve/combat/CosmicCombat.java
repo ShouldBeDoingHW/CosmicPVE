@@ -8,8 +8,15 @@ import com.cosmicpve.combat.event.CombatEventBridge;
 import com.cosmicpve.combat.execution.ExecutionService;
 import com.cosmicpve.combat.pipeline.AttackSequenceService;
 import com.cosmicpve.combat.pipeline.CombatEngine;
+import com.cosmicpve.combat.cooldown.CooldownService;
+import com.cosmicpve.combat.proc.ProcCandidateSourceRegistry;
+import com.cosmicpve.combat.proc.ProcEngine;
+import com.cosmicpve.combat.proc.ProcEventService;
+import com.cosmicpve.combat.proc.ProcHookEventBridge;
+import com.cosmicpve.combat.proc.ProcTraceService;
 import com.cosmicpve.equipment.enchantment.EffectiveEnchantmentsResolver;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.bus.api.EventPriority;
 
 public final class CosmicCombat {
     private static final CombatEngine ENGINE = new CombatEngine();
@@ -17,11 +24,18 @@ public final class CosmicCombat {
     private static final DamageAttributionService ATTRIBUTION = new DamageAttributionService();
     private static final CombatTraceService TRACES = new CombatTraceService();
     private static final EffectiveEnchantmentsResolver ENCHANTMENTS = new EffectiveEnchantmentsResolver();
+    private static final CooldownService COOLDOWNS = new CooldownService();
+    private static final ProcTraceService PROC_TRACES = new ProcTraceService();
+    private static final ProcCandidateSourceRegistry PROC_SOURCES = new ProcCandidateSourceRegistry();
+    private static final ProcEngine PROCS = new ProcEngine(COOLDOWNS, PROC_TRACES);
+    private static final ProcEventService PROC_EVENTS =
+            new ProcEventService(PROCS, PROC_SOURCES, SEQUENCES, ENCHANTMENTS);
     private static final TrueDamageDeliveryService TRUE_DAMAGE = new TrueDamageDeliveryService();
     private static final ChildCombatActionService CHILD_ACTIONS = new ChildCombatActionService(SEQUENCES, TRUE_DAMAGE);
     private static final ExecutionService EXECUTIONS = new ExecutionService(SEQUENCES, TRACES);
     private static final CombatEventBridge EVENTS =
-            new CombatEventBridge(ENGINE, ATTRIBUTION, SEQUENCES, TRACES, ENCHANTMENTS);
+            new CombatEventBridge(ENGINE, ATTRIBUTION, SEQUENCES, TRACES, ENCHANTMENTS, PROC_EVENTS);
+    private static final ProcHookEventBridge PROC_HOOKS = new ProcHookEventBridge(PROC_EVENTS, EXECUTIONS);
 
     private CosmicCombat() {}
 
@@ -29,6 +43,11 @@ public final class CosmicCombat {
         NeoForge.EVENT_BUS.addListener(EVENTS::onIncomingDamage);
         NeoForge.EVENT_BUS.addListener(EVENTS::onDamageAccepted);
         NeoForge.EVENT_BUS.addListener(EVENTS::onDamageCommitted);
+        NeoForge.EVENT_BUS.addListener(PROC_HOOKS::onPreDeath);
+        NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, PROC_HOOKS::onBlockBreak);
+        NeoForge.EVENT_BUS.addListener(PROC_HOOKS::onFoodEaten);
+        NeoForge.EVENT_BUS.addListener(PROC_HOOKS::onPlayerTick);
+        NeoForge.EVENT_BUS.addListener(PROC_HOOKS::onEntityTick);
     }
 
     public static CombatTraceService traces() {
@@ -49,5 +68,25 @@ public final class CosmicCombat {
 
     public static EffectiveEnchantmentsResolver enchantments() {
         return ENCHANTMENTS;
+    }
+
+    public static CooldownService cooldowns() {
+        return COOLDOWNS;
+    }
+
+    public static ProcEngine procs() {
+        return PROCS;
+    }
+
+    public static ProcEventService procEvents() {
+        return PROC_EVENTS;
+    }
+
+    public static ProcCandidateSourceRegistry procSources() {
+        return PROC_SOURCES;
+    }
+
+    public static ProcTraceService procTraces() {
+        return PROC_TRACES;
     }
 }

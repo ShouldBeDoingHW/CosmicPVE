@@ -11,6 +11,7 @@ import com.cosmicpve.combat.debug.CombatTraceService;
 import com.cosmicpve.combat.pipeline.AttackSequenceService;
 import com.cosmicpve.combat.pipeline.CombatCalculationRequest;
 import com.cosmicpve.combat.pipeline.CombatEngine;
+import com.cosmicpve.combat.proc.ProcEventService;
 import com.cosmicpve.equipment.enchantment.EffectiveEnchantmentsResolver;
 import java.util.List;
 import java.util.ArrayDeque;
@@ -29,6 +30,7 @@ public final class CombatEventBridge {
     private final AttackSequenceService sequences;
     private final CombatTraceService traces;
     private final EffectiveEnchantmentsResolver enchantments;
+    private final ProcEventService procEvents;
     private final Map<DamageContainer, CombatResult> incomingCandidates =
             Collections.synchronizedMap(new WeakHashMap<>());
     private final ThreadLocal<Deque<CombatResult>> acceptedDamageStack =
@@ -39,12 +41,14 @@ public final class CombatEventBridge {
             DamageAttributionService attribution,
             AttackSequenceService sequences,
             CombatTraceService traces,
-            EffectiveEnchantmentsResolver enchantments) {
+            EffectiveEnchantmentsResolver enchantments,
+            ProcEventService procEvents) {
         this.engine = engine;
         this.attribution = attribution;
         this.sequences = sequences;
         this.traces = traces;
         this.enchantments = enchantments;
+        this.procEvents = procEvents;
     }
 
     public void onIncomingDamage(LivingIncomingDamageEvent event) {
@@ -134,6 +138,8 @@ public final class CombatEventBridge {
             return;
         }
 
-        traces.recordCommitted(provisional.commit(event.getNewDamage()));
+        var committed = provisional.commit(event.getNewDamage());
+        traces.recordCommitted(committed);
+        procEvents.onCommittedDamage(committed);
     }
 }

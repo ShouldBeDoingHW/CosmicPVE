@@ -18,6 +18,6 @@ public record TrueDamagePacket(
     }
 
     public static TrueDamagePacket standard(Identifier sourceId, double amount) {
-        return new TrueDamagePacket(sourceId, amount, true, true, true);
+        return new TrueDamagePacket(sourceId, amount, true, false, true);
     }
 }

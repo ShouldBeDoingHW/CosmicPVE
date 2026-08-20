@@ -6,8 +6,12 @@ import com.cosmicpve.combat.execution.ExecutionCause;
 import com.cosmicpve.combat.api.RecursionPolicy;
 import com.cosmicpve.combat.api.TrueDamagePacket;
 import com.mojang.brigadier.arguments.FloatArgumentType;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.cosmicpve.combat.cooldown.CooldownScope;
+import com.cosmicpve.combat.proc.DevelopmentProcFixtures;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.commands.arguments.IdentifierArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.permissions.PermissionCheck;
 import net.minecraft.server.permissions.Permissions;
@@ -33,9 +37,35 @@ public final class CosmicCommands {
                                                 context.getSource(),
                                                 EntityArgument.getEntity(context, "target"),
                                                 FloatArgumentType.getFloat(context, "amount"))))));
+        var proc = Commands.literal("proc")
+                .then(Commands.literal("trace")
+                        .then(Commands.literal("on").executes(context -> setProcTrace(context.getSource(), true)))
+                        .then(Commands.literal("off").executes(context -> setProcTrace(context.getSource(), false)))
+                        .then(Commands.literal("last").executes(context -> showLastProc(context.getSource()))))
+                .then(Commands.literal("test")
+                        .then(Commands.literal("hit").executes(context -> testProc(
+                                context.getSource(), RecursionPolicy.NORMAL)))
+                        .then(Commands.literal("no-procs").executes(context -> testProc(
+                                context.getSource(), RecursionPolicy.NO_PROCS))));
+        var cooldown = Commands.literal("cooldown")
+                .then(Commands.literal("list").executes(context -> listCooldowns(context.getSource())))
+                .then(Commands.literal("set")
+                        .then(Commands.argument("key", IdentifierArgument.id())
+                                .then(Commands.argument("ticks", IntegerArgumentType.integer(0))
+                                        .executes(context -> setCooldown(
+                                                context.getSource(),
+                                                IdentifierArgument.getId(context, "key"),
+                                                IntegerArgumentType.getInteger(context, "ticks"))))))
+                .then(Commands.literal("clear")
+                        .then(Commands.literal("all").executes(context -> clearAllCooldowns(context.getSource())))
+                        .then(Commands.argument("key", IdentifierArgument.id())
+                                .executes(context -> clearCooldown(
+                                        context.getSource(), IdentifierArgument.getId(context, "key")))));
         event.getDispatcher().register(Commands.literal("cosmic")
                 .requires(Commands.hasPermission(new PermissionCheck.Require(Permissions.COMMANDS_GAMEMASTER)))
-                .then(combat));
+                .then(combat)
+                .then(proc)
+                .then(cooldown));
     }
 
     private static int trueDamageTarget(
@@ -90,5 +120,84 @@ public final class CosmicCommands {
         }
         source.sendSuccess(() -> Component.literal(CosmicCombat.traces().format(result.orElseThrow())), false);
         return 1;
+    }
+
+    private static int setProcTrace(net.minecraft.commands.CommandSourceStack source, boolean enabled)
+            throws com.mojang.brigadier.exceptions.CommandSyntaxException {
+        var player = source.getPlayerOrException();
+        CosmicCombat.procTraces().setEnabled(player.getUUID(), enabled);
+        source.sendSuccess(() -> Component.literal("Cosmic proc tracing " + (enabled ? "enabled" : "disabled") + "."), false);
+        return 1;
+    }
+
+    private static int showLastProc(net.minecraft.commands.CommandSourceStack source)
+            throws com.mojang.brigadier.exceptions.CommandSyntaxException {
+        var player = source.getPlayerOrException();
+        var result = CosmicCombat.procTraces().last(player.getUUID());
+        if (result.isEmpty()) {
+            source.sendFailure(Component.literal("No proc event has been traced yet."));
+            return 0;
+        }
+        source.sendSuccess(() -> Component.literal(CosmicCombat.procTraces().format(result.orElseThrow())), false);
+        return 1;
+    }
+
+    private static int testProc(net.minecraft.commands.CommandSourceStack source, RecursionPolicy policy)
+            throws com.mojang.brigadier.exceptions.CommandSyntaxException {
+        var player = source.getPlayerOrException();
+        var result = CosmicCombat.procEvents().dispatchDevelopment(
+                player, java.util.List.of(DevelopmentProcFixtures.guaranteedHit()), policy, java.util.Set.of());
+        String formatted = CosmicCombat.procTraces().format(result);
+        source.sendSuccess(() -> Component.literal("Development proc: " + formatted), false);
+        return result.activationCount() > 0 ? 1 : 0;
+    }
+
+    private static int listCooldowns(net.minecraft.commands.CommandSourceStack source)
+            throws com.mojang.brigadier.exceptions.CommandSyntaxException {
+        var player = source.getPlayerOrException();
+        long tick = source.getServer().getTickCount();
+        var active = CosmicCombat.cooldowns().active(player.getUUID(), tick);
+        if (active.isEmpty()) {
+            source.sendSuccess(() -> Component.literal("No active Cosmic cooldowns."), false);
+            return 0;
+        }
+        String output = active.stream()
+                .map(entry -> entry.getKey() + "="
+                        + CosmicCombat.cooldowns().remainingTicks(player.getUUID(), entry.getKey(), tick)
+                        + "t(" + entry.getValue().scope() + ")")
+                .collect(java.util.stream.Collectors.joining(", "));
+        source.sendSuccess(() -> Component.literal("Cosmic cooldowns: " + output), false);
+        return active.size();
+    }
+
+    private static int setCooldown(
+            net.minecraft.commands.CommandSourceStack source,
+            net.minecraft.resources.Identifier key,
+            int ticks)
+            throws com.mojang.brigadier.exceptions.CommandSyntaxException {
+        var player = source.getPlayerOrException();
+        CosmicCombat.cooldowns().set(
+                player.getUUID(), key, ticks, source.getServer().getTickCount(),
+                CooldownScope.EPHEMERAL_COMBAT, java.util.Optional.empty());
+        source.sendSuccess(() -> Component.literal("Set " + key + " to " + ticks + " ticks."), false);
+        return 1;
+    }
+
+    private static int clearCooldown(
+            net.minecraft.commands.CommandSourceStack source,
+            net.minecraft.resources.Identifier key)
+            throws com.mojang.brigadier.exceptions.CommandSyntaxException {
+        var player = source.getPlayerOrException();
+        boolean removed = CosmicCombat.cooldowns().clear(player.getUUID(), key);
+        source.sendSuccess(() -> Component.literal((removed ? "Cleared " : "No active cooldown for ") + key + "."), false);
+        return removed ? 1 : 0;
+    }
+
+    private static int clearAllCooldowns(net.minecraft.commands.CommandSourceStack source)
+            throws com.mojang.brigadier.exceptions.CommandSyntaxException {
+        var player = source.getPlayerOrException();
+        int count = CosmicCombat.cooldowns().clearAll(player.getUUID());
+        source.sendSuccess(() -> Component.literal("Cleared " + count + " Cosmic cooldown(s)."), false);
+        return count;
     }
 }
