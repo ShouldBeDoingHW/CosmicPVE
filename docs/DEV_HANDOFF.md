@@ -1,8 +1,8 @@
 # CosmicPVE Development Handoff
 
-Current verified and accepted gameplay state: Steps 6A–6E. The Step 6E gameplay commit is being created as part of this accepted milestone closure; its resulting hash is recorded by the follow-up handoff commit.
+Current verified and accepted gameplay commit: `bf64c77d5ac62952f801a81241801f3401c17e78` (`Add weapon skins and skin passives`). This is the accepted Steps 6A–6E baseline.
 
-Repository state at Step 6E closure: the accepted Step 6E implementation is ready for its dedicated gameplay commit. The root `assets` folder retains the three user-supplied source images and remains deliberately untracked. The user-replaced canonical `Cosmic_Design.md` is reserved for the separate documentation-baseline commit.
+Repository state after Step 6E closure: clean at gameplay commit `bf64c77d5ac62952f801a81241801f3401c17e78`, apart from the deliberately untracked root `assets` folder, the user-replaced canonical `Cosmic_Design.md`, and this documentation follow-up. Both tracked documentation updates are recorded by the follow-up baseline commit before Step 6F begins.
 
 Last handoff update: 2026-08-20
 
