@@ -65,7 +65,8 @@ public final class CosmicCommands {
                 .requires(Commands.hasPermission(new PermissionCheck.Require(Permissions.COMMANDS_GAMEMASTER)))
                 .then(combat)
                 .then(proc)
-                .then(cooldown));
+                .then(cooldown)
+                .then(CombatStackCommands.create()));
     }
 
     private static int trueDamageTarget(

@@ -14,6 +14,9 @@ import com.cosmicpve.combat.proc.ProcEngine;
 import com.cosmicpve.combat.proc.ProcEventService;
 import com.cosmicpve.combat.proc.ProcHookEventBridge;
 import com.cosmicpve.combat.proc.ProcTraceService;
+import com.cosmicpve.combat.stack.CombatStackEventBridge;
+import com.cosmicpve.combat.stack.CombatStackService;
+import com.cosmicpve.content.CosmicContent;
 import com.cosmicpve.equipment.enchantment.EffectiveEnchantmentsResolver;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.bus.api.EventPriority;
@@ -36,6 +39,8 @@ public final class CosmicCombat {
     private static final CombatEventBridge EVENTS =
             new CombatEventBridge(ENGINE, ATTRIBUTION, SEQUENCES, TRACES, ENCHANTMENTS, PROC_EVENTS);
     private static final ProcHookEventBridge PROC_HOOKS = new ProcHookEventBridge(PROC_EVENTS, EXECUTIONS);
+    private static final CombatStackService STACKS = new CombatStackService(CosmicContent.repository());
+    private static final CombatStackEventBridge STACK_EVENTS = new CombatStackEventBridge(STACKS);
 
     private CosmicCombat() {}
 
@@ -48,6 +53,9 @@ public final class CosmicCombat {
         NeoForge.EVENT_BUS.addListener(PROC_HOOKS::onFoodEaten);
         NeoForge.EVENT_BUS.addListener(PROC_HOOKS::onPlayerTick);
         NeoForge.EVENT_BUS.addListener(PROC_HOOKS::onEntityTick);
+        NeoForge.EVENT_BUS.addListener(STACK_EVENTS::onPlayerTick);
+        NeoForge.EVENT_BUS.addListener(STACK_EVENTS::onEntityTick);
+        NeoForge.EVENT_BUS.addListener(STACK_EVENTS::onPlayerClone);
     }
 
     public static CombatTraceService traces() {
@@ -88,5 +96,9 @@ public final class CosmicCombat {
 
     public static ProcTraceService procTraces() {
         return PROC_TRACES;
+    }
+
+    public static CombatStackService stacks() {
+        return STACKS;
     }
 }

@@ -2,6 +2,7 @@ package com.cosmicpve.registry;
 
 import com.cosmicpve.CosmicPVE;
 import com.cosmicpve.data.attachment.PlayerProfileData;
+import com.cosmicpve.combat.stack.CombatStackContainer;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.attachment.AttachmentType;
 import net.neoforged.neoforge.registries.DeferredHolder;
@@ -18,6 +19,14 @@ public final class ModAttachments {
                     () -> AttachmentType.builder(PlayerProfileData::createDefault)
                             .serialize(PlayerProfileData.CODEC)
                             .copyOnDeath()
+                            .build());
+
+    /** Available on every entity; only persistent stack instances are serialized by the container codec. */
+    public static final DeferredHolder<AttachmentType<?>, AttachmentType<CombatStackContainer>> COMBAT_STACKS =
+            ATTACHMENTS.register(
+                    "combat_stacks",
+                    () -> AttachmentType.builder((java.util.function.Supplier<CombatStackContainer>) CombatStackContainer::new)
+                            .serialize(CombatStackContainer.CODEC)
                             .build());
 
     private ModAttachments() {}

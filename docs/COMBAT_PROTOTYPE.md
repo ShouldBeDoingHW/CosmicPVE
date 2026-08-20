@@ -125,3 +125,53 @@ Development commands are permission-gated:
 
 Actual enchantment behaviors, Luck, armor-set cooldown modifiers, runtime stacks, and Doublestrike delivery remain
 deferred.
+
+## Step 4B runtime combat stacks
+
+`CombatStackService` is the only mutation boundary for stack state. Each `LivingEntity` acquires a
+`COMBAT_STACKS` attachment only when a stack is actually applied. The container stores an individual immutable
+instance for every stack unit, including definition ID/revision, original source entity, credited player,
+application/refresh/expiration ticks, scope, and transfer audit data. Per-instance provenance means future effects
+can aggregate by source without changing the container format.
+
+Every definition-dependent operation resolves the current immutable `StackDefinition` from `CosmicContent` rather
+than copying polarity, limits, duration, or flags into runtime state. A removed definition remains inspectable,
+removable, and expirable; cleanse and transfer skip it because its flags can no longer be established safely.
+
+### Refresh policies
+
+- `INDEPENDENT`: each successful application gets `applicationTick + durationTicks`; older instances never refresh.
+- `REFRESH_ALL`: each application renews every existing instance to `currentTick + durationTicks`, then adds one new
+  instance if below the maximum.
+- `REFRESH_ONE`: applications add normally until the definition is full. At maximum, exactly the earliest-expiring
+  instance is renewed. Ties use application tick and then stack-instance UUID, so map iteration order is irrelevant.
+- `FIXED`: the first instance establishes the group's expiry. Later instances may fill remaining capacity but inherit
+  that original expiry. Nothing extends the lifetime until the group expires or is explicitly removed and re-added.
+
+Expiration occurs when `expirationTick <= currentServerTick`. Containers cache their next expiry, so entities without
+an attachment or without a due expiry avoid scanning stack state or content definitions on tick.
+
+### Transfer and persistence boundary
+
+Transfer moves exactly one deterministic earliest-expiring instance and preserves its definition revision, original
+source, credited player, application tick, and remaining duration. The transfer actor and tick are recorded
+separately. A transfer into an existing `FIXED` group is capped by that recipient group's earlier deadline, preventing
+transfer from extending a fixed lifetime. Steal selection considers only currently resolved, transferable positive
+definitions with recipient capacity and sorts definition IDs before selecting.
+
+Definitions marked `persistent` force instances into `PERSISTENT_ENTITY` scope. The attachment codec writes only that
+scope; ephemeral combat and instance-session stacks remain runtime-only. Player death clones copy only persistent
+instances, while non-death clones retain all runtime scopes. Full migration and broader persistence/recovery remain
+deferred.
+
+Development commands are permission-gated:
+
+- `/cosmic stack add <target> <stack-id> [count]`
+- `/cosmic stack remove <target> <stack-id> [count|all]`
+- `/cosmic stack list <target>`
+- `/cosmic stack cleanse <target> <positive|negative>`
+- `/cosmic stack steal <from> <to>`
+
+The development datapack definitions are explicitly named `development_*`; none represent canonical Bleed, Feeding
+Frenzy, Hysteria, or other gameplay balance. Stack-driven damage, movement, Luck, healing, and proc behavior remain
+deferred.

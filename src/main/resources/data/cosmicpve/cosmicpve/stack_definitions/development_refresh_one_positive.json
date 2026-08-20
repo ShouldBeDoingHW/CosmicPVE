@@ -1,0 +1,9 @@
+{
+  "polarity": "positive",
+  "maximum_stacks": 3,
+  "duration_ticks": 80,
+  "refresh_policy": "refresh_one",
+  "transferable": true,
+  "cleansable": true,
+  "persistent": false
+}
