@@ -1,8 +1,8 @@
 # CosmicPVE Development Handoff
 
-Current verified and accepted gameplay state: Steps 6A–6D. The Step 6D gameplay commit is being created as part of this accepted milestone closure; its resulting hash is recorded by the follow-up handoff commit.
+Current verified and accepted gameplay commit: `7530ab293610a8ea6c1a02b396df9539454b36bb` (`Add Aegis Rage Eagle Eye and Ancient set`). This is the accepted Steps 6A–6D baseline.
 
-Repository state at Step 6D closure: the accepted Step 6D implementation is ready for its dedicated gameplay commit. The root `assets` folder contains user-supplied Step 6E source artwork and is deliberately excluded from Step 6D.
+Repository state after Step 6D closure: clean at gameplay commit `7530ab293610a8ea6c1a02b396df9539454b36bb`, apart from the deliberately untracked root `assets` folder containing user-supplied Step 6E source artwork and this documentation follow-up.
 
 Last handoff update: 2026-08-20
 
