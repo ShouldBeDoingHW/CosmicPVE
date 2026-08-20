@@ -1,6 +1,7 @@
 package com.cosmicpve.combat.debug;
 
 import com.cosmicpve.combat.api.CombatResult;
+import com.cosmicpve.combat.execution.ExecutionResult;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -8,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public final class CombatTraceService {
     private final Set<UUID> enabledPlayers = ConcurrentHashMap.newKeySet();
-    private final ConcurrentHashMap<UUID, CombatResult> lastResults = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<UUID, CombatTraceEntry> lastResults = new ConcurrentHashMap<>();
 
     public void setEnabled(UUID playerId, boolean enabled) {
         if (enabled) {
@@ -28,20 +29,36 @@ public final class CombatTraceService {
         }
         result.context().attributedPlayerId()
                 .filter(enabledPlayers::contains)
-                .ifPresent(playerId -> lastResults.put(playerId, result));
+                .ifPresent(playerId -> lastResults.put(playerId, new DamageTraceEntry(result)));
     }
 
-    public Optional<CombatResult> last(UUID playerId) {
+    public void recordExecution(ExecutionResult result) {
+        result.attributedPlayerId().filter(enabledPlayers::contains)
+                .ifPresent(playerId -> lastResults.put(playerId, new ExecutionTraceEntry(result)));
+    }
+
+    public Optional<CombatTraceEntry> last(UUID playerId) {
         return Optional.ofNullable(lastResults.get(playerId));
     }
 
-    public String format(CombatResult result) {
+    public String format(CombatTraceEntry entry) {
+        return switch (entry) {
+            case DamageTraceEntry damage -> formatDamage(damage.result());
+            case ExecutionTraceEntry execution -> formatExecution(execution.result());
+        };
+    }
+
+    private String formatDamage(CombatResult result) {
         var context = result.context();
         var breakdown = result.breakdown();
         String parent = context.parentSequenceId().isPresent()
                 ? Long.toString(context.parentSequenceId().getAsLong())
                 : "none";
-        return "sequence=" + context.attackSequenceId()
+        String enchantments = context.effectiveEnchantments().entries().stream()
+                .map(enchantment -> enchantment.id() + "=" + enchantment.level() + enchantment.provenance())
+                .collect(java.util.stream.Collectors.joining(",", "[", "]"));
+        return "type=" + context.channel()
+                + " sequence=" + context.attackSequenceId()
                 + " parent=" + parent
                 + " category=" + context.category()
                 + " policy=" + context.recursionPolicy()
@@ -52,7 +69,18 @@ public final class CombatTraceService {
                 + " incomingProduct=" + formatNumber(breakdown.incomingMultiplierProduct())
                 + " ordinaryBeforeVanilla=" + formatNumber(breakdown.finalOrdinaryDamage())
                 + " committedHealth=" + formatNumber(result.committedHealthDamage())
-                + " queuedTrue=" + formatNumber(result.totalQueuedTrueDamage());
+                + " queuedTrue=" + formatNumber(result.totalQueuedTrueDamage())
+                + " enchantments=" + enchantments;
+    }
+
+    private String formatExecution(ExecutionResult result) {
+        String parent = result.parentSequenceId().isPresent()
+                ? Long.toString(result.parentSequenceId().getAsLong()) : "none";
+        return "type=EXECUTION sequence=" + result.sequenceId()
+                + " parent=" + parent
+                + " cause=" + result.cause().id()
+                + " target=" + result.targetId()
+                + " executed=" + result.executed();
     }
 
     private static String formatNumber(double value) {

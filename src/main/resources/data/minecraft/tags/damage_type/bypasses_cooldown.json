@@ -1,0 +1,4 @@
+{
+  "replace": false,
+  "values": ["cosmicpve:true_damage", "cosmicpve:mitigated_true_damage"]
+}

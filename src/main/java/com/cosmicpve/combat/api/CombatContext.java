@@ -1,5 +1,6 @@
 package com.cosmicpve.combat.api;
 
+import com.cosmicpve.equipment.enchantment.EffectiveEnchantments;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Optional;
@@ -23,6 +24,7 @@ public record CombatContext(
         DamageChannel channel,
         Set<CombatFlag> flags,
         WeaponSnapshot weaponSnapshot,
+        EffectiveEnchantments effectiveEnchantments,
         long attackSequenceId,
         OptionalLong parentSequenceId,
         RecursionPolicy recursionPolicy) {
@@ -33,6 +35,7 @@ public record CombatContext(
         channel = Objects.requireNonNull(channel);
         flags = Set.copyOf(flags);
         weaponSnapshot = Objects.requireNonNull(weaponSnapshot);
+        effectiveEnchantments = Objects.requireNonNull(effectiveEnchantments);
         if (attackSequenceId <= 0) {
             throw new IllegalArgumentException("Attack sequence IDs must be positive");
         }
@@ -58,8 +61,16 @@ public record CombatContext(
                 childChannel,
                 childFlags,
                 weaponSnapshot,
+                effectiveEnchantments,
                 childSequence.id(),
                 childSequence.parentId(),
                 childPolicy);
+    }
+
+    public CombatContext withDamageSource(@Nullable DamageSource childDamageSource) {
+        return new CombatContext(
+                directSource, creditedSource, attacker, target, attributedPlayerId, childDamageSource,
+                category, channel, flags, weaponSnapshot, effectiveEnchantments,
+                attackSequenceId, parentSequenceId, recursionPolicy);
     }
 }

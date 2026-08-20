@@ -13,6 +13,7 @@ import com.cosmicpve.combat.api.DamageChannel;
 import com.cosmicpve.combat.api.RecursionPolicy;
 import com.cosmicpve.combat.api.TrueDamagePacket;
 import com.cosmicpve.combat.api.WeaponSnapshot;
+import com.cosmicpve.equipment.enchantment.EffectiveEnchantments;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalLong;
@@ -88,6 +89,7 @@ class CombatEngineTest {
                 DamageChannel.ORDINARY,
                 Set.of(),
                 WeaponSnapshot.empty(),
+                EffectiveEnchantments.EMPTY,
                 1L,
                 OptionalLong.empty(),
                 RecursionPolicy.NORMAL);
