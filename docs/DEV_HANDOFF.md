@@ -1,8 +1,8 @@
 # CosmicPVE Development Handoff
 
-Current verified and accepted gameplay commit: `b5148760420b658cd7006a73b230199f9311bc73` (`Add equipment lore Molten and Nutrition`). This is the accepted Steps 6A–6F baseline.
+Current verified and accepted gameplay commit: `3cda6081572024c2223db5016f3725f8da32caf1` (`Add Heroic equipment and passive enchantments`). This is the accepted Steps 6A–6G baseline.
 
-Repository state after Step 6F closure: tracked gameplay is clean at `b5148760420b658cd7006a73b230199f9311bc73`, apart from the canonical documentation follow-up and deliberately untracked root `assets` source-art folder.
+Repository state after Step 6G closure: tracked gameplay is clean at `3cda6081572024c2223db5016f3725f8da32caf1`, apart from the canonical documentation follow-up and deliberately untracked root `assets` source-art folder.
 
 Last handoff update: 2026-08-20
 
@@ -118,6 +118,14 @@ Standardized every Cosmic Book through `CosmicEnchantmentSpec` metadata and loca
 
 Implemented real Unique enchantments `cosmicpve:molten` IV and `cosmicpve:nutrition` III, bringing the total to exactly 17. Molten is valid on any armor. A committed positive-red-health hit creates at most one defensive candidate when a meaningful living attacker exists; its effective level is the highest equipped Molten level, never the sum, and its Luck-modified base chance is 2% per level. Activation ignites the responsible attributed living attacker for three seconds. Nutrition is leggings-only and runs once after completed food consumption without ProcEngine RNG: Minecraft `FoodData.eat` adds exactly +1 hunger and +0.25 saturation per level while retaining vanilla caps. Both use real Minecraft enchantment data, generic Books, capacity, Black Scroll eligibility, Transmog sorting, and remain outside vanilla acquisition pools.
 
+### Step 6G — COMPLETE; MANUALLY VERIFIED AND ACCEPTED
+
+Implemented one versioned `HEROIC` item component and one generic Heroic Crystal. A server-authoritative drag/drop transaction applies once to armor, pickaxes, or shovels, mutating the original stack in place and preserving wear and unrelated components. It raises the stack's real `MAX_DAMAGE` by exactly 250 while leaving its damage value unchanged. Heroic armor retains its registry item and defensive statistics but uses leather equipment/item presentation; Heroic pickaxes and shovels retain their underlying mining behavior but use gold-style item presentation. Heroic and armor-set identities compose in either application order. Heroic Dungeon Portal behavior remains designed and unimplemented.
+
+Implemented real `cosmicpve:glowing` I (Simple, helmet) and `cosmicpve:obsidianshield` I (Ultimate, leggings), bringing the real enchantment count to 19. One LivingEntity-compatible equipped-effect service maintains hidden short Night Vision or Fire Resistance leases and refreshes only near expiry. It tracks only effects it created; an external potion/effect that supersedes the lease is not removed when equipment changes. Both enchantments automatically use generic Books, capacity, Black Scroll eligibility, Transmog, and the standardized metadata-driven lore.
+
+Expanded the armor-set inventory tint item-definition path to leather, chainmail, iron, gold, diamond, and netherite armor, including trim variants. Heroic leather-style armor uses the same tint source, so set identity remains visible in item UIs. Maui's Hook now mirrors the held model's X scale in first/third-person and right/left-hand transforms so its curved end faces away from the wielder; the inventory artwork and gameplay are unchanged.
+
 ## 3. Current Real Enchantments
 
 These are registered through Minecraft's enchantment infrastructure, use actual enchantment data on the item, and are not present in normal enchanting-table, librarian, random-loot, random-equipment, or mob-equipment acquisition pools.
@@ -143,10 +151,12 @@ These are registered through Minecraft's enchantment infrastructure, use actual 
 | `cosmicpve:rage` | VI | Sword/axe | Legendary | Adds exactly 5% ordinary outgoing damage when this exact target damaged the attacker at least three committed positive-red-health times within the rolling `(4 + level)`-second window. History is not consumed. |
 | `cosmicpve:molten` | IV | Any armor | Unique | On committed positive-red-health damage taken, has 2% per highest equipped Molten level to ignite the responsible living attacker for 3 seconds. Multiple pieces produce one candidate using the highest level, not summed levels. |
 | `cosmicpve:nutrition` | III | Leggings | Unique | Once a food item is fully consumed, adds +1 hunger and +0.25 saturation per level through vanilla bounded food state. It is deterministic and does not use Luck or RNG. |
+| `cosmicpve:glowing` | I | Helmet | Simple | Maintains subtle Night Vision while actively equipped without deleting externally supplied Night Vision. |
+| `cosmicpve:obsidianshield` | I | Leggings | Ultimate | Maintains subtle Fire Resistance while actively equipped without deleting externally supplied Fire Resistance. |
 
 ### DESIGNED BUT NOT IMPLEMENTED
 
-The design also names Armored, Auto Smelt, Death Pact, Divine Immolation, Experience, Gears, Glowing, Hero Killer, Mortal Coil, Obsidianshield, Oxygenate, Phoenix, Self Destruct, and Virus. None currently has a registered real enchantment or runtime behavior. There are exactly 17 implemented real Cosmic enchantments. No Mastery enchantment is implemented. Do not add behavior assumptions beyond `Cosmic_Design.md`.
+The design also names Armored, Auto Smelt, Death Pact, Divine Immolation, Experience, Gears, Hero Killer, Mortal Coil, Oxygenate, Phoenix, Self Destruct, and Virus. None currently has a registered real enchantment or runtime behavior. There are exactly 19 implemented real Cosmic enchantments. No Mastery enchantment is implemented. Do not add behavior assumptions beyond `Cosmic_Design.md`.
 
 ## 4. Critical Combat Semantics
 
@@ -331,12 +341,12 @@ This Invasion rule supersedes older design text that described Invasions as keep
 
 The following remain future content or infrastructure:
 
-- all enchantments beyond the 17 listed above, including every Mastery enchantment
+- all enchantments beyond the 19 listed above, including every Mastery enchantment
 - Dimensional Traveler, Engineer, Ranger, and Yjiki armor sets
 - masks and Multi-Masks
 - Whisk Taker, Spinal Tap, Party Blade, and Doomsday Machete weapon skins. Boosted Chainsaw, Maui's Hook, and Stormbringer are implemented. The settled inventory UX is drag and left-click to apply; empty-cursor inventory right-click removes and returns the skin item. This supersedes older design text that reverses those gestures.
 - Feeding Frenzy and Hysteria runtime behavior
-- Heroic equipment/portals and repair semantics
+- Heroic Dungeon Portals and future Heroic repair-specific systems; armor/pickaxe/shovel Heroic conversion is implemented
 - armor-set signature weapons
 - G-Kits, M-Kits, unlocks, and refreshers
 - Trials, Dungeons, Invasions, bosses, rooms, portals, keys, scaling runtime, protection, and recovery
@@ -377,6 +387,7 @@ The following are confirmed in current source and permission-gated under `/cosmi
 - `/cosmic enchant orb give <player> <armor|weapon> <success> <destroy>`
 - `/cosmic enchant orb give-random <player> <armor|weapon>`
 - `/cosmic skin give <player> <skin-id>`
+- `/cosmic heroic crystal give <player>`
 - `/cosmic food show`
 - `/cosmic food set <hunger> <saturation>`
 - `/feed`, `/heal`, and `/restore` are separate permission-gated development convenience commands.
@@ -388,7 +399,6 @@ Commands call gameplay services or create the same typed components used by game
 - **Portal rules:** placement validation, owner/party authority, protected footprint, expiry, chunk-loading, collision, joining, and safe fallback return behavior require a bounded specification.
 - **Trial scaling after departures:** architecture freezes initial party size so boss maximum health does not shrink, but detailed remaining objective/mob scaling and late-disconnect behavior still need acceptance criteria.
 - **Crash-safe Trial inventory persistence:** the exact NeoForge durability boundary must be prototyped. Marking data dirty is not proof of a crash-durable snapshot, and global saves on every transition are explicitly rejected.
-- **Heroic conversion:** cosmetic leather/gold presentation, maximum/current durability adjustment, damage state, repair, and component preservation need exact rules and prototypes.
 - **Loot tables:** several current design tables are incomplete or malformed and contain ambiguous duplicates. Validation must distinguish intentional duplicate weights from mistakes.
 - **Attribute units/caps:** future health, movement, incoming damage, cooldown, and stacked modifier caps/floors need normalization before large content expansion.
 - **Pheonix/Phoenix identity and death order:** settle the stable spelling/ID and verify pinned NeoForge kill/death-prevention event ordering before implementing it.
@@ -399,7 +409,7 @@ The final post-Orb capacity is no longer unresolved for current target classes: 
 
 ## 16. Current Next Milestone
 
-The next bounded milestone is Step 6G: Heroic equipment for armor/pickaxes/shovels, Glowing I, Obsidianshield I, the armor-set inventory tint correction, and Maui's Hook held-orientation correction. Heroic Dungeon Portals and all adjacent content remain deferred.
+The next bounded milestone is Step 6H: the first reusable custom hostile-mob foundation, both Space Pirate variants, Oxygenate II, the Simple rarity color correction, and the Ancient armor-set color correction. Conquest Chest, Abandoned Spaceship, natural spawning, and adjacent progression content remain deferred.
 
 ## 17. Development Workflow
 
@@ -415,6 +425,16 @@ The next bounded milestone is Step 6G: Heroic equipment for armor/pickaxes/shove
 Preserve unrelated dirty changes. Never change pinned versions as a side effect of gameplay work. Prefer service-level rules and typed data over one-off event logic, and keep client-only classes isolated from dedicated-server loading.
 
 ## 18. Verification Snapshot
+
+For the accepted Step 6G implementation:
+
+- `gradlew.bat build` succeeded; 148 automated tests passed with 0 failures and 0 errors.
+- Every main-resource JSON file decoded successfully and `git diff --check` reported no whitespace errors.
+- Dedicated-server startup published current content and reached `Done` on NeoForge 21.11.45.
+- Client startup completed resource reload, sound initialization, armor-trim and item-atlas creation without missing-model, malformed-resource, or CosmicPVE loading errors.
+- Pinned environment values remain unchanged.
+- The user manually verified the Heroic equipment flow, Glowing, Obsidianshield, armor-set inventory tinting, and Maui's Hook orientation and accepted Step 6G.
+- Step 6G gameplay is committed at `3cda6081572024c2223db5016f3725f8da32caf1` (`Add Heroic equipment and passive enchantments`).
 
 For the accepted Step 6F implementation:
 

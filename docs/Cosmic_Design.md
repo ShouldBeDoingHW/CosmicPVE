@@ -392,7 +392,9 @@ Heroic Abandoned Spaceship Lootbag:
 
 Conquest Chests are periodic Overworld events that allow players to gain loot. One Conquest Chest spawns every 7th Minecraft day. Its X and Z coordinates are selected independently within the square from \-5,000 to \+5,000 on each axis. Each Conquest Chest must be mined to obtain the loot held inside and takes 1.5× as long to mine as obsidian. Upon the first player interaction with the chest, 3-5 Space Pirates spawn in a 5x5 area around it. Players cannot break or place blocks aside from the Conquest Chest itself within the existing 20x20 protected area around the chest. If no player has interacted with the chest within 30 minutes of its spawn, it despawns. Once successfully broken, the Conquest Chest rolls 3 items from its loot table.
 
-Spawning rules: After X/Z selection, the chest must be placed at a valid surface position rather than underground or embedded inside terrain. A valid placement must have at least 2 of the chest block's 6 faces adjacent to air. If a selected position does not satisfy these rules, choose another valid candidate rather than forcing the placement. 
+Spawning rules: After X/Z selection, the chest must be placed at a valid surface position rather than underground or embedded inside terrain. A valid placement must have at least 2 of the chest block's 6 faces adjacent to air. If a selected position does not satisfy these rules, choose another valid candidate rather than forcing the placement. After spawning, and subsequently every 5 minutes while the chest is still active, a global chat message is sent that says “Look alive cosmonaut\! A Conquest Chest has spawned at (coordinates) and will disappear in (minutes remaining on chest) minutes\!”
+
+Conquest Chests can also be summoned with a player right clicking a “Conquest Chest Flare” which spawns a conquest chest within \+/- 100 blocks in either direction from their location in a valid spawn.
 
 Loot when broken: 
 
@@ -412,6 +414,8 @@ Loot when broken:
 | 65% Black Scroll | 6 | 1 |
 | Repair Scroll | 10 | 1 |
 | Gkit Refresher | 4 | 1 |
+| Legendary Space Chest | 8 | 1 |
+| Ultimate Space Chest | 10 | 1 |
 
 # Misc Items
 
@@ -422,6 +426,8 @@ Heroic Crystal \- Can be applied one time maximum to dungeon portals, pickaxes a
 Kit Refreshers- Consume to renew all of your available kits, allowing you to claim them.Comes in “Mkit”, “Gkit”, or “Super” variants, which allow you to refresh your GKits, Mkits, or both respectively. Item texture is the item quartz. 
 
 Dungeon Key Ring \- Item that once right clicked drops 1 of each type of dungeon key into the player’s inventory. Cannot be opened if there isn’t inventory space. 
+
+Conquest Chest Flare \- spawns a conquest chest in a valid spawn location within \+/- 100 blocks in either direction from the player’s current location. Uses a redstone torch base model. Description text and name text is \#BF0000. 
 
 # Masks / Skins
 
@@ -494,9 +500,31 @@ Transmog Scrolls use a Paper presentation and affect tooltip presentation only. 
 
 For destructive item-application systems, the standard feedback language is: successful application plays the vanilla level-up sound; a failed application plays the passive lava sound; and the anvil-breaking sound is added only when the target item is actually destroyed.
 
+# Mobs
+
+**SPACE PIRATES**
+
+There are two variants of space pirates, and everything will be formatted for Space Pirates in (variant 1/variant 2\) fashion. If an aspect of the mob is laid out and only 1 concrete detail is mentioned, it is shared between the two variants.
+
+Appearance: Zombified piglin/wither skeleton model. Both are 1.35 size.
+
+Armor: No default armor points or toughness. Randomly spawns in with a full set of armor that is randomized between iron and diamond. Each piece has protection randomized between 1 and 4, creating a large variance of armor each mob can have.
+
+Health: 25/35
+
+Base Attack Damage: 0 
+
+Held Item: Diamond Axe/Iron Sword
+
+Held Item Modifiers: Guaranteed to have insanity 8, 50% chance of having pummel 3/Random Poison enchant 1-3, 25% chance to have Execute 1-5.
+
+Custom attacks/abilities: N/A
+
 # Cosmic Crates
 
-Cosmic Crates are apex reward crates with four variants: Spring, Summer, Fall, and Winter. A crate becomes openable only by combining a matching Left Half and Right Half of the same season. Memory Chests award one random Cosmic Crate half from any season. Each seasonal crate is intended to contain some of the strongest loot in the game, including two season-exclusive utility custom blocks and two season-exclusive weapon skins, alongside powerful general rewards; seasonal Mastery enchantments may also be tied to individual crates. Custom blocks should provide utility rather than being purely decorative. The detailed seasonal tables below are active design material, but they are not yet implementation-ready balance and are expected to change as prerequisite systems are built and balancing continues.
+Cosmic Crates are apex reward crates with four variants: Spring, Summer, Fall, and Winter. A crate becomes openable only by combining a matching Left Half and Right Half of the same season. 
+
+Each seasonal crate is intended to contain some of the strongest loot in the game, including two season-exclusive utility custom blocks and two season-exclusive weapon skins, alongside powerful general rewards; seasonal Mastery enchantments may also be tied to individual crates. Custom blocks should provide utility rather than being purely decorative. The detailed seasonal tables below are active design material, but they are not yet implementation-ready balance and are expected to change as prerequisite systems are built and balancing continues.
 
 A Secret Weapon Cache awards one random signature weapon associated with an armor set. Signature set weapons deal a flat \+5% damage while the wielder has the matching full armor-set bonus active (for example, Phantom Scythe, Yeti Maul, Ranger Bow).
 
@@ -548,4 +576,87 @@ Maxed out Trial Portal
 
 Potted Cactus: Generates 1 cactus every 90s, stores up to 9 stacks at a time. Hoppers/chests do not work on it.
 
-Sand Castle: Each Sand Castle that you’ve placed gives you a \+1% chance to gain a bonus item from the Advanced Invasion loot table. Up to a maximum of \+10%. Cannot gain more than 1 bonus loot item, and it only rolls if the invasion is completely won, including the final boss.  
+Sand Castle: Each Sand Castle that you’ve placed gives you a \+1% chance to gain a bonus item from the Advanced Invasion loot table. Up to a maximum of \+10%. Cannot gain more than 1 bonus loot item, and it only rolls if the invasion is completely won, including the final boss.
+
+# Space Chests
+
+Space Chests are medium/minor loot bags that contain useful though tame loot to help the player advance through the world. Space Chests are mainly dropped via bosses, though there are alternative methods of obtaining. There are also Memory Chests, a variant of Space Chests that contain a single drop of potentially immense value. 
+
+Space Chests come in 3 main rarities: Ultimate, Legendary, and Mastery. Each variant contains 5 items of loot from their respective loot table. 
+
+Space Chests use a default chest texture. Memory chests use an ender chest texture. Right clicking the Space Chest will open a menu to select your 5 loot items. Memory chests have no menu and simply pop in your hand into whatever you roll.
+
+Ultimate Space Chest Loot:
+
+| Loot Item | Weight | Quantity |
+| :---- | :---- | :---- |
+| Ultimate Enchantment Book | 10 | 1 |
+| Legendary Enchantment Book | 5 | 1 |
+| Elite Enchantment Book | 10 | 2 |
+| 50% Blackscroll | 10 | 1 |
+| Pig Spawner | 4 | 1 |
+| Sheep Spawner | 4 | 1 |
+| Golden Apple | 10 | 16 |
+| Repair Scroll | 12 | 1 |
+| Iron Armor Piece with 1-2 max level Ultimate or lower valid enchantment | 5 | 1 |
+| Transmog Scroll | 9 | 1 |
+| 50k Banknote | 10 | 1 |
+| 75k Banknote | 5 | 1 |
+
+Legendary space chest loot: 
+
+| Loot Item | Weight | Quantity |
+| :---- | :---- | :---- |
+| Ultimate Enchantment Book | 10 | 2 |
+| Legendary Enchantment Book | 10 | 1 |
+| White Scroll | 10 | 1 |
+| 50% Blackscroll | 10 | 1 |
+| 75% Blackscroll | 8 | 1 |
+| Creeper Spawner | 4 | 1 |
+| Spider Spawner | 6 | 1 |
+| Zombie Spawner | 5 | 1 |
+| Repair Scroll | 10 | 1 |
+| Iron Armor Piece with 1-2 max level Legendary or lower valid enchantment | 5 | 1 |
+| 100k Banknote | 10 | 1 |
+| 250k Banknote | 5 | 1 |
+| 50% Armor Orb | 8 | 1 |
+| 50% Weapon Orb | 8 | 1 |
+
+Mastery Space Chest Loot: 
+
+| Loot Item | Weight | Quantity |
+| :---- | :---- | :---- |
+| Ultimate Enchantment Book | 10 | 2 |
+| Legendary Enchantment Book | 10 | 2 |
+| Mastery Enchantment Book | 10 | 1 |
+| 60% Blackscroll | 10 | 1 |
+| 80% Blackscroll | 8 | 1 |
+| Blaze Spawner | 4 | 1 |
+| Iron Golem Spawner | 3 | 1 |
+| Creeper Spawner | 5 | 1 |
+| Repair Scroll | 10 | 2 |
+| Iron Armor Piece with 2-3 max level Legendary or lower valid enchantment | 5 | 1 |
+| 300k Banknote | 12 | 1 |
+| 500k Banknote | 6 | 1 |
+| 75% Weapon Orb | 8 | 1 |
+| 75% Armor Orb | 8 | 1 |
+
+Memory Chest Loot Table:
+
+| Loot Item | Weight | Quantity |
+| :---- | :---- | :---- |
+| Ultimate Space Chest | 30 | 1 |
+| Legendary Space Chest | 20 | 1 |
+| Mastery Space Chest | 12 | 1 |
+| Spring Cosmic Crate Left Half | 4 | 1 |
+| Spring Cosmic Crate Right Half | 4 | 1 |
+| Summer Cosmic Crate Left Half | 4 | 1 |
+| Summer Cosmic Crate Right Half | 4 | 1 |
+| Fall Cosmic Crate Left Half | 4 | 1 |
+| Fall Cosmic Crate Right Half | 4 | 1 |
+| Winter Cosmic Crate Left Half | 4 | 1 |
+| Winter Cosmic Crate Right Half | 4 | 1 |
+
+The animation for non memory space chests works as follows:
+
+An inventory filled with 27 glass panes is opened. The color of the glass panes is either Yellow, Orange, or Red based on the rarity of the chest being opened. The player can click on 5 of these panes, turning them white. They cannot click the same pane twice. Each click plays the leather armor equip sound. Once 5 panes have turned white, the rest of the colored panes are revealed from left to right, top to bottom, over the span of 4 seconds to show the loot they did not earn, and then the egg being laid sound is played, and everything disappears from the menu except for the 5 white panes. The player can then click on each pane to reveal one of the pieces of loot from the loot table. Duplicates are allowed. If the player closes the menu before reaching 5 white panes, the chest is returned to them, if they have turned 5 panes white when the close, regardless of where the animation is, exiting out will simply give them the loot. If they do not have inventory space, the loot is dropped on the ground.
