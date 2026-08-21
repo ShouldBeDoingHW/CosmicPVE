@@ -9,6 +9,7 @@ import com.cosmicpve.data.component.EnchantmentOrbData;
 import com.cosmicpve.data.component.BlackScrollData;
 import com.cosmicpve.data.component.WeaponSkinIdentity;
 import com.cosmicpve.data.component.WeaponSkinItemData;
+import com.cosmicpve.data.component.HeroicIdentity;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -60,6 +61,11 @@ public final class ModDataComponents {
             COMPONENTS.registerComponentType("weapon_skin_item",
                     builder -> builder.persistent(WeaponSkinItemData.CODEC)
                             .networkSynchronized(ByteBufCodecs.fromCodecWithRegistries(WeaponSkinItemData.CODEC)).cacheEncoding());
+
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<HeroicIdentity>> HEROIC =
+            COMPONENTS.registerComponentType("heroic",
+                    builder -> builder.persistent(HeroicIdentity.CODEC)
+                            .networkSynchronized(ByteBufCodecs.fromCodecWithRegistries(HeroicIdentity.CODEC)).cacheEncoding());
 
     private ModDataComponents() {}
 

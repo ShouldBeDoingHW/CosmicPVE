@@ -41,10 +41,14 @@ public final class CosmicEnchantmentSpecs {
             ModEnchantments.MOLTEN.identifier(), 4, CosmicEnchantmentTier.UNIQUE, "any_armor");
     public static final CosmicEnchantmentSpec NUTRITION = new CosmicEnchantmentSpec(
             ModEnchantments.NUTRITION.identifier(), 3, CosmicEnchantmentTier.UNIQUE, "leggings");
+    public static final CosmicEnchantmentSpec GLOWING = new CosmicEnchantmentSpec(
+            ModEnchantments.GLOWING.identifier(), 1, CosmicEnchantmentTier.SIMPLE, "helmet");
+    public static final CosmicEnchantmentSpec OBSIDIANSHIELD = new CosmicEnchantmentSpec(
+            ModEnchantments.OBSIDIANSHIELD.identifier(), 1, CosmicEnchantmentTier.ULTIMATE, "leggings");
 
     public static final List<CosmicEnchantmentSpec> ALL =
             List.of(EXECUTE, ANGELIC, LIGHTNING, ENDER_SHIFT, DOUBLESTRIKE, BLEED, LUCK, POISON, PUMMEL,
-                    GREATSWORD, INSANITY, VENOM, AEGIS, EAGLE_EYE, RAGE, MOLTEN, NUTRITION);
+                    GREATSWORD, INSANITY, VENOM, AEGIS, EAGLE_EYE, RAGE, MOLTEN, NUTRITION, GLOWING, OBSIDIANSHIELD);
 
     private CosmicEnchantmentSpecs() {}
 

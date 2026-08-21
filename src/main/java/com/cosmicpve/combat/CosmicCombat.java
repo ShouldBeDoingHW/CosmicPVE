@@ -50,6 +50,9 @@ public final class CosmicCombat {
     private static final DamageAttributionService ATTRIBUTION = new DamageAttributionService();
     private static final CombatTraceService TRACES = new CombatTraceService();
     private static final EffectiveEnchantmentsResolver ENCHANTMENTS = new EffectiveEnchantmentsResolver();
+    private static final com.cosmicpve.combat.enchantment.EquippedPersistentEffectEventBridge PERSISTENT_EFFECTS =
+            new com.cosmicpve.combat.enchantment.EquippedPersistentEffectEventBridge(
+                    new com.cosmicpve.combat.enchantment.EquippedPersistentEffectService(ENCHANTMENTS));
     private static final CooldownService COOLDOWNS = new CooldownService();
     private static final ProcTraceService PROC_TRACES = new ProcTraceService();
     private static final ProcCandidateSourceRegistry PROC_SOURCES = new ProcCandidateSourceRegistry();
@@ -116,6 +119,8 @@ public final class CosmicCombat {
         NeoForge.EVENT_BUS.addListener(STACK_EVENTS::onPlayerClone);
         NeoForge.EVENT_BUS.addListener(ARMOR_SET_EVENTS::onPlayerTick);
         NeoForge.EVENT_BUS.addListener(ARMOR_SET_EVENTS::onEntityTick);
+        NeoForge.EVENT_BUS.addListener(PERSISTENT_EFFECTS::onPlayerTick);
+        NeoForge.EVENT_BUS.addListener(PERSISTENT_EFFECTS::onEntityTick);
         NeoForge.EVENT_BUS.addListener(RECENT_COMBAT_MEMORY_EVENTS::onServerTick);
     }
 

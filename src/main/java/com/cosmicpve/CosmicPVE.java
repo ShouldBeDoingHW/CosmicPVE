@@ -12,6 +12,7 @@ import com.cosmicpve.equipment.armor.ArmorCrystalEventBridge;
 import com.cosmicpve.equipment.EquipmentTooltipService;
 import com.cosmicpve.equipment.enchantment.EnchantingEventBridge;
 import com.cosmicpve.equipment.skin.WeaponSkinEventBridge;
+import com.cosmicpve.equipment.heroic.HeroicCrystalEventBridge;
 import com.mojang.logging.LogUtils;
 import net.minecraft.resources.Identifier;
 import net.neoforged.bus.api.IEventBus;
@@ -41,6 +42,8 @@ public final class CosmicPVE {
         NeoForge.EVENT_BUS.addListener(enchanting::onStacked);
         var skins = new WeaponSkinEventBridge();
         NeoForge.EVENT_BUS.addListener(skins::onStacked);
+        var heroic = new HeroicCrystalEventBridge();
+        NeoForge.EVENT_BUS.addListener(heroic::onStacked);
     }
 
     public static Identifier id(String path) {

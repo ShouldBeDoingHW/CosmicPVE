@@ -16,6 +16,12 @@ import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 public final class EquipmentTooltipService {
     public void onTooltip(ItemTooltipEvent event) {
         var stack = event.getItemStack();
+        if (stack.is(com.cosmicpve.registry.ModItems.HEROIC_CRYSTAL.get())) {
+            event.getToolTip().add(Component.translatable("tooltip.cosmicpve.heroic_crystal.purpose"));
+            event.getToolTip().add(Component.translatable("tooltip.cosmicpve.heroic_crystal.instruction"));
+        }
+        if (stack.has(ModDataComponents.HEROIC.get()))
+            event.getToolTip().add(Component.translatable("tooltip.cosmicpve.heroic").withColor(0xAA55FF));
         var identity = stack.get(ModDataComponents.ARMOR_SET_ID.get());
         if (identity != null) {
             event.getToolTip().add(Component.empty());

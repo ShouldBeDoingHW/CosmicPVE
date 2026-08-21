@@ -46,6 +46,9 @@ public final class ModItems {
     public static final DeferredItem<WeaponSkinItem> WEAPON_SKIN = ITEMS.registerItem(
             "weapon_skin", WeaponSkinItem::new, properties -> properties.stacksTo(1));
 
+    public static final DeferredItem<Item> HEROIC_CRYSTAL = ITEMS.registerSimpleItem(
+            "heroic_crystal", properties -> properties.stacksTo(64));
+
     private ModItems() {}
 
     public static void register(IEventBus modBus) {
