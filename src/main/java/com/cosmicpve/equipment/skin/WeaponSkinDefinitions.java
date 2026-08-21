@@ -19,11 +19,16 @@ public final class WeaponSkinDefinitions {
     public static final Identifier STORMBRINGER = CosmicPVE.id("stormbringer");
 
     private static final Map<Identifier, WeaponSkinDefinition> DEFINITIONS = List.of(
-            definition(BOOSTED_CHAINSAW, WeaponSkinDefinition.WeaponKind.AXE,
+            definition(BOOSTED_CHAINSAW, 0xCCA00A, WeaponSkinDefinition.WeaponKind.AXE,
+                    List.of(Component.translatable("weapon_skin.cosmicpve.boosted_chainsaw.effect")),
                     List.of(new VirtualEnchantmentGrant(
                             ModEnchantments.DOUBLESTRIKE.identifier(), 3, BOOSTED_CHAINSAW))),
-            definition(MAUIS_HOOK, WeaponSkinDefinition.WeaponKind.SWORD, List.of()),
-            definition(STORMBRINGER, WeaponSkinDefinition.WeaponKind.AXE, List.of())
+            definition(MAUIS_HOOK, 0x404242, WeaponSkinDefinition.WeaponKind.SWORD,
+                    List.of(Component.translatable("weapon_skin.cosmicpve.mauis_hook.effect.damage"),
+                            Component.translatable("weapon_skin.cosmicpve.mauis_hook.effect.steal")), List.of()),
+            definition(STORMBRINGER, 0x224B57, WeaponSkinDefinition.WeaponKind.AXE,
+                    List.of(Component.translatable("weapon_skin.cosmicpve.stormbringer.effect.lightning"),
+                            Component.translatable("weapon_skin.cosmicpve.stormbringer.effect.defense")), List.of())
     ).stream().collect(Collectors.toUnmodifiableMap(WeaponSkinDefinition::id, Function.identity()));
 
     private WeaponSkinDefinitions() {}
@@ -37,9 +42,10 @@ public final class WeaponSkinDefinitions {
     }
 
     private static WeaponSkinDefinition definition(
-            Identifier id, WeaponSkinDefinition.WeaponKind kind, List<VirtualEnchantmentGrant> grants) {
+            Identifier id, int nameColor, WeaponSkinDefinition.WeaponKind kind,
+            List<Component> effectDescription, List<VirtualEnchantmentGrant> grants) {
         return new WeaponSkinDefinition(id,
                 Component.translatable("weapon_skin." + id.getNamespace() + "." + id.getPath()),
-                kind, id, grants);
+                nameColor, effectDescription, kind, id, grants);
     }
 }

@@ -69,6 +69,31 @@ class CosmicEnchantmentBehaviorTest {
     }
 
     @Test
+    void moltenUsesHighestArmorLevelForExactlyOneTwoPercentPerLevelPlan() {
+        assertEquals(0.02, MoltenBehavior.chance(1), 1.0E-12);
+        assertEquals(0.04, MoltenBehavior.chance(2), 1.0E-12);
+        assertEquals(0.06, MoltenBehavior.chance(3), 1.0E-12);
+        assertEquals(0.08, MoltenBehavior.chance(4), 1.0E-12);
+
+        var onePiece = MoltenBehavior.planForLevels(0, 4, 0, 0).orElseThrow();
+        var fourPieces = MoltenBehavior.planForLevels(4, 4, 4, 4).orElseThrow();
+        var mixed = MoltenBehavior.planForLevels(2, 3, 0, 1).orElseThrow();
+        assertEquals(4, onePiece.effectiveLevel());
+        assertEquals(0.08, onePiece.chance(), 1.0E-12);
+        assertEquals(onePiece, fourPieces);
+        assertEquals(3, mixed.effectiveLevel());
+        assertEquals(0.06, mixed.chance(), 1.0E-12);
+        assertTrue(MoltenBehavior.planForLevels(0, 0, 0, 0).isEmpty());
+        assertEquals(3.0F, MoltenBehavior.FIRE_SECONDS);
+
+        // Intentional regression guard: Angelic sums armor while Molten selects one highest level.
+        assertEquals(16, AngelicBehavior.aggregateLevels(4, 4, 4, 4));
+        assertEquals(4, MoltenBehavior.aggregateHighest(4, 4, 4, 4));
+        assertEquals(0.096, com.cosmicpve.combat.proc.ProcChance.calculate(
+                MoltenBehavior.chance(4), List.of(LuckBehavior.chanceMultiplier(20))), 1.0E-12);
+    }
+
+    @Test
     void lightningChancePacketAndAttributionUseStandardTrueDamage() {
         assertEquals(0.05, LightningBehavior.chance(1), 1.0E-12);
         assertEquals(0.20, LightningBehavior.chance(4), 1.0E-12);

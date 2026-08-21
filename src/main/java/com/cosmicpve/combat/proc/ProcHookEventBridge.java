@@ -1,6 +1,7 @@
 package com.cosmicpve.combat.proc;
 
 import com.cosmicpve.combat.execution.ExecutionService;
+import com.cosmicpve.combat.enchantment.NutritionFoodService;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
@@ -15,10 +16,13 @@ import net.minecraft.world.entity.player.Player;
 public final class ProcHookEventBridge {
     private final ProcEventService events;
     private final ExecutionService executions;
+    private final NutritionFoodService nutrition;
 
-    public ProcHookEventBridge(ProcEventService events, ExecutionService executions) {
+    public ProcHookEventBridge(
+            ProcEventService events, ExecutionService executions, NutritionFoodService nutrition) {
         this.events = events;
         this.executions = executions;
+        this.nutrition = nutrition;
     }
 
     public void onPreDeath(LivingDeathEvent event) {
@@ -40,11 +44,13 @@ public final class ProcHookEventBridge {
     }
 
     public void onFoodEaten(LivingEntityUseItemEvent.Finish event) {
-        if (!events.hasCandidateSources() || event.getEntity().level().isClientSide()
-                || event.getItem().get(DataComponents.FOOD) == null) {
+        if (event.getEntity().level().isClientSide() || event.getItem().get(DataComponents.FOOD) == null) {
             return;
         }
-        events.dispatchRoot(ProcHook.ON_FOOD_EATEN, event.getEntity(), event.getEntity(), null);
+        if (event.getEntity() instanceof ServerPlayer player) nutrition.applyCompletedFood(player);
+        if (events.hasCandidateSources()) {
+            events.dispatchRoot(ProcHook.ON_FOOD_EATEN, event.getEntity(), event.getEntity(), null);
+        }
     }
 
     public void onPlayerTick(PlayerTickEvent.Post event) {

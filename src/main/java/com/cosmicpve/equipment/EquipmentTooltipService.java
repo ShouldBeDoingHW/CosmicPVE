@@ -1,9 +1,9 @@
 package com.cosmicpve.equipment;
 
 import com.cosmicpve.equipment.enchantment.CosmicEnchantmentSpecs;
+import com.cosmicpve.equipment.enchantment.CosmicBookLore;
 import com.cosmicpve.registry.ModDataComponents;
 import com.cosmicpve.equipment.enchantment.CustomEnchantCapacityService;
-import com.cosmicpve.equipment.enchantment.CosmicEnchantmentTier;
 import com.cosmicpve.equipment.enchantment.TransmogApplicationService;
 import com.cosmicpve.equipment.enchantment.TransmogTooltipOrdering;
 import com.cosmicpve.equipment.enchantment.ItemApplicationColors;
@@ -36,15 +36,8 @@ public final class EquipmentTooltipService {
         }
         var book = stack.get(ModDataComponents.COSMIC_ENCHANT_BOOK.get());
         if (book != null) {
-            var spec = CosmicEnchantmentSpecs.find(book.enchantmentId());
-            spec.ifPresent(value -> {
-                int color = value.tier().tooltipColor();
-                event.getToolTip().add(Component.translatable("tooltip.cosmicpve.book.rarity",
-                        Component.translatable("cosmic_tier.cosmicpve." + value.tier().name().toLowerCase())).withColor(color));
-                event.getToolTip().add(Component.translatable("tooltip.cosmicpve.book.success", book.successRate()).withColor(ItemApplicationColors.SUCCESS));
-                event.getToolTip().add(Component.translatable("tooltip.cosmicpve.book.destroy", book.destroyRate()).withColor(ItemApplicationColors.DESTROY));
-                event.getToolTip().add(Component.translatable("tooltip.cosmicpve.book.instruction"));
-            });
+            CosmicEnchantmentSpecs.find(book.enchantmentId())
+                    .ifPresent(spec -> event.getToolTip().addAll(CosmicBookLore.lines(book, spec)));
         }
         var metadata = stack.get(ModDataComponents.CUSTOM_ENCHANT_META.get());
         if (metadata != null && metadata.whiteScrollProtected()) {
@@ -79,17 +72,13 @@ public final class EquipmentTooltipService {
         }
         var skinItem = stack.get(ModDataComponents.WEAPON_SKIN_ITEM.get());
         if (skinItem != null) {
-            com.cosmicpve.equipment.skin.WeaponSkinDefinitions.find(skinItem.skinId()).ifPresent(definition -> {
-                event.getToolTip().add(Component.translatable("tooltip.cosmicpve.skin.applies_to",
-                        Component.translatable("weapon_kind.cosmicpve." + definition.weaponKind().name().toLowerCase())));
-                event.getToolTip().add(Component.translatable("tooltip.cosmicpve.skin.instruction"));
-            });
+            com.cosmicpve.equipment.skin.WeaponSkinDefinitions.find(skinItem.skinId()).ifPresent(definition ->
+                    event.getToolTip().addAll(com.cosmicpve.equipment.skin.WeaponSkinLore.applicationItem(definition)));
         }
         var activeSkin = stack.get(ModDataComponents.WEAPON_SKIN.get());
         if (activeSkin != null) {
             com.cosmicpve.equipment.skin.WeaponSkinDefinitions.find(activeSkin.skinId()).ifPresent(definition ->
-                    event.getToolTip().add(Component.translatable(
-                            "tooltip.cosmicpve.skin.active", definition.displayName()).withColor(0x55FFFF)));
+                    event.getToolTip().add(com.cosmicpve.equipment.skin.WeaponSkinLore.active(definition)));
         }
         var capacity = new CustomEnchantCapacityService();
         int used = capacity.used(stack);

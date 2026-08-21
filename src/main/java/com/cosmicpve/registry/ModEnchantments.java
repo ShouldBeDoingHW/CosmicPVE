@@ -21,6 +21,8 @@ public final class ModEnchantments {
     public static final ResourceKey<Enchantment> AEGIS = createKey("aegis");
     public static final ResourceKey<Enchantment> EAGLE_EYE = createKey("eagle_eye");
     public static final ResourceKey<Enchantment> RAGE = createKey("rage");
+    public static final ResourceKey<Enchantment> MOLTEN = createKey("molten");
+    public static final ResourceKey<Enchantment> NUTRITION = createKey("nutrition");
 
     private ModEnchantments() {}
 

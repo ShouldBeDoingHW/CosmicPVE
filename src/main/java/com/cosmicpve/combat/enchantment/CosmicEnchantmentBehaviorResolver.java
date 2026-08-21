@@ -25,6 +25,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateResolver {
     public static final Identifier ANGELIC_ONCE_KEY = CosmicPVE.id("angelic_once_per_damage");
     public static final Identifier ENDER_SHIFT_COOLDOWN = CosmicPVE.id("ender_shift");
+    public static final Identifier MOLTEN_ONCE_KEY = CosmicPVE.id("molten_once_per_damage");
 
     private final ChildCombatActionService childActions;
     private final CombatStackService stacks;
@@ -53,6 +54,7 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
         } else if (event.hook() == ProcHook.ON_DAMAGE_TAKEN) {
             addAngelic(event, result);
             addEnderShift(event, result);
+            addMolten(event, result);
         }
         return List.copyOf(result);
     }
@@ -193,6 +195,26 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
                         && !procEvent.target().isDeadOrDying()
                         && EnderShiftBehavior.shouldTrigger(
                                 procEvent.target().getHealth(), procEvent.target().getMaxHealth()))));
+    }
+
+    private void addMolten(ProcEvent event, List<ProcCandidate> result) {
+        if (event.target() == null || event.attacker() == null || event.attacker() == event.target()
+                || event.attacker().isDeadOrDying()) {
+            return;
+        }
+        int level = MoltenBehavior.equippedLevelHighest(event.target());
+        if (level <= 0) return;
+        result.add(candidate(
+                ModEnchantments.MOLTEN.identifier(), ProcHook.ON_DAMAGE_TAKEN, MoltenBehavior.chance(level),
+                Optional.empty(), 0L, Optional.of(MOLTEN_ONCE_KEY),
+                ChildProcEligibility.LIMITED_DEFENSIVE_REACTION,
+                activation -> {
+                    var attacker = activation.event().attacker();
+                    if (attacker != null && attacker != activation.event().target() && !attacker.isDeadOrDying()) {
+                        MoltenBehavior.ignite(attacker);
+                    }
+                },
+                new ProcProvenance(ProcSourceKind.ACTUAL_ENCHANTMENT, CosmicPVE.id("equipped_armor"))));
     }
 
     private static ProcCandidate candidate(

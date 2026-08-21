@@ -75,6 +75,7 @@ public final class CosmicCommands {
                 .then(ArmorSetCommands.create())
                 .then(EnchantingCommands.create())
                 .then(WeaponSkinCommands.create())
+                .then(FoodDebugCommands.create())
                 .then(CombatStackCommands.create()));
 
         event.getDispatcher().register(Commands.literal("feed")

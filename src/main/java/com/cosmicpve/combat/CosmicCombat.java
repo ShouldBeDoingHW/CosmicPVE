@@ -26,6 +26,7 @@ import com.cosmicpve.combat.enchantment.InsanityBehavior;
 import com.cosmicpve.combat.enchantment.AegisBehavior;
 import com.cosmicpve.combat.enchantment.EagleEyeBehavior;
 import com.cosmicpve.combat.enchantment.RageBehavior;
+import com.cosmicpve.combat.enchantment.NutritionFoodService;
 import com.cosmicpve.combat.cooldown.CooldownService;
 import com.cosmicpve.combat.proc.ProcCandidateSourceRegistry;
 import com.cosmicpve.combat.proc.ProcEngine;
@@ -76,11 +77,13 @@ public final class CosmicCombat {
             new WeaponSkinCombatResolver(WEAPON_SKINS, STACKS, CHILD_ACTIONS);
     private static final CosmicEnchantmentBehaviorResolver ENCHANTMENT_BEHAVIORS =
             new CosmicEnchantmentBehaviorResolver(CHILD_ACTIONS, STACKS, BLEED_RUNTIME);
+    private static final NutritionFoodService NUTRITION = new NutritionFoodService(ENCHANTMENTS);
     private static final ExecutionService EXECUTIONS = new ExecutionService(SEQUENCES, TRACES);
     private static final CombatEventBridge EVENTS =
             new CombatEventBridge(ENGINE, ATTRIBUTION, SEQUENCES, TRACES, ENCHANTMENTS, PROC_EVENTS,
                     OUTGOING, INCOMING, PRE_DEFENSE_BOUNDS, RECENT_COMBAT_MEMORY, WEAPON_SKINS);
-    private static final ProcHookEventBridge PROC_HOOKS = new ProcHookEventBridge(PROC_EVENTS, EXECUTIONS);
+    private static final ProcHookEventBridge PROC_HOOKS =
+            new ProcHookEventBridge(PROC_EVENTS, EXECUTIONS, NUTRITION);
     private static final CombatStackEventBridge STACK_EVENTS = new CombatStackEventBridge(STACKS, BLEED_RUNTIME);
 
     private CosmicCombat() {}

@@ -37,10 +37,14 @@ public final class CosmicEnchantmentSpecs {
             ModEnchantments.EAGLE_EYE.identifier(), 6, CosmicEnchantmentTier.ULTIMATE, "bow_or_crossbow");
     public static final CosmicEnchantmentSpec RAGE = new CosmicEnchantmentSpec(
             ModEnchantments.RAGE.identifier(), 6, CosmicEnchantmentTier.LEGENDARY, "sword_or_axe");
+    public static final CosmicEnchantmentSpec MOLTEN = new CosmicEnchantmentSpec(
+            ModEnchantments.MOLTEN.identifier(), 4, CosmicEnchantmentTier.UNIQUE, "any_armor");
+    public static final CosmicEnchantmentSpec NUTRITION = new CosmicEnchantmentSpec(
+            ModEnchantments.NUTRITION.identifier(), 3, CosmicEnchantmentTier.UNIQUE, "leggings");
 
     public static final List<CosmicEnchantmentSpec> ALL =
             List.of(EXECUTE, ANGELIC, LIGHTNING, ENDER_SHIFT, DOUBLESTRIKE, BLEED, LUCK, POISON, PUMMEL,
-                    GREATSWORD, INSANITY, VENOM, AEGIS, EAGLE_EYE, RAGE);
+                    GREATSWORD, INSANITY, VENOM, AEGIS, EAGLE_EYE, RAGE, MOLTEN, NUTRITION);
 
     private CosmicEnchantmentSpecs() {}
 

@@ -15,6 +15,7 @@ public final class WeaponSkinItem extends Item {
         var definition = WeaponSkinDefinitions.find(data.skinId());
         return definition.isPresent()
                 ? Component.translatable("item.cosmicpve.weapon_skin.named", definition.orElseThrow().displayName())
+                        .withColor(definition.orElseThrow().nameColor())
                 : super.getName(stack);
     }
 }

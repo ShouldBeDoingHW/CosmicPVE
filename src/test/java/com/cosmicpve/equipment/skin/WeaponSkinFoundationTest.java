@@ -45,6 +45,15 @@ class WeaponSkinFoundationTest {
                 .accepts(new ItemStack(Items.DIAMOND_AXE)));
     }
 
+    @Test void canonicalLoreUsesPerSkinNameColorsAndSharedYellowGrayPresentation() {
+        assertSkinLore(WeaponSkinDefinitions.BOOSTED_CHAINSAW, 0xCCA00A,
+                WeaponSkinDefinition.WeaponKind.AXE, 1);
+        assertSkinLore(WeaponSkinDefinitions.MAUIS_HOOK, 0x404242,
+                WeaponSkinDefinition.WeaponKind.SWORD, 2);
+        assertSkinLore(WeaponSkinDefinitions.STORMBRINGER, 0x224B57,
+                WeaponSkinDefinition.WeaponKind.AXE, 2);
+    }
+
     @Test void typedDataCodecsRejectInvalidVersions() {
         assertEquals(WeaponSkinDefinitions.MAUIS_HOOK,
                 new WeaponSkinItemData(1, WeaponSkinDefinitions.MAUIS_HOOK).skinId());
@@ -210,5 +219,24 @@ class WeaponSkinFoundationTest {
             return JsonParser.parseReader(reader).getAsJsonObject().getAsJsonObject("model")
                     .get("model").getAsString();
         }
+    }
+
+    private static void assertSkinLore(
+            Identifier id, int color, WeaponSkinDefinition.WeaponKind kind, int effectLines) {
+        var definition = WeaponSkinDefinitions.find(id).orElseThrow();
+        assertEquals(color, definition.nameColor());
+        assertEquals(kind, definition.weaponKind());
+        var lines = WeaponSkinLore.applicationItem(definition);
+        assertEquals(effectLines + 3, lines.size());
+        for (int index = 0; index < effectLines; index++) {
+            assertEquals(net.minecraft.ChatFormatting.YELLOW.getColor(),
+                    lines.get(index).getStyle().getColor().getValue());
+        }
+        for (int index = effectLines; index < lines.size(); index++) {
+            assertEquals(net.minecraft.ChatFormatting.GRAY.getColor(),
+                    lines.get(index).getStyle().getColor().getValue());
+        }
+        assertEquals(color, WeaponSkinLore.active(definition).getStyle().getColor().getValue());
+        assertEquals(effectLines, definition.effectDescription().size());
     }
 }

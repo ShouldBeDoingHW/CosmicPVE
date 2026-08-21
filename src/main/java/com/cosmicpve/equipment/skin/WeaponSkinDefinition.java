@@ -10,9 +10,11 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import com.cosmicpve.equipment.enchantment.VirtualEnchantmentGrant;
 
 public record WeaponSkinDefinition(
-        Identifier id, Component displayName, WeaponKind weaponKind, Identifier itemModel,
+        Identifier id, Component displayName, int nameColor, List<Component> effectDescription,
+        WeaponKind weaponKind, Identifier itemModel,
         List<VirtualEnchantmentGrant> virtualEnchantments) {
     public WeaponSkinDefinition {
+        effectDescription = List.copyOf(effectDescription);
         virtualEnchantments = List.copyOf(virtualEnchantments);
     }
 

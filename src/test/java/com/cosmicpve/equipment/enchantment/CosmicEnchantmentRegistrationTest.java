@@ -29,7 +29,9 @@ class CosmicEnchantmentRegistrationTest {
                 Map.entry("venom", 3),
                 Map.entry("aegis", 6),
                 Map.entry("eagle_eye", 6),
-                Map.entry("rage", 6));
+                Map.entry("rage", 6),
+                Map.entry("molten", 4),
+                Map.entry("nutrition", 3));
         for (var entry : expected.entrySet()) {
             var resource = getClass().getClassLoader()
                     .getResourceAsStream("data/cosmicpve/enchantment/" + entry.getKey() + ".json");
@@ -45,10 +47,16 @@ class CosmicEnchantmentRegistrationTest {
                     assertEquals("#cosmicpve:enchantable/bow_or_crossbow", json.get("supported_items").getAsString());
                 } else if (entry.getKey().equals("rage")) {
                     assertEquals("#cosmicpve:enchantable/sword_or_axe", json.get("supported_items").getAsString());
+                } else if (entry.getKey().equals("molten")) {
+                    assertEquals("#minecraft:enchantable/armor", json.get("supported_items").getAsString());
+                    assertEquals("armor", json.getAsJsonArray("slots").get(0).getAsString());
+                } else if (entry.getKey().equals("nutrition")) {
+                    assertEquals("#cosmicpve:enchantable/leggings", json.get("supported_items").getAsString());
+                    assertEquals("legs", json.getAsJsonArray("slots").get(0).getAsString());
                 }
             }
         }
-        assertEquals(15, CosmicEnchantmentSpecs.ALL.size());
+        assertEquals(17, CosmicEnchantmentSpecs.ALL.size());
         assertEquals(CosmicEnchantmentTier.ELITE, CosmicEnchantmentSpecs.EXECUTE.tier());
         assertEquals(CosmicEnchantmentTier.ULTIMATE, CosmicEnchantmentSpecs.ANGELIC.tier());
         assertEquals(CosmicEnchantmentTier.SIMPLE, CosmicEnchantmentSpecs.LIGHTNING.tier());
@@ -64,6 +72,10 @@ class CosmicEnchantmentRegistrationTest {
         assertEquals(CosmicEnchantmentTier.LEGENDARY, CosmicEnchantmentSpecs.AEGIS.tier());
         assertEquals(CosmicEnchantmentTier.ULTIMATE, CosmicEnchantmentSpecs.EAGLE_EYE.tier());
         assertEquals(CosmicEnchantmentTier.LEGENDARY, CosmicEnchantmentSpecs.RAGE.tier());
+        assertEquals(CosmicEnchantmentTier.UNIQUE, CosmicEnchantmentSpecs.MOLTEN.tier());
+        assertEquals(CosmicEnchantmentTier.UNIQUE, CosmicEnchantmentSpecs.NUTRITION.tier());
+        assertEquals("any_armor", CosmicEnchantmentSpecs.MOLTEN.equipmentApplicability());
+        assertEquals("leggings", CosmicEnchantmentSpecs.NUTRITION.equipmentApplicability());
     }
 
     @Test
