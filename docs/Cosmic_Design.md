@@ -8,7 +8,7 @@
 | Angelic | 5 | Any Armor | Ultimate | Gives a 1% × level chance to heal 0.5 heart (1 HP) after a committed damaging event. Angelic levels across equipped armor pieces are summed into one proc chance, and the heal can occur at most once per damage event. |
 | Armored | 4 | Any Armor | Legendary | Each level is equal to half a level of protection. |
 | Auto Smelt | 1 | Pickaxe | Simple | Automatically smelts drops. |
-| Bleed | 6 | Axe | Ultimate | 1% chance per level on a valid damaging hit to apply one Bleed stack for 5 seconds. Each entity can have up to 10 Bleed stacks. Every stack has its own independent 5-second lifetime; applying a new stack does not refresh older stacks. Each active stack reduces movement speed by 1% while it remains active and deals 1 true damage every 1.5 seconds. |
+| Bleed | 6 | Axe | Ultimate   | 1% chance per level on a valid damaging hit to apply one Bleed stack for 5 seconds. Each entity can have up to 10 Bleed stacks. Every stack has its own independent 5-second lifetime; applying a new stack does not refresh older stacks. Each active stack reduces movement speed by 1% while it remains active and deals 1 true damage every 1.5 seconds. |
 | Death Pact | 5 | Chestplate | Mastery | Deal 3% less damage but take (2% x level) less damage. |
 | Divine Immolation | 4 | Sword | Mastery | 3% chance per level to proc on hit. On proc, set yourself on fire for 5 seconds and deal \+10% damage. 30 second cooldown. |
 | Eagle Eye | 6 | Bow/Crossbow | Ultimate | Deal (3% x level) more damage to targets that are 18 blocks away or further. |
@@ -111,9 +111,10 @@ Development builds should include debug commands/tools for giving specific encha
 | Yjiki | \-15% inc, \+5% out. Doubled in dungeons. | Dungeons |
 | Dimensional Traveler | \+7.5% out, \+10% movement speed. \-20% proc cooldown (Phoenix, Ender Shift, etc.) | Invasions |
 | Engineer | \-25% inc, \+15% movement speed | Invasions |
-| Yeti | \+10% out, \-10% inc, immune to freeze, frozen, permafrost, ice aspect. | Trials |
-| Ancient | \+7.5% out, \-7.5% inc, doubled when under 50% health. | Trials |
+| Yeti | \+10% out, \-10% inc, immune to freeze, frozen, permafrost, ice aspect. | Igloo |
+| Ancient | \+7.5% out, \-7.5% inc, doubled when under 50% health. | Ancient City |
 | Ranger | \+20% bow/crossbow damage, \+20% movement speed. | Trials |
+| Dragonslayer | \+15% Outgoing, \-5% incoming. Immunity to poison and fire damage.  | Primal Dragon Boss |
 
 # Kits
 
@@ -387,6 +388,31 @@ Heroic Abandoned Spaceship Lootbag:
 | Tier 2 Trial Trinket | 10 | 1 |
 | Random Double Mask | 6 | 1 |
 
+# Conquest Chests
+
+Conquest Chests are periodic Overworld events that allow players to gain loot. One Conquest Chest spawns every 7th Minecraft day. Its X and Z coordinates are selected independently within the square from \-5,000 to \+5,000 on each axis. Each Conquest Chest must be mined to obtain the loot held inside and takes 1.5× as long to mine as obsidian. Upon the first player interaction with the chest, 3-5 Space Pirates spawn in a 5x5 area around it. Players cannot break or place blocks aside from the Conquest Chest itself within the existing 20x20 protected area around the chest. If no player has interacted with the chest within 30 minutes of its spawn, it despawns. Once successfully broken, the Conquest Chest rolls 3 items from its loot table.
+
+Spawning rules: After X/Z selection, the chest must be placed at a valid surface position rather than underground or embedded inside terrain. A valid placement must have at least 2 of the chest block's 6 faces adjacent to air. If a selected position does not satisfy these rules, choose another valid candidate rather than forcing the placement. 
+
+Loot when broken: 
+
+| Loot Item | Weight | Quantity |
+| :---- | :---- | :---- |
+| Simple Enchantment Book | 15 | 2 |
+| Unique Enchantment Book | 15 | 2 |
+| Elite Enchantment Book | 12 | 2 |
+| Ultimate Enchantment Book | 12 | 1 |
+| Legendary Enchantment Book | 8 | 1 |
+| Random Boss Spawn Egg | 5 | 1 |
+| Trial Portal | 10 | 1 |
+| Trial Portal | 5 | 2 |
+| Transmog Scroll | 10 | 1 |
+| White Scroll | 9 | 1 |
+| 50% Black Scroll | 10 | 1 |
+| 65% Black Scroll | 6 | 1 |
+| Repair Scroll | 10 | 1 |
+| Gkit Refresher | 4 | 1 |
+
 # Misc Items
 
 Repair Scroll \- can be applied to any item to refill durability up to maximum. Item texture is paper.
@@ -403,7 +429,7 @@ Dungeon Key Ring \- Item that once right clicked drops 1 of each type of dungeon
 
 # Masks
 
-Masks are an additional customization and buildcraft layer. Most masks are found individually. A player may use a dedicated custom NPC or an appropriate combination item/mechanic to combine masks into Multi-Masks containing up to 3 different individual masks. Duplicate copies of the same mask cannot occupy multiple slots in one Multi-Mask.
+Masks are an additional customization and buildcraft layer. Most masks are found individually. Inside an anvil, players may combine single masks into double, and a double \+ single mask into a triple. No multi mask may contain more than 3 masks at this time, though this should be a variable that can be changed up or down.
 
 Masks should attach to or be associated with the player's helmet rather than replacing the armor-set helmet slot. A Multi-Mask provides the effects of all masks contained within it. For rendering, Multi-Masks use a black box with a question mark on the front. The contained masks still provide their effects without requiring the visuals to be physically layered on the player's face.
 
@@ -415,7 +441,9 @@ Purge — \+3% outgoing damage.
 Party — \+1% outgoing damage, \-1% incoming damage, and \+1% movement speed.  
 Lover — Passively heals 1 HP every 5 seconds.  
 Scarecrow — Hunger does not decrease. Golden apples grant \+2 additional absorption hearts.  
-Zeus — Immune to lightning strike effects such as Nature’s Wrath and Lightning. 
+Zeus — Immune to lightning strike effects such as Nature’s Wrath and Lightning.   
+Turkey — \+2% Dodge Chance  
+Dragon Mask — \+2% damage. Immune to fire and poison damage. 
 
 # Weapon Skins
 

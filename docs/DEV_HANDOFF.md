@@ -1,8 +1,8 @@
 # CosmicPVE Development Handoff
 
-Current verified and accepted gameplay commit: `bf64c77d5ac62952f801a81241801f3401c17e78` (`Add weapon skins and skin passives`). This is the accepted Steps 6A–6E baseline.
+Current verified and accepted gameplay commit: `b5148760420b658cd7006a73b230199f9311bc73` (`Add equipment lore Molten and Nutrition`). This is the accepted Steps 6A–6F baseline.
 
-Repository state after Step 6E closure: clean at gameplay commit `bf64c77d5ac62952f801a81241801f3401c17e78`, apart from the deliberately untracked root `assets` folder, the user-replaced canonical `Cosmic_Design.md`, and this documentation follow-up. Both tracked documentation updates are recorded by the follow-up baseline commit before Step 6F begins.
+Repository state after Step 6F closure: tracked gameplay is clean at `b5148760420b658cd7006a73b230199f9311bc73`, apart from the canonical documentation follow-up and deliberately untracked root `assets` source-art folder.
 
 Last handoff update: 2026-08-20
 
@@ -110,6 +110,14 @@ The three supplied transparent source images were converted with nearest-neighbo
 
 The full build and all 134 tests passed; 71 JSON resources validated. The dedicated server reached `Done`, and the client completed resource reload/model-atlas creation with no missing-texture or invalid-model errors. The user manually verified the weapon-skin foundation, all three implemented skin passives and interactions, supplied artwork presentation, and the Black Scroll Ink Sac appearance, then accepted the milestone.
 
+### Step 6F — COMPLETE; MANUALLY VERIFIED AND ACCEPTED
+
+Standardized Weapon Skin application lore through per-skin presentation metadata and one reusable renderer. Application items are named `Weapon Skin (<Skin Name>)`; Boosted Chainsaw uses `#CCA00A`, Maui's Hook uses `#404242`, and Stormbringer uses `#224B57`, as specified by the canonical design. Effect summaries are always yellow, while the weapon-kind and exact attach/detach instructions are gray. Attached weapons show one concise active-skin line in the skin's canonical name color. Gameplay data, models, glint, attachment/removal behavior, and Transmog/enchantment ordering are unchanged.
+
+Standardized every Cosmic Book through `CosmicEnchantmentSpec` metadata and localized descriptions. Lore order is Success Rate, Destroy Rate, tier-colored rarity plus plain-language effect, gray applicability, and gray drag/drop instruction. The specification owns the stable display/description/applicability keys, so future registered enchantments do not require tooltip switch logic.
+
+Implemented real Unique enchantments `cosmicpve:molten` IV and `cosmicpve:nutrition` III, bringing the total to exactly 17. Molten is valid on any armor. A committed positive-red-health hit creates at most one defensive candidate when a meaningful living attacker exists; its effective level is the highest equipped Molten level, never the sum, and its Luck-modified base chance is 2% per level. Activation ignites the responsible attributed living attacker for three seconds. Nutrition is leggings-only and runs once after completed food consumption without ProcEngine RNG: Minecraft `FoodData.eat` adds exactly +1 hunger and +0.25 saturation per level while retaining vanilla caps. Both use real Minecraft enchantment data, generic Books, capacity, Black Scroll eligibility, Transmog sorting, and remain outside vanilla acquisition pools.
+
 ## 3. Current Real Enchantments
 
 These are registered through Minecraft's enchantment infrastructure, use actual enchantment data on the item, and are not present in normal enchanting-table, librarian, random-loot, random-equipment, or mob-equipment acquisition pools.
@@ -133,10 +141,12 @@ These are registered through Minecraft's enchantment infrastructure, use actual 
 | `cosmicpve:aegis` | VI | Chestplate | Legendary | Caps the outgoing-finalized ordinary attack component at `14 - level` HP in the pre-defense bounds stage. Aegis VI caps at 8 HP; later incoming/vanilla mitigation still applies, while true damage and execution bypass it. |
 | `cosmicpve:eagle_eye` | VI | Bow/crossbow | Ultimate | At an inclusive attacker-to-target entity distance of 18 blocks or farther, adds 3% ordinary outgoing damage per level in the shared additive bucket. |
 | `cosmicpve:rage` | VI | Sword/axe | Legendary | Adds exactly 5% ordinary outgoing damage when this exact target damaged the attacker at least three committed positive-red-health times within the rolling `(4 + level)`-second window. History is not consumed. |
+| `cosmicpve:molten` | IV | Any armor | Unique | On committed positive-red-health damage taken, has 2% per highest equipped Molten level to ignite the responsible living attacker for 3 seconds. Multiple pieces produce one candidate using the highest level, not summed levels. |
+| `cosmicpve:nutrition` | III | Leggings | Unique | Once a food item is fully consumed, adds +1 hunger and +0.25 saturation per level through vanilla bounded food state. It is deterministic and does not use Luck or RNG. |
 
 ### DESIGNED BUT NOT IMPLEMENTED
 
-The design also names Armored, Auto Smelt, Death Pact, Divine Immolation, Experience, Gears, Glowing, Hero Killer, Molten, Mortal Coil, Nutrition, Obsidianshield, Oxygenate, Pheonix/Phoenix, Self Destruct, and Virus. None currently has a registered real enchantment or runtime behavior. There are exactly 15 implemented real Cosmic enchantments. No Mastery enchantment is implemented. Do not add behavior assumptions beyond `Cosmic_Design.md`; the `Pheonix`/`Phoenix` spelling should be settled before choosing its stable ID.
+The design also names Armored, Auto Smelt, Death Pact, Divine Immolation, Experience, Gears, Glowing, Hero Killer, Mortal Coil, Obsidianshield, Oxygenate, Phoenix, Self Destruct, and Virus. None currently has a registered real enchantment or runtime behavior. There are exactly 17 implemented real Cosmic enchantments. No Mastery enchantment is implemented. Do not add behavior assumptions beyond `Cosmic_Design.md`.
 
 ## 4. Critical Combat Semantics
 
@@ -283,7 +293,9 @@ Cosmic tiers are the sole color source; do not create per-enchantment color maps
 - Unique `#55FF55`
 - Simple `#AAAAAA`
 
-Cosmic Book tint/name and actual enchantment tooltip lines resolve `CosmicEnchantmentTier`. Success lines use `#4DFF74`; Destroy lines use `#C92C2C`. Phantom uses `#FF6969`; Yeti uses `#A3FFF5`.
+Cosmic Book tint/name and actual enchantment tooltip lines resolve `CosmicEnchantmentTier`. Book lore is Success, Destroy, tier-colored rarity/effect description, gray applicability, then gray usage instruction. Success lines use `#4DFF74`; Destroy lines use `#C92C2C`. Descriptions and applicability come from generic enchantment specification/localization metadata. Phantom uses `#FF6969`; Yeti uses `#A3FFF5`.
+
+Weapon Skin names use the canonical per-skin design colors: Boosted Chainsaw `#CCA00A`, Maui's Hook `#404242`, and Stormbringer `#224B57`. Skin effect summaries are yellow; `Axe Skin`/`Sword Skin` applicability and both attach/detach instructions are gray.
 
 Transmog Scrolls are ordinary paper presentations. Applying one sets persistent `CUSTOM_ENCHANT_META.transmogSorted=true` and changes presentation only: it does not rewrite, remove, re-add, or level enchantments. Future enchantments automatically participate because sorting occurs while rendering the tooltip.
 
@@ -319,7 +331,7 @@ This Invasion rule supersedes older design text that described Invasions as keep
 
 The following remain future content or infrastructure:
 
-- all enchantments beyond the 15 listed above, including every Mastery enchantment
+- all enchantments beyond the 17 listed above, including every Mastery enchantment
 - Dimensional Traveler, Engineer, Ranger, and Yjiki armor sets
 - masks and Multi-Masks
 - Whisk Taker, Spinal Tap, Party Blade, and Doomsday Machete weapon skins. Boosted Chainsaw, Maui's Hook, and Stormbringer are implemented. The settled inventory UX is drag and left-click to apply; empty-cursor inventory right-click removes and returns the skin item. This supersedes older design text that reverses those gestures.
@@ -365,6 +377,8 @@ The following are confirmed in current source and permission-gated under `/cosmi
 - `/cosmic enchant orb give <player> <armor|weapon> <success> <destroy>`
 - `/cosmic enchant orb give-random <player> <armor|weapon>`
 - `/cosmic skin give <player> <skin-id>`
+- `/cosmic food show`
+- `/cosmic food set <hunger> <saturation>`
 - `/feed`, `/heal`, and `/restore` are separate permission-gated development convenience commands.
 
 Commands call gameplay services or create the same typed components used by gameplay; production loot acquisition remains deferred.
@@ -385,7 +399,7 @@ The final post-Orb capacity is no longer unresolved for current target classes: 
 
 ## 16. Current Next Milestone
 
-The next bounded milestone is Step 6F: standardized Weapon Skin and Cosmic Enchantment Book lore plus real Molten IV and Nutrition III. All other enchantments, skins, and adjacent content remain deferred.
+The next bounded milestone is Step 6G: Heroic equipment for armor/pickaxes/shovels, Glowing I, Obsidianshield I, the armor-set inventory tint correction, and Maui's Hook held-orientation correction. Heroic Dungeon Portals and all adjacent content remain deferred.
 
 ## 17. Development Workflow
 
@@ -402,18 +416,17 @@ Preserve unrelated dirty changes. Never change pinned versions as a side effect 
 
 ## 18. Verification Snapshot
 
-For the current uncommitted Step 6D implementation:
+For the accepted Step 6F implementation:
 
-- `gradlew.bat build` succeeded.
-- 124 automated tests passed with 0 failures and 0 errors.
-- Dedicated-server startup published three armor sets, including `cosmicpve:ancient`, and reached `Done`.
-- Client startup completed mod/resource loading and item-atlas creation without CosmicPVE model/resource errors.
-- Changed JSON resources decoded successfully; Aegis, Eagle Eye, Rage, and Ancient resources loaded at runtime.
-- Pinned environment values remained unchanged.
-- Step 6C remains manually accepted at gameplay commit `0e8a21c93fa13760f6a3424e1c7ebc526cdab564`.
-- Manual in-world Step 6D verification and acceptance remain pending.
+- `gradlew.bat build` succeeded; 142 automated tests passed with 0 failures and 0 errors.
+- All 74 main-resource JSON files decoded successfully.
+- Dedicated-server startup loaded both new enchantment definitions, published current reloadable content, and reached `Done`.
+- Client startup completed mod/resource loading, sound initialization, and item-atlas creation with no missing localization, malformed style, tooltip, model, or CosmicPVE resource errors in the runtime log.
+- Pinned environment values remain unchanged.
+- Step 6E is manually accepted at gameplay commit `bf64c77d5ac62952f801a81241801f3401c17e78`; its handoff/design baseline is `8fa9a650845ea631bf2a9be719c371ab1772089d`.
+- The user manually verified the lore cleanup, Molten IV, and Nutrition III and accepted Step 6F.
 
-This snapshot describes the current uncommitted working tree layered on accepted Step 6C gameplay commit `0e8a21c93fa13760f6a3424e1c7ebc526cdab564` and documentation closure commit `a7c49917e37c620db4fddd9a7c13852dd7f099bf`. Do not mark Step 6D accepted or assign it a commit hash until manual acceptance and commit actually occur.
+Step 6F gameplay is committed at `b5148760420b658cd7006a73b230199f9311bc73` (`Add equipment lore Molten and Nutrition`).
 
 ## Maintaining This Handoff
 
