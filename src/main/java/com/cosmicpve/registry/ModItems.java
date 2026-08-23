@@ -14,6 +14,7 @@ import com.cosmicpve.equipment.heroic.HeroicCrystalItem;
 import com.cosmicpve.equipment.enchantment.UnexaminedEnchantmentBookItem;
 import com.cosmicpve.economy.BanknoteItem;
 import com.cosmicpve.reward.spawner.TypedMobSpawnerItem;
+import com.cosmicpve.spacechest.SpaceChestItem;
 
 public final class ModItems {
     private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(CosmicPVE.MOD_ID);
@@ -65,6 +66,9 @@ public final class ModItems {
 
     public static final DeferredItem<TypedMobSpawnerItem> MOB_SPAWNER = ITEMS.registerItem(
             "mob_spawner", TypedMobSpawnerItem::new, properties -> properties.stacksTo(64));
+
+    public static final DeferredItem<SpaceChestItem> SPACE_CHEST = ITEMS.registerItem(
+            "space_chest", SpaceChestItem::new, properties -> properties.stacksTo(1));
 
     private ModItems() {}
 

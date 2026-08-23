@@ -4,12 +4,15 @@ import com.cosmicpve.equipment.enchantment.CosmicEnchantmentTier;
 import net.minecraft.resources.Identifier;
 
 public sealed interface RewardDescriptor permits RewardDescriptor.StaticItem, RewardDescriptor.Banknote,
-        RewardDescriptor.CosmicBook, RewardDescriptor.BlackScroll, RewardDescriptor.ArmorOrb,
+        RewardDescriptor.CosmicBook, RewardDescriptor.UnexaminedBook, RewardDescriptor.BlackScroll, RewardDescriptor.ArmorOrb,
         RewardDescriptor.WeaponOrb, RewardDescriptor.MobSpawner, RewardDescriptor.GeneratedEquipment {
     RewardType type();
     record StaticItem(Identifier itemId) implements RewardDescriptor { public RewardType type(){return RewardType.STATIC_ITEM;} }
     record Banknote(long cents) implements RewardDescriptor { public RewardType type(){return RewardType.BANKNOTE;} }
     record CosmicBook(CosmicEnchantmentTier rarity) implements RewardDescriptor { public RewardType type(){return RewardType.COSMIC_BOOK;} }
+    record UnexaminedBook(CosmicEnchantmentTier rarity) implements RewardDescriptor {
+        public RewardType type(){return RewardType.UNEXAMINED_BOOK;}
+    }
     record BlackScroll(int successRate) implements RewardDescriptor { public RewardType type(){return RewardType.BLACK_SCROLL;} }
     record ArmorOrb(int successRate) implements RewardDescriptor { public RewardType type(){return RewardType.ARMOR_ORB;} }
     record WeaponOrb(int successRate) implements RewardDescriptor { public RewardType type(){return RewardType.WEAPON_ORB;} }

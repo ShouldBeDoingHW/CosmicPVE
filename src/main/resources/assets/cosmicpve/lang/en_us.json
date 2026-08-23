@@ -210,4 +210,12 @@
   ,"enchantment.cosmicpve.experience.description":"Increases experience gained from breaking blocks."
   ,"item.cosmicpve.mob_spawner":"Mob Spawner"
   ,"item.cosmicpve.mob_spawner.named":"%s Spawner"
+  ,"item.cosmicpve.space_chest":"Space Chest"
+  ,"item.cosmicpve.space_chest.named":"%s Space Chest"
+  ,"tooltip.cosmicpve.space_chest.purpose":"Select five rewards from a field of twenty-seven."
+  ,"tooltip.cosmicpve.space_chest.instruction":"Right-Click to open."
+  ,"message.cosmicpve.space_chest.invalid":"That Space Chest cannot be opened right now."
+  ,"container.cosmicpve.space_chest":"%s Space Chest"
+  ,"enchantment.cosmicpve.blessed":"Blessed"
+  ,"enchantment.cosmicpve.blessed.description":"Successful attacks may remove one negative effect from you."
 }

@@ -55,9 +55,7 @@ public final class TypedMobSpawnerItem extends Item {
             level.removeBlock(position, false);
             return InteractionResult.FAIL;
         }
-        spawner.setEntityId(entityType.orElseThrow().value(), level.getRandom());
-        spawner.setChanged();
-        level.sendBlockUpdated(position, spawner.getBlockState(), spawner.getBlockState(), 3);
+        MobSpawnerConfiguration.configure(spawner, entityType.orElseThrow().value(), level, position);
         level.playSound(null, position, SoundEvents.SPAWNER_PLACE, SoundSource.BLOCKS, 1.0F, 1.0F);
         if (context.getPlayer() == null || !context.getPlayer().getAbilities().instabuild) stack.shrink(1);
         return InteractionResult.SUCCESS;

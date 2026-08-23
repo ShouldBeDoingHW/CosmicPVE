@@ -22,14 +22,39 @@ public final class RewardTableService {
         RewardTable table = repository.requireRewardTable(tableId);
         var results = new ArrayList<ItemStack>();
         for (int roll = 0; roll < rolls; roll++) {
+            var bundle = new ArrayList<ItemStack>();
             RewardEntry selected = select(table, context);
             int quantity = context.random().nextIntBetweenInclusive(
                     selected.minimumQuantity(), selected.maximumQuantity());
             for (int index = 0; index < quantity; index++) {
-                generator.generate(selected.reward(), context).ifPresent(results::add);
+                generator.generate(selected.reward(), context).ifPresent(bundle::add);
             }
+            results.addAll(compact(bundle));
         }
         return List.copyOf(results);
+    }
+
+    /** Compacts identical stackable results inside one reward position without merging independent generated books. */
+    public static List<ItemStack> compact(List<ItemStack> generated) {
+        var compacted = new ArrayList<ItemStack>();
+        for (ItemStack original : generated) {
+            ItemStack remaining = original.copy();
+            for (ItemStack existing : compacted) {
+                if (remaining.isEmpty()) break;
+                if (ItemStack.isSameItemSameComponents(existing, remaining) && existing.getCount() < existing.getMaxStackSize()) {
+                    int moved = Math.min(remaining.getCount(), existing.getMaxStackSize() - existing.getCount());
+                    existing.grow(moved);
+                    remaining.shrink(moved);
+                }
+            }
+            while (!remaining.isEmpty()) {
+                int count = Math.min(remaining.getCount(), remaining.getMaxStackSize());
+                ItemStack part = remaining.copyWithCount(count);
+                compacted.add(part);
+                remaining.shrink(count);
+            }
+        }
+        return List.copyOf(compacted);
     }
 
     public static RewardEntry select(RewardTable table, RewardGenerationContext context) {

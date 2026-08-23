@@ -4,6 +4,7 @@ import com.cosmicpve.content.validation.ContentDiagnostic;
 import com.cosmicpve.content.validation.ValidationResult;
 import com.cosmicpve.equipment.enchantment.CosmicEnchantmentSpecs;
 import com.cosmicpve.equipment.enchantment.CosmicEnchantmentTier;
+import com.cosmicpve.reward.spawner.MobSpawnerEligibility;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
@@ -12,7 +13,6 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
-import net.minecraft.world.entity.MobCategory;
 
 public record RewardDescriptorData(RewardType type, Optional<Identifier> itemId, Optional<Long> cents,
         Optional<CosmicEnchantmentTier> rarity, Optional<Integer> successRate,
@@ -49,13 +49,20 @@ public record RewardDescriptorData(RewardType type, Optional<Identifier> itemId,
                     if (!available) yield failure(source, "No implemented enchantment exists for rarity " + tier);
                     yield ValidationResult.success(new RewardDescriptor.CosmicBook(tier));
                 }
+                case UNEXAMINED_BOOK -> {
+                    var tier = required(rarity, "rarity");
+                    var registry = registries.lookupOrThrow(Registries.ENCHANTMENT);
+                    boolean available = CosmicEnchantmentSpecs.ALL.stream().anyMatch(spec -> spec.tier() == tier
+                            && registry.get(spec.id()).isPresent());
+                    if (!available) yield failure(source, "No implemented enchantment exists for rarity " + tier);
+                    yield ValidationResult.success(new RewardDescriptor.UnexaminedBook(tier));
+                }
                 case BLACK_SCROLL -> ValidationResult.success(new RewardDescriptor.BlackScroll(rate()));
                 case ARMOR_ORB -> ValidationResult.success(new RewardDescriptor.ArmorOrb(rate()));
                 case WEAPON_ORB -> ValidationResult.success(new RewardDescriptor.WeaponOrb(rate()));
                 case MOB_SPAWNER -> {
                     var id = required(entityTypeId, "entity_type");
-                    var entity = BuiltInRegistries.ENTITY_TYPE.get(id);
-                    if (entity.isEmpty() || entity.orElseThrow().value().getCategory() == MobCategory.MISC)
+                    if (!MobSpawnerEligibility.isEligible(id))
                         yield failure(source, "Spawner entity must be a registered Mob type: " + id);
                     yield ValidationResult.success(new RewardDescriptor.MobSpawner(id));
                 }

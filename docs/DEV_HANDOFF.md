@@ -1,6 +1,6 @@
 # CosmicPVE Development Handoff
 
-Current verified and accepted gameplay commit: `24bdff26247e09ea82da4f2d779251af3ea6a286` (`Add money rewards and defensive enchantments`). This is the accepted Steps 6A–6J baseline.
+Current verified and accepted gameplay commit: `fe58f247a1355edfea6b6c29dfeb13b718c3d17f` (`Add generic reward and mining foundations`). This is the accepted Steps 6A–6K baseline.
 
 Repository state: Steps 6A–6K are implemented, automated/runtime verified, and manually accepted. The root `assets` source-art folder and root `trial rooms` structure-development folder remain deliberately untracked and unrelated.
 
@@ -144,7 +144,7 @@ A data-scoped global loot modifier replaces generated Diamond helmet/chestplate/
 
 ### Step 6J — IMPLEMENTED; AUTOMATED/RUNTIME VERIFIED; MANUALLY VERIFIED / ACCEPTED
 
-Implemented one cent-safe persistent `long` money balance in the existing copy-on-death player profile attachment and centralized all mutations in `MoneyService`. `/bal`, `/balance`, and exact-decimal `/withdraw` are server-authoritative. Generic non-stackable Banknotes carry versioned positive-cent data, redeem atomically with the arrow-hit-player sound, and use a reusable exact-denomination factory. Repair Scrolls use the established server-authoritative drag/drop seam and repair the original damageable stack to its current maximum without reconstructing it. Exact returned-success Black Scroll and fixed-success/random-destroy Armor/Weapon Orb construction now share a reusable server-side reward factory; no reward weighting or Space Chest table exists yet.
+Implemented one cent-safe persistent `long` money balance in the existing copy-on-death player profile attachment and centralized all mutations in `MoneyService`. `/bal`, `/balance`, and exact-decimal `/withdraw` are server-authoritative. Generic non-stackable Banknotes carry versioned positive-cent data, redeem atomically with the arrow-hit-player sound, and use a reusable exact-denomination factory. Repair Scrolls use the established server-authoritative drag/drop seam and repair the original damageable stack to its current maximum without reconstructing it. Exact returned-success Black Scroll and fixed-success/random-destroy Armor/Weapon Orb construction share reusable server-side reward factories now consumed by the generic reward and Space Chest systems.
 
 Implemented Legendary `cosmicpve:armored` IV on any armor through Minecraft's native `damage_protection` enchantment effect at 0.5 Protection-equivalent points per level. Equipped pieces therefore aggregate with vanilla Protection and remain inside vanilla's normal protection cap; true-damage delivery continues to bypass enchantment reduction. Implemented the first Mastery enchantment, chestplate-only `cosmicpve:death_pact` V: every level contributes exactly -3% to the shared ordinary outgoing bucket and applies a separate ordinary incoming multiplier of `1 - 0.02 × level`. Mastery Book rates, Unexamined Mastery reveal, capacity/Transmog integration, and Black Scroll exclusion derive from existing generic tier/spec systems. There are now 22 real Cosmic enchantments.
 
@@ -154,9 +154,19 @@ Glowing now maintains a hidden 600-tick Cosmic-owned Night Vision lease and refr
 
 Added atomically reloadable `cosmicpve/reward_tables` definitions with positive weighted entries, validated quantity ranges, and typed descriptors for static items, exact Banknotes, same-rarity generated Cosmic Books, fixed-success Black Scrolls, fixed-success/random-destroy Armor and Weapon Orbs, typed Mob Spawners, and generated equipment. Generation accepts an explicit random source, while delivery is a separate reusable service that inserts safely and drops overflow at the player. One development fixture proves all descriptor families without defining production Space Chest tables.
 
-One generic versioned Mob Spawner item stores a namespaced entity-type ID, validates a sensible Mob boundary, and places/configures Minecraft's real spawner block without inventing custom spawning or recovery rules. Generated equipment currently supports uniformly selected Iron armor pieces, distinct compatible actual Cosmic enchantments under a rarity ceiling, bounded enchantment counts, and maximum or independently random valid levels. The three designed future Space Chest armor patterns are representable through the same definition.
+One generic versioned Mob Spawner item stores a namespaced entity-type ID, validates a sensible Mob boundary, and places/configures Minecraft's real spawner block without inventing custom spawning or recovery rules. Generated equipment currently supports uniformly selected Iron armor pieces, distinct compatible actual Cosmic enchantments under a rarity ceiling, bounded enchantment counts, and maximum or independently random valid levels. The three Space Chest armor patterns are consumed through this same definition.
 
 Implemented Simple `cosmicpve:auto_smelt` I and `cosmicpve:experience` III, bringing the total to 24 real Cosmic enchantments. Auto Smelt transforms the finalized normal block-drop stacks through ordinary furnace recipes, preserving generated quantity and producing no furnace XP. Experience scales only the finalized block XP by `1 + 0.5 × level` and floors the result. Both share the completed player block-drop event, coexist without duplication, and integrate through normal Books, Unexamined Simple Books, capacity, Black Scroll, Transmog, lore, and persistence systems.
+
+### Step 6L — IMPLEMENTED; AUTOMATED/RUNTIME VERIFIED; MANUALLY VERIFIED / ACCEPTED
+
+Implemented one generic typed/versioned, non-stackable Space Chest item for Ultimate, Legendary, and Mastery tiers, using canonical tier-colored names, Minecraft's special vanilla normal-Chest item renderer, and tier-specific virtual panes. Three production `cosmicpve:space_chest/*` reward tables use the existing reloadable weighted-reward repository and Step 6K factories. Each rarity-labelled Book row now generates the corresponding generic Unexamined Book, deferring enchantment, level, Success, and Destroy rolls until each book is opened; the separate random-actual-Cosmic-Book reward primitive remains available for other content. Each of the 27 positions is one independent table roll, and identical Unexamined Books may compact into a truthful quantity stack inside one position.
+
+The server-authoritative 27-slot menu escrows exactly one chest, permits five distinct blind selections, and commits all 27 results only on the fifth choice. Missed rewards reveal left-to-right/top-to-bottom over 80 server ticks, remain fully visible for a 30-tick pause, then clear together with one chicken egg sound. The five selections retain their leather-equip sounds; each newly claimed selected reward plays one player-only experience-orb pickup sound, and closing a committed menu plays one player-only chest-close sound. Selected bundles remain guaranteed: clicking a selected pane delivers and marks its complete bundle exactly once, while any post-commit close delivers all still-pending bundles. A persistent copy-on-death player attachment records tier, phase, selected indices, committed selected ItemStacks, and delivery markers; login/respawn recovery returns an uncommitted chest or idempotently delivers committed pending rewards without globally saving on each click. Client code owns only screen rendering and synchronized display stacks.
+
+Implemented Ultimate `cosmicpve:blessed` IV on axes, bringing the total to 25 real Cosmic enchantments. Each valid committed melee hit creates at most one Luck-modified candidate at 2% per level, and only when the attacker has an eligible cleansable negative Cosmic stack instance or harmful vanilla effect. Doublestrike children may reroll it through the normal limited-offensive peer policy. Activation uniformly selects across individual negative stack instances and harmful effects, then removes exactly one stack instance or the entire selected vanilla effect. Blessed has no cooldown, stack, true damage, or extra packet.
+
+The generic spawner placement audit confirms `SpawnerBlockEntity.setEntityId` writes `minecraft:creeper` into vanilla `SpawnData` while retaining the normal 20-tick initial delay, 200–800-tick subsequent delay, spawn count 4, and 16-block player range. Placement now centralizes the vanilla configuration, dirty-mark, chunk notification, and client update boundary, and `/cosmic reward spawner inspect <position>` exposes the saved state for controlled testing. Creepers still obey ordinary non-Peaceful difficulty, darkness, collision, nearby-mob, and player-range rules; no mob-specific spawning exception was introduced.
 
 ## 3. Current Real Enchantments
 
@@ -190,10 +200,11 @@ These are registered through Minecraft's enchantment infrastructure, use actual 
 | `cosmicpve:death_pact` | V | Chestplate | Mastery | Adds -3% ordinary outgoing damage at every level and a separate `1 - 0.02 × level` ordinary incoming multiplier. True damage and execution bypass the ordinary pipeline. |
 | `cosmicpve:auto_smelt` | I | Pickaxe | Simple | Converts each finalized block-drop stack through one ordinary smelting recipe, preserving the vanilla-generated quantity and awarding no furnace XP. |
 | `cosmicpve:experience` | III | Pickaxe | Simple | Multiplies finalized player block-break XP by `1 + 0.5 × level` and floors the integral result. Other XP sources are unaffected. |
+| `cosmicpve:blessed` | IV | Axe | Ultimate | On a committed melee hit, has 2% per level to uniformly remove either one eligible negative Cosmic stack instance or one entire harmful vanilla effect from the attacker. Luck modifies the chance relatively. |
 
 ### DESIGNED BUT NOT IMPLEMENTED
 
-The design also names Divine Immolation, Gears, Hero Killer, Mortal Coil, Phoenix, Self Destruct, and Virus. None currently has a registered real enchantment or runtime behavior. There are exactly 24 implemented real Cosmic enchantments; Death Pact is currently the sole implemented Mastery enchantment. Do not add behavior assumptions beyond `Cosmic_Design.md`.
+The design also names Divine Immolation, Gears, Hero Killer, Mortal Coil, Phoenix, Self Destruct, and Virus. None currently has a registered real enchantment or runtime behavior. There are exactly 25 implemented real Cosmic enchantments; Death Pact is currently the sole implemented Mastery enchantment. Do not add behavior assumptions beyond `Cosmic_Design.md`.
 
 ## 4. Critical Combat Semantics
 
@@ -460,9 +471,9 @@ The final post-Orb capacity is no longer unresolved for current target classes: 
 
 ## 16. Current Next Milestone
 
-**Next milestone: Step 6L — Space Chest Core + Ultimate, Legendary, and Mastery Space Chests.**
+**Next milestone: Step 6M — Trial Instance Foundation.**
 
-Step 6K is manually accepted. Step 6L must consume the generic Step 6K reward infrastructure instead of rebuilding reward construction in Space Chest code.
+Step 6L is implemented, automated/runtime verified, and manually accepted. Step 6M begins from its committed clean baseline.
 
 After acceptance, continue building generic reward prerequisites toward Space Chests and then the Trial instance foundation. Memory Chests and Cosmic Crates remain deliberately deferred. Maintain the normal cadence of roughly one or two enchantments per milestone; fewer are acceptable for especially risky infrastructure work.
 
@@ -480,6 +491,13 @@ After acceptance, continue building generic reward prerequisites toward Space Ch
 Preserve unrelated dirty changes. Never change pinned versions as a side effect of gameplay work. Prefer service-level rules and typed data over one-off event logic, and keep client-only classes isolated from dedicated-server loading.
 
 ## 18. Verification Snapshot
+
+For the accepted Step 6L implementation:
+
+- The automated suite currently passes all 223 tests across 67 suites with 0 failures and 0 errors; focused coverage includes tier/table identity, exact production rows/weights and Unexamined Book semantics, persistence codecs and transaction invariants, the 80-tick reveal plus 30-tick pause, canonical presentation/sound policy, non-stackability, vanilla Creeper `SpawnData` and timing defaults, reward-bundle compaction, Blessed chances, and the 25-enchantment registration invariant.
+- The dedicated server atomically published all three production Space Chest tables plus the existing development table, loaded 1,462 recipes, retained the progression recipe invariant, and reached `Done` without relevant registry, datapack, command, menu, attachment, or sided-classloading errors.
+- Client startup completed resource reload, sound initialization, and texture-atlas creation with the Space Chest menu screen/item model registered and no relevant missing-model, malformed-resource, or localization errors. The client was deliberately terminated at the smoke-test boundary.
+- Pinned environment values remain unchanged. The user manually verified and accepted the corrected Space Chest presentation, timing, sounds, Unexamined rewards, transactional recovery, and Blessed behavior. Creeper Spawner runtime spawning remains a deferred, non-blocking issue: the typed item and placed vanilla spawner preserve `minecraft:creeper` in `SpawnData`, and configuration diagnostics appear correct, but manual testing has not yet produced Creepers under apparently valid conditions.
 
 For the accepted Step 6K implementation:
 

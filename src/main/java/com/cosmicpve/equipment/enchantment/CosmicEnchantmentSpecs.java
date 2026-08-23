@@ -55,11 +55,13 @@ public final class CosmicEnchantmentSpecs {
             ModEnchantments.AUTO_SMELT.identifier(), 1, CosmicEnchantmentTier.SIMPLE, "pickaxe");
     public static final CosmicEnchantmentSpec EXPERIENCE = new CosmicEnchantmentSpec(
             ModEnchantments.EXPERIENCE.identifier(), 3, CosmicEnchantmentTier.SIMPLE, "pickaxe");
+    public static final CosmicEnchantmentSpec BLESSED = new CosmicEnchantmentSpec(
+            ModEnchantments.BLESSED.identifier(), 4, CosmicEnchantmentTier.ULTIMATE, "axe");
 
     public static final List<CosmicEnchantmentSpec> ALL =
             List.of(EXECUTE, ANGELIC, LIGHTNING, ENDER_SHIFT, DOUBLESTRIKE, BLEED, LUCK, POISON, PUMMEL,
                     GREATSWORD, INSANITY, VENOM, AEGIS, EAGLE_EYE, RAGE, MOLTEN, NUTRITION, GLOWING,
-                    OBSIDIANSHIELD, OXYGENATE, ARMORED, DEATH_PACT, AUTO_SMELT, EXPERIENCE);
+                    OBSIDIANSHIELD, OXYGENATE, ARMORED, DEATH_PACT, AUTO_SMELT, EXPERIENCE, BLESSED);
 
     private CosmicEnchantmentSpecs() {}
 

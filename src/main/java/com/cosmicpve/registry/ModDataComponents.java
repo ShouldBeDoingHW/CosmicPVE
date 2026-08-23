@@ -13,6 +13,7 @@ import com.cosmicpve.data.component.HeroicIdentity;
 import com.cosmicpve.data.component.UnexaminedBookData;
 import com.cosmicpve.data.component.BanknoteData;
 import com.cosmicpve.data.component.MobSpawnerData;
+import com.cosmicpve.data.component.SpaceChestData;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -84,6 +85,11 @@ public final class ModDataComponents {
             COMPONENTS.registerComponentType("mob_spawner",
                     builder -> builder.persistent(MobSpawnerData.CODEC)
                             .networkSynchronized(ByteBufCodecs.fromCodecWithRegistries(MobSpawnerData.CODEC)).cacheEncoding());
+
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<SpaceChestData>> SPACE_CHEST =
+            COMPONENTS.registerComponentType("space_chest",
+                    builder -> builder.persistent(SpaceChestData.CODEC)
+                            .networkSynchronized(ByteBufCodecs.fromCodecWithRegistries(SpaceChestData.CODEC)).cacheEncoding());
 
     private ModDataComponents() {}
 

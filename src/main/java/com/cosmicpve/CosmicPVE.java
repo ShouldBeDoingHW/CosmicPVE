@@ -9,6 +9,8 @@ import com.cosmicpve.registry.ModAttachments;
 import com.cosmicpve.registry.ModDataComponents;
 import com.cosmicpve.registry.ModItems;
 import com.cosmicpve.registry.ModEntities;
+import com.cosmicpve.registry.ModMenus;
+import com.cosmicpve.spacechest.SpaceChestEventBridge;
 import com.cosmicpve.loot.ModLootModifiers;
 import com.cosmicpve.progression.ArmorRecipeProgression;
 import com.cosmicpve.equipment.armor.ArmorCrystalEventBridge;
@@ -43,6 +45,7 @@ public final class CosmicPVE {
         ModAttachments.register(modBus);
         ModItems.register(modBus);
         ModEntities.register(modBus);
+        ModMenus.register(modBus);
         ModLootModifiers.register(modBus);
         modBus.addListener(CosmicNetwork::registerPayloads);
         modBus.addListener(CosmicPVE::registerProgressionDataPack);
@@ -67,6 +70,9 @@ public final class CosmicPVE {
         var repairs = new RepairScrollEventBridge();
         NeoForge.EVENT_BUS.addListener(repairs::onStacked);
         ArmorRecipeProgression.register();
+        var spaceChests = new SpaceChestEventBridge();
+        NeoForge.EVENT_BUS.addListener(spaceChests::onLogin);
+        NeoForge.EVENT_BUS.addListener(spaceChests::onRespawn);
     }
 
     public static Identifier id(String path) {

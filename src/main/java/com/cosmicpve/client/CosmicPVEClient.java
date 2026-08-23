@@ -6,6 +6,7 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import com.cosmicpve.registry.ModEntities;
 import com.cosmicpve.client.entity.SpacePirateVariant1Renderer;
 import com.cosmicpve.client.entity.SpacePirateVariant2Renderer;
@@ -16,6 +17,11 @@ public final class CosmicPVEClient {
         modBus.addListener(ArmorSetClientExtensions::register);
         modBus.addListener(CosmicPVEClient::registerItemTints);
         modBus.addListener(CosmicPVEClient::registerEntityRenderers);
+        modBus.addListener(CosmicPVEClient::registerMenuScreens);
+    }
+
+    private static void registerMenuScreens(RegisterMenuScreensEvent event) {
+        event.register(com.cosmicpve.registry.ModMenus.SPACE_CHEST.get(), SpaceChestScreen::new);
     }
 
     private static void registerEntityRenderers(EntityRenderersEvent.RegisterRenderers event) {

@@ -218,9 +218,9 @@ Sand Castle: Each Sand Castle that you’ve placed gives you a \+1% chance to ga
 
 # Current Issues
 
-Glowing visual bug — UNRESOLVED:
+Creeper Spawner runtime spawning — UNRESOLVED / DEFERRED:
 
-Minecraft makes the night vision effect flicker between working and not working while it’s duration remaining is under 200 ticks. Glowing v1 gave night vision for 40 ticks, which meant that the flickering effect was a permanent feature of wearing the enchantment. I used a small patch to increase glowing’s duration to 11 seconds/220 ticks, but I did not realize that the enchantment only gives night vision if the player does not currently have it, meaning that I now get 11 seconds, it starts flickering after 1, and then after 10 more seconds the night vision refreshes.
+The typed Creeper Spawner item and placed vanilla spawner preserve `minecraft:creeper` in `SpawnData`, and configuration diagnostics appear correct, but manual testing has not yet produced Creepers under apparently valid conditions. This is non-blocking for Trials and is deliberately deferred.
 
 # Dungeons
 
@@ -658,6 +658,8 @@ Space Chests are medium/minor loot bags that contain useful though tame loot to 
 
 Space Chests come in 3 main rarities: Ultimate, Legendary, and Mastery. Each variant contains 5 items of loot from their respective loot table. Non memory chests have their name formatted in the color that corresponds to that rarity. Memory chests use a rainbow gradient as follows:
 
+Within ordinary Space Chest loot tables, every rarity-labelled Enchantment Book entry means an Unexamined Enchantment Book of that rarity. The enchantment identity, level, Success Rate, and Destroy Rate are rolled only when the player later opens each Unexamined Book.
+
 | Letter | Hex Code |
 | :---- | :---- |
 | M \#1 | BF0F0F |
@@ -742,7 +744,7 @@ Memory Chest Loot Table:
 
 The animation for non memory space chests works as follows:
 
-An inventory filled with 27 glass panes is opened. The color of the glass panes is either Yellow, Orange, or Red based on the rarity of the chest being opened. The player can click on 5 of these panes, turning them white. They cannot click the same pane twice. Each click plays the leather armor equip sound. Once 5 panes have turned white, the rest of the colored panes are revealed from left to right, top to bottom, over the span of 4 seconds to show the loot they did not earn, and then the egg being laid sound is played, and everything disappears from the menu except for the 5 white panes. The player can then click on each pane to reveal one of the pieces of loot from the loot table. Duplicates are allowed. If the player closes the menu before reaching 5 white panes, the chest is returned to them, if they have turned 5 panes white when the close, regardless of where the animation is, exiting out will simply give them the loot. If they do not have inventory space, the loot is dropped on the ground.
+An inventory filled with 27 glass panes is opened. The color of the glass panes is either Yellow, Orange, or Red based on the rarity of the chest being opened. The player can click on 5 of these panes, turning them white. They cannot click the same pane twice. Each click plays the leather armor equip sound. Once 5 panes have turned white, the rest of the colored panes are revealed from left to right, top to bottom, over the span of 4 seconds to show the loot they did not earn. The complete board then remains visible for 1.5 seconds before the egg-being-laid sound plays and everything disappears except the 5 white panes. The player can then click each white pane to reveal one won reward, with the experience-orb pickup sound playing once per newly revealed reward. Duplicates are allowed. If the player closes the menu before reaching 5 white panes, the chest is returned to them; after five selections, closing at any point gives all remaining selected loot. If they do not have inventory space, the loot is dropped on the ground.
 
 # Trials
 

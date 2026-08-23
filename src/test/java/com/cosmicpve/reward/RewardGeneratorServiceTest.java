@@ -10,6 +10,7 @@ import com.cosmicpve.data.component.BlackScrollData;
 import com.cosmicpve.data.component.CosmicEnchantmentBookData;
 import com.cosmicpve.data.component.EnchantmentOrbData;
 import com.cosmicpve.data.component.MobSpawnerData;
+import com.cosmicpve.data.component.UnexaminedBookData;
 import com.cosmicpve.equipment.enchantment.CosmicEnchantmentSpecs;
 import com.cosmicpve.equipment.enchantment.CosmicEnchantmentTier;
 import com.cosmicpve.registry.ModDataComponents;
@@ -43,6 +44,17 @@ class RewardGeneratorServiceTest {
                 assertTrue(data.level() >= 1 && data.level() <= spec.maxLevel());
                 assertTrue(tier.allowsRates(data.successRate(), data.destroyRate()));
             }
+        }
+    }
+
+    @Test void unexaminedBookRewardStoresOnlyRarityAndDefersEveryActualBookRoll() {
+        for (var tier : CosmicEnchantmentTier.values()) {
+            var stack = generate(new RewardDescriptor.UnexaminedBook(tier));
+            assertEquals(ModItems.UNEXAMINED_ENCHANTMENT_BOOK.get(), stack.getItem());
+            UnexaminedBookData data = stack.get(ModDataComponents.UNEXAMINED_BOOK.get());
+            assertNotNull(data);
+            assertEquals(tier, data.tier());
+            assertEquals(null, stack.get(ModDataComponents.COSMIC_ENCHANT_BOOK.get()));
         }
     }
 

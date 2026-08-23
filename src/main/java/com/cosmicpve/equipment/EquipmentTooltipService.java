@@ -16,6 +16,10 @@ import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 public final class EquipmentTooltipService {
     public void onTooltip(ItemTooltipEvent event) {
         var stack = event.getItemStack();
+        if (stack.is(com.cosmicpve.registry.ModItems.SPACE_CHEST.get())
+                && stack.has(ModDataComponents.SPACE_CHEST.get())) {
+            event.getToolTip().addAll(com.cosmicpve.spacechest.SpaceChestItem.lore());
+        }
         if (stack.is(com.cosmicpve.registry.ModItems.HEROIC_CRYSTAL.get())) {
             event.getToolTip().addAll(com.cosmicpve.equipment.heroic.HeroicCrystalItem.lore());
         }

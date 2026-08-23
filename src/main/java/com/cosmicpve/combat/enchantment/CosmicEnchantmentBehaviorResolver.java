@@ -48,6 +48,7 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
             addBleed(event, result);
             addPoison(event, result);
             addPummel(event, result);
+            addBlessed(event, result);
         } else if (event.hook() == ProcHook.ON_PROJECTILE_HIT) {
             addLightning(event, result);
             addVenom(event, result);
@@ -57,6 +58,18 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
             addMolten(event, result);
         }
         return List.copyOf(result);
+    }
+
+    private void addBlessed(ProcEvent event, List<ProcCandidate> result) {
+        int level = event.effectiveEnchantments().level(ModEnchantments.BLESSED.identifier());
+        if (level <= 0 || event.attacker() == null
+                || BlessedBehavior.eligible(event.attacker(), stacks, event.serverTick()).isEmpty()) return;
+        result.add(candidate(ModEnchantments.BLESSED.identifier(), ProcHook.ON_VALID_HIT,
+                BlessedBehavior.chance(level), Optional.empty(), 0L, Optional.empty(),
+                ChildProcEligibility.LIMITED_OFFENSIVE_REROLL,
+                activation -> BlessedBehavior.activate(activation.event(), stacks),
+                provenance(event, ModEnchantments.BLESSED.identifier()),
+                meleeCondition(CosmicPVE.id("blessed_melee_hit"))));
     }
 
     private void addBleed(ProcEvent event, List<ProcCandidate> result) {

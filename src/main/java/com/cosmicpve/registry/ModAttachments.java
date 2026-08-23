@@ -3,6 +3,7 @@ package com.cosmicpve.registry;
 import com.cosmicpve.CosmicPVE;
 import com.cosmicpve.data.attachment.PlayerProfileData;
 import com.cosmicpve.combat.stack.CombatStackContainer;
+import com.cosmicpve.spacechest.SpaceChestSessionAttachment;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.attachment.AttachmentType;
 import net.neoforged.neoforge.registries.DeferredHolder;
@@ -28,6 +29,10 @@ public final class ModAttachments {
                     () -> AttachmentType.builder((java.util.function.Supplier<CombatStackContainer>) CombatStackContainer::new)
                             .serialize(CombatStackContainer.CODEC)
                             .build());
+
+    public static final DeferredHolder<AttachmentType<?>, AttachmentType<SpaceChestSessionAttachment>> SPACE_CHEST_SESSION =
+            ATTACHMENTS.register("space_chest_session", () -> AttachmentType.builder(SpaceChestSessionAttachment::empty)
+                    .serialize(SpaceChestSessionAttachment.CODEC).copyOnDeath().build());
 
     private ModAttachments() {}
 

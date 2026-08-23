@@ -74,7 +74,7 @@ class CosmicEnchantmentRegistrationTest {
                 }
             }
         }
-        assertEquals(24, CosmicEnchantmentSpecs.ALL.size());
+        assertEquals(25, CosmicEnchantmentSpecs.ALL.size());
         assertEquals(CosmicEnchantmentTier.ELITE, CosmicEnchantmentSpecs.EXECUTE.tier());
         assertEquals(CosmicEnchantmentTier.ULTIMATE, CosmicEnchantmentSpecs.ANGELIC.tier());
         assertEquals(CosmicEnchantmentTier.SIMPLE, CosmicEnchantmentSpecs.LIGHTNING.tier());
@@ -106,6 +106,9 @@ class CosmicEnchantmentRegistrationTest {
         assertEquals(CosmicEnchantmentTier.SIMPLE, CosmicEnchantmentSpecs.EXPERIENCE.tier());
         assertEquals("pickaxe", CosmicEnchantmentSpecs.AUTO_SMELT.equipmentApplicability());
         assertEquals("pickaxe", CosmicEnchantmentSpecs.EXPERIENCE.equipmentApplicability());
+        assertEquals(CosmicEnchantmentTier.ULTIMATE, CosmicEnchantmentSpecs.BLESSED.tier());
+        assertEquals("axe", CosmicEnchantmentSpecs.BLESSED.equipmentApplicability());
+        assertEquals(4, CosmicEnchantmentSpecs.BLESSED.maxLevel());
     }
 
     @Test

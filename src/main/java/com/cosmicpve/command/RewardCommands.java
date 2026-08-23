@@ -11,6 +11,7 @@ import com.cosmicpve.reward.RewardGenerationContext;
 import com.cosmicpve.reward.RewardGeneratorService;
 import com.cosmicpve.reward.RewardTableService;
 import com.cosmicpve.reward.spawner.MobSpawners;
+import com.cosmicpve.reward.spawner.MobSpawnerEligibility;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import java.util.List;
@@ -19,6 +20,7 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.IdentifierArgument;
+import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -31,6 +33,22 @@ public final class RewardCommands {
         var tableId = Commands.argument("table", IdentifierArgument.id())
                 .suggests((context, builder) -> SharedSuggestionProvider.suggestResource(
                         CosmicContent.repository().snapshot().rewardTables().keySet(), builder));
+        var spawner = Commands.literal("spawner")
+                .then(Commands.literal("give")
+                        .then(Commands.argument("player", EntityArgument.player())
+                                .then(Commands.argument("entity_type", IdentifierArgument.id())
+                                        .executes(context -> giveSpawner(context.getSource(),
+                                                EntityArgument.getPlayer(context, "player"),
+                                                IdentifierArgument.getId(context, "entity_type"), 1))
+                                        .then(Commands.argument("count", IntegerArgumentType.integer(1, 64))
+                                                .executes(context -> giveSpawner(context.getSource(),
+                                                        EntityArgument.getPlayer(context, "player"),
+                                                        IdentifierArgument.getId(context, "entity_type"),
+                                                        IntegerArgumentType.getInteger(context, "count")))))))
+                .then(Commands.literal("inspect")
+                        .then(Commands.argument("position", BlockPosArgument.blockPos())
+                                .executes(context -> inspectSpawner(context.getSource(),
+                                        BlockPosArgument.getLoadedBlockPos(context, "position")))));
         return Commands.literal("reward")
                 .then(Commands.literal("list").executes(context -> list(context.getSource())))
                 .then(Commands.literal("inspect").then(tableId.executes(context -> inspect(
@@ -44,17 +62,7 @@ public final class RewardCommands {
                                 .executes(context -> roll(context.getSource(),
                                         IdentifierArgument.getId(context, "table"),
                                         IntegerArgumentType.getInteger(context, "count"))))))
-                .then(Commands.literal("spawner").then(Commands.literal("give")
-                        .then(Commands.argument("player", EntityArgument.player())
-                                .then(Commands.argument("entity_type", IdentifierArgument.id())
-                                        .executes(context -> giveSpawner(context.getSource(),
-                                                EntityArgument.getPlayer(context, "player"),
-                                                IdentifierArgument.getId(context, "entity_type"), 1))
-                                        .then(Commands.argument("count", IntegerArgumentType.integer(1, 64))
-                                                .executes(context -> giveSpawner(context.getSource(),
-                                                        EntityArgument.getPlayer(context, "player"),
-                                                        IdentifierArgument.getId(context, "entity_type"),
-                                                        IntegerArgumentType.getInteger(context, "count"))))))))
+                .then(spawner)
                 .then(Commands.literal("book").then(Commands.literal("give")
                         .then(Commands.argument("player", EntityArgument.player())
                                 .then(Commands.argument("rarity", StringArgumentType.word())
@@ -123,13 +131,30 @@ public final class RewardCommands {
 
     private static int giveSpawner(net.minecraft.commands.CommandSourceStack source,
             net.minecraft.server.level.ServerPlayer player, Identifier entityId, int count) {
-        var type = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.get(entityId);
-        if (type.isEmpty() || type.orElseThrow().value().getCategory() == net.minecraft.world.entity.MobCategory.MISC) {
+        if (!MobSpawnerEligibility.isEligible(entityId)) {
             source.sendFailure(Component.literal("Entity type is not a valid mob: " + entityId)); return 0;
         }
         DELIVERY.deliver(player, List.of(MobSpawners.create(entityId, count)));
         source.sendSuccess(() -> Component.literal("Gave " + count + " " + entityId + " spawner(s)."), true);
         return count;
+    }
+
+    private static int inspectSpawner(net.minecraft.commands.CommandSourceStack source, net.minecraft.core.BlockPos position) {
+        if (!(source.getLevel().getBlockEntity(position)
+                instanceof net.minecraft.world.level.block.entity.SpawnerBlockEntity spawner)) {
+            source.sendFailure(Component.literal("No mob spawner exists at " + position.toShortString() + "."));
+            return 0;
+        }
+        var tag = spawner.saveCustomOnly(source.registryAccess());
+        var level = source.getLevel();
+        int blockLight = level.getBrightness(net.minecraft.world.level.LightLayer.BLOCK, position);
+        int skyLight = level.getBrightness(net.minecraft.world.level.LightLayer.SKY, position);
+        boolean playerInRange = level.hasNearbyAlivePlayer(position.getX() + 0.5D, position.getY() + 0.5D,
+                position.getZ() + 0.5D, 16.0D);
+        source.sendSuccess(() -> Component.literal("Spawner at " + position.toShortString() + ": " + tag
+                + ", difficulty=" + level.getDifficulty() + ", block_light=" + blockLight
+                + ", sky_light=" + skyLight + ", player_within_16=" + playerInRange), false);
+        return 1;
     }
 
     private static int giveEquipment(net.minecraft.commands.CommandSourceStack source,

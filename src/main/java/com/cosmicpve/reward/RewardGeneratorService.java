@@ -24,6 +24,7 @@ public final class RewardGeneratorService {
             case RewardDescriptor.CosmicBook reward -> UnexaminedBooks.openingService()
                     .roll(reward.rarity(), CosmicEnchantmentSpecs.ALL, context.random(), context.player())
                     .map(UnexaminedBooks::revealed);
+            case RewardDescriptor.UnexaminedBook reward -> Optional.of(UnexaminedBooks.create(reward.rarity()));
             case RewardDescriptor.BlackScroll reward -> Optional.of(enchanting.blackScroll(reward.successRate()));
             case RewardDescriptor.ArmorOrb reward -> Optional.of(
                     enchanting.orb(OrbType.ARMOR, reward.successRate(), context.random()));
