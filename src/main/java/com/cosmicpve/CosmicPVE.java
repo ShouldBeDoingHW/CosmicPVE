@@ -9,6 +9,8 @@ import com.cosmicpve.registry.ModAttachments;
 import com.cosmicpve.registry.ModDataComponents;
 import com.cosmicpve.registry.ModItems;
 import com.cosmicpve.registry.ModEntities;
+import com.cosmicpve.loot.ModLootModifiers;
+import com.cosmicpve.progression.ArmorRecipeProgression;
 import com.cosmicpve.equipment.armor.ArmorCrystalEventBridge;
 import com.cosmicpve.equipment.EquipmentTooltipService;
 import com.cosmicpve.equipment.enchantment.EnchantingEventBridge;
@@ -19,9 +21,14 @@ import com.cosmicpve.equipment.enchantment.OxygenateService;
 import com.cosmicpve.equipment.enchantment.EffectiveEnchantmentsResolver;
 import com.mojang.logging.LogUtils;
 import net.minecraft.resources.Identifier;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.repository.Pack;
+import net.minecraft.server.packs.repository.PackSource;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.AddPackFindersEvent;
 import org.slf4j.Logger;
 
 @Mod(CosmicPVE.MOD_ID)
@@ -34,7 +41,9 @@ public final class CosmicPVE {
         ModAttachments.register(modBus);
         ModItems.register(modBus);
         ModEntities.register(modBus);
+        ModLootModifiers.register(modBus);
         modBus.addListener(CosmicNetwork::registerPayloads);
+        modBus.addListener(CosmicPVE::registerProgressionDataPack);
         CosmicContent.register();
         LegacyCombatService.register(modBus);
         CosmicCombat.register();
@@ -51,9 +60,16 @@ public final class CosmicPVE {
         NeoForge.EVENT_BUS.addListener(heroic::onStacked);
         var oxygenate = new OxygenateEventBridge(new OxygenateService(new EffectiveEnchantmentsResolver()));
         NeoForge.EVENT_BUS.addListener(oxygenate::onBlockDrops);
+        ArmorRecipeProgression.register();
     }
 
     public static Identifier id(String path) {
         return Identifier.fromNamespaceAndPath(MOD_ID, path);
+    }
+
+    private static void registerProgressionDataPack(AddPackFindersEvent event) {
+        event.addPackFinders(id("resourcepacks/progression_cleanup"), PackType.SERVER_DATA,
+                Component.literal("CosmicPVE Progression Cleanup"), PackSource.BUILT_IN,
+                true, Pack.Position.TOP);
     }
 }

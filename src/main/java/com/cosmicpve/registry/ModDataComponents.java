@@ -10,6 +10,7 @@ import com.cosmicpve.data.component.BlackScrollData;
 import com.cosmicpve.data.component.WeaponSkinIdentity;
 import com.cosmicpve.data.component.WeaponSkinItemData;
 import com.cosmicpve.data.component.HeroicIdentity;
+import com.cosmicpve.data.component.UnexaminedBookData;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -41,6 +42,11 @@ public final class ModDataComponents {
             COMPONENTS.registerComponentType("cosmic_enchant_book",
                     builder -> builder.persistent(CosmicEnchantmentBookData.CODEC)
                             .networkSynchronized(ByteBufCodecs.fromCodecWithRegistries(CosmicEnchantmentBookData.CODEC)).cacheEncoding());
+
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<UnexaminedBookData>> UNEXAMINED_BOOK =
+            COMPONENTS.registerComponentType("unexamined_book",
+                    builder -> builder.persistent(UnexaminedBookData.CODEC)
+                            .networkSynchronized(ByteBufCodecs.fromCodecWithRegistries(UnexaminedBookData.CODEC)).cacheEncoding());
 
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<EnchantmentOrbData>> ENCHANTMENT_ORB =
             COMPONENTS.registerComponentType("enchantment_orb",

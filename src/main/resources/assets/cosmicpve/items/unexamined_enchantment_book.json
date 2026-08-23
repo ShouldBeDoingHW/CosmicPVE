@@ -1,0 +1,9 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "cosmicpve:item/unexamined_enchantment_book",
+    "tints": [
+      { "type": "cosmicpve:cosmic_book" }
+    ]
+  }
+}

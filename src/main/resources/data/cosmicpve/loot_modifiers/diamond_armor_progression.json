@@ -1,0 +1,12 @@
+{
+  "type": "cosmicpve:diamond_armor_replacement",
+  "conditions": [],
+  "loot_tables": [
+    "minecraft:chests/ancient_city",
+    "minecraft:chests/bastion_treasure",
+    "minecraft:chests/end_city_treasure",
+    "minecraft:chests/woodland_mansion",
+    "minecraft:chests/trial_chambers/reward_rare",
+    "minecraft:chests/trial_chambers/reward_ominous_rare"
+  ]
+}

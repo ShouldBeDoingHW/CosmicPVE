@@ -49,6 +49,8 @@ For example, an Unexamined Mastery Enchantment Book may reveal Phoenix at any va
 
 The revealed book receives independently generated Success Rate and Destroy Rate values. Its base rolls follow the normal rules for its rarity, including the special Mastery ranges. The generation of these values must be data-driven and expose a reusable modifier path so future custom blocks, upgrades, temporary buffs, debuffs, or other systems may favorably or negatively influence the rates of books opened while the modifier is active. For example, a future custom block could grant \+3 percentage points to the Success Rate of Unexamined Books opened during a five-minute effect window. Exact modifier stacking and clamping are defined by the effect providing the modifier rather than hard-coded into the Unexamined Book item.
 
+Implementation status: one generic typed Unexamined Enchantment Book now supports every Cosmic rarity. Opening is server-authoritative and selects only real implemented enchantments from the book's rarity, then independently rolls a valid level, Success Rate, and Destroy Rate. A rarity with no implemented enchantments rejects opening without consuming the item. Successful opening consumes one book, launches a non-damaging upward firework, and returns the ordinary typed Cosmic Enchantment Book used by the existing application system. Rate generation is centralized and exposes an ordered modifier seam; no rate-modifying gameplay source is implemented yet.
+
 # Conquest Chests
 
 Conquest Chests are periodic Overworld events that allow players to gain loot. One Conquest Chest spawns every 7th Minecraft day. Its X and Z coordinates are selected independently within the square from \-5,000 to \+5,000 on each axis. Each Conquest Chest must be mined to obtain the loot held inside and takes 1.5× as long to mine as obsidian. Upon the first player interaction with the chest, 3-5 Space Pirates spawn in a 5x5 area around it. Players cannot break or place blocks aside from the Conquest Chest itself within the existing 20x20 protected area around the chest. If no player has interacted with the chest within 30 minutes of its spawn, it despawns. Once successfully broken, the Conquest Chest rolls 3 items from its loot table.
@@ -153,6 +155,8 @@ Iron armor is the highest normal player armor tier in CosmicPVE. Diamond Armor a
 Diamond Armor results in generated loot tables, including End City loot and other applicable vanilla loot sources, are removed. Whenever one of these removed Diamond Armor loot results would otherwise be generated, it is replaced by one Unexamined Enchantment Book: 65% chance of  Unexamined Simple and 35% for an Unexamined Unique.
 
 This progression rule does not prevent encounter mobs from visually or mechanically using stronger armor when an encounter explicitly defines that equipment; it governs normal player armor progression and acquisition.
+
+Implementation status: the four Diamond armor crafting recipes and four Netherite armor smithing recipes are disabled. Generated Diamond armor is replaced after loot generation in Ancient City, Bastion Treasure, End City Treasure, Woodland Mansion, and normal/ominous rare Trial Chamber reward chests. Each replaced armor result becomes exactly one Unexamined Book using the 65% Simple / 35% Unique split. The separate Trial Chamber encounter-equipment table is intentionally unchanged under the encounter-mob exception above.
 
 # Cosmic Crates
 

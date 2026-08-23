@@ -5,9 +5,13 @@ import com.cosmicpve.data.component.EnchantmentOrbData;
 import com.cosmicpve.data.component.BlackScrollData;
 import com.cosmicpve.equipment.enchantment.OrbType;
 import com.cosmicpve.equipment.enchantment.CosmicEnchantmentSpecs;
+import com.cosmicpve.equipment.enchantment.CosmicEnchantmentTier;
+import com.cosmicpve.equipment.enchantment.UnexaminedBooks;
 import com.cosmicpve.registry.ModDataComponents;
 import com.cosmicpve.registry.ModItems;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
+import java.util.Locale;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.IdentifierArgument;
@@ -57,8 +61,20 @@ public final class EnchantingCommands {
                         .then(Commands.argument("returned-success", IntegerArgumentType.integer(1, 100))
                                 .executes(c -> giveBlackScroll(EntityArgument.getPlayer(c, "player"),
                                         IntegerArgumentType.getInteger(c, "returned-success"))))));
+        var unexamined = Commands.literal("unexamined").then(Commands.literal("give")
+                .then(Commands.argument("player", EntityArgument.player())
+                        .then(Commands.argument("tier", StringArgumentType.word())
+                                .suggests((context, builder) -> net.minecraft.commands.SharedSuggestionProvider.suggest(
+                                        java.util.Arrays.stream(CosmicEnchantmentTier.values())
+                                                .map(CosmicEnchantmentTier::serializedName), builder))
+                                .executes(c -> giveUnexamined(c.getSource(), EntityArgument.getPlayer(c, "player"),
+                                        StringArgumentType.getString(c, "tier"), 1))
+                                .then(Commands.argument("count", IntegerArgumentType.integer(1, 64))
+                                        .executes(c -> giveUnexamined(c.getSource(), EntityArgument.getPlayer(c, "player"),
+                                                StringArgumentType.getString(c, "tier"),
+                                                IntegerArgumentType.getInteger(c, "count")))))));
         return Commands.literal("enchant").then(Commands.literal("book").then(give).then(random))
-                .then(scroll).then(blackScroll).then(transmog).then(orbs);
+                .then(unexamined).then(scroll).then(blackScroll).then(transmog).then(orbs);
     }
     private static int giveBook(net.minecraft.commands.CommandSourceStack source, net.minecraft.server.level.ServerPlayer player,
             net.minecraft.resources.Identifier id,int level,int success,int destroy){
@@ -110,5 +126,22 @@ public final class EnchantingCommands {
                 BlackScrollData.CURRENT_DATA_VERSION, returnedSuccessRate));
         player.getInventory().placeItemBackInInventory(stack);
         return 1;
+    }
+
+    private static int giveUnexamined(net.minecraft.commands.CommandSourceStack source,
+            net.minecraft.server.level.ServerPlayer player, String tierName, int count) {
+        final CosmicEnchantmentTier tier;
+        try {
+            tier = CosmicEnchantmentTier.valueOf(tierName.toUpperCase(Locale.ROOT));
+        } catch (IllegalArgumentException exception) {
+            source.sendFailure(Component.translatable("command.cosmicpve.unexamined.unknown_tier", tierName));
+            return 0;
+        }
+        ItemStack stack = UnexaminedBooks.create(tier);
+        stack.setCount(count);
+        player.getInventory().placeItemBackInInventory(stack);
+        source.sendSuccess(() -> Component.translatable("command.cosmicpve.unexamined.given",
+                count, tier.serializedName(), player.getDisplayName()), true);
+        return count;
     }
 }

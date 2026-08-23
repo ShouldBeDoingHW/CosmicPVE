@@ -2,7 +2,7 @@
 
 Current verified and accepted gameplay commit: `da3a6334dabda9c148935a6e6a27cda5334af1ba` (`Add Space Pirates and Oxygenate`). This is the accepted Steps 6A–6H baseline, including the accepted Heroic Crystal and Glowing-duration refinements completed before closure.
 
-Repository state after Step 6H gameplay closure: tracked gameplay is clean at `da3a6334dabda9c148935a6e6a27cda5334af1ba`, apart from this canonical documentation/design-baseline follow-up. The root `assets` source-art folder and root `trial rooms` structure-development folder are deliberately untracked.
+Current working state: Step 6I is implemented, automated/runtime verified, and manually verified/accepted. Its closure commit is being prepared. The root `assets` source-art folder and root `trial rooms` structure-development folder remain deliberately untracked and unrelated.
 
 Last handoff update: 2026-08-23
 
@@ -122,7 +122,7 @@ Implemented real Unique enchantments `cosmicpve:molten` IV and `cosmicpve:nutrit
 
 Implemented one versioned `HEROIC` item component and one generic non-stackable Heroic Crystal. Its displayed name uses `#AA00AA`, and its concise purpose/instruction lore uses the standard yellow effect-description style. A server-authoritative drag/drop transaction applies once to armor, pickaxes, or shovels, mutating the original stack in place and preserving wear and unrelated components. Successful application plays the standard player-level-up item-application cue. It raises the stack's real `MAX_DAMAGE` by exactly 250 while leaving its damage value unchanged. Heroic armor retains its registry item and defensive statistics but uses leather equipment/item presentation; Heroic pickaxes and shovels retain their underlying mining behavior but use gold-style item presentation. Heroic and armor-set identities compose in either application order. Heroic Dungeon Portal behavior remains designed and unimplemented.
 
-Implemented real `cosmicpve:glowing` I (Simple, helmet) and `cosmicpve:obsidianshield` I (Ultimate, leggings), bringing the real enchantment count to 19. One LivingEntity-compatible equipped-effect service maintains hidden Night Vision or Fire Resistance leases and refreshes only near expiry. Glowing's lease is currently 220 ticks; its remaining visual refresh defect is recorded under Unresolved and is explicitly included in Step 6I. The service tracks only effects it created; an external potion/effect that supersedes the lease is not removed when equipment changes. Both enchantments automatically use generic Books, capacity, Black Scroll eligibility, Transmog, and the standardized metadata-driven lore.
+Implemented real `cosmicpve:glowing` I (Simple, helmet) and `cosmicpve:obsidianshield` I (Ultimate, leggings), bringing the real enchantment count to 19. One LivingEntity-compatible equipped-effect service maintains hidden Night Vision or Fire Resistance leases and refreshes only near expiry. Glowing's lease is currently 220 ticks; its remaining visual refresh defect is recorded under Unresolved and was deliberately preserved during Step 6I. The service tracks only effects it created; an external potion/effect that supersedes the lease is not removed when equipment changes. Both enchantments automatically use generic Books, capacity, Black Scroll eligibility, Transmog, and the standardized metadata-driven lore.
 
 Expanded the armor-set inventory tint item-definition path to leather, chainmail, iron, gold, diamond, and netherite armor, including trim variants. Heroic leather-style armor uses the same tint source, so set identity remains visible in item UIs. Maui's Hook now mirrors the held model's X scale in first/third-person and right/left-hand transforms so its curved end faces away from the wielder; the inventory artwork and gameplay are unchanged.
 
@@ -133,6 +133,14 @@ Implemented the first reusable custom hostile-mob foundation and explicit entity
 Implemented real Simple enchantment `cosmicpve:oxygenate` II for pickaxes, bringing the registered real-enchantment count to 20. A completed underwater block break restores exactly one displayed air bubble (30 internal air units) per effective level and clamps to the normal maximum. It is deterministic and outside ProcEngine, Luck, cooldown, and stack handling. Oxygenate uses generic Books, capacity counting, Black Scroll extraction, Transmog, and remains absent from vanilla acquisition pools.
 
 The centralized Simple rarity color is now `#FFFFFF`; Cosmic Book effect-description bodies remain yellow while their tier name uses the tier color. Ancient's data-driven presentation color is now `#0A4A3D` with gameplay unchanged. Combat/proc trace output now lets a traced player inspect committed mob attacks, identifying the attacker, weapon/effective enchantments, outgoing contributors, and proc candidates/results through the existing trace systems.
+
+### Step 6I — IMPLEMENTED; AUTOMATED/RUNTIME VERIFIED; MANUALLY VERIFIED / ACCEPTED
+
+Iron is now the normal crafted player-armor ceiling. A required highest-priority built-in server datapack disables all four Diamond armor crafting recipes and all four Netherite armor smithing upgrades without restricting Diamond/Netherite tools or weapons. A server-start/datapack-sync invariant verifies those eight IDs are absent from the live recipe manager and fails loudly if another resource reintroduces them. This does not prevent explicitly configured encounter mobs, including Space Pirates and Trial Chamber encounter equipment, from using stronger armor.
+
+One generic stackable `cosmicpve:unexamined_enchantment_book` carries a versioned rarity component and uses the existing Cosmic tier metadata for naming, tint, glint, and base rate ranges. Server-authoritative right-click opening selects one registered/implemented enchantment of the same rarity, rolls a uniformly random valid level, independently rolls Success and Destroy rates, consumes exactly one Unexamined Book, launches a non-damaging upward firework, and returns the existing typed Cosmic Enchantment Book. The use transaction explicitly transforms an exhausted final source stack into its revealed book; when source books remain, vanilla inventory insertion safely drops the reward if no slot can accept it. Rarities with no implemented enchantments reject safely without consumption. `BookOpeningRateService` composes registered modifiers in order and validates the result against the tier; no modifier-providing gameplay effect exists yet.
+
+A data-scoped global loot modifier replaces generated Diamond helmet/chestplate/leggings/boots results with exactly one Unexamined Book: 65% Simple and 35% Unique. The audited target tables are Ancient City, Bastion Treasure, End City Treasure, Woodland Mansion, and the normal/ominous rare Trial Chamber reward chests. The separate Trial Chamber encounter-equipment table is deliberately excluded. A permission-gated `/cosmic enchant unexamined give <player> <tier> [count]` command supports manual verification.
 
 ## 3. Current Real Enchantments
 
@@ -351,7 +359,6 @@ This Invasion rule is activity-specific and must not change the global `keepInve
 The following remain future content or infrastructure:
 
 - all enchantments beyond the 20 listed above, including every Mastery enchantment
-- the Iron-capped normal player armor progression rule, Diamond/Netherite armor acquisition cleanup, generated Diamond Armor loot replacement, and Unexamined Enchantment Books
 - Space Pirate natural spawning, Conquest Chest spawning/rewards, and Abandoned Spaceship encounters; only the reusable entities and canonical generated combat equipment exist
 - Dimensional Traveler, Engineer, Ranger, Yjiki, and Dragonslayer armor sets
 - masks and Multi-Masks
@@ -392,6 +399,7 @@ The following are confirmed in current source and permission-gated under `/cosmi
 - `/cosmic armor crystal give <player> <set-id> <success-rate>`
 - `/cosmic enchant book give <player> <enchantment-id> <level> <success> <destroy>`
 - `/cosmic enchant book give-random <player> <enchantment-id> <level>`
+- `/cosmic enchant unexamined give <player> <tier> [count]`
 - `/cosmic enchant black-scroll give <player> <returned-success>`
 - `/cosmic enchant white-scroll give <player> [count]`
 - `/cosmic enchant transmog give <player> [count]`
@@ -415,17 +423,18 @@ Commands call gameplay services or create the same typed components used by game
 - **Pheonix/Phoenix identity and death order:** settle the stable spelling/ID and verify pinned NeoForge kill/death-prevention event ordering before implementing it.
 - **Activity key/portal terminology and acquisition:** Dungeons are intended as costly/keyed activities, but current design text primarily describes portals; reconcile this before item implementation.
 - **Seasonal crate finalization:** substantial draft tables and mechanics exist, but their exact balance, rewards, acquisition rates, prerequisites, and implementation details remain subject to a bounded reconciliation milestone.
-- **Glowing visual lease:** Glowing currently grants a 220-tick Night Vision lease but refreshes only near expiry, after vanilla's Night Vision flicker threshold. Step 6I must fix the visible flicker through the shared equipped-effect service without changing unrelated effect ownership semantics.
+- **Glowing visual lease:** Glowing currently grants a 220-tick Night Vision lease but refreshes only near expiry, after vanilla's Night Vision flicker threshold. This remains unresolved after Step 6I and needs a later focused fix through the shared equipped-effect service without changing unrelated effect ownership semantics.
+- **Armorer trade policy:** Step 6I disables Diamond/Netherite armor recipes and replaces generated Diamond armor in the six audited chest tables. Vanilla Armorer villagers remain a separate Diamond-armor acquisition path because the current bounded rule did not specify trade replacement; settle whether those offers should be removed or replaced before declaring Iron the ceiling for every normal acquisition route.
 
 The final post-Orb capacity is no longer unresolved for current target classes: armor is 8 and swords/axes/bows/crossbows are 10. Do not reopen those limits incidentally during unrelated work.
 
 ## 16. Current Next Milestone
 
-**Next milestone: Step 6I — Progression Cleanup + Unexamined Enchantment Books.**
+**Next milestone: Step 6J — Money, Reward Items, Armored, Death Pact, and Glowing Cleanup.**
 
-Bound the milestone to the current design's progression rule: Iron is the highest normally obtainable/craftable player armor tier; remove normal Diamond/Netherite armor crafting/acquisition as specified; replace applicable generated Diamond Armor loot with 65% Unexamined Simple and 35% Unexamined Unique Books; implement one generic rarity-bearing Unexamined Book that reveals a random same-rarity actual enchantment at a random valid level with server-authoritative Success/Destroy generation; and provide a reusable, data-driven modifier seam for future book-opening rate effects. Include the proper Glowing/Night Vision visual fix and likely Auto Smelt I plus Experience III as the bounded enchantment additions. Do not expand 6I into other newly documented systems.
+Keep Step 6J bounded to the accepted roadmap and current canonical design. Do not expand it into Space Chests, generic weighted reward tables, spawner/generated-equipment foundations, Trials, or the explicitly deferred Armorer-villager trade policy.
 
-After the progression/reward prerequisites, build toward Space Chests and then the Trial instance foundation. Memory Chests and Cosmic Crates are deliberately deferred. Maintain the normal cadence of roughly one or two enchantments per milestone; fewer are acceptable for especially risky infrastructure work.
+After acceptance, continue building generic reward prerequisites toward Space Chests and then the Trial instance foundation. Memory Chests and Cosmic Crates remain deliberately deferred. Maintain the normal cadence of roughly one or two enchantments per milestone; fewer are acceptable for especially risky infrastructure work.
 
 ## 17. Development Workflow
 
@@ -442,13 +451,21 @@ Preserve unrelated dirty changes. Never change pinned versions as a side effect 
 
 ## 18. Verification Snapshot
 
+For the accepted Step 6I implementation:
+
+- `gradlew.bat cleanTest test build` succeeded; 178 automated tests passed across 51 suites with 0 failures, 0 errors, and 0 skipped.
+- All 115 JSON/datapack metadata resources decoded successfully and `git diff --check` reported no whitespace errors.
+- Dedicated-server startup automatically enabled the required progression datapack, loaded 1,462 recipes, verified all eight forbidden armor recipe IDs absent and eight Iron/tool control recipes present in the live recipe manager, published current content, and reached `Done` without datapack, recipe, modifier, registry, or sided-classloading errors.
+- Client startup completed CosmicPVE resource reload, sound initialization, and item-atlas creation without missing-model, missing-texture, malformed-resource, tint-source, localization, or item-registration errors in the runtime log.
+- Pinned environment values remain unchanged. The user manually re-tested and accepted final-stack/full-stack Unexamined opening, Diamond crafting and recipe-book removal after a fresh restart, Netherite armor smithing removal, and Diamond-armor loot replacement. Glowing's visual flicker remains deliberately unresolved for Step 6J.
+
 For the accepted Step 6H implementation and final accepted refinements:
 
 - `gradlew.bat cleanTest test build` succeeded; 161 automated tests passed across 46 suites with 0 failures, 0 errors, and 0 skipped.
 - All 102 main-resource JSON files decoded successfully and `git diff --check` reported no whitespace errors.
 - Dedicated-server startup registered both entities and their attributes, published current content, and reached `Done` on NeoForge 21.11.45 without entity, datapack, or sided-classloading errors.
 - Client startup completed resource reload, sound initialization, texture-atlas creation, and client entity-renderer/model-layer setup without missing-texture, invalid-model, malformed-resource, or renderer exceptions in the runtime log.
-- Pinned environment values remain unchanged. The user manually verified and accepted Step 6H, including the shared `0.35` movement-speed attribute, and accepted the Heroic Crystal presentation/sound/non-stacking refinements plus Glowing's 220-tick duration change. The separate Glowing visual-flicker defect remains explicitly scheduled for Step 6I.
+- Pinned environment values remain unchanged. The user manually verified and accepted Step 6H, including the shared `0.35` movement-speed attribute, and accepted the Heroic Crystal presentation/sound/non-stacking refinements plus Glowing's 220-tick duration change. The separate Glowing visual-flicker defect remains unresolved.
 - Step 6H gameplay is committed at `da3a6334dabda9c148935a6e6a27cda5334af1ba` (`Add Space Pirates and Oxygenate`).
 
 For the accepted Step 6G implementation:

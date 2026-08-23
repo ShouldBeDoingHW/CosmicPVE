@@ -15,8 +15,10 @@ public final class CosmicBookItemTintSource implements ItemTintSource {
     private CosmicBookItemTintSource() {}
     @Override public int calculate(ItemStack stack, @Nullable ClientLevel level, @Nullable LivingEntity entity) {
         var data = stack.get(ModDataComponents.COSMIC_ENCHANT_BOOK.get());
-        return data == null ? 0xFFFFFFFF : 0xFF000000 | CosmicEnchantmentSpecs.find(data.enchantmentId())
+        if (data != null) return 0xFF000000 | CosmicEnchantmentSpecs.find(data.enchantmentId())
                 .map(spec -> spec.tier().tooltipColor()).orElse(0xFFFFFF);
+        var unexamined = stack.get(ModDataComponents.UNEXAMINED_BOOK.get());
+        return unexamined == null ? 0xFFFFFFFF : 0xFF000000 | unexamined.tier().tooltipColor();
     }
     @Override public MapCodec<? extends ItemTintSource> type() { return MAP_CODEC; }
 }

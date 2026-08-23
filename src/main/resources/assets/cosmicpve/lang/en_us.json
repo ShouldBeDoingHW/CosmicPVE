@@ -175,4 +175,13 @@
   ,"tooltip.cosmicpve.applicability.pickaxe":"Pickaxe Enchantment"
   ,"entity.cosmicpve.space_pirate_variant_1":"Space Pirate"
   ,"entity.cosmicpve.space_pirate_variant_2":"Space Pirate"
+  ,"item.cosmicpve.unexamined_enchantment_book":"Unexamined Enchantment Book"
+  ,"item.cosmicpve.unexamined_enchantment_book.named":"Unexamined %s Enchantment Book"
+  ,"tooltip.cosmicpve.unexamined.purpose":"Contains one random enchantment of this rarity at a random valid level."
+  ,"tooltip.cosmicpve.unexamined.instruction":"Right-Click to examine."
+  ,"message.cosmicpve.unexamined.revealed":"Revealed %s %s!"
+  ,"message.cosmicpve.unexamined.empty":"No implemented enchantments exist for this rarity yet."
+  ,"message.cosmicpve.unexamined.invalid":"That Unexamined Enchantment Book is invalid."
+  ,"command.cosmicpve.unexamined.unknown_tier":"Unknown Cosmic enchantment rarity: %s"
+  ,"command.cosmicpve.unexamined.given":"Gave %1$s Unexamined %2$s Enchantment Book(s) to %3$s."
 }

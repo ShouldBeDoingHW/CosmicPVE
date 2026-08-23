@@ -11,6 +11,7 @@ import com.cosmicpve.equipment.enchantment.EnchantmentOrbItem;
 import com.cosmicpve.equipment.enchantment.BlackScrollItem;
 import com.cosmicpve.equipment.skin.WeaponSkinItem;
 import com.cosmicpve.equipment.heroic.HeroicCrystalItem;
+import com.cosmicpve.equipment.enchantment.UnexaminedEnchantmentBookItem;
 
 public final class ModItems {
     private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(CosmicPVE.MOD_ID);
@@ -25,6 +26,9 @@ public final class ModItems {
 
     public static final DeferredItem<CosmicEnchantmentBookItem> COSMIC_ENCHANTMENT_BOOK = ITEMS.registerItem(
             "cosmic_enchantment_book", CosmicEnchantmentBookItem::new, properties -> properties.stacksTo(1));
+
+    public static final DeferredItem<UnexaminedEnchantmentBookItem> UNEXAMINED_ENCHANTMENT_BOOK = ITEMS.registerItem(
+            "unexamined_enchantment_book", UnexaminedEnchantmentBookItem::new, properties -> properties.stacksTo(64));
 
     public static final DeferredItem<Item> WHITE_SCROLL = ITEMS.registerSimpleItem(
             "white_scroll", properties -> properties.stacksTo(64));

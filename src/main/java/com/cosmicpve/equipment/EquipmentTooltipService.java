@@ -44,6 +44,11 @@ public final class EquipmentTooltipService {
             CosmicEnchantmentSpecs.find(book.enchantmentId())
                     .ifPresent(spec -> event.getToolTip().addAll(CosmicBookLore.lines(book, spec)));
         }
+        if (stack.is(com.cosmicpve.registry.ModItems.UNEXAMINED_ENCHANTMENT_BOOK.get())
+                && stack.has(ModDataComponents.UNEXAMINED_BOOK.get())) {
+            event.getToolTip().addAll(
+                    com.cosmicpve.equipment.enchantment.UnexaminedEnchantmentBookItem.lore());
+        }
         var metadata = stack.get(ModDataComponents.CUSTOM_ENCHANT_META.get());
         if (metadata != null && metadata.whiteScrollProtected()) {
             event.getToolTip().add(Component.translatable("tooltip.cosmicpve.protected")
