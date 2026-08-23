@@ -5,12 +5,22 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import com.cosmicpve.registry.ModEntities;
+import com.cosmicpve.client.entity.SpacePirateVariant1Renderer;
+import com.cosmicpve.client.entity.SpacePirateVariant2Renderer;
 
 @Mod(value = CosmicPVE.MOD_ID, dist = Dist.CLIENT)
 public final class CosmicPVEClient {
     public CosmicPVEClient(IEventBus modBus) {
         modBus.addListener(ArmorSetClientExtensions::register);
         modBus.addListener(CosmicPVEClient::registerItemTints);
+        modBus.addListener(CosmicPVEClient::registerEntityRenderers);
+    }
+
+    private static void registerEntityRenderers(EntityRenderersEvent.RegisterRenderers event) {
+        event.registerEntityRenderer(ModEntities.SPACE_PIRATE_VARIANT_1.get(), SpacePirateVariant1Renderer::new);
+        event.registerEntityRenderer(ModEntities.SPACE_PIRATE_VARIANT_2.get(), SpacePirateVariant2Renderer::new);
     }
 
     private static void registerItemTints(RegisterColorHandlersEvent.ItemTintSources event) {

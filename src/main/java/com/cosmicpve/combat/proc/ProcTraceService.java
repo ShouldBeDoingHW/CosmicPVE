@@ -42,6 +42,12 @@ public final class ProcTraceService {
         return "sequence=" + result.event().sequenceId()
                 + " parent=" + parent
                 + " hook=" + result.event().hook()
+                + " owner=" + result.event().ownerId()
+                + " attacker=" + describe(result.event().attacker())
+                + " target=" + describe(result.event().target())
+                + " enchantments=" + result.event().effectiveEnchantments().entries().stream()
+                        .map(enchantment -> enchantment.id() + "=" + enchantment.level())
+                        .collect(java.util.stream.Collectors.joining(",", "[", "]"))
                 + " policy=" + result.event().recursionPolicy()
                 + " chanceModifiers=" + result.event().namedChanceMultipliers()
                 + " evaluations=" + evaluations;
@@ -58,5 +64,9 @@ public final class ProcTraceService {
                 + ",status=" + evaluation.status()
                 + ",cooldownReady=" + evaluation.cooldownReady()
                 + ",source=" + evaluation.provenance().kind() + ":" + evaluation.provenance().sourceId();
+    }
+
+    private static String describe(net.minecraft.world.entity.LivingEntity entity) {
+        return entity == null ? "none" : entity.getType().toShortString() + ":" + entity.getUUID();
     }
 }

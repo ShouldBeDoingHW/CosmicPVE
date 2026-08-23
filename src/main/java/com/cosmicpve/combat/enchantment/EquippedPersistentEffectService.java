@@ -17,7 +17,8 @@ import java.util.function.Function;
 
 /** Owns short hidden leases only when CosmicPVE created the effect. */
 public final class EquippedPersistentEffectService {
-    static final int LEASE_TICKS = 60;
+    static final int GLOWING_LEASE_TICKS = 220;
+    static final int OBSIDIANSHIELD_LEASE_TICKS = 60;
     static final int REFRESH_AT = 20;
     private final EffectiveEnchantmentsResolver enchantments;
     private final Function<net.minecraft.world.item.ItemStack, List<VirtualEnchantmentGrant>> virtualGrants;
@@ -36,40 +37,42 @@ public final class EquippedPersistentEffectService {
 
     public void tick(LivingEntity entity) {
         if (entity.level().isClientSide()) return;
-        apply(entity, EquipmentSlot.HEAD, ModEnchantments.GLOWING.identifier(), MobEffects.NIGHT_VISION);
-        apply(entity, EquipmentSlot.LEGS, ModEnchantments.OBSIDIANSHIELD.identifier(), MobEffects.FIRE_RESISTANCE);
+        apply(entity, EquipmentSlot.HEAD, ModEnchantments.GLOWING.identifier(),
+                MobEffects.NIGHT_VISION, GLOWING_LEASE_TICKS);
+        apply(entity, EquipmentSlot.LEGS, ModEnchantments.OBSIDIANSHIELD.identifier(),
+                MobEffects.FIRE_RESISTANCE, OBSIDIANSHIELD_LEASE_TICKS);
     }
 
     private void apply(LivingEntity entity, EquipmentSlot slot, net.minecraft.resources.Identifier id,
-                       Holder<MobEffect> effect) {
+                       Holder<MobEffect> effect, int leaseTicks) {
         var stack = entity.getItemBySlot(slot);
         int level = enchantments.resolve(stack, virtualGrants.apply(stack)).level(id);
         var effects = owned.computeIfAbsent(entity, ignored -> new java.util.HashMap<>());
         boolean ours = effects.containsKey(effect);
         var current = entity.getEffect(effect);
         if (level > 0) {
-            if (ours && !isManaged(current)) {
+            if (ours && !isManaged(current, leaseTicks)) {
                 effects.remove(effect); // an external source superseded our lease
                 return;
             }
             if (!ours && current != null) return;
             if (!ours || current.getDuration() <= REFRESH_AT) {
-                entity.addEffect(managed(effect));
+                entity.addEffect(managed(effect, leaseTicks));
                 effects.put(effect, Boolean.TRUE);
             }
         } else if (ours) {
-            if (isManaged(current)) entity.removeEffect(effect);
+            if (isManaged(current, leaseTicks)) entity.removeEffect(effect);
             effects.remove(effect);
         }
         if (effects.isEmpty()) owned.remove(entity);
     }
 
-    static MobEffectInstance managed(Holder<MobEffect> effect) {
-        return new MobEffectInstance(effect, LEASE_TICKS, 0, true, false, false);
+    static MobEffectInstance managed(Holder<MobEffect> effect, int leaseTicks) {
+        return new MobEffectInstance(effect, leaseTicks, 0, true, false, false);
     }
 
-    static boolean isManaged(MobEffectInstance effect) {
+    static boolean isManaged(MobEffectInstance effect, int leaseTicks) {
         return effect != null && effect.getAmplifier() == 0 && effect.isAmbient()
-                && !effect.isVisible() && !effect.showIcon() && effect.getDuration() <= LEASE_TICKS;
+                && !effect.isVisible() && !effect.showIcon() && effect.getDuration() <= leaseTicks;
     }
 }

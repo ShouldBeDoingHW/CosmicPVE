@@ -170,4 +170,9 @@
   ,"enchantment.cosmicpve.obsidianshield":"Obsidianshield"
   ,"enchantment.cosmicpve.glowing.description":"Grants permanent night vision while worn."
   ,"enchantment.cosmicpve.obsidianshield.description":"Grants permanent fire resistance while worn."
+  ,"enchantment.cosmicpve.oxygenate":"Oxygenate"
+  ,"enchantment.cosmicpve.oxygenate.description":"Breaking blocks underwater restores air."
+  ,"tooltip.cosmicpve.applicability.pickaxe":"Pickaxe Enchantment"
+  ,"entity.cosmicpve.space_pirate_variant_1":"Space Pirate"
+  ,"entity.cosmicpve.space_pirate_variant_2":"Space Pirate"
 }

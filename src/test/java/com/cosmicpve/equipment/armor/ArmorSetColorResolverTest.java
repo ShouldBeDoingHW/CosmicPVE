@@ -10,6 +10,7 @@ class ArmorSetColorResolverTest {
     @Test void colorsComeFromIdentityAndNoSetHasNoTint() {
         assertEquals(0xFF6969, ArmorSetColorResolver.color(identity(ArmorSetIds.PHANTOM, 0xFF6969)).orElseThrow());
         assertEquals(0xA3FFF5, ArmorSetColorResolver.color(identity(ArmorSetIds.YETI, 0xA3FFF5)).orElseThrow());
+        assertEquals(0x0A4A3D, ArmorSetColorResolver.color(identity(ArmorSetIds.ANCIENT, 0x0A4A3D)).orElseThrow());
         assertTrue(ArmorSetColorResolver.color(null).isEmpty());
         assertEquals(0xFFFFFFFF, ArmorSetColorResolver.argbOrWhite(null));
     }

@@ -8,11 +8,15 @@ import com.cosmicpve.network.CosmicNetwork;
 import com.cosmicpve.registry.ModAttachments;
 import com.cosmicpve.registry.ModDataComponents;
 import com.cosmicpve.registry.ModItems;
+import com.cosmicpve.registry.ModEntities;
 import com.cosmicpve.equipment.armor.ArmorCrystalEventBridge;
 import com.cosmicpve.equipment.EquipmentTooltipService;
 import com.cosmicpve.equipment.enchantment.EnchantingEventBridge;
 import com.cosmicpve.equipment.skin.WeaponSkinEventBridge;
 import com.cosmicpve.equipment.heroic.HeroicCrystalEventBridge;
+import com.cosmicpve.equipment.enchantment.OxygenateEventBridge;
+import com.cosmicpve.equipment.enchantment.OxygenateService;
+import com.cosmicpve.equipment.enchantment.EffectiveEnchantmentsResolver;
 import com.mojang.logging.LogUtils;
 import net.minecraft.resources.Identifier;
 import net.neoforged.bus.api.IEventBus;
@@ -29,6 +33,7 @@ public final class CosmicPVE {
         ModDataComponents.register(modBus);
         ModAttachments.register(modBus);
         ModItems.register(modBus);
+        ModEntities.register(modBus);
         modBus.addListener(CosmicNetwork::registerPayloads);
         CosmicContent.register();
         LegacyCombatService.register(modBus);
@@ -44,6 +49,8 @@ public final class CosmicPVE {
         NeoForge.EVENT_BUS.addListener(skins::onStacked);
         var heroic = new HeroicCrystalEventBridge();
         NeoForge.EVENT_BUS.addListener(heroic::onStacked);
+        var oxygenate = new OxygenateEventBridge(new OxygenateService(new EffectiveEnchantmentsResolver()));
+        NeoForge.EVENT_BUS.addListener(oxygenate::onBlockDrops);
     }
 
     public static Identifier id(String path) {

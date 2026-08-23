@@ -17,8 +17,7 @@ public final class EquipmentTooltipService {
     public void onTooltip(ItemTooltipEvent event) {
         var stack = event.getItemStack();
         if (stack.is(com.cosmicpve.registry.ModItems.HEROIC_CRYSTAL.get())) {
-            event.getToolTip().add(Component.translatable("tooltip.cosmicpve.heroic_crystal.purpose"));
-            event.getToolTip().add(Component.translatable("tooltip.cosmicpve.heroic_crystal.instruction"));
+            event.getToolTip().addAll(com.cosmicpve.equipment.heroic.HeroicCrystalItem.lore());
         }
         if (stack.has(ModDataComponents.HEROIC.get()))
             event.getToolTip().add(Component.translatable("tooltip.cosmicpve.heroic").withColor(0xAA55FF));

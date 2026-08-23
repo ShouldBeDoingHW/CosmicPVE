@@ -1,7 +1,7 @@
 package com.cosmicpve.equipment.enchantment;
 
 public enum CosmicEnchantmentTier {
-    SIMPLE(0xAAAAAA, 1, 100, 1, 100),
+    SIMPLE(0xFFFFFF, 1, 100, 1, 100),
     UNIQUE(0x55FF55, 1, 100, 1, 100),
     ELITE(0xA3FFF5, 1, 100, 1, 100),
     ULTIMATE(0xFFFF55, 1, 100, 1, 100),

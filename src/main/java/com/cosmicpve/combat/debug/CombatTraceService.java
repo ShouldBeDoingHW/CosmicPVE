@@ -27,9 +27,11 @@ public final class CombatTraceService {
         if (!result.isCommittedDamagingHit()) {
             return;
         }
-        result.context().attributedPlayerId()
-                .filter(enabledPlayers::contains)
-                .ifPresent(playerId -> lastResults.put(playerId, new DamageTraceEntry(result)));
+        var observers = new java.util.HashSet<UUID>();
+        result.context().attributedPlayerId().ifPresent(observers::add);
+        if (result.context().target() instanceof net.minecraft.world.entity.player.Player player) observers.add(player.getUUID());
+        observers.stream().filter(enabledPlayers::contains)
+                .forEach(playerId -> lastResults.put(playerId, new DamageTraceEntry(result)));
     }
 
     public void recordExecution(ExecutionResult result) {
@@ -58,6 +60,9 @@ public final class CombatTraceService {
                 .map(enchantment -> enchantment.id() + "=" + enchantment.level() + enchantment.provenance())
                 .collect(java.util.stream.Collectors.joining(",", "[", "]"));
         return "type=" + context.channel()
+                + " attacker=" + (context.attacker() == null ? "none"
+                        : context.attacker().getType().toShortString() + ":" + context.attacker().getUUID())
+                + " weapon=" + context.weaponSnapshot().stack().getItem()
                 + " sequence=" + context.attackSequenceId()
                 + " parent=" + parent
                 + " category=" + context.category()

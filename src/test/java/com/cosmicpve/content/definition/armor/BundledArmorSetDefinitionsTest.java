@@ -24,7 +24,7 @@ class BundledArmorSetDefinitionsTest {
                 CosmicPVE.id("permafrost"), CosmicPVE.id("ice_aspect"))));
 
         var ancient = load("ancient");
-        assertEquals(0x050C59, ancient.presentationColor());
+        assertEquals(0x0A4A3D, ancient.presentationColor());
         assertEquals(.075, ancient.additiveOutgoingBonus());
         assertEquals(.925, ancient.incomingMultiplier());
     }

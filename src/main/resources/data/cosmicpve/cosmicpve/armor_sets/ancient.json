@@ -1,6 +1,6 @@
 {
   "display_name": {"translate": "armor_set.cosmicpve.ancient"},
-  "color": "#050C59",
+  "color": "#0A4A3D",
   "full_set_bonus": [
     {"translate": "armor_set.cosmicpve.ancient.bonus.outgoing"},
     {"translate": "armor_set.cosmicpve.ancient.bonus.incoming"},

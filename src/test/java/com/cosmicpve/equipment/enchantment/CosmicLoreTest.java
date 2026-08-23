@@ -23,7 +23,10 @@ class CosmicLoreTest {
         assertEquals("tooltip.cosmicpve.book.destroy", key(lines.get(1)));
         assertEquals(ItemApplicationColors.DESTROY, lines.get(1).getStyle().getColor().getValue());
         assertEquals("tooltip.cosmicpve.book.description", key(lines.get(2)));
-        assertEquals(CosmicEnchantmentTier.ELITE.tooltipColor(), lines.get(2).getStyle().getColor().getValue());
+        assertEquals(ChatFormatting.YELLOW.getColor(), lines.get(2).getStyle().getColor().getValue());
+        var description = (TranslatableContents) lines.get(2).getContents();
+        var tierName = (Component) description.getArgs()[0];
+        assertEquals(CosmicEnchantmentTier.ELITE.tooltipColor(), tierName.getStyle().getColor().getValue());
         assertEquals("tooltip.cosmicpve.applicability.sword", key(lines.get(3)));
         assertEquals(ChatFormatting.GRAY.getColor(), lines.get(3).getStyle().getColor().getValue());
         assertEquals("tooltip.cosmicpve.book.instruction", key(lines.get(4)));
@@ -39,6 +42,7 @@ class CosmicLoreTest {
         assertEquals("tooltip.cosmicpve.applicability.any_armor", key(CosmicEnchantmentSpecs.MOLTEN.applicability()));
         assertEquals("tooltip.cosmicpve.applicability.leggings", key(CosmicEnchantmentSpecs.NUTRITION.applicability()));
         assertEquals("tooltip.cosmicpve.applicability.boots_or_leggings", key(CosmicEnchantmentSpecs.LUCK.applicability()));
+        assertEquals("tooltip.cosmicpve.applicability.pickaxe", key(CosmicEnchantmentSpecs.OXYGENATE.applicability()));
         assertTrue(CosmicEnchantmentSpecs.ALL.stream().allMatch(spec -> !spec.description().getString().isBlank()));
     }
 

@@ -11,10 +11,26 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.sounds.SoundEvents;
+import com.cosmicpve.equipment.enchantment.ItemApplicationFeedback;
 import org.junit.jupiter.api.Test;
 
 class HeroicApplicationServiceTest {
     private final HeroicApplicationService service = new HeroicApplicationService();
+
+    @Test void crystalIsNonStackableAndSuccessUsesStandardLevelUpCue() {
+        assertEquals(1, new ItemStack(ModItems.HEROIC_CRYSTAL.get()).getMaxStackSize());
+        assertEquals(List.of(SoundEvents.PLAYER_LEVELUP),
+                ItemApplicationFeedback.soundsFor(ItemApplicationFeedback.Cue.SUCCESS));
+    }
+
+    @Test void crystalUsesCanonicalPurpleNameAndYellowBodyLore() {
+        var crystal = new ItemStack(ModItems.HEROIC_CRYSTAL.get());
+        assertEquals(HeroicCrystalItem.NAME_COLOR, crystal.getHoverName().getStyle().getColor().getValue());
+        assertEquals(2, HeroicCrystalItem.lore().size());
+        HeroicCrystalItem.lore().forEach(line -> assertEquals(
+                net.minecraft.ChatFormatting.YELLOW.getColor(), line.getStyle().getColor().getValue()));
+    }
 
     @Test void appliesOnceAddsExactly250AndPreservesWearAndMetadata() {
         var crystal = new ItemStack(ModItems.HEROIC_CRYSTAL.get());

@@ -3,6 +3,7 @@ package com.cosmicpve.equipment.enchantment;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.cosmicpve.registry.ModEnchantments;
 import com.google.gson.JsonParser;
@@ -33,7 +34,8 @@ class CosmicEnchantmentRegistrationTest {
                 Map.entry("molten", 4),
                 Map.entry("nutrition", 3),
                 Map.entry("glowing", 1),
-                Map.entry("obsidianshield", 1));
+                Map.entry("obsidianshield", 1),
+                Map.entry("oxygenate", 2));
         for (var entry : expected.entrySet()) {
             var resource = getClass().getClassLoader()
                     .getResourceAsStream("data/cosmicpve/enchantment/" + entry.getKey() + ".json");
@@ -55,10 +57,13 @@ class CosmicEnchantmentRegistrationTest {
                 } else if (entry.getKey().equals("nutrition")) {
                     assertEquals("#cosmicpve:enchantable/leggings", json.get("supported_items").getAsString());
                     assertEquals("legs", json.getAsJsonArray("slots").get(0).getAsString());
+                } else if (entry.getKey().equals("oxygenate")) {
+                    assertEquals("#cosmicpve:enchantable/pickaxe", json.get("supported_items").getAsString());
+                    assertEquals("mainhand", json.getAsJsonArray("slots").get(0).getAsString());
                 }
             }
         }
-        assertEquals(19, CosmicEnchantmentSpecs.ALL.size());
+        assertEquals(20, CosmicEnchantmentSpecs.ALL.size());
         assertEquals(CosmicEnchantmentTier.ELITE, CosmicEnchantmentSpecs.EXECUTE.tier());
         assertEquals(CosmicEnchantmentTier.ULTIMATE, CosmicEnchantmentSpecs.ANGELIC.tier());
         assertEquals(CosmicEnchantmentTier.SIMPLE, CosmicEnchantmentSpecs.LIGHTNING.tier());
@@ -78,8 +83,11 @@ class CosmicEnchantmentRegistrationTest {
         assertEquals(CosmicEnchantmentTier.UNIQUE, CosmicEnchantmentSpecs.NUTRITION.tier());
         assertEquals(CosmicEnchantmentTier.SIMPLE, CosmicEnchantmentSpecs.GLOWING.tier());
         assertEquals(CosmicEnchantmentTier.ULTIMATE, CosmicEnchantmentSpecs.OBSIDIANSHIELD.tier());
+        assertEquals(CosmicEnchantmentTier.SIMPLE, CosmicEnchantmentSpecs.OXYGENATE.tier());
         assertEquals("any_armor", CosmicEnchantmentSpecs.MOLTEN.equipmentApplicability());
         assertEquals("leggings", CosmicEnchantmentSpecs.NUTRITION.equipmentApplicability());
+        assertEquals("pickaxe", CosmicEnchantmentSpecs.OXYGENATE.equipmentApplicability());
+        assertTrue(CosmicEnchantmentSpecs.OXYGENATE.tier().extractableByBlackScroll());
     }
 
     @Test

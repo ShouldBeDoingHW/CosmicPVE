@@ -11,7 +11,7 @@ class ArmorSetResolverTest {
     @Test void fourMatchingAncientActivates() { assertEquals(Optional.of(ArmorSetIds.ANCIENT), four(ArmorSetIds.ANCIENT)); }
     @Test void mixedArmorMaterialsWithAncientIdentityActivate() {
         var identity = new com.cosmicpve.data.component.ArmorSetIdentity(1, ArmorSetIds.ANCIENT,
-                net.minecraft.network.chat.Component.literal("Ancient"), 0x050C59,
+                net.minecraft.network.chat.Component.literal("Ancient"), 0x0A4A3D,
                 List.of(net.minecraft.network.chat.Component.literal("bonus")));
         var pieces = List.of(
                 new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.IRON_HELMET),

@@ -16,8 +16,9 @@ public final class CosmicBookLore {
                         .withColor(ItemApplicationColors.SUCCESS),
                 Component.translatable("tooltip.cosmicpve.book.destroy", book.destroyRate())
                         .withColor(ItemApplicationColors.DESTROY),
-                Component.translatable("tooltip.cosmicpve.book.description", spec.tierName(), spec.description())
-                        .withColor(tierColor),
+                Component.translatable("tooltip.cosmicpve.book.description",
+                                spec.tierName().copy().withColor(tierColor), spec.description())
+                        .withStyle(ChatFormatting.YELLOW),
                 spec.applicability().copy().withStyle(ChatFormatting.GRAY),
                 Component.translatable("tooltip.cosmicpve.book.instruction").withStyle(ChatFormatting.GRAY));
     }

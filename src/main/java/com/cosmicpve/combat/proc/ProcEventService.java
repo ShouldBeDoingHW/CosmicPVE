@@ -49,7 +49,7 @@ public final class ProcEventService {
             dispatch(create(
                     ProcHook.ON_VALID_HIT, context.attacker(), context.attacker(), context.target(),
                     context.attackSequenceId(), context.parentSequenceId(), context.recursionPolicy(),
-                    context.attributedPlayerId(), context.effectiveEnchantments(), random,
+                    context.attributedPlayerId().or(() -> tracePlayer(context.target())), context.effectiveEnchantments(), random,
                     context.excludedProcEffectIds(), Optional.of(result)));
             if (context.category() == com.cosmicpve.combat.api.AttackCategory.PROJECTILE) {
                 dispatch(create(
