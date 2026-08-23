@@ -1,10 +1,10 @@
 # CosmicPVE Development Handoff
 
-Current verified and accepted gameplay commit: `3cda6081572024c2223db5016f3725f8da32caf1` (`Add Heroic equipment and passive enchantments`). This is the accepted Steps 6A–6G baseline.
+Current verified and accepted gameplay commit: `da3a6334dabda9c148935a6e6a27cda5334af1ba` (`Add Space Pirates and Oxygenate`). This is the accepted Steps 6A–6H baseline, including the accepted Heroic Crystal and Glowing-duration refinements completed before closure.
 
-Repository state after Step 6G closure: tracked gameplay is clean at `3cda6081572024c2223db5016f3725f8da32caf1`, apart from the canonical documentation follow-up and deliberately untracked root `assets` source-art folder.
+Repository state after Step 6H gameplay closure: tracked gameplay is clean at `da3a6334dabda9c148935a6e6a27cda5334af1ba`, apart from this canonical documentation/design-baseline follow-up. The root `assets` source-art folder and root `trial rooms` structure-development folder are deliberately untracked.
 
-Last handoff update: 2026-08-20
+Last handoff update: 2026-08-23
 
 Pinned environment:
 
@@ -30,8 +30,8 @@ Primary project style:
 
 Use project sources in this order:
 
-1. `docs/DEV_HANDOFF.md` — current verified implementation, recently settled canonical decisions, immediate next work, and do-not-assume items.
-2. `docs/Cosmic_Design.md` — gameplay vision and intended content.
+1. `docs/DEV_HANDOFF.md` — current implemented/verified state, immediate next work, and do-not-assume items.
+2. `docs/Cosmic_Design.md` — the current gameplay-design source for future milestones. It has been substantially updated since the prior handoff baseline; its newly documented systems remain design-only until implemented and verified.
 3. `docs/ARCHITECTURE.md` — architectural principles, ownership, and system boundaries.
 4. `docs/COMBAT_PROTOTYPE.md` — detailed verified combat implementation behavior.
 5. Conversational or persistent AI memory — supplemental context only; never authoritative over repository documentation.
@@ -114,17 +114,25 @@ The full build and all 134 tests passed; 71 JSON resources validated. The dedica
 
 Standardized Weapon Skin application lore through per-skin presentation metadata and one reusable renderer. Application items are named `Weapon Skin (<Skin Name>)`; Boosted Chainsaw uses `#CCA00A`, Maui's Hook uses `#404242`, and Stormbringer uses `#224B57`, as specified by the canonical design. Effect summaries are always yellow, while the weapon-kind and exact attach/detach instructions are gray. Attached weapons show one concise active-skin line in the skin's canonical name color. Gameplay data, models, glint, attachment/removal behavior, and Transmog/enchantment ordering are unchanged.
 
-Standardized every Cosmic Book through `CosmicEnchantmentSpec` metadata and localized descriptions. Lore order is Success Rate, Destroy Rate, tier-colored rarity plus plain-language effect, gray applicability, and gray drag/drop instruction. The specification owns the stable display/description/applicability keys, so future registered enchantments do not require tooltip switch logic.
+Standardized every Cosmic Book through `CosmicEnchantmentSpec` metadata and localized descriptions. Lore order is Success Rate, Destroy Rate, a tier-colored rarity name with a yellow plain-language effect body, gray applicability, and gray drag/drop instruction. The specification owns the stable display/description/applicability keys, so future registered enchantments do not require tooltip switch logic.
 
 Implemented real Unique enchantments `cosmicpve:molten` IV and `cosmicpve:nutrition` III, bringing the total to exactly 17. Molten is valid on any armor. A committed positive-red-health hit creates at most one defensive candidate when a meaningful living attacker exists; its effective level is the highest equipped Molten level, never the sum, and its Luck-modified base chance is 2% per level. Activation ignites the responsible attributed living attacker for three seconds. Nutrition is leggings-only and runs once after completed food consumption without ProcEngine RNG: Minecraft `FoodData.eat` adds exactly +1 hunger and +0.25 saturation per level while retaining vanilla caps. Both use real Minecraft enchantment data, generic Books, capacity, Black Scroll eligibility, Transmog sorting, and remain outside vanilla acquisition pools.
 
 ### Step 6G — COMPLETE; MANUALLY VERIFIED AND ACCEPTED
 
-Implemented one versioned `HEROIC` item component and one generic Heroic Crystal. A server-authoritative drag/drop transaction applies once to armor, pickaxes, or shovels, mutating the original stack in place and preserving wear and unrelated components. It raises the stack's real `MAX_DAMAGE` by exactly 250 while leaving its damage value unchanged. Heroic armor retains its registry item and defensive statistics but uses leather equipment/item presentation; Heroic pickaxes and shovels retain their underlying mining behavior but use gold-style item presentation. Heroic and armor-set identities compose in either application order. Heroic Dungeon Portal behavior remains designed and unimplemented.
+Implemented one versioned `HEROIC` item component and one generic non-stackable Heroic Crystal. Its displayed name uses `#AA00AA`, and its concise purpose/instruction lore uses the standard yellow effect-description style. A server-authoritative drag/drop transaction applies once to armor, pickaxes, or shovels, mutating the original stack in place and preserving wear and unrelated components. Successful application plays the standard player-level-up item-application cue. It raises the stack's real `MAX_DAMAGE` by exactly 250 while leaving its damage value unchanged. Heroic armor retains its registry item and defensive statistics but uses leather equipment/item presentation; Heroic pickaxes and shovels retain their underlying mining behavior but use gold-style item presentation. Heroic and armor-set identities compose in either application order. Heroic Dungeon Portal behavior remains designed and unimplemented.
 
-Implemented real `cosmicpve:glowing` I (Simple, helmet) and `cosmicpve:obsidianshield` I (Ultimate, leggings), bringing the real enchantment count to 19. One LivingEntity-compatible equipped-effect service maintains hidden short Night Vision or Fire Resistance leases and refreshes only near expiry. It tracks only effects it created; an external potion/effect that supersedes the lease is not removed when equipment changes. Both enchantments automatically use generic Books, capacity, Black Scroll eligibility, Transmog, and the standardized metadata-driven lore.
+Implemented real `cosmicpve:glowing` I (Simple, helmet) and `cosmicpve:obsidianshield` I (Ultimate, leggings), bringing the real enchantment count to 19. One LivingEntity-compatible equipped-effect service maintains hidden Night Vision or Fire Resistance leases and refreshes only near expiry. Glowing's lease is currently 220 ticks; its remaining visual refresh defect is recorded under Unresolved and is explicitly included in Step 6I. The service tracks only effects it created; an external potion/effect that supersedes the lease is not removed when equipment changes. Both enchantments automatically use generic Books, capacity, Black Scroll eligibility, Transmog, and the standardized metadata-driven lore.
 
 Expanded the armor-set inventory tint item-definition path to leather, chainmail, iron, gold, diamond, and netherite armor, including trim variants. Heroic leather-style armor uses the same tint source, so set identity remains visible in item UIs. Maui's Hook now mirrors the held model's X scale in first/third-person and right/left-hand transforms so its curved end faces away from the wielder; the inventory artwork and gameplay are unchanged.
+
+### Step 6H — COMPLETE; AUTOMATED/RUNTIME VERIFIED; MANUALLY VERIFIED AND ACCEPTED
+
+Implemented the first reusable custom hostile-mob foundation and explicit entity types `cosmicpve:space_pirate_variant_1` and `cosmicpve:space_pirate_variant_2`. Both share ordinary hostile melee AI, authoritative one-time equipment initialization, normal LivingEntity combat integration, and zero drop chance for all generated equipment. They have no natural spawn placement or custom attacks. Variant 1 uses the vanilla Zombified Piglin presentation at 1.35 scale, 25 HP, a Diamond Axe with actual Insanity VIII and an independent 50% Pummel III chance. Variant 2 uses the vanilla Wither Skeleton presentation at 1.35 scale, 35 HP, an Iron Sword with actual Poison I–III and an independent 25% Execute I–V chance. Both have zero innate armor, toughness, and bonus attack damage, independently roll Iron/Diamond plus Protection I–IV for each armor slot, and use movement speed `0.35` through the normal entity attribute. Generated equipment is saved as normal entity item data and guarded against spawn-time rerolls. The user manually verified and accepted both variants, including the final movement-speed tuning.
+
+Implemented real Simple enchantment `cosmicpve:oxygenate` II for pickaxes, bringing the registered real-enchantment count to 20. A completed underwater block break restores exactly one displayed air bubble (30 internal air units) per effective level and clamps to the normal maximum. It is deterministic and outside ProcEngine, Luck, cooldown, and stack handling. Oxygenate uses generic Books, capacity counting, Black Scroll extraction, Transmog, and remains absent from vanilla acquisition pools.
+
+The centralized Simple rarity color is now `#FFFFFF`; Cosmic Book effect-description bodies remain yellow while their tier name uses the tier color. Ancient's data-driven presentation color is now `#0A4A3D` with gameplay unchanged. Combat/proc trace output now lets a traced player inspect committed mob attacks, identifying the attacker, weapon/effective enchantments, outgoing contributors, and proc candidates/results through the existing trace systems.
 
 ## 3. Current Real Enchantments
 
@@ -153,10 +161,11 @@ These are registered through Minecraft's enchantment infrastructure, use actual 
 | `cosmicpve:nutrition` | III | Leggings | Unique | Once a food item is fully consumed, adds +1 hunger and +0.25 saturation per level through vanilla bounded food state. It is deterministic and does not use Luck or RNG. |
 | `cosmicpve:glowing` | I | Helmet | Simple | Maintains subtle Night Vision while actively equipped without deleting externally supplied Night Vision. |
 | `cosmicpve:obsidianshield` | I | Leggings | Ultimate | Maintains subtle Fire Resistance while actively equipped without deleting externally supplied Fire Resistance. |
+| `cosmicpve:oxygenate` | II | Pickaxe | Simple | After a completed underwater block break with the enchanted pickaxe, restores one displayed air bubble (30 internal air units) per level, clamped to normal maximum air. Deterministic; does not use Luck or RNG. |
 
 ### DESIGNED BUT NOT IMPLEMENTED
 
-The design also names Armored, Auto Smelt, Death Pact, Divine Immolation, Experience, Gears, Hero Killer, Mortal Coil, Oxygenate, Phoenix, Self Destruct, and Virus. None currently has a registered real enchantment or runtime behavior. There are exactly 19 implemented real Cosmic enchantments. No Mastery enchantment is implemented. Do not add behavior assumptions beyond `Cosmic_Design.md`.
+The design also names Armored, Auto Smelt, Death Pact, Divine Immolation, Experience, Gears, Hero Killer, Mortal Coil, Phoenix, Self Destruct, and Virus. None currently has a registered real enchantment or runtime behavior. There are exactly 20 implemented real Cosmic enchantments. No Mastery enchantment is implemented. Do not add behavior assumptions beyond `Cosmic_Design.md`.
 
 ## 4. Critical Combat Semantics
 
@@ -233,7 +242,7 @@ Implemented sets:
 
 - **Phantom** (`cosmicpve:phantom`, `#FF6969`): +25% additive ordinary outgoing damage, ×1.10 incoming damage, and a `×1.25` chance modifier for probabilistic Mastery procs. No real Mastery proc exists yet, so the final behavior is currently a tested integration seam.
 - **Yeti** (`cosmicpve:yeti`, `#A3FFF5`): +10% additive ordinary outgoing damage, ×0.90 incoming damage, and immunity IDs for freeze, frozen, permafrost, and ice aspect. Current vanilla integration clears freezing for players and mobs wearing the full set; the custom named effects do not exist yet.
-- **Ancient** (`cosmicpve:ancient`, `#050C59`): at or above exactly 50% health, +7.5% additive ordinary outgoing damage and ×0.925 ordinary incoming damage. Strictly below 50%, these become +15% and ×0.85. Outgoing reads attacker health at calculation; incoming reads target health before the current hit, so a threshold-crossing hit affects only later events. Standard true damage bypasses the set's ordinary reduction.
+- **Ancient** (`cosmicpve:ancient`, `#0A4A3D`): at or above exactly 50% health, +7.5% additive ordinary outgoing damage and ×0.925 ordinary incoming damage. Strictly below 50%, these become +15% and ×0.85. Outgoing reads attacker health at calculation; incoming reads target health before the current hit, so a threshold-crossing hit affects only later events. Standard true damage bypasses the set's ordinary reduction.
 
 There are exactly three implemented armor sets. Dimensional Traveler, Engineer, Ranger, and Yjiki are designed but not implemented. Do not infer set behavior merely because the design table names it.
 
@@ -301,9 +310,9 @@ Cosmic tiers are the sole color source; do not create per-enchantment color maps
 - Ultimate `#FFFF55`
 - Elite `#A3FFF5`
 - Unique `#55FF55`
-- Simple `#AAAAAA`
+- Simple `#FFFFFF`
 
-Cosmic Book tint/name and actual enchantment tooltip lines resolve `CosmicEnchantmentTier`. Book lore is Success, Destroy, tier-colored rarity/effect description, gray applicability, then gray usage instruction. Success lines use `#4DFF74`; Destroy lines use `#C92C2C`. Descriptions and applicability come from generic enchantment specification/localization metadata. Phantom uses `#FF6969`; Yeti uses `#A3FFF5`.
+Cosmic Book tint/name and actual enchantment tooltip lines resolve `CosmicEnchantmentTier`. Book lore is Success, Destroy, tier-colored rarity name plus yellow effect-description body, gray applicability, then gray usage instruction. Success lines use `#4DFF74`; Destroy lines use `#C92C2C`. Descriptions and applicability come from generic enchantment specification/localization metadata. Phantom uses `#FF6969`; Yeti uses `#A3FFF5`.
 
 Weapon Skin names use the canonical per-skin design colors: Boosted Chainsaw `#CCA00A`, Maui's Hook `#404242`, and Stormbringer `#224B57`. Skin effect summaries are yellow; `Axe Skin`/`Sword Skin` applicability and both attach/detach instructions are gray.
 
@@ -331,18 +340,20 @@ Inventory and return recovery must be durable and idempotent across disconnects/
 
 ## 11. Activity Identities
 
-- **Trials:** the most accessible activity, with very high mastery ceiling and harsh learning failures. Parties progress through rooms while building a pot; cash-out is individual. A player who cashes out receives a full copy of the current pot and leaves while remaining players may continue. Skip N advances phase/room progression and adds N corresponding loot rolls without consuming time or awarding skipped-room time bonuses.
-- **Dungeons:** high entry cost, intended to require keys/portals, high mastery ceiling, strong average loot, fixed challenge sequences, and a harder Heroic variant. Exact key/portal terminology and acquisition still require a future content specification.
+- **Trials:** the most accessible activity, with a high mastery ceiling and harsh learning failures. The current design defines party-wide atomic room completion into a Decision Box, a shared timer, individual death/removal, and individual cash-out: a player who cashes out receives a full copy of the current pot and leaves while remaining players may continue. Skip N advances phase/room progression and adds N corresponding loot rolls without consuming time or awarding skipped-room time bonuses. The detailed current room designs remain future implementation input.
+- **Dungeons:** high entry cost through encounter portals, high mastery ceiling, strong average loot, fixed challenge sequences, keep-inventory enabled, and a harder Heroic variant. Portal and activity runtime remain unimplemented.
 - **Invasions:** scheduled cooperative events with medium accessibility, comparatively lower mechanical mastery ceiling, stronger baseline preparation requirements, and extraordinary loot potential through boss contribution. Invasions have keep-inventory **off**. Implement their death and inventory behavior through the shared activity/session architecture rather than changing the global `keepInventory` gamerule; the exact activity-specific implementation is deferred to the Invasion milestone.
 
-This Invasion rule supersedes older design text that described Invasions as keep-inventory activities. Dungeon death/inventory behavior remains subject to its own bounded implementation specification.
+This Invasion rule is activity-specific and must not change the global `keepInventory` gamerule.
 
 ## 12. Major Designed Content Not Yet Implemented
 
 The following remain future content or infrastructure:
 
-- all enchantments beyond the 19 listed above, including every Mastery enchantment
-- Dimensional Traveler, Engineer, Ranger, and Yjiki armor sets
+- all enchantments beyond the 20 listed above, including every Mastery enchantment
+- the Iron-capped normal player armor progression rule, Diamond/Netherite armor acquisition cleanup, generated Diamond Armor loot replacement, and Unexamined Enchantment Books
+- Space Pirate natural spawning, Conquest Chest spawning/rewards, and Abandoned Spaceship encounters; only the reusable entities and canonical generated combat equipment exist
+- Dimensional Traveler, Engineer, Ranger, Yjiki, and Dragonslayer armor sets
 - masks and Multi-Masks
 - Whisk Taker, Spinal Tap, Party Blade, and Doomsday Machete weapon skins. Boosted Chainsaw, Maui's Hook, and Stormbringer are implemented. The settled inventory UX is drag and left-click to apply; empty-cursor inventory right-click removes and returns the skin item. This supersedes older design text that reverses those gestures.
 - Feeding Frenzy and Hysteria runtime behavior
@@ -351,14 +362,14 @@ The following remain future content or infrastructure:
 - G-Kits, M-Kits, unlocks, and refreshers
 - Trials, Dungeons, Invasions, bosses, rooms, portals, keys, scaling runtime, protection, and recovery
 - loot generation, lootbags, production acquisition tables, spawners, and contribution rewards
-- Cosmic Crates, Memory Chests, Secret Weapon Caches, and seasonal utility blocks
+- Space Chests and their reward prerequisites; Cosmic Crates, Memory Chests, Secret Weapon Caches, and seasonal utility blocks
 - final enchanting/loot GUIs; confirmation dialogs are not desired for ordinary deliberate item application
 
-## 13. Cosmic Crates
+## 13. Future Reward Systems
 
-Cosmic Crates are designed but absent from current code. The design includes four seasonal variants—Spring, Summer, Fall, and Winter—along with substantial draft reward tables and mechanics. Each crate is completed from its matching Left Half plus Right Half. A Memory Chest yields a random half from any seasonal crate.
+Space Chests and Cosmic Crates are designed but absent from current code. The near-term direction is to build generic reward prerequisites toward Space Chests before beginning the Trial instance foundation. Memory Chests and Cosmic Crates are deliberately deferred and are not near-term scope.
 
-Each seasonal crate is intended to contain an apex reward, two seasonal utility custom blocks, two seasonal weapon skins, strong general loot, and potentially a seasonal Mastery enchantment. A Secret Weapon Cache yields a random signature armor-set weapon; a signature weapon gains +5% damage while its matching full armor-set bonus is active. The existing tables are legitimate design input, but prerequisites remain unimplemented and their exact balance, rewards, rates, and bespoke mechanics are not frozen. Reconcile and validate them in a bounded crate milestone rather than treating every draft value as final or inventing replacements.
+The current `Cosmic_Design.md` contains the live gameplay design and reward tables for these future systems. Treat those as design input, not implemented behavior; reconcile and validate each system in its own bounded milestone rather than copying the tables into this implementation handoff.
 
 ## 14. Utility and Debug Commands
 
@@ -404,12 +415,17 @@ Commands call gameplay services or create the same typed components used by game
 - **Pheonix/Phoenix identity and death order:** settle the stable spelling/ID and verify pinned NeoForge kill/death-prevention event ordering before implementing it.
 - **Activity key/portal terminology and acquisition:** Dungeons are intended as costly/keyed activities, but current design text primarily describes portals; reconcile this before item implementation.
 - **Seasonal crate finalization:** substantial draft tables and mechanics exist, but their exact balance, rewards, acquisition rates, prerequisites, and implementation details remain subject to a bounded reconciliation milestone.
+- **Glowing visual lease:** Glowing currently grants a 220-tick Night Vision lease but refreshes only near expiry, after vanilla's Night Vision flicker threshold. Step 6I must fix the visible flicker through the shared equipped-effect service without changing unrelated effect ownership semantics.
 
 The final post-Orb capacity is no longer unresolved for current target classes: armor is 8 and swords/axes/bows/crossbows are 10. Do not reopen those limits incidentally during unrelated work.
 
 ## 16. Current Next Milestone
 
-The next bounded milestone is Step 6H: the first reusable custom hostile-mob foundation, both Space Pirate variants, Oxygenate II, the Simple rarity color correction, and the Ancient armor-set color correction. Conquest Chest, Abandoned Spaceship, natural spawning, and adjacent progression content remain deferred.
+**Next milestone: Step 6I — Progression Cleanup + Unexamined Enchantment Books.**
+
+Bound the milestone to the current design's progression rule: Iron is the highest normally obtainable/craftable player armor tier; remove normal Diamond/Netherite armor crafting/acquisition as specified; replace applicable generated Diamond Armor loot with 65% Unexamined Simple and 35% Unexamined Unique Books; implement one generic rarity-bearing Unexamined Book that reveals a random same-rarity actual enchantment at a random valid level with server-authoritative Success/Destroy generation; and provide a reusable, data-driven modifier seam for future book-opening rate effects. Include the proper Glowing/Night Vision visual fix and likely Auto Smelt I plus Experience III as the bounded enchantment additions. Do not expand 6I into other newly documented systems.
+
+After the progression/reward prerequisites, build toward Space Chests and then the Trial instance foundation. Memory Chests and Cosmic Crates are deliberately deferred. Maintain the normal cadence of roughly one or two enchantments per milestone; fewer are acceptable for especially risky infrastructure work.
 
 ## 17. Development Workflow
 
@@ -425,6 +441,15 @@ The next bounded milestone is Step 6H: the first reusable custom hostile-mob fou
 Preserve unrelated dirty changes. Never change pinned versions as a side effect of gameplay work. Prefer service-level rules and typed data over one-off event logic, and keep client-only classes isolated from dedicated-server loading.
 
 ## 18. Verification Snapshot
+
+For the accepted Step 6H implementation and final accepted refinements:
+
+- `gradlew.bat cleanTest test build` succeeded; 161 automated tests passed across 46 suites with 0 failures, 0 errors, and 0 skipped.
+- All 102 main-resource JSON files decoded successfully and `git diff --check` reported no whitespace errors.
+- Dedicated-server startup registered both entities and their attributes, published current content, and reached `Done` on NeoForge 21.11.45 without entity, datapack, or sided-classloading errors.
+- Client startup completed resource reload, sound initialization, texture-atlas creation, and client entity-renderer/model-layer setup without missing-texture, invalid-model, malformed-resource, or renderer exceptions in the runtime log.
+- Pinned environment values remain unchanged. The user manually verified and accepted Step 6H, including the shared `0.35` movement-speed attribute, and accepted the Heroic Crystal presentation/sound/non-stacking refinements plus Glowing's 220-tick duration change. The separate Glowing visual-flicker defect remains explicitly scheduled for Step 6I.
+- Step 6H gameplay is committed at `da3a6334dabda9c148935a6e6a27cda5334af1ba` (`Add Space Pirates and Oxygenate`).
 
 For the accepted Step 6G implementation:
 
