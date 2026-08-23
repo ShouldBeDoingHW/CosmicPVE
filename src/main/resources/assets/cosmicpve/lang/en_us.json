@@ -223,4 +223,9 @@
   ,"item.cosmicpve.trial_portal":"Trial Portal"
   ,"item.cosmicpve.trial_portal.description":"Opens a gateway for one to four Trial participants."
   ,"item.cosmicpve.trial_portal.use":"Use on a clear surface to create."
+  ,"item.cosmicpve.trial_trinket_time_1":"+1 Minute Trial Trinket"
+  ,"item.cosmicpve.trial_trinket_insurance_1":"+1 Insurance Trial Trinket"
+  ,"item.cosmicpve.trial_trinket_skip_1":"Skip 1 Room Trial Trinket"
+  ,"enchantment.cosmicpve.trap":"Trap"
+  ,"enchantment.cosmicpve.trap.description":"Successful sword attacks may inflict Slowness V."
 }

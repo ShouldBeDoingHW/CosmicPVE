@@ -1,6 +1,6 @@
 # CosmicPVE Development Handoff
 
-Current verified and accepted gameplay commit: `14415b3c1bc51c4f489599131814f68f76744c15` (`Add Space Chests and Blessed`). This is the accepted Steps 6A–6L baseline.
+Current verified and accepted gameplay commit: `3a110d64edb2623920b93c92d0e78f0f56a85c71` (`Add Trial instance foundation and Implants`). This is the accepted Steps 6A–6M baseline.
 
 Repository state: Steps 6A–6M are implemented, automated/runtime verified, and manually accepted. The root `assets` source-art folder and root `trial rooms` structure-development folder remain deliberately untracked and unrelated.
 
@@ -180,6 +180,16 @@ Default scoped instance protection denies participant break, place, item-use/buc
 
 Implemented Ultimate `cosmicpve:implants` III on helmets, bringing the total to 26 real Cosmic enchantments. Continuous equipped operation schedules exactly 1 HP healing every 85/70/55 ticks for levels I/II/III, advances the schedule even at full health to avoid catch-up bursts, stops when unequipped, caps through normal healing at maximum health, and uses no proc, Luck, cooldown, CombatStack, or damage modifier. Normal Book, Unexamined Ultimate, Black Scroll, capacity, Transmog, lore, and persistence integration comes from the shared real-enchantment metadata.
 
+### Step 6N — IMPLEMENTED; AUTOMATED/RUNTIME VERIFIED; MANUALLY VERIFIED / ACCEPTED
+
+The production Apprentice Trial loop now uses the Step 6M durable session rather than a parallel activity. Every completed room atomically appends one resolved reward bundle to the persistent ordered shared pot, adds 600 gameplay ticks, increments the room count once, and enters the paused Decision Box. The canonical reloadable Apprentice table produces Unexamined rarity books, scrolls, typed spawners, the Ultimate Space Chest, and three Orange-Dye-presented tier-1 Trial Trinket identities whose portal-application mechanics remain deferred. Pot entries retain independent acquisition identities, so separately rolled duplicates do not merge or reroll.
+
+The read-only 27-slot Decision menu exposes four DEAL panes, one blocked center pane, four NO DEAL panes, and ordered pot previews across rows two and three. DEAL is individual: the server durably records the payout, removes that player, restores the exact outside snapshot/location first, then safely delivers a full pot copy with overflow at the returned location. NO DEAL preserves both participation and the shared pot. Decisions resolve early when everyone responds; timeout treats undecided players as NO DEAL. The room selector uses `5 - 2 × appearances + modifiers`, excludes the immediately previous room, accepts injectable RNG, and has a contributor seam for future Snow Globes. The fourth Apprentice completion moves the persisted phase to Hardcore and applies the one-time 3-minute bonus. Because Step 6N has no Hardcore production room, NO DEAL is temporarily rejected safely at that final Decision Box while DEAL remains available; Step 6O must remove this development gate.
+
+Raiding Rainbow and Circuit Circus use their actual tracked structure resources. Only the explicit resolved Emerald spawn-marker coordinate is consumed; an optional definition override or deterministic cardinal-neighbor inference replaces it with matching floor before teleport, leaving legitimate Emerald mechanics untouched. Raiding Rainbow owns one persisted shuffled eight-color sequence, shared progress, and a canonical active-Zombie factory shared by initial activation and every wrong-order reset; each fresh Zombie has 1 HP, normal AI/gravity/damage behavior, no loot/XP, wool identity plus authoritative color tags, and is added server-side as a new entity. Wrong kills retain the sequence, reset progress, remove survivors, and create a fresh full set. Circuit Circus persists a two-of-each randomized pillar assignment, independently claimable targets, 1-or-2 issued glass, bounded six-direction connectivity, one Beacon cue per newly completed circuit, and lever completion only after all four circuits are valid. Its scoped four-color placement exception is evaluated at item-use against the intended vanilla placement position and again at the resulting block-placement event; vanilla remains authoritative for placement and consumes exactly one block. Cleanup removes encounter entities/items and clears the declared room bounds before the next structure placement.
+
+Generic Trial title presentation sends a targeted server sound packet to each participant: one basedrum per displayed one-second Decision/room countdown update and one Ender Dragon growl when a room crosses `ROOM_INTRO` to `ROOM_ACTIVE`; Decision entry never plays the growl. The same delivery seam is independently testable with `/cosmic trial debug sound countdown` and `/cosmic trial debug sound start`. Implemented Elite sword enchantment `cosmicpve:trap` III, bringing the total to 27 real Cosmic enchantments. Each committed positive-health-loss melee hit has a flat 4% Luck-modified chance at every level to apply Slowness V for 25/30/35 ticks; eligible Doublestrike child hits may reroll it through the established limited offensive policy. Trap has no cooldown, stack, bonus damage, or hurt-immunity manipulation.
+
 ## 3. Current Real Enchantments
 
 These are registered through Minecraft's enchantment infrastructure, use actual enchantment data on the item, and are not present in normal enchanting-table, librarian, random-loot, random-equipment, or mob-equipment acquisition pools.
@@ -214,10 +224,11 @@ These are registered through Minecraft's enchantment infrastructure, use actual 
 | `cosmicpve:experience` | III | Pickaxe | Simple | Multiplies finalized player block-break XP by `1 + 0.5 × level` and floors the integral result. Other XP sources are unaffected. |
 | `cosmicpve:blessed` | IV | Axe | Ultimate | On a committed melee hit, has 2% per level to uniformly remove either one eligible negative Cosmic stack instance or one entire harmful vanilla effect from the attacker. Luck modifies the chance relatively. |
 | `cosmicpve:implants` | III | Helmet | Ultimate | While continuously equipped, heals exactly 1 HP every 85/70/55 ticks at levels I/II/III, without overhealing or catch-up bursts. |
+| `cosmicpve:trap` | III | Sword | Elite | Each committed positive-health-loss melee hit has a flat 4% Luck-modified chance to apply Slowness V for 25/30/35 ticks. Eligible Doublestrike child hits may reroll it. |
 
 ### DESIGNED BUT NOT IMPLEMENTED
 
-The design also names Divine Immolation, Gears, Hero Killer, Mortal Coil, Phoenix, Self Destruct, and Virus. None currently has a registered real enchantment or runtime behavior. There are exactly 26 implemented real Cosmic enchantments; Death Pact is currently the sole implemented Mastery enchantment. Do not add behavior assumptions beyond `Cosmic_Design.md`.
+The design also names Divine Immolation, Gears, Hero Killer, Mortal Coil, Phoenix, Self Destruct, and Virus. None currently has a registered real enchantment or runtime behavior. There are exactly 27 implemented real Cosmic enchantments; Death Pact is currently the sole implemented Mastery enchantment. Do not add behavior assumptions beyond `Cosmic_Design.md`.
 
 ## 4. Critical Combat Semantics
 
@@ -488,11 +499,11 @@ The final post-Orb capacity is no longer unresolved for current target classes: 
 
 ## 16. Current Next Milestone
 
-**Next milestone: Step 6N — First Playable Trial Vertical Slice.**
+**Next milestone: Step 6O — Hardcore Trial Expansion: Fire Colony + Zero-G.**
 
-Step 6M is implemented, automated/runtime verified, and manually accepted. Step 6N should add the production Decision Box DEAL/NO DEAL interface, Trial pot and Apprentice reward table, room selection/appearance weighting, Raiding Rainbow and Circuit Circus mechanics, and the first real repeatable Trial loop. Do not treat the Step 6M placement-only development room as implemented production room gameplay.
+Step 6N is implemented, automated/runtime verified, and manually accepted. Step 6O should add the first production Hardcore rooms, remove the temporary post-Apprentice gate, exercise the Hardcore +15-second completion award, and continue the normal one-or-two-enchantment cadence.
 
-After Step 6M acceptance, proceed to the bounded Step 6N playable Trial vertical slice described above. Memory Chests and Cosmic Crates remain deliberately deferred. Maintain the normal cadence of roughly one or two enchantments per milestone; fewer are acceptable for especially risky infrastructure work.
+Do not begin Step 6O until Step 6N is committed. Memory Chests and Cosmic Crates remain deliberately deferred.
 
 ## 17. Development Workflow
 
@@ -508,6 +519,13 @@ After Step 6M acceptance, proceed to the bounded Step 6N playable Trial vertical
 Preserve unrelated dirty changes. Never change pinned versions as a side effect of gameplay work. Prefer service-level rules and typed data over one-off event logic, and keep client-only classes isolated from dedicated-server loading.
 
 ## 18. Verification Snapshot
+
+For the accepted Step 6N implementation:
+
+- `gradlew.bat cleanTest test build` passes all 271 automated tests across 82 suites with 0 failures and 0 errors. New coverage pins the 27-enchantment registry, Trap chance/duration/child-proc metadata, persistent pot and pending-payout codec round trips, pot ordering and distinct duplicate acquisitions, the fourth-room Hardcore boundary and one-time time bonus, individual decisions, declining/modifiable room weights and no consecutive duplicate, immutable Decision-menu layout, seeded eight-color Rainbow sequencing and repeated-reset active-Zombie invariants, bounded orthogonal Circuit connectivity, the intended-placement protection exception and its validation boundaries, imported production structure dimensions/marker semantics, matching-floor inference, canonical Apprentice rows/weights/deferred Unexamined Books, and deduplicated basedrum/Dragon presentation tokens.
+- All 144 JSON resources parse successfully. The dedicated server loaded 1,462 recipes, atomically published five reward tables and four Trial rooms including the Apprentice table and both production rooms, retained the progression recipe invariant, and reached `Done` without relevant datapack, codec, dimension, structure, menu, registry, attachment, or common-side classloading errors.
+- Fresh client startup loaded both common and client entry points, completed resource reload, initialized OpenAL, and created the block, item, and GUI atlases with the Decision screen and new item definitions present. No relevant missing-model, missing-texture, malformed-resource, menu, or sided-loading errors were observed.
+- `git diff --check` passes. Pinned Minecraft, NeoForge, Java, Gradle, ModDevGradle, mod ID, and package remain unchanged. The user manually verified the corrected Circuit Circus placement path, repeatable Raiding Rainbow resets, Trial presentation sounds, DEAL/NO DEAL, and spawn-marker replacement.
 
 For the accepted Step 6M implementation:
 

@@ -33,6 +33,9 @@ public final class TrialCommands {
                                 TrialRuntime.sessions().abort(ctx.getSource().getServer(), "Trial aborted by operator."))))
                         .then(Commands.literal("restore").then(Commands.argument("player", EntityArgument.player())
                                 .executes(ctx -> restore(ctx.getSource(), EntityArgument.getPlayer(ctx, "player")))))
+                        .then(Commands.literal("sound")
+                                .then(Commands.literal("countdown").executes(ctx -> sound(ctx.getSource(), false)))
+                                .then(Commands.literal("start").executes(ctx -> sound(ctx.getSource(), true))))
                         .then(Commands.literal("timer")
                                 .then(Commands.literal("set").then(Commands.argument("seconds", IntegerArgumentType.integer(0))
                                         .executes(ctx -> timer(ctx.getSource(), IntegerArgumentType.getInteger(ctx, "seconds"), true))))
@@ -61,7 +64,15 @@ public final class TrialCommands {
         }).collect(java.util.stream.Collectors.joining(", "));
         source.sendSuccess(() -> Component.literal("Trial " + session.sessionId() + " state=" + session.state()
                 + " participants=[" + players + "] timer=" + session.timerTicks() + "t room="
-                + session.currentRoom().map(Object::toString).orElse("none") + " transition=" + session.transitionSerial()), false);
+                + session.currentRoom().map(Object::toString).orElse("none") + " transition=" + session.transitionSerial()
+                + " phase=" + session.progress().phase() + " completed=" + session.progress().completedRooms()
+                + " pot=" + session.progress().pot().size()), false);
+        if (!session.progress().encounter().hiddenSequence().isEmpty())
+            source.sendSuccess(() -> Component.literal("  hidden sequence=" + session.progress().encounter().hiddenSequence()
+                    + " progress=" + session.progress().encounter().sequenceProgress()), false);
+        if (!session.progress().encounter().pillarMaterials().isEmpty())
+            source.sendSuccess(() -> Component.literal("  pillars=" + session.progress().encounter().pillarMaterials()
+                    + " completed circuits=" + session.progress().encounter().completedCircuits()), false);
         for (var id : session.participants()) {
             var player = source.getServer().getPlayerList().getPlayer(id);
             String snapshot = player == null ? "offline/preserved" : String.valueOf(player.getExistingDataOrNull(ModAttachments.TRIAL_PLAYER_STATE));
@@ -71,10 +82,16 @@ public final class TrialCommands {
     }
 
     private static int restore(net.minecraft.commands.CommandSourceStack source, ServerPlayer player) {
-        boolean restored = TrialRuntime.inventories().restore(player);
+        boolean restored = TrialRuntime.sessions().emergencyRestore(player);
         if (restored) source.sendSuccess(() -> Component.literal("Restored pending Trial snapshot for " + player.getName().getString() + "."), true);
         else source.sendFailure(Component.literal("No safe pending Trial snapshot exists for that player."));
         return restored ? 1 : 0;
+    }
+
+    private static int sound(net.minecraft.commands.CommandSourceStack source, boolean start) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
+        TrialRuntime.sessions().debugSound(source.getPlayerOrException(), start);
+        source.sendSuccess(() -> Component.literal("Played Trial " + (start ? "room-start" : "countdown") + " sound."), false);
+        return 1;
     }
 
     private static int timer(net.minecraft.commands.CommandSourceStack source, int seconds, boolean absolute) {

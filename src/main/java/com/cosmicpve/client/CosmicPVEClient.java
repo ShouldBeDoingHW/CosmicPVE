@@ -22,6 +22,7 @@ public final class CosmicPVEClient {
 
     private static void registerMenuScreens(RegisterMenuScreensEvent event) {
         event.register(com.cosmicpve.registry.ModMenus.SPACE_CHEST.get(), SpaceChestScreen::new);
+        event.register(com.cosmicpve.registry.ModMenus.TRIAL_DECISION.get(), TrialDecisionScreen::new);
     }
 
     private static void registerEntityRenderers(EntityRenderersEvent.RegisterRenderers event) {

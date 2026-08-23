@@ -32,6 +32,7 @@ public final class ModEnchantments {
     public static final ResourceKey<Enchantment> EXPERIENCE = createKey("experience");
     public static final ResourceKey<Enchantment> BLESSED = createKey("blessed");
     public static final ResourceKey<Enchantment> IMPLANTS = createKey("implants");
+    public static final ResourceKey<Enchantment> TRAP = createKey("trap");
 
     private ModEnchantments() {}
 

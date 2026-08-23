@@ -14,6 +14,10 @@ public final class TrialBootstrap {
         NeoForge.EVENT_BUS.addListener(trials::onLogout);
         NeoForge.EVENT_BUS.addListener(trials::onRespawn);
         NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, trials::onDeath);
+        NeoForge.EVENT_BUS.addListener(trials::onDrops);
+        NeoForge.EVENT_BUS.addListener(trials::onExperience);
+        NeoForge.EVENT_BUS.addListener(trials::onProjectileImpact);
+        NeoForge.EVENT_BUS.addListener(trials::onRightClickBlock);
         var protection = new InstanceProtectionEventBridge(TrialRuntime.protection());
         NeoForge.EVENT_BUS.addListener(protection::onBreak);
         NeoForge.EVENT_BUS.addListener(protection::onPlace);

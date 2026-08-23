@@ -216,6 +216,18 @@ class CosmicEnchantmentBehaviorTest {
     }
 
     @Test
+    void trapUsesCommittedHitProcPathAndPermitsDoublestrikeChildRerolls() {
+        var effective = new EffectiveEnchantmentsResolver().resolveSources(
+                List.of(new ActualEnchantmentGrant(ModEnchantments.TRAP.identifier(), 3, CosmicPVE.id("sword"))), List.of());
+        var candidates = behaviorResolver().resolve(procEvent(effective));
+        assertEquals(1, candidates.size());
+        assertEquals(ModEnchantments.TRAP.identifier(), candidates.getFirst().effectId());
+        assertEquals(0.04, candidates.getFirst().baseProbability(), 1.0E-12);
+        assertEquals(ChildProcEligibility.LIMITED_OFFENSIVE_REROLL, candidates.getFirst().childEligibility());
+        assertTrue(behaviorResolver().resolve(procEvent(ProcHook.ON_PROJECTILE_HIT, effective)).isEmpty());
+    }
+
+    @Test
     void greatswordUsesInclusiveEntityDistanceAndSharedAdditiveBucket() {
         assertEquals(0.0, GreatswordBehavior.bonus(4, 2.4999), 1.0E-12);
         assertEquals(0.20, GreatswordBehavior.bonus(4, 2.5), 1.0E-12);

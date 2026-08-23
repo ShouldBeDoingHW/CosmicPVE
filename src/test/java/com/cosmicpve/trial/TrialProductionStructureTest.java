@@ -1,0 +1,53 @@
+package com.cosmicpve.trial;
+
+import static org.junit.jupiter.api.Assertions.*;
+import com.cosmicpve.instance.structure.InstanceStructureService;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.NbtAccounter;
+import net.minecraft.nbt.NbtIo;
+import net.minecraft.world.level.block.Blocks;
+import org.junit.jupiter.api.Test;
+
+class TrialProductionStructureTest {
+    @Test void productionSpawnMarkersAreExplicitAndMatchTheirFloors() throws Exception {
+        var rainbow=states("raiding_rainbow");
+        assertEquals("minecraft:emerald_block",rainbow.get(new BlockPos(20,3,20)));
+        assertEquals(List.of("minecraft:stone_bricks","minecraft:stone_bricks","minecraft:stone_bricks","minecraft:stone_bricks"),
+                neighbors(rainbow,new BlockPos(20,3,20)));
+        assertEquals(8,rainbow.values().stream().filter("minecraft:gold_block"::equals).count());
+
+        var circuit=states("circuit_circus");
+        assertEquals("minecraft:emerald_block",circuit.get(new BlockPos(12,3,12)));
+        assertEquals(List.of("minecraft:smooth_quartz","minecraft:smooth_quartz","minecraft:smooth_quartz","minecraft:smooth_quartz"),
+                neighbors(circuit,new BlockPos(12,3,12)));
+        assertEquals(5,circuit.values().stream().filter("minecraft:emerald_block"::equals).count(),
+                "four legitimate Emerald pillar blocks must remain in addition to the marker");
+    }
+
+    @Test void floorInferenceChoosesMostCommonStateAndNeverAirOrMarker() {
+        var inferred=InstanceStructureService.inferCandidate(List.of(Blocks.STONE_BRICKS.defaultBlockState(),
+                Blocks.STONE_BRICKS.defaultBlockState(),Blocks.AIR.defaultBlockState(),Blocks.EMERALD_BLOCK.defaultBlockState()));
+        assertTrue(inferred.orElseThrow().is(Blocks.STONE_BRICKS));
+        assertTrue(InstanceStructureService.inferCandidate(List.of(Blocks.AIR.defaultBlockState(),
+                Blocks.EMERALD_BLOCK.defaultBlockState())).isEmpty());
+    }
+
+    private static List<String> neighbors(Map<BlockPos,String> states,BlockPos pos) {
+        return List.of(states.get(pos.east()),states.get(pos.west()),states.get(pos.south()),states.get(pos.north()));
+    }
+    private Map<BlockPos,String> states(String name) throws Exception {
+        try(var stream=getClass().getClassLoader().getResourceAsStream("data/cosmicpve/structure/trial/"+name+".nbt")) {
+            assertNotNull(stream); var tag=NbtIo.readCompressed(stream,NbtAccounter.unlimitedHeap());
+            var palette=tag.getListOrEmpty("palette"); var names=new ArrayList<String>();
+            for(var value:palette) names.add(((net.minecraft.nbt.CompoundTag)value).getStringOr("Name",""));
+            Map<BlockPos,String> result=new HashMap<>();
+            for(var value:tag.getListOrEmpty("blocks")) { var block=(net.minecraft.nbt.CompoundTag)value; var p=block.getListOrEmpty("pos");
+                result.put(new BlockPos(p.getIntOr(0,-1),p.getIntOr(1,-1),p.getIntOr(2,-1)),names.get(block.getIntOr("state",-1))); }
+            return result;
+        }
+    }
+}

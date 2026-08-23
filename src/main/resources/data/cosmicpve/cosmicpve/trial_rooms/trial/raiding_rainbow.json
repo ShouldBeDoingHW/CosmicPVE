@@ -1,0 +1,10 @@
+{
+  "display_name": "Raiding Rainbow",
+  "category": "apprentice",
+  "pieces": [
+    {"structure": "cosmicpve:trial/raiding_rainbow"}
+  ],
+  "spawn_marker": "emerald_block",
+  "spawn_marker_position": [20, 3, 20],
+  "bounds": {"min": [0, 0, 0], "max": [40, 16, 40]}
+}

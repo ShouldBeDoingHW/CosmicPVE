@@ -33,6 +33,7 @@ public final class RewardGeneratorService {
             case RewardDescriptor.MobSpawner reward -> Optional.of(MobSpawners.create(reward.entityTypeId(), 1));
             case RewardDescriptor.GeneratedEquipment reward -> Optional.of(equipment.generate(
                     reward.definition(), context.registries().lookupOrThrow(Registries.ENCHANTMENT), context.random()));
+            case RewardDescriptor.SpaceChest reward -> Optional.of(com.cosmicpve.spacechest.SpaceChests.create(reward.tier()));
         };
     }
 }

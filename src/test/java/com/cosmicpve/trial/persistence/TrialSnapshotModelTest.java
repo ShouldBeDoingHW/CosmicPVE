@@ -38,4 +38,14 @@ class TrialSnapshotModelTest {
         var json=TrialPlayerState.CODEC.codec().encodeStart(JsonOps.INSTANCE,restored).getOrThrow();
         assertEquals(restored,TrialPlayerState.CODEC.codec().parse(JsonOps.INSTANCE,json).getOrThrow());
     }
+    @Test void preparedCashoutRewardsPersistWithoutMutatingTheOutsideSnapshot() {
+        var snapshot=new TrialOutsideSnapshot(1,UUID.randomUUID(),UUID.randomUUID(),
+                java.util.Collections.nCopies(36,ItemStack.EMPTY),java.util.Collections.nCopies(4,ItemStack.EMPTY),
+                ItemStack.EMPTY,ItemStack.EMPTY,0,Identifier.parse("minecraft:overworld"),0,64,0,0,0);
+        var state=TrialPlayerState.committed(snapshot).inTrial().withPendingRewards(List.of(new ItemStack(Items.DIAMOND,3)));
+        var json=TrialPlayerState.CODEC.codec().encodeStart(JsonOps.INSTANCE,state).getOrThrow();
+        var decoded=TrialPlayerState.CODEC.codec().parse(JsonOps.INSTANCE,json).getOrThrow();
+        assertEquals(3,decoded.pendingRewards().getFirst().getCount());
+        assertEquals(snapshot,decoded.snapshot().orElseThrow());
+    }
 }

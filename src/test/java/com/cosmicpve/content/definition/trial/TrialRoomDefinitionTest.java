@@ -21,7 +21,8 @@ class TrialRoomDefinitionTest {
     }
     @Test void emptyPiecesAndInvertedBoundsReject() {
         var data=new TrialRoomDefinitionData("Bad",TrialRoomCategory.DEVELOPMENT,java.util.List.of(),
-                TrialSpawnMarkerRule.EMERALD_BLOCK,new TrialRoomBounds(new net.minecraft.core.BlockPos(2,0,0),net.minecraft.core.BlockPos.ZERO));
+                TrialSpawnMarkerRule.EMERALD_BLOCK, java.util.Optional.empty(), java.util.Optional.empty(),
+                new TrialRoomBounds(new net.minecraft.core.BlockPos(2,0,0),net.minecraft.core.BlockPos.ZERO));
         assertFalse(data.resolve(Identifier.parse("cosmicpve:bad")).isSuccess());
     }
 }

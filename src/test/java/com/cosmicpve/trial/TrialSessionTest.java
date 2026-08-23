@@ -54,4 +54,18 @@ class TrialSessionTest {
         var json=TrialSession.CODEC.encodeStart(JsonOps.INSTANCE,original).getOrThrow();
         assertEquals(original,TrialSession.CODEC.parse(JsonOps.INSTANCE,json).getOrThrow());
     }
+    @Test void productionPotDecisionsAppearancesAndEncounterRoundTrip() {
+        UUID player=UUID.randomUUID(); var room=Identifier.parse("cosmicpve:trial/raiding_rainbow");
+        var encounter=new TrialEncounterState(List.of("red","blue"),1,List.of(),List.of(),List.of());
+        var progress=TrialProgress.EMPTY.beginRoom(room,encounter)
+                .completeRoom(List.of(new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.DIAMOND,2)))
+                .beginDecision(List.of(player)).decide(player,TrialDecision.NO_DEAL);
+        var original=session().addParticipant(player).withProgress(progress);
+        var json=TrialSession.CODEC.encodeStart(JsonOps.INSTANCE,original).getOrThrow();
+        var decoded=TrialSession.CODEC.parse(JsonOps.INSTANCE,json).getOrThrow();
+        assertEquals(original.sessionId(),decoded.sessionId()); assertEquals(1,decoded.progress().pot().size());
+        assertTrue(decoded.progress().pot().getFirst().items().getFirst().is(net.minecraft.world.item.Items.DIAMOND));
+        assertEquals(2,decoded.progress().pot().getFirst().items().getFirst().getCount());
+        assertEquals(TrialDecision.NO_DEAL,decoded.progress().decision(player));
+    }
 }

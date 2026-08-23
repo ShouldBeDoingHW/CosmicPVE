@@ -10,6 +10,9 @@ import net.neoforged.neoforge.event.entity.living.LivingDestroyBlockEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
 import net.neoforged.neoforge.event.level.ExplosionEvent;
 import net.neoforged.neoforge.event.level.PistonEvent;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.item.context.BlockPlaceContext;
 
 public final class InstanceProtectionEventBridge {
     private final InstanceProtectionService service;
@@ -23,15 +26,31 @@ public final class InstanceProtectionEventBridge {
     public void onPlace(BlockEvent.EntityPlaceEvent event) {
         if (event.getLevel() instanceof ServerLevel level) {
             Player actor = event.getEntity() instanceof Player player ? player : null;
+            if (actor instanceof ServerPlayer serverPlayer
+                    && TrialRuntime.sessions().allowsCircuitPlacement(serverPlayer, event.getPos(), event.getPlacedBlock())) {
+                TrialRuntime.sessions().onCircuitPlaced(serverPlayer, event.getPos(), event.getPlacedBlock());
+                return;
+            }
             if (service.denies(level, actor, event.getPos(), InstanceMutationCause.PLACE)) event.setCanceled(true);
         }
     }
 
     public void onUseItem(UseItemOnBlockEvent event) {
+        if (event.getPlayer() instanceof ServerPlayer player) {
+            BlockPos intendedPlacement = new BlockPlaceContext(event.getUseOnContext()).getClickedPos();
+            boolean circuitPlacement = TrialRuntime.sessions().allowsCircuitPlacementUse(
+                    player, intendedPlacement, event.getItemStack());
+            boolean circuitLever = TrialRuntime.sessions().allowsCircuitUse(player, event.getPos());
+            if (explicitAllowOverridesDefaultDeny(circuitPlacement, circuitLever)) return;
+        }
         if (event.getLevel() instanceof ServerLevel level
                 && service.denies(level, event.getPlayer(), event.getPos(), InstanceMutationCause.USE)) {
             event.cancelWithResult(InteractionResult.FAIL);
         }
+    }
+
+    public static boolean explicitAllowOverridesDefaultDeny(boolean circuitPlacement, boolean circuitLever) {
+        return circuitPlacement || circuitLever;
     }
 
     public void onExplosion(ExplosionEvent.Detonate event) {

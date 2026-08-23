@@ -49,6 +49,7 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
             addPoison(event, result);
             addPummel(event, result);
             addBlessed(event, result);
+            addTrap(event, result);
         } else if (event.hook() == ProcHook.ON_PROJECTILE_HIT) {
             addLightning(event, result);
             addVenom(event, result);
@@ -122,6 +123,17 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
                 activation -> PummelBehavior.activate(activation.event()),
                 provenance(event, ModEnchantments.PUMMEL.identifier()),
                 meleeCondition(CosmicPVE.id("pummel_melee_hit"))));
+    }
+
+    private void addTrap(ProcEvent event, List<ProcCandidate> result) {
+        int level = event.effectiveEnchantments().level(ModEnchantments.TRAP.identifier());
+        if (level <= 0) return;
+        result.add(candidate(ModEnchantments.TRAP.identifier(), ProcHook.ON_VALID_HIT,
+                TrapBehavior.chance(level), Optional.empty(), 0L, Optional.empty(),
+                ChildProcEligibility.LIMITED_OFFENSIVE_REROLL,
+                activation -> TrapBehavior.activate(activation.event(), level),
+                provenance(event, ModEnchantments.TRAP.identifier()),
+                meleeCondition(CosmicPVE.id("trap_melee_hit"))));
     }
 
     private void addDoublestrike(ProcEvent event, List<ProcCandidate> result) {

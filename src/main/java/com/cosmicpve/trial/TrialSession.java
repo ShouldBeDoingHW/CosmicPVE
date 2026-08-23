@@ -15,8 +15,8 @@ public record TrialSession(int dataVersion, UUID sessionId, TrialLifecycleState 
         Identifier portalDimension, BlockPos portalOrigin, List<BlockPos> portalBlocks,
         List<UUID> participants, List<UUID> removedParticipants, int stateTicksRemaining,
         int timerTicks, Optional<Identifier> currentRoom, List<InstanceBounds> protectedBounds,
-        boolean initialDecision, long transitionSerial) {
-    public static final int DATA_VERSION = 1;
+        boolean initialDecision, TrialProgress progress, long transitionSerial) {
+    public static final int DATA_VERSION = 2;
     public static final int INITIAL_TIMER_TICKS = 12_000;
     public static final int JOIN_TICKS = 600;
     public static final int ROOM_INTRO_TICKS = 100;
@@ -37,6 +37,7 @@ public record TrialSession(int dataVersion, UUID sessionId, TrialLifecycleState 
             Identifier.CODEC.optionalFieldOf("current_room").forGetter(TrialSession::currentRoom),
             InstanceBounds.CODEC.listOf().fieldOf("protected_bounds").forGetter(TrialSession::protectedBounds),
             Codec.BOOL.optionalFieldOf("initial_decision", true).forGetter(TrialSession::initialDecision),
+            TrialProgress.CODEC.optionalFieldOf("progress", TrialProgress.EMPTY).forGetter(TrialSession::progress),
             Codec.LONG.optionalFieldOf("transition_serial", 0L).forGetter(TrialSession::transitionSerial)
     ).apply(instance, TrialSession::new));
 
@@ -52,7 +53,8 @@ public record TrialSession(int dataVersion, UUID sessionId, TrialLifecycleState 
     public static TrialSession joining(UUID id, Identifier dimension, BlockPos origin, List<BlockPos> portalBlocks,
                                        List<InstanceBounds> bounds) {
         return new TrialSession(DATA_VERSION, id, TrialLifecycleState.JOINING, dimension, origin, portalBlocks,
-                List.of(), List.of(), JOIN_TICKS, INITIAL_TIMER_TICKS, Optional.empty(), bounds, true, 0L);
+                List.of(), List.of(), JOIN_TICKS, INITIAL_TIMER_TICKS, Optional.empty(), bounds, true,
+                TrialProgress.EMPTY, 0L);
     }
 
     public boolean acceptsJoins() { return initialDecision && (state == TrialLifecycleState.JOINING || state == TrialLifecycleState.DECISION); }
@@ -63,7 +65,7 @@ public record TrialSession(int dataVersion, UUID sessionId, TrialLifecycleState 
         if (!acceptsJoins() || participants.size() >= MAX_PARTICIPANTS) throw new IllegalStateException("Trial cannot accept another participant");
         var next = new ArrayList<>(participants); next.add(id);
         return copy(TrialLifecycleState.DECISION, next, removedParticipants, stateTicksRemaining, timerTicks,
-                currentRoom, protectedBounds, true, transitionSerial + 1);
+                currentRoom, protectedBounds, true, progress, transitionSerial + 1);
     }
 
     public TrialSession removeParticipant(UUID id) {
@@ -71,29 +73,39 @@ public record TrialSession(int dataVersion, UUID sessionId, TrialLifecycleState 
         var next = new ArrayList<>(participants); next.remove(id);
         var removed = new ArrayList<>(removedParticipants); if (!removed.contains(id)) removed.add(id);
         return copy(state, next, removed, stateTicksRemaining, timerTicks, currentRoom, protectedBounds,
-                initialDecision, transitionSerial + 1);
+                initialDecision, progress, transitionSerial + 1);
     }
 
     public TrialSession withState(TrialLifecycleState nextState, int ticks, Optional<Identifier> room,
                                   boolean initial, List<InstanceBounds> bounds) {
         return copy(nextState, participants, removedParticipants, ticks, timerTicks, room, bounds, initial,
-                transitionSerial + 1);
+                progress, transitionSerial + 1);
     }
 
     public TrialSession withStateTicks(int ticks) {
         return copy(state, participants, removedParticipants, ticks, timerTicks, currentRoom, protectedBounds,
-                initialDecision, transitionSerial);
+                initialDecision, progress, transitionSerial);
     }
 
     public TrialSession withTimer(int ticks) {
         return copy(state, participants, removedParticipants, stateTicksRemaining, Math.max(0, ticks), currentRoom,
-                protectedBounds, initialDecision, transitionSerial);
+                protectedBounds, initialDecision, progress, transitionSerial);
+    }
+
+    public TrialSession withProgress(TrialProgress nextProgress) {
+        return copy(state, participants, removedParticipants, stateTicksRemaining, timerTicks, currentRoom,
+                protectedBounds, initialDecision, nextProgress, transitionSerial + 1);
+    }
+
+    public TrialSession withTimerAndProgress(int ticks, TrialProgress nextProgress) {
+        return copy(state, participants, removedParticipants, stateTicksRemaining, Math.max(0, ticks), currentRoom,
+                protectedBounds, initialDecision, nextProgress, transitionSerial + 1);
     }
 
     private TrialSession copy(TrialLifecycleState nextState, List<UUID> nextParticipants, List<UUID> removed,
             int stateTicks, int timer, Optional<Identifier> room, List<InstanceBounds> bounds,
-            boolean initial, long serial) {
+            boolean initial, TrialProgress nextProgress, long serial) {
         return new TrialSession(dataVersion, sessionId, nextState, portalDimension, portalOrigin, portalBlocks,
-                nextParticipants, removed, stateTicks, timer, room, bounds, initial, serial);
+                nextParticipants, removed, stateTicks, timer, room, bounds, initial, nextProgress, serial);
     }
 }

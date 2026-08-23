@@ -1,6 +1,7 @@
 package com.cosmicpve.trial.persistence;
 
 import com.cosmicpve.registry.ModAttachments;
+import com.cosmicpve.reward.RewardDeliveryService;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -45,8 +46,36 @@ public final class TrialInventoryTransactionService {
     }
 
     public boolean restore(ServerPlayer player) {
+        return restoreInternal(player, false);
+    }
+
+    public boolean prepareCashout(ServerPlayer player, List<ItemStack> rewards) {
+        TrialPlayerState state = player.getExistingDataOrNull(ModAttachments.TRIAL_PLAYER_STATE);
+        if (state == null || state.phase() == TrialSnapshotPhase.RESTORED || state.snapshot().isEmpty()
+                || !state.pendingRewards().isEmpty()) return false;
+        player.setData(ModAttachments.TRIAL_PLAYER_STATE, state.withPendingRewards(rewards));
+        persistPlayer(player);
+        return true;
+    }
+
+    public boolean restoreCashout(ServerPlayer player, RewardDeliveryService delivery) {
+        return restoreInternal(player, true, delivery);
+    }
+
+    public boolean recover(ServerPlayer player, RewardDeliveryService delivery) {
+        TrialPlayerState state = player.getExistingDataOrNull(ModAttachments.TRIAL_PLAYER_STATE);
+        if (state == null || state.phase() == TrialSnapshotPhase.RESTORED) return false;
+        return state.pendingRewards().isEmpty() ? restore(player) : restoreCashout(player, delivery);
+    }
+
+    private boolean restoreInternal(ServerPlayer player, boolean cashout) {
+        return restoreInternal(player, cashout, null);
+    }
+
+    private boolean restoreInternal(ServerPlayer player, boolean cashout, RewardDeliveryService delivery) {
         TrialPlayerState state = player.getExistingDataOrNull(ModAttachments.TRIAL_PLAYER_STATE);
         if (state == null || state.phase() == TrialSnapshotPhase.RESTORED || state.snapshot().isEmpty()) return false;
+        if (cashout && (delivery == null || state.pendingRewards().isEmpty())) return false;
         TrialOutsideSnapshot snapshot = state.snapshot().orElseThrow();
         clearTrialInventory(player);
         var destination = player.getInventory().getNonEquipmentItems();
@@ -75,6 +104,7 @@ public final class TrialInventoryTransactionService {
                     fallback.getZ() + 0.5, Set.<Relative>of(), snapshot.yaw(), snapshot.pitch(), false);
         }
         if (!teleported) return false; // snapshot remains retryable; the inventory rewrite is idempotent
+        if (cashout) delivery.deliver(player, state.pendingRewards());
         player.setData(ModAttachments.TRIAL_PLAYER_STATE, TrialPlayerState.restored());
         persistPlayer(player); // restored inventory and consumed snapshot share one player-file save
         return true;

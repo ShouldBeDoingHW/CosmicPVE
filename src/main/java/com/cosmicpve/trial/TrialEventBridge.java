@@ -5,6 +5,13 @@ import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
+import net.neoforged.neoforge.event.entity.ProjectileImpactEvent;
+import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
+import net.neoforged.neoforge.event.entity.living.LivingExperienceDropEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.minecraft.world.entity.monster.zombie.Zombie;
+import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
+import net.minecraft.world.phys.BlockHitResult;
 
 public final class TrialEventBridge {
     public void onServerStarted(ServerStartedEvent event) { TrialRuntime.sessions().recoverInterrupted(event.getServer()); }
@@ -19,6 +26,27 @@ public final class TrialEventBridge {
         if (event.getEntity() instanceof ServerPlayer player) TrialRuntime.sessions().onRespawn(player);
     }
     public void onDeath(LivingDeathEvent event) {
-        if (!event.isCanceled() && event.getEntity() instanceof ServerPlayer player) TrialRuntime.sessions().onDeath(player);
+        if (event.isCanceled()) return;
+        if (event.getEntity() instanceof Zombie zombie) TrialRuntime.sessions().onRainbowZombieDeath(zombie);
+        if (event.getEntity() instanceof ServerPlayer player) TrialRuntime.sessions().onDeath(player);
+    }
+    public void onDrops(LivingDropsEvent event) {
+        if (event.getEntity() instanceof Zombie zombie
+                && com.cosmicpve.trial.room.RaidingRainbowService.encounterZombie(zombie)) event.getDrops().clear();
+    }
+    public void onExperience(LivingExperienceDropEvent event) {
+        if (event.getEntity() instanceof Zombie zombie
+                && com.cosmicpve.trial.room.RaidingRainbowService.encounterZombie(zombie)) event.setDroppedExperience(0);
+    }
+    public void onProjectileImpact(ProjectileImpactEvent event) {
+        if (event.getProjectile() instanceof AbstractArrow arrow && arrow.getOwner() instanceof ServerPlayer player
+                && event.getRayTraceResult() instanceof BlockHitResult hit
+                && TrialRuntime.sessions().onCircuitTarget(player, hit.getBlockPos())) {
+            arrow.discard(); event.setCanceled(true);
+        }
+    }
+    public void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
+        if (event.getEntity() instanceof ServerPlayer player)
+            TrialRuntime.sessions().onCircuitLever(player, event.getPos());
     }
 }

@@ -72,6 +72,15 @@ public record RewardDescriptorData(RewardType type, Optional<Identifier> itemId,
                     if (!resolved.isSuccess()) yield ValidationResult.failure(resolved.diagnostics());
                     yield ValidationResult.success(new RewardDescriptor.GeneratedEquipment(resolved.valueOrThrow()));
                 }
+                case SPACE_CHEST -> {
+                    var tier = required(rarity, "rarity");
+                    yield ValidationResult.success(new RewardDescriptor.SpaceChest(switch (tier) {
+                        case ULTIMATE -> com.cosmicpve.spacechest.SpaceChestTier.ULTIMATE;
+                        case LEGENDARY -> com.cosmicpve.spacechest.SpaceChestTier.LEGENDARY;
+                        case MASTERY -> com.cosmicpve.spacechest.SpaceChestTier.MASTERY;
+                        default -> throw new IllegalArgumentException("Space Chest rarity must be Ultimate, Legendary, or Mastery");
+                    }));
+                }
             };
         } catch (IllegalArgumentException exception) {
             return failure(source, exception.getMessage());

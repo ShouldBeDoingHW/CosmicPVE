@@ -74,6 +74,13 @@ public final class ModItems {
     public static final DeferredItem<TrialPortalItem> TRIAL_PORTAL = ITEMS.registerItem(
             "trial_portal", TrialPortalItem::new, properties -> properties.stacksTo(64));
 
+    public static final DeferredItem<Item> TRIAL_TRINKET_TIME_1 = ITEMS.registerSimpleItem(
+            "trial_trinket_time_1", properties -> properties.stacksTo(64));
+    public static final DeferredItem<Item> TRIAL_TRINKET_INSURANCE_1 = ITEMS.registerSimpleItem(
+            "trial_trinket_insurance_1", properties -> properties.stacksTo(64));
+    public static final DeferredItem<Item> TRIAL_TRINKET_SKIP_1 = ITEMS.registerSimpleItem(
+            "trial_trinket_skip_1", properties -> properties.stacksTo(64));
+
     private ModItems() {}
 
     public static void register(IEventBus modBus) {

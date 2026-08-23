@@ -1,0 +1,10 @@
+{
+  "display_name": "Circuit Circus",
+  "category": "apprentice",
+  "pieces": [
+    {"structure": "cosmicpve:trial/circuit_circus"}
+  ],
+  "spawn_marker": "emerald_block",
+  "spawn_marker_position": [12, 3, 12],
+  "bounds": {"min": [0, 0, 0], "max": [24, 24, 30]}
+}

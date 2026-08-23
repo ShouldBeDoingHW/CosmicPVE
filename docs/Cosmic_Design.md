@@ -774,6 +774,10 @@ Rooms can be duplicated across a run, but the same room cannot appear twice cons
 
 > The Decision Box then begins its normal 30-second decision period.
 
+> Every visible one-second Trial Room or Decision Box title countdown update plays `minecraft:block.note_block.basedrum` once for each participating player. When a room's five-second introduction finishes and gameplay becomes active, `minecraft:entity.ender_dragon.growl` plays once for each participant; Decision Box entry never plays the growl.
+
+> A room's resolved Emerald spawn marker is metadata rather than terrain. Only the exact marker selected by the room definition is consumed, it is replaced with the matching floor before players arrive, and unrelated Emerald Blocks remain untouched. Definitions with multiple Emerald mechanics identify their spawn marker explicitly and may override the replacement BlockState when inference is unsuitable.
+
 Trial portals can be modified with Trial Trinkets (orange dye item) that give various buffs to the player. There are 3 kinds of trinkets, with several variants each.
 
 Skip: Allows the player to skip 1, 2, or 3 rooms at the beginning of the Trial with no time spent and the skipped-room loot already added to the deal pot. Skipped rooms do not grant their normal room-completion time bonuses.
