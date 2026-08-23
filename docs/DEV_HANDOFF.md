@@ -1,8 +1,8 @@
 # CosmicPVE Development Handoff
 
-Current verified and accepted gameplay commit: `da3a6334dabda9c148935a6e6a27cda5334af1ba` (`Add Space Pirates and Oxygenate`). This is the accepted Steps 6A–6H baseline, including the accepted Heroic Crystal and Glowing-duration refinements completed before closure.
+Current verified and accepted gameplay commit: `8af58c550d5ecbe8429e55b3e8fb176848cd2971` (`Add progression cleanup and Unexamined Books`). This is the accepted Steps 6A–6I baseline.
 
-Current working state: Step 6I is implemented, automated/runtime verified, and manually verified/accepted. Its closure commit is being prepared. The root `assets` source-art folder and root `trial rooms` structure-development folder remain deliberately untracked and unrelated.
+Repository state after Step 6I gameplay closure: tracked gameplay is clean at `8af58c550d5ecbe8429e55b3e8fb176848cd2971`, apart from this canonical documentation-baseline follow-up. The root `assets` source-art folder and root `trial rooms` structure-development folder remain deliberately untracked and unrelated.
 
 Last handoff update: 2026-08-23
 
@@ -458,6 +458,7 @@ For the accepted Step 6I implementation:
 - Dedicated-server startup automatically enabled the required progression datapack, loaded 1,462 recipes, verified all eight forbidden armor recipe IDs absent and eight Iron/tool control recipes present in the live recipe manager, published current content, and reached `Done` without datapack, recipe, modifier, registry, or sided-classloading errors.
 - Client startup completed CosmicPVE resource reload, sound initialization, and item-atlas creation without missing-model, missing-texture, malformed-resource, tint-source, localization, or item-registration errors in the runtime log.
 - Pinned environment values remain unchanged. The user manually re-tested and accepted final-stack/full-stack Unexamined opening, Diamond crafting and recipe-book removal after a fresh restart, Netherite armor smithing removal, and Diamond-armor loot replacement. Glowing's visual flicker remains deliberately unresolved for Step 6J.
+- Step 6I gameplay is committed at `8af58c550d5ecbe8429e55b3e8fb176848cd2971` (`Add progression cleanup and Unexamined Books`).
 
 For the accepted Step 6H implementation and final accepted refinements:
 
