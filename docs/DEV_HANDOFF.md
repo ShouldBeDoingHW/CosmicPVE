@@ -1,8 +1,8 @@
 # CosmicPVE Development Handoff
 
-Current verified and accepted gameplay commit: `8af58c5e7b8a39ff1f312f5d0ff6a1b25ce23ad1` (`Add progression cleanup and Unexamined Books`). This is the accepted Steps 6A–6I baseline.
+Current verified and accepted gameplay commit: `24bdff26247e09ea82da4f2d779251af3ea6a286` (`Add money rewards and defensive enchantments`). This is the accepted Steps 6A–6J baseline.
 
-Repository state: Steps 6A–6J are implemented, automated/runtime verified, and manually accepted. The root `assets` source-art folder and root `trial rooms` structure-development folder remain deliberately untracked and unrelated.
+Repository state: Steps 6A–6K are implemented, automated/runtime verified, and manually accepted. The root `assets` source-art folder and root `trial rooms` structure-development folder remain deliberately untracked and unrelated.
 
 Last handoff update: 2026-08-23
 
@@ -50,7 +50,7 @@ Implemented the real `com.cosmicpve` package and `cosmicpve` namespace, common/c
 
 ### Step 2A — COMPLETE: Content Repository Foundation
 
-Implemented a reloadable, namespaced, codec-driven content repository. Candidate definitions are decoded and validated before an immutable snapshot is published atomically; failed reloads do not partially replace active content. Current definition families are `ScalingProfile`, `StackDefinition`, and `ArmorSetDefinition`. Development stack fixtures use explicit `development_*` IDs rather than pretending to be canonical gameplay content.
+Implemented a reloadable, namespaced, codec-driven content repository. Candidate definitions are decoded and validated before an immutable snapshot is published atomically; failed reloads do not partially replace active content. Current definition families are `ScalingProfile`, `StackDefinition`, `ArmorSetDefinition`, and `RewardTable`. Development fixtures use explicit `development_*` IDs rather than pretending to be canonical gameplay content.
 
 ### Step 3A — COMPLETE: Combat Kernel and Legacy Combat Prototype
 
@@ -150,6 +150,14 @@ Implemented Legendary `cosmicpve:armored` IV on any armor through Minecraft's na
 
 Glowing now maintains a hidden 600-tick Cosmic-owned Night Vision lease and refreshes at 300 ticks, comfortably before vanilla's sub-200-tick warning range without recreating the effect every tick. The shared ownership rules remain intact: removing Glowing removes only its owned lease, external effects are preserved, and Glowing reacquires its lease after a superseding external effect expires.
 
+### Step 6K — IMPLEMENTED; AUTOMATED/RUNTIME VERIFIED; MANUALLY VERIFIED / ACCEPTED
+
+Added atomically reloadable `cosmicpve/reward_tables` definitions with positive weighted entries, validated quantity ranges, and typed descriptors for static items, exact Banknotes, same-rarity generated Cosmic Books, fixed-success Black Scrolls, fixed-success/random-destroy Armor and Weapon Orbs, typed Mob Spawners, and generated equipment. Generation accepts an explicit random source, while delivery is a separate reusable service that inserts safely and drops overflow at the player. One development fixture proves all descriptor families without defining production Space Chest tables.
+
+One generic versioned Mob Spawner item stores a namespaced entity-type ID, validates a sensible Mob boundary, and places/configures Minecraft's real spawner block without inventing custom spawning or recovery rules. Generated equipment currently supports uniformly selected Iron armor pieces, distinct compatible actual Cosmic enchantments under a rarity ceiling, bounded enchantment counts, and maximum or independently random valid levels. The three designed future Space Chest armor patterns are representable through the same definition.
+
+Implemented Simple `cosmicpve:auto_smelt` I and `cosmicpve:experience` III, bringing the total to 24 real Cosmic enchantments. Auto Smelt transforms the finalized normal block-drop stacks through ordinary furnace recipes, preserving generated quantity and producing no furnace XP. Experience scales only the finalized block XP by `1 + 0.5 × level` and floors the result. Both share the completed player block-drop event, coexist without duplication, and integrate through normal Books, Unexamined Simple Books, capacity, Black Scroll, Transmog, lore, and persistence systems.
+
 ## 3. Current Real Enchantments
 
 These are registered through Minecraft's enchantment infrastructure, use actual enchantment data on the item, and are not present in normal enchanting-table, librarian, random-loot, random-equipment, or mob-equipment acquisition pools.
@@ -180,10 +188,12 @@ These are registered through Minecraft's enchantment infrastructure, use actual 
 | `cosmicpve:oxygenate` | II | Pickaxe | Simple | After a completed underwater block break with the enchanted pickaxe, restores one displayed air bubble (30 internal air units) per level, clamped to normal maximum air. Deterministic; does not use Luck or RNG. |
 | `cosmicpve:armored` | IV | Any armor | Legendary | Adds one-half vanilla Protection-equivalent point per level through Minecraft's native protection effect, aggregating across equipped pieces and sharing vanilla Protection's normal cap. |
 | `cosmicpve:death_pact` | V | Chestplate | Mastery | Adds -3% ordinary outgoing damage at every level and a separate `1 - 0.02 × level` ordinary incoming multiplier. True damage and execution bypass the ordinary pipeline. |
+| `cosmicpve:auto_smelt` | I | Pickaxe | Simple | Converts each finalized block-drop stack through one ordinary smelting recipe, preserving the vanilla-generated quantity and awarding no furnace XP. |
+| `cosmicpve:experience` | III | Pickaxe | Simple | Multiplies finalized player block-break XP by `1 + 0.5 × level` and floors the integral result. Other XP sources are unaffected. |
 
 ### DESIGNED BUT NOT IMPLEMENTED
 
-The design also names Auto Smelt, Divine Immolation, Experience, Gears, Hero Killer, Mortal Coil, Phoenix, Self Destruct, and Virus. None currently has a registered real enchantment or runtime behavior. There are exactly 22 implemented real Cosmic enchantments; Death Pact is currently the sole implemented Mastery enchantment. Do not add behavior assumptions beyond `Cosmic_Design.md`.
+The design also names Divine Immolation, Gears, Hero Killer, Mortal Coil, Phoenix, Self Destruct, and Virus. None currently has a registered real enchantment or runtime behavior. There are exactly 24 implemented real Cosmic enchantments; Death Pact is currently the sole implemented Mastery enchantment. Do not add behavior assumptions beyond `Cosmic_Design.md`.
 
 ## 4. Critical Combat Semantics
 
@@ -425,6 +435,11 @@ The following are confirmed in current source and permission-gated under `/cosmi
 - `/cosmic money <player> [set|add|subtract <amount>]`
 - `/cosmic money banknote give <player> <amount>`
 - `/cosmic money repair-scroll give <player> [count]`
+- `/cosmic reward list|inspect|reload`
+- `/cosmic reward roll <table> [count]`
+- `/cosmic reward book give <player> <rarity> [count]`
+- `/cosmic reward spawner give <player> <entity-type> [count]`
+- `/cosmic reward equipment give <player> <maximum-rarity> <minimum> <maximum> <maximum|random_valid>`
 - `/feed`, `/heal`, and `/restore` are separate permission-gated development convenience commands.
 
 Commands call gameplay services or create the same typed components used by gameplay; production loot acquisition remains deferred.
@@ -445,9 +460,9 @@ The final post-Orb capacity is no longer unresolved for current target classes: 
 
 ## 16. Current Next Milestone
 
-**Next milestone: Step 6K — Generic Reward Generation + Spawner/Generated-Equipment Foundations.**
+**Next milestone: Step 6L — Space Chest Core + Ultimate, Legendary, and Mastery Space Chests.**
 
-Step 6J is manually accepted. Step 6K begins from its committed baseline. Do not expand Step 6K into Space Chests themselves, Trials, or the explicitly deferred Armorer-villager trade policy without its bounded specification.
+Step 6K is manually accepted. Step 6L must consume the generic Step 6K reward infrastructure instead of rebuilding reward construction in Space Chest code.
 
 After acceptance, continue building generic reward prerequisites toward Space Chests and then the Trial instance foundation. Memory Chests and Cosmic Crates remain deliberately deferred. Maintain the normal cadence of roughly one or two enchantments per milestone; fewer are acceptable for especially risky infrastructure work.
 
@@ -465,6 +480,14 @@ After acceptance, continue building generic reward prerequisites toward Space Ch
 Preserve unrelated dirty changes. Never change pinned versions as a side effect of gameplay work. Prefer service-level rules and typed data over one-off event logic, and keep client-only classes isolated from dedicated-server loading.
 
 ## 18. Verification Snapshot
+
+For the accepted Step 6K implementation:
+
+- `gradlew.bat cleanTest test build` succeeded; all 203 automated tests across 61 suites passed with 0 failures and 0 errors.
+- All 125 main-resource JSON files parsed successfully and `git diff --check` reported no whitespace errors (only normal Windows line-ending notices).
+- Dedicated-server startup loaded 1,462 recipes, atomically published the new development reward table alongside existing content, retained the progression recipe invariant, and reached `Done` without relevant registry, datapack, command, or sided-classloading errors.
+- Client startup completed resource reload, sound initialization, and all texture atlases including the item atlas without missing-model, missing-texture, malformed-resource, localization, or item-registration errors. The client was deliberately terminated after the smoke-test boundary.
+- Pinned environment values remain unchanged. The user manually verified reward generation, spawner placement, generated equipment, Auto Smelt, and Experience and accepted the milestone.
 
 For the accepted Step 6J implementation:
 

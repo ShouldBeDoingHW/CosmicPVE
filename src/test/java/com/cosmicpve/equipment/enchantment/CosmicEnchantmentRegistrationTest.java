@@ -37,7 +37,9 @@ class CosmicEnchantmentRegistrationTest {
                 Map.entry("obsidianshield", 1),
                 Map.entry("oxygenate", 2),
                 Map.entry("armored", 4),
-                Map.entry("death_pact", 5));
+                Map.entry("death_pact", 5),
+                Map.entry("auto_smelt", 1),
+                Map.entry("experience", 3));
         for (var entry : expected.entrySet()) {
             var resource = getClass().getClassLoader()
                     .getResourceAsStream("data/cosmicpve/enchantment/" + entry.getKey() + ".json");
@@ -72,7 +74,7 @@ class CosmicEnchantmentRegistrationTest {
                 }
             }
         }
-        assertEquals(22, CosmicEnchantmentSpecs.ALL.size());
+        assertEquals(24, CosmicEnchantmentSpecs.ALL.size());
         assertEquals(CosmicEnchantmentTier.ELITE, CosmicEnchantmentSpecs.EXECUTE.tier());
         assertEquals(CosmicEnchantmentTier.ULTIMATE, CosmicEnchantmentSpecs.ANGELIC.tier());
         assertEquals(CosmicEnchantmentTier.SIMPLE, CosmicEnchantmentSpecs.LIGHTNING.tier());
@@ -100,6 +102,10 @@ class CosmicEnchantmentRegistrationTest {
         assertEquals(CosmicEnchantmentTier.LEGENDARY, CosmicEnchantmentSpecs.ARMORED.tier());
         assertEquals(CosmicEnchantmentTier.MASTERY, CosmicEnchantmentSpecs.DEATH_PACT.tier());
         assertFalse(CosmicEnchantmentSpecs.DEATH_PACT.tier().extractableByBlackScroll());
+        assertEquals(CosmicEnchantmentTier.SIMPLE, CosmicEnchantmentSpecs.AUTO_SMELT.tier());
+        assertEquals(CosmicEnchantmentTier.SIMPLE, CosmicEnchantmentSpecs.EXPERIENCE.tier());
+        assertEquals("pickaxe", CosmicEnchantmentSpecs.AUTO_SMELT.equipmentApplicability());
+        assertEquals("pickaxe", CosmicEnchantmentSpecs.EXPERIENCE.equipmentApplicability());
     }
 
     @Test

@@ -6,6 +6,8 @@ import com.cosmicpve.content.definition.stack.StackDefinition;
 import com.cosmicpve.content.definition.stack.StackDefinitionData;
 import com.cosmicpve.content.definition.armor.ArmorSetDefinition;
 import com.cosmicpve.content.definition.armor.ArmorSetDefinitionData;
+import com.cosmicpve.content.definition.reward.RewardTable;
+import com.cosmicpve.content.definition.reward.RewardTableData;
 import com.cosmicpve.content.validation.ContentDiagnostic;
 import com.cosmicpve.content.validation.ValidationResult;
 import java.util.ArrayList;
@@ -13,11 +15,13 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import net.minecraft.resources.Identifier;
+import net.minecraft.core.RegistryAccess;
 
 public final class ContentCandidateBuilder {
     private final Map<Identifier, ScalingProfile> scalingProfiles = new LinkedHashMap<>();
     private final Map<Identifier, StackDefinition> stackDefinitions = new LinkedHashMap<>();
     private final Map<Identifier, ArmorSetDefinition> armorSetDefinitions = new LinkedHashMap<>();
+    private final Map<Identifier, RewardTable> rewardTables = new LinkedHashMap<>();
     private final List<ContentDiagnostic> diagnostics = new ArrayList<>();
 
     public void addScalingProfile(Identifier id, ScalingProfileData data) {
@@ -53,6 +57,17 @@ public final class ContentCandidateBuilder {
         }
     }
 
+    public void addRewardTable(Identifier id, RewardTableData data, RegistryAccess registries) {
+        ValidationResult<RewardTable> result = data.resolve(id, registries);
+        if (!result.isSuccess()) {
+            diagnostics.addAll(result.diagnostics());
+            return;
+        }
+        if (rewardTables.putIfAbsent(id, result.valueOrThrow()) != null) {
+            diagnostics.add(ContentDiagnostic.error(id.toString(), "Duplicate reward table ID"));
+        }
+    }
+
     public void addDiagnostic(ContentDiagnostic diagnostic) {
         diagnostics.add(diagnostic);
     }
@@ -62,7 +77,7 @@ public final class ContentCandidateBuilder {
             return ValidationResult.failure(diagnostics);
         }
         return ValidationResult.success(
-                new ContentSnapshot(0L, scalingProfiles, stackDefinitions, armorSetDefinitions),
+                new ContentSnapshot(0L, scalingProfiles, stackDefinitions, armorSetDefinitions, rewardTables),
                 diagnostics);
     }
 }

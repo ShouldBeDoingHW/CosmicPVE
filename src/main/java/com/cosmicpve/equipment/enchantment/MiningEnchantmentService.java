@@ -1,0 +1,81 @@
+package com.cosmicpve.equipment.enchantment;
+
+import com.cosmicpve.registry.ModEnchantments;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Function;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.crafting.SingleRecipeInput;
+import net.neoforged.neoforge.event.level.BlockDropsEvent;
+
+public final class MiningEnchantmentService {
+    private final EffectiveEnchantmentsResolver enchantments = new EffectiveEnchantmentsResolver();
+
+    public void apply(BlockDropsEvent event) {
+        ItemStack tool = event.getTool();
+        int autoSmelt = enchantments.resolve(tool, List.of()).level(ModEnchantments.AUTO_SMELT.identifier());
+        int experience = enchantments.resolve(tool, List.of()).level(ModEnchantments.EXPERIENCE.identifier());
+        if (autoSmelt > 0 && event.getLevel() instanceof ServerLevel level) {
+            transformDrops(event.getDrops(), stack -> smeltingResult(level, stack));
+        }
+        if (experience > 0) event.setDroppedExperience(scaleBlockExperience(event.getDroppedExperience(), experience));
+    }
+
+    static ItemStack smeltingResult(ServerLevel level, ItemStack inputStack) {
+        ItemStack one = inputStack.copyWithCount(1);
+        return level.getServer().getRecipeManager().getRecipeFor(RecipeType.SMELTING, new SingleRecipeInput(one), level)
+                .map(holder -> holder.value().assemble(new SingleRecipeInput(one), level.registryAccess()))
+                .orElse(ItemStack.EMPTY);
+    }
+
+    public static void transformDrops(List<ItemEntity> drops, Function<ItemStack, ItemStack> recipeResolver) {
+        var replacement = new ArrayList<ItemEntity>();
+        for (ItemEntity entity : List.copyOf(drops)) {
+            ItemStack original = entity.getItem();
+            ItemStack result = recipeResolver.apply(original);
+            if (result.isEmpty()) continue;
+            long total = (long) original.getCount() * result.getCount();
+            int firstCount = (int) Math.min(total, result.getMaxStackSize());
+            entity.setItem(result.copyWithCount(firstCount));
+            total -= firstCount;
+            while (total > 0) {
+                int count = (int) Math.min(total, result.getMaxStackSize());
+                var split = new ItemEntity(entity.level(), entity.getX(), entity.getY(), entity.getZ(),
+                        result.copyWithCount(count));
+                split.setDeltaMovement(entity.getDeltaMovement());
+                replacement.add(split);
+                total -= count;
+            }
+        }
+        drops.addAll(replacement);
+    }
+
+    public static List<ItemStack> transformStacks(List<ItemStack> drops,
+            Function<ItemStack, ItemStack> recipeResolver) {
+        var transformed = new ArrayList<ItemStack>();
+        for (ItemStack original : drops) {
+            ItemStack result = recipeResolver.apply(original);
+            if (result.isEmpty()) {
+                transformed.add(original.copy());
+                continue;
+            }
+            long total = (long) original.getCount() * result.getCount();
+            while (total > 0) {
+                int count = (int) Math.min(total, result.getMaxStackSize());
+                transformed.add(result.copyWithCount(count));
+                total -= count;
+            }
+        }
+        return List.copyOf(transformed);
+    }
+
+    public static int scaleBlockExperience(int vanillaExperience, int level) {
+        if (vanillaExperience <= 0 || level <= 0) return vanillaExperience;
+        return Mth.floor(vanillaExperience * (1.0D + 0.5D * level));
+    }
+}

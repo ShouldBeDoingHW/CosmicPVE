@@ -204,4 +204,10 @@
   ,"enchantment.cosmicpve.armored.description":"Provides half a level of Protection per level."
   ,"enchantment.cosmicpve.death_pact":"Death Pact"
   ,"enchantment.cosmicpve.death_pact.description":"Reduces outgoing damage, but provides level-scaled protection from incoming damage."
+  ,"enchantment.cosmicpve.auto_smelt":"Auto Smelt"
+  ,"enchantment.cosmicpve.auto_smelt.description":"Automatically smelts block drops."
+  ,"enchantment.cosmicpve.experience":"Experience"
+  ,"enchantment.cosmicpve.experience.description":"Increases experience gained from breaking blocks."
+  ,"item.cosmicpve.mob_spawner":"Mob Spawner"
+  ,"item.cosmicpve.mob_spawner.named":"%s Spawner"
 }

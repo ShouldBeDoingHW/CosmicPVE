@@ -51,11 +51,15 @@ public final class CosmicEnchantmentSpecs {
             ModEnchantments.ARMORED.identifier(), 4, CosmicEnchantmentTier.LEGENDARY, "any_armor");
     public static final CosmicEnchantmentSpec DEATH_PACT = new CosmicEnchantmentSpec(
             ModEnchantments.DEATH_PACT.identifier(), 5, CosmicEnchantmentTier.MASTERY, "chestplate");
+    public static final CosmicEnchantmentSpec AUTO_SMELT = new CosmicEnchantmentSpec(
+            ModEnchantments.AUTO_SMELT.identifier(), 1, CosmicEnchantmentTier.SIMPLE, "pickaxe");
+    public static final CosmicEnchantmentSpec EXPERIENCE = new CosmicEnchantmentSpec(
+            ModEnchantments.EXPERIENCE.identifier(), 3, CosmicEnchantmentTier.SIMPLE, "pickaxe");
 
     public static final List<CosmicEnchantmentSpec> ALL =
             List.of(EXECUTE, ANGELIC, LIGHTNING, ENDER_SHIFT, DOUBLESTRIKE, BLEED, LUCK, POISON, PUMMEL,
                     GREATSWORD, INSANITY, VENOM, AEGIS, EAGLE_EYE, RAGE, MOLTEN, NUTRITION, GLOWING,
-                    OBSIDIANSHIELD, OXYGENATE, ARMORED, DEATH_PACT);
+                    OBSIDIANSHIELD, OXYGENATE, ARMORED, DEATH_PACT, AUTO_SMELT, EXPERIENCE);
 
     private CosmicEnchantmentSpecs() {}
 

@@ -12,6 +12,7 @@ import com.cosmicpve.data.component.WeaponSkinItemData;
 import com.cosmicpve.data.component.HeroicIdentity;
 import com.cosmicpve.data.component.UnexaminedBookData;
 import com.cosmicpve.data.component.BanknoteData;
+import com.cosmicpve.data.component.MobSpawnerData;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -78,6 +79,11 @@ public final class ModDataComponents {
             COMPONENTS.registerComponentType("banknote",
                     builder -> builder.persistent(BanknoteData.CODEC)
                             .networkSynchronized(ByteBufCodecs.fromCodecWithRegistries(BanknoteData.CODEC)).cacheEncoding());
+
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<MobSpawnerData>> MOB_SPAWNER =
+            COMPONENTS.registerComponentType("mob_spawner",
+                    builder -> builder.persistent(MobSpawnerData.CODEC)
+                            .networkSynchronized(ByteBufCodecs.fromCodecWithRegistries(MobSpawnerData.CODEC)).cacheEncoding());
 
     private ModDataComponents() {}
 

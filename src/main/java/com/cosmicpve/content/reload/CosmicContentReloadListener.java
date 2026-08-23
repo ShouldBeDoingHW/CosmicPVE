@@ -7,6 +7,7 @@ import com.cosmicpve.content.CosmicContentRepository;
 import com.cosmicpve.content.definition.scaling.ScalingProfileData;
 import com.cosmicpve.content.definition.stack.StackDefinitionData;
 import com.cosmicpve.content.definition.armor.ArmorSetDefinitionData;
+import com.cosmicpve.content.definition.reward.RewardTableData;
 import com.cosmicpve.content.validation.ContentDiagnostic;
 import com.cosmicpve.content.validation.ValidationResult;
 import com.google.gson.JsonElement;
@@ -25,6 +26,7 @@ import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.core.RegistryAccess;
 
 public final class CosmicContentReloadListener
         extends SimplePreparableReloadListener<ValidationResult<ContentSnapshot>> {
@@ -34,11 +36,15 @@ public final class CosmicContentReloadListener
             FileToIdConverter.json("cosmicpve/stack_definitions");
     private static final FileToIdConverter ARMOR_SET_DEFINITIONS =
             FileToIdConverter.json("cosmicpve/armor_sets");
+    private static final FileToIdConverter REWARD_TABLES =
+            FileToIdConverter.json("cosmicpve/reward_tables");
 
     private final CosmicContentRepository repository;
+    private final RegistryAccess registries;
 
-    public CosmicContentReloadListener(CosmicContentRepository repository) {
+    public CosmicContentReloadListener(CosmicContentRepository repository, RegistryAccess registries) {
         this.repository = repository;
+        this.registries = registries;
     }
 
     @Override
@@ -62,6 +68,8 @@ public final class CosmicContentReloadListener
                 ArmorSetDefinitionData.CODEC,
                 candidate,
                 candidate::addArmorSetDefinition);
+        loadDefinitions(resourceManager, REWARD_TABLES, RewardTableData.CODEC, candidate,
+                (id, data) -> candidate.addRewardTable(id, data, registries));
         return candidate.build();
     }
 
@@ -78,14 +86,16 @@ public final class CosmicContentReloadListener
 
         ContentSnapshot active = repository.snapshot();
         CosmicPVE.LOGGER.info(
-                "Published CosmicPVE content revision {}: {} scaling profile(s), {} stack definition(s), {} armor set(s)",
+                "Published CosmicPVE content revision {}: {} scaling profile(s), {} stack definition(s), {} armor set(s), {} reward table(s)",
                 active.revision(),
                 active.scalingProfiles().size(),
                 active.stackDefinitions().size(),
-                active.armorSetDefinitions().size());
+                active.armorSetDefinitions().size(),
+                active.rewardTables().size());
         CosmicPVE.LOGGER.debug("Scaling profiles: {}", active.scalingProfiles().keySet());
         CosmicPVE.LOGGER.debug("Stack definitions: {}", active.stackDefinitions().keySet());
         CosmicPVE.LOGGER.debug("Armor sets: {}", active.armorSetDefinitions().keySet());
+        CosmicPVE.LOGGER.debug("Reward tables: {}", active.rewardTables().keySet());
     }
 
     private static <T> void loadDefinitions(

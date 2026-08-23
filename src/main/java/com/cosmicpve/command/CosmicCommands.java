@@ -79,6 +79,7 @@ public final class CosmicCommands {
                 .then(HeroicCommands.create())
                 .then(EconomyCommands.create())
                 .then(FoodDebugCommands.create())
+                .then(RewardCommands.create())
                 .then(CombatStackCommands.create()));
 
         event.getDispatcher().register(Commands.literal("feed")

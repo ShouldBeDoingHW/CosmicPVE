@@ -21,6 +21,6 @@ public final class CosmicContent {
     private static void addServerReloadListener(AddServerReloadListenersEvent event) {
         event.addListener(
                 CosmicPVE.id("content_definitions"),
-                new CosmicContentReloadListener(REPOSITORY));
+                new CosmicContentReloadListener(REPOSITORY, event.getRegistryAccess()));
     }
 }

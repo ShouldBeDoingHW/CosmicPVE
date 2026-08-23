@@ -1,0 +1,15 @@
+{
+  "entries": [
+    {"weight": 10, "reward": {"type": "static_item", "item": "minecraft:golden_apple"}},
+    {"weight": 5, "reward": {"type": "banknote", "cents": 5000000}},
+    {"weight": 5, "reward": {"type": "cosmic_book", "rarity": "ultimate"}},
+    {"weight": 4, "reward": {"type": "black_scroll", "success_rate": 50}},
+    {"weight": 4, "reward": {"type": "armor_orb", "success_rate": 50}},
+    {"weight": 4, "reward": {"type": "weapon_orb", "success_rate": 75}},
+    {"weight": 3, "reward": {"type": "mob_spawner", "entity_type": "minecraft:blaze"}},
+    {"weight": 2, "reward": {"type": "generated_equipment", "generated_equipment": {
+      "category": "random_iron_armor_piece", "minimum_enchantments": 1,
+      "maximum_enchantments": 2, "maximum_rarity": "ultimate", "level_mode": "maximum"
+    }}}
+  ]
+}
