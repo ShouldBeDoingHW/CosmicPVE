@@ -1,8 +1,8 @@
 # CosmicPVE Development Handoff
 
-Current verified and accepted gameplay commit: `fe58f247a1355edfea6b6c29dfeb13b718c3d17f` (`Add generic reward and mining foundations`). This is the accepted Steps 6A–6K baseline.
+Current verified and accepted gameplay commit: `14415b3c1bc51c4f489599131814f68f76744c15` (`Add Space Chests and Blessed`). This is the accepted Steps 6A–6L baseline.
 
-Repository state: Steps 6A–6K are implemented, automated/runtime verified, and manually accepted. The root `assets` source-art folder and root `trial rooms` structure-development folder remain deliberately untracked and unrelated.
+Repository state: Steps 6A–6M are implemented, automated/runtime verified, and manually accepted. The root `assets` source-art folder and root `trial rooms` structure-development folder remain deliberately untracked and unrelated.
 
 Last handoff update: 2026-08-23
 
@@ -168,6 +168,18 @@ Implemented Ultimate `cosmicpve:blessed` IV on axes, bringing the total to 25 re
 
 The generic spawner placement audit confirms `SpawnerBlockEntity.setEntityId` writes `minecraft:creeper` into vanilla `SpawnData` while retaining the normal 20-tick initial delay, 200–800-tick subsequent delay, spawn count 4, and 16-block player range. Placement now centralizes the vanilla configuration, dirty-mark, chunk notification, and client update boundary, and `/cosmic reward spawner inspect <position>` exposes the saved state for controlled testing. Creepers still obey ordinary non-Peaceful difficulty, darkness, collision, nearby-mob, and player-range rules; no mob-specific spawning exception was introduced.
 
+### Step 6M — IMPLEMENTED; AUTOMATED/RUNTIME VERIFIED; MANUALLY VERIFIED / ACCEPTED
+
+Added the shared `cosmicpve:cosmic_instance` void dimension and a centralized single-active-session Trial lifecycle (`JOINING`, `DECISION`, `ROOM_INTRO`, `ROOM_ACTIVE`, `ENDING`, `CLOSED`) with a persistent UUID, participant/removed rosters, portal context, current room, protected bounds, transition serial, and the shared 12,000-tick gameplay timer. Decision states and the five-second room intro pause the gameplay timer. Debug completion commits once, clears the development-room state/loadout, and moves the whole active party back to the Decision Box; duplicate completion calls reject.
+
+Trial entry closes the current container, records exact main/hotbar, armor, offhand, cursor, selected slot, dimension, position, yaw, and pitch through registry-aware `ItemStack` codecs, attaches a unique transaction/session ID, and synchronously saves only that player file before clearing anything. The cleared Trial inventory and retained snapshot are then saved together. Exit first clears Trial-only state, rewrites the outside stacks in place, teleports to the saved return context (Overworld spawn is the missing-dimension/failed-position fallback), replaces the snapshot with a persistent restored tombstone, and saves the restored inventory/tombstone together. Retries are idempotent. Disconnect removes only that participant while preserving their snapshot; login restores when they no longer belong to a valid active session. Server restart conservatively aborts any interrupted session and restores affected players as they become available. Trial death clears Trial-only inventory before normal drops, removes only the dead participant, and restores through the copy-on-death snapshot after respawn without changing `keepInventory`.
+
+The stackable Eye-of-Ender-presented Trial Portal creates a temporary two-block custom gateway only after the instance dimension and Decision Box are ready, permits at most four participants during the 30-second join period, and rejects a fifth participant, placement in the instance dimension, obstructed placement, or a second active session. The supplied `decision_box.nbt` is imported with its sole Emerald Block at local `[23,13,23]` as a consumed spawn marker. The supplied Raiding Rainbow structure is imported only as `development_room.nbt` placement test content; its gameplay is not implemented or in a production room pool. Reloadable Trial room definitions own display/category, one or more offset/rotated structure pieces, marker policy, and declared bounds; two-piece composition is covered for future Deadeye-style rooms.
+
+Default scoped instance protection denies participant break, place, item-use/bucket/ignition, explosion block mutation, mob-grief checks, living block destruction, piston mutation, and fluid block formation inside active bounds, with creative bypass and a narrow per-session/room/cause/position allow-policy seam. Structure cleanup removes non-player entities and deterministically clears declared room bounds before reuse. NeoForge exposes no complete cancellable hook for every scheduled vanilla fire-spread or flowing-fluid state change; direct ignition/use and fluid block formation are denied, and deterministic room cleanup is the current defense for residual scheduled mutations. This limitation must be revisited before a room intentionally contains persistent fire or flowing fluid.
+
+Implemented Ultimate `cosmicpve:implants` III on helmets, bringing the total to 26 real Cosmic enchantments. Continuous equipped operation schedules exactly 1 HP healing every 85/70/55 ticks for levels I/II/III, advances the schedule even at full health to avoid catch-up bursts, stops when unequipped, caps through normal healing at maximum health, and uses no proc, Luck, cooldown, CombatStack, or damage modifier. Normal Book, Unexamined Ultimate, Black Scroll, capacity, Transmog, lore, and persistence integration comes from the shared real-enchantment metadata.
+
 ## 3. Current Real Enchantments
 
 These are registered through Minecraft's enchantment infrastructure, use actual enchantment data on the item, and are not present in normal enchanting-table, librarian, random-loot, random-equipment, or mob-equipment acquisition pools.
@@ -201,10 +213,11 @@ These are registered through Minecraft's enchantment infrastructure, use actual 
 | `cosmicpve:auto_smelt` | I | Pickaxe | Simple | Converts each finalized block-drop stack through one ordinary smelting recipe, preserving the vanilla-generated quantity and awarding no furnace XP. |
 | `cosmicpve:experience` | III | Pickaxe | Simple | Multiplies finalized player block-break XP by `1 + 0.5 × level` and floors the integral result. Other XP sources are unaffected. |
 | `cosmicpve:blessed` | IV | Axe | Ultimate | On a committed melee hit, has 2% per level to uniformly remove either one eligible negative Cosmic stack instance or one entire harmful vanilla effect from the attacker. Luck modifies the chance relatively. |
+| `cosmicpve:implants` | III | Helmet | Ultimate | While continuously equipped, heals exactly 1 HP every 85/70/55 ticks at levels I/II/III, without overhealing or catch-up bursts. |
 
 ### DESIGNED BUT NOT IMPLEMENTED
 
-The design also names Divine Immolation, Gears, Hero Killer, Mortal Coil, Phoenix, Self Destruct, and Virus. None currently has a registered real enchantment or runtime behavior. There are exactly 25 implemented real Cosmic enchantments; Death Pact is currently the sole implemented Mastery enchantment. Do not add behavior assumptions beyond `Cosmic_Design.md`.
+The design also names Divine Immolation, Gears, Hero Killer, Mortal Coil, Phoenix, Self Destruct, and Virus. None currently has a registered real enchantment or runtime behavior. There are exactly 26 implemented real Cosmic enchantments; Death Pact is currently the sole implemented Mastery enchantment. Do not add behavior assumptions beyond `Cosmic_Design.md`.
 
 ## 4. Critical Combat Semantics
 
@@ -451,15 +464,19 @@ The following are confirmed in current source and permission-gated under `/cosmi
 - `/cosmic reward book give <player> <rarity> [count]`
 - `/cosmic reward spawner give <player> <entity-type> [count]`
 - `/cosmic reward equipment give <player> <maximum-rarity> <minimum> <maximum> <maximum|random_valid>`
+- `/cosmic trial portal give <player> [count]`
+- `/cosmic trial debug status|complete-room|continue|exit|abort`
+- `/cosmic trial debug timer set|add|remove <seconds>`
+- `/cosmic trial debug restore <player>`
 - `/feed`, `/heal`, and `/restore` are separate permission-gated development convenience commands.
 
 Commands call gameplay services or create the same typed components used by gameplay; production loot acquisition remains deferred.
 
 ## 15. Unresolved / Do Not Assume
 
-- **Portal rules:** placement validation, owner/party authority, protected footprint, expiry, chunk-loading, collision, joining, and safe fallback return behavior require a bounded specification.
 - **Trial scaling after departures:** architecture freezes initial party size so boss maximum health does not shrink, but detailed remaining objective/mob scaling and late-disconnect behavior still need acceptance criteria.
-- **Crash-safe Trial inventory persistence:** the exact NeoForge durability boundary must be prototyped. Marking data dirty is not proof of a crash-durable snapshot, and global saves on every transition are explicitly rejected.
+- **Creeper Spawner runtime spawning:** the typed item and placed vanilla spawner preserve `minecraft:creeper` in `SpawnData`, and diagnostics/configuration appear correct, but manual testing has not produced Creepers under apparently valid conditions. This is deliberately deferred and does not block Trials.
+- **Scheduled instance mutation hooks:** direct block use/ignition, fluid block formation, explosions, pistons, entity grief, placement, and breaking are scoped and denied, but NeoForge does not expose a complete cancellable hook for every scheduled fire-spread or flowing-fluid state transition. Baseline cleanup currently contains residual mutation; rooms that intentionally use persistent fire/fluids need a bounded stronger policy.
 - **Loot tables:** several current design tables are incomplete or malformed and contain ambiguous duplicates. Validation must distinguish intentional duplicate weights from mistakes.
 - **Attribute units/caps:** future health, movement, incoming damage, cooldown, and stacked modifier caps/floors need normalization before large content expansion.
 - **Pheonix/Phoenix identity and death order:** settle the stable spelling/ID and verify pinned NeoForge kill/death-prevention event ordering before implementing it.
@@ -471,11 +488,11 @@ The final post-Orb capacity is no longer unresolved for current target classes: 
 
 ## 16. Current Next Milestone
 
-**Next milestone: Step 6M — Trial Instance Foundation.**
+**Next milestone: Step 6N — First Playable Trial Vertical Slice.**
 
-Step 6L is implemented, automated/runtime verified, and manually accepted. Step 6M begins from its committed clean baseline.
+Step 6M is implemented, automated/runtime verified, and manually accepted. Step 6N should add the production Decision Box DEAL/NO DEAL interface, Trial pot and Apprentice reward table, room selection/appearance weighting, Raiding Rainbow and Circuit Circus mechanics, and the first real repeatable Trial loop. Do not treat the Step 6M placement-only development room as implemented production room gameplay.
 
-After acceptance, continue building generic reward prerequisites toward Space Chests and then the Trial instance foundation. Memory Chests and Cosmic Crates remain deliberately deferred. Maintain the normal cadence of roughly one or two enchantments per milestone; fewer are acceptable for especially risky infrastructure work.
+After Step 6M acceptance, proceed to the bounded Step 6N playable Trial vertical slice described above. Memory Chests and Cosmic Crates remain deliberately deferred. Maintain the normal cadence of roughly one or two enchantments per milestone; fewer are acceptable for especially risky infrastructure work.
 
 ## 17. Development Workflow
 
@@ -492,12 +509,20 @@ Preserve unrelated dirty changes. Never change pinned versions as a side effect 
 
 ## 18. Verification Snapshot
 
+For the accepted Step 6M implementation:
+
+- `gradlew.bat test` passes all 247 automated tests across 74 suites with 0 failures and 0 errors. New coverage includes the four-player boundary, participant removal, paused/active timer semantics, duplicate-completion predicate, persistent session codecs, exact component-bearing inventory snapshot codecs and restored tombstones, one- and two-piece room definitions, imported NBT dimensions/marker counts, title/countdown copy and colors, default/creative/explicit-allow protection policy, Implants intervals/scheduling, and the 26-enchantment invariant.
+- The dedicated server decoded and atomically published both Trial room definitions, loaded the dedicated void dimension and imported structures, retained 1,462 recipes and progression invariants, and reached `Done` without relevant datapack, attachment, command, dimension, structure, common-side classloading, or persistence errors.
+- Fresh client startup completed mod/resource reload, OpenAL, and all texture atlases with the Trial Portal item definition, gateway block model, localization, and Implants data present and no relevant missing-model, missing-texture, malformed-resource, or client/server loading errors.
+- The user manually verified the complete portal-to-Decision-to-development-room-to-Decision-to-outside loop, multiplayer lifecycle behavior, restart recovery, terrain protection, titles/timer, and Implants timing and accepted Step 6M.
+
 For the accepted Step 6L implementation:
 
 - The automated suite currently passes all 223 tests across 67 suites with 0 failures and 0 errors; focused coverage includes tier/table identity, exact production rows/weights and Unexamined Book semantics, persistence codecs and transaction invariants, the 80-tick reveal plus 30-tick pause, canonical presentation/sound policy, non-stackability, vanilla Creeper `SpawnData` and timing defaults, reward-bundle compaction, Blessed chances, and the 25-enchantment registration invariant.
 - The dedicated server atomically published all three production Space Chest tables plus the existing development table, loaded 1,462 recipes, retained the progression recipe invariant, and reached `Done` without relevant registry, datapack, command, menu, attachment, or sided-classloading errors.
 - Client startup completed resource reload, sound initialization, and texture-atlas creation with the Space Chest menu screen/item model registered and no relevant missing-model, malformed-resource, or localization errors. The client was deliberately terminated at the smoke-test boundary.
 - Pinned environment values remain unchanged. The user manually verified and accepted the corrected Space Chest presentation, timing, sounds, Unexamined rewards, transactional recovery, and Blessed behavior. Creeper Spawner runtime spawning remains a deferred, non-blocking issue: the typed item and placed vanilla spawner preserve `minecraft:creeper` in `SpawnData`, and configuration diagnostics appear correct, but manual testing has not yet produced Creepers under apparently valid conditions.
+- Step 6L is committed at `14415b3c1bc51c4f489599131814f68f76744c15` (`Add Space Chests and Blessed`).
 
 For the accepted Step 6K implementation:
 

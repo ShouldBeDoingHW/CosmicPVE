@@ -39,7 +39,9 @@ class CosmicEnchantmentRegistrationTest {
                 Map.entry("armored", 4),
                 Map.entry("death_pact", 5),
                 Map.entry("auto_smelt", 1),
-                Map.entry("experience", 3));
+                Map.entry("experience", 3),
+                Map.entry("blessed", 4),
+                Map.entry("implants", 3));
         for (var entry : expected.entrySet()) {
             var resource = getClass().getClassLoader()
                     .getResourceAsStream("data/cosmicpve/enchantment/" + entry.getKey() + ".json");
@@ -74,7 +76,7 @@ class CosmicEnchantmentRegistrationTest {
                 }
             }
         }
-        assertEquals(25, CosmicEnchantmentSpecs.ALL.size());
+        assertEquals(26, CosmicEnchantmentSpecs.ALL.size());
         assertEquals(CosmicEnchantmentTier.ELITE, CosmicEnchantmentSpecs.EXECUTE.tier());
         assertEquals(CosmicEnchantmentTier.ULTIMATE, CosmicEnchantmentSpecs.ANGELIC.tier());
         assertEquals(CosmicEnchantmentTier.SIMPLE, CosmicEnchantmentSpecs.LIGHTNING.tier());
@@ -109,6 +111,9 @@ class CosmicEnchantmentRegistrationTest {
         assertEquals(CosmicEnchantmentTier.ULTIMATE, CosmicEnchantmentSpecs.BLESSED.tier());
         assertEquals("axe", CosmicEnchantmentSpecs.BLESSED.equipmentApplicability());
         assertEquals(4, CosmicEnchantmentSpecs.BLESSED.maxLevel());
+        assertEquals(CosmicEnchantmentTier.ULTIMATE, CosmicEnchantmentSpecs.IMPLANTS.tier());
+        assertEquals("helmet", CosmicEnchantmentSpecs.IMPLANTS.equipmentApplicability());
+        assertEquals(3, CosmicEnchantmentSpecs.IMPLANTS.maxLevel());
     }
 
     @Test

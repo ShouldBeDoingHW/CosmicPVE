@@ -8,6 +8,8 @@ import com.cosmicpve.content.definition.armor.ArmorSetDefinition;
 import com.cosmicpve.content.definition.armor.ArmorSetDefinitionData;
 import com.cosmicpve.content.definition.reward.RewardTable;
 import com.cosmicpve.content.definition.reward.RewardTableData;
+import com.cosmicpve.content.definition.trial.TrialRoomDefinition;
+import com.cosmicpve.content.definition.trial.TrialRoomDefinitionData;
 import com.cosmicpve.content.validation.ContentDiagnostic;
 import com.cosmicpve.content.validation.ValidationResult;
 import java.util.ArrayList;
@@ -22,6 +24,7 @@ public final class ContentCandidateBuilder {
     private final Map<Identifier, StackDefinition> stackDefinitions = new LinkedHashMap<>();
     private final Map<Identifier, ArmorSetDefinition> armorSetDefinitions = new LinkedHashMap<>();
     private final Map<Identifier, RewardTable> rewardTables = new LinkedHashMap<>();
+    private final Map<Identifier, TrialRoomDefinition> trialRooms = new LinkedHashMap<>();
     private final List<ContentDiagnostic> diagnostics = new ArrayList<>();
 
     public void addScalingProfile(Identifier id, ScalingProfileData data) {
@@ -68,6 +71,14 @@ public final class ContentCandidateBuilder {
         }
     }
 
+    public void addTrialRoom(Identifier id, TrialRoomDefinitionData data) {
+        ValidationResult<TrialRoomDefinition> result = data.resolve(id);
+        if (!result.isSuccess()) { diagnostics.addAll(result.diagnostics()); return; }
+        if (trialRooms.putIfAbsent(id, result.valueOrThrow()) != null) {
+            diagnostics.add(ContentDiagnostic.error(id.toString(), "Duplicate Trial room ID"));
+        }
+    }
+
     public void addDiagnostic(ContentDiagnostic diagnostic) {
         diagnostics.add(diagnostic);
     }
@@ -77,7 +88,7 @@ public final class ContentCandidateBuilder {
             return ValidationResult.failure(diagnostics);
         }
         return ValidationResult.success(
-                new ContentSnapshot(0L, scalingProfiles, stackDefinitions, armorSetDefinitions, rewardTables),
+                new ContentSnapshot(0L, scalingProfiles, stackDefinitions, armorSetDefinitions, rewardTables, trialRooms),
                 diagnostics);
     }
 }

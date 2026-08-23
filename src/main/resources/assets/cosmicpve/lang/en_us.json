@@ -218,4 +218,9 @@
   ,"container.cosmicpve.space_chest":"%s Space Chest"
   ,"enchantment.cosmicpve.blessed":"Blessed"
   ,"enchantment.cosmicpve.blessed.description":"Successful attacks may remove one negative effect from you."
+  ,"enchantment.cosmicpve.implants":"Implants"
+  ,"enchantment.cosmicpve.implants.description":"Periodically restores health while worn."
+  ,"item.cosmicpve.trial_portal":"Trial Portal"
+  ,"item.cosmicpve.trial_portal.description":"Opens a gateway for one to four Trial participants."
+  ,"item.cosmicpve.trial_portal.use":"Use on a clear surface to create."
 }

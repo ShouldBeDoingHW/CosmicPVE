@@ -1,0 +1,9 @@
+{
+  "display_name": "Development Trial Room",
+  "category": "development",
+  "pieces": [
+    {"structure": "cosmicpve:trial/development_room"}
+  ],
+  "spawn_marker": "emerald_block",
+  "bounds": {"min": [0, 0, 0], "max": [40, 16, 40]}
+}

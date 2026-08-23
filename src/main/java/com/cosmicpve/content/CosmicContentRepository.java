@@ -4,6 +4,7 @@ import com.cosmicpve.content.definition.scaling.ScalingProfile;
 import com.cosmicpve.content.definition.stack.StackDefinition;
 import com.cosmicpve.content.definition.armor.ArmorSetDefinition;
 import com.cosmicpve.content.definition.reward.RewardTable;
+import com.cosmicpve.content.definition.trial.TrialRoomDefinition;
 import com.cosmicpve.content.validation.ValidationResult;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
@@ -49,6 +50,14 @@ public final class CosmicContentRepository {
 
     public RewardTable requireRewardTable(Identifier id) {
         return findRewardTable(id).orElseThrow(() -> new UnknownContentDefinitionException("reward table", id));
+    }
+
+    public Optional<TrialRoomDefinition> findTrialRoom(Identifier id) {
+        return Optional.ofNullable(snapshot().trialRooms().get(id));
+    }
+
+    public TrialRoomDefinition requireTrialRoom(Identifier id) {
+        return findTrialRoom(id).orElseThrow(() -> new UnknownContentDefinitionException("Trial room", id));
     }
 
     public synchronized boolean publish(ValidationResult<ContentSnapshot> candidate) {

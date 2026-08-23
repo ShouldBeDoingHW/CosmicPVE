@@ -25,6 +25,8 @@ public final class EquippedPersistentEffectService {
     private final Function<net.minecraft.world.item.ItemStack, List<VirtualEnchantmentGrant>> virtualGrants;
     private final Map<LivingEntity, Map<Holder<MobEffect>, Boolean>> owned =
             Collections.synchronizedMap(new WeakHashMap<>());
+    private final Map<LivingEntity, ImplantSchedule> implants =
+            Collections.synchronizedMap(new WeakHashMap<>());
 
     public EquippedPersistentEffectService(EffectiveEnchantmentsResolver enchantments) {
         this(enchantments, ignored -> List.of());
@@ -42,7 +44,28 @@ public final class EquippedPersistentEffectService {
                 MobEffects.NIGHT_VISION, GLOWING_LEASE_TICKS, GLOWING_REFRESH_AT);
         apply(entity, EquipmentSlot.LEGS, ModEnchantments.OBSIDIANSHIELD.identifier(),
                 MobEffects.FIRE_RESISTANCE, OBSIDIANSHIELD_LEASE_TICKS, DEFAULT_REFRESH_AT);
+        tickImplants(entity);
     }
+
+    void tickImplants(LivingEntity entity) {
+        var helmet = entity.getItemBySlot(EquipmentSlot.HEAD);
+        int level = enchantments.resolve(helmet, virtualGrants.apply(helmet))
+                .level(ModEnchantments.IMPLANTS.identifier());
+        if (level <= 0) { implants.remove(entity); return; }
+        int now = entity.tickCount;
+        int interval = ImplantsBehavior.intervalTicks(level);
+        ImplantSchedule schedule = implants.get(entity);
+        if (schedule == null || schedule.level() != level) {
+            implants.put(entity, new ImplantSchedule(level, ImplantsBehavior.nextHealTick(now, level)));
+            return;
+        }
+        if (now >= schedule.nextHealTick()) {
+            if (entity.getHealth() < entity.getMaxHealth()) entity.heal(ImplantsBehavior.HEAL_AMOUNT);
+            implants.put(entity, new ImplantSchedule(level, ImplantsBehavior.nextHealTick(now, level)));
+        }
+    }
+
+    private record ImplantSchedule(int level, int nextHealTick) {}
 
     private void apply(LivingEntity entity, EquipmentSlot slot, net.minecraft.resources.Identifier id,
                        Holder<MobEffect> effect, int leaseTicks, int refreshAt) {

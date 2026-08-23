@@ -1,0 +1,9 @@
+{
+  "display_name": "Decision Box",
+  "category": "decision",
+  "pieces": [
+    {"structure": "cosmicpve:trial/decision_box"}
+  ],
+  "spawn_marker": "emerald_block",
+  "bounds": {"min": [0, 0, 0], "max": [46, 27, 46]}
+}

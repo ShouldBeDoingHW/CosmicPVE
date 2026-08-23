@@ -57,11 +57,13 @@ public final class CosmicEnchantmentSpecs {
             ModEnchantments.EXPERIENCE.identifier(), 3, CosmicEnchantmentTier.SIMPLE, "pickaxe");
     public static final CosmicEnchantmentSpec BLESSED = new CosmicEnchantmentSpec(
             ModEnchantments.BLESSED.identifier(), 4, CosmicEnchantmentTier.ULTIMATE, "axe");
+    public static final CosmicEnchantmentSpec IMPLANTS = new CosmicEnchantmentSpec(
+            ModEnchantments.IMPLANTS.identifier(), 3, CosmicEnchantmentTier.ULTIMATE, "helmet");
 
     public static final List<CosmicEnchantmentSpec> ALL =
             List.of(EXECUTE, ANGELIC, LIGHTNING, ENDER_SHIFT, DOUBLESTRIKE, BLEED, LUCK, POISON, PUMMEL,
                     GREATSWORD, INSANITY, VENOM, AEGIS, EAGLE_EYE, RAGE, MOLTEN, NUTRITION, GLOWING,
-                    OBSIDIANSHIELD, OXYGENATE, ARMORED, DEATH_PACT, AUTO_SMELT, EXPERIENCE, BLESSED);
+                    OBSIDIANSHIELD, OXYGENATE, ARMORED, DEATH_PACT, AUTO_SMELT, EXPERIENCE, BLESSED, IMPLANTS);
 
     private CosmicEnchantmentSpecs() {}
 

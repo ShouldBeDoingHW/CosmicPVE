@@ -4,6 +4,7 @@ import com.cosmicpve.CosmicPVE;
 import com.cosmicpve.data.attachment.PlayerProfileData;
 import com.cosmicpve.combat.stack.CombatStackContainer;
 import com.cosmicpve.spacechest.SpaceChestSessionAttachment;
+import com.cosmicpve.trial.persistence.TrialPlayerState;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.attachment.AttachmentType;
 import net.neoforged.neoforge.registries.DeferredHolder;
@@ -33,6 +34,10 @@ public final class ModAttachments {
     public static final DeferredHolder<AttachmentType<?>, AttachmentType<SpaceChestSessionAttachment>> SPACE_CHEST_SESSION =
             ATTACHMENTS.register("space_chest_session", () -> AttachmentType.builder(SpaceChestSessionAttachment::empty)
                     .serialize(SpaceChestSessionAttachment.CODEC).copyOnDeath().build());
+
+    public static final DeferredHolder<AttachmentType<?>, AttachmentType<TrialPlayerState>> TRIAL_PLAYER_STATE =
+            ATTACHMENTS.register("trial_player_state", () -> AttachmentType.builder(TrialPlayerState::restored)
+                    .serialize(TrialPlayerState.CODEC).copyOnDeath().build());
 
     private ModAttachments() {}
 

@@ -8,6 +8,7 @@ import com.cosmicpve.content.definition.scaling.ScalingProfileData;
 import com.cosmicpve.content.definition.stack.StackDefinitionData;
 import com.cosmicpve.content.definition.armor.ArmorSetDefinitionData;
 import com.cosmicpve.content.definition.reward.RewardTableData;
+import com.cosmicpve.content.definition.trial.TrialRoomDefinitionData;
 import com.cosmicpve.content.validation.ContentDiagnostic;
 import com.cosmicpve.content.validation.ValidationResult;
 import com.google.gson.JsonElement;
@@ -38,6 +39,7 @@ public final class CosmicContentReloadListener
             FileToIdConverter.json("cosmicpve/armor_sets");
     private static final FileToIdConverter REWARD_TABLES =
             FileToIdConverter.json("cosmicpve/reward_tables");
+    private static final FileToIdConverter TRIAL_ROOMS = FileToIdConverter.json("cosmicpve/trial_rooms");
 
     private final CosmicContentRepository repository;
     private final RegistryAccess registries;
@@ -70,6 +72,8 @@ public final class CosmicContentReloadListener
                 candidate::addArmorSetDefinition);
         loadDefinitions(resourceManager, REWARD_TABLES, RewardTableData.CODEC, candidate,
                 (id, data) -> candidate.addRewardTable(id, data, registries));
+        loadDefinitions(resourceManager, TRIAL_ROOMS, TrialRoomDefinitionData.CODEC, candidate,
+                candidate::addTrialRoom);
         return candidate.build();
     }
 
@@ -86,16 +90,17 @@ public final class CosmicContentReloadListener
 
         ContentSnapshot active = repository.snapshot();
         CosmicPVE.LOGGER.info(
-                "Published CosmicPVE content revision {}: {} scaling profile(s), {} stack definition(s), {} armor set(s), {} reward table(s)",
+                "Published CosmicPVE content revision {}: {} scaling profile(s), {} stack definition(s), {} armor set(s), {} reward table(s), {} Trial room(s)",
                 active.revision(),
                 active.scalingProfiles().size(),
                 active.stackDefinitions().size(),
                 active.armorSetDefinitions().size(),
-                active.rewardTables().size());
+                active.rewardTables().size(), active.trialRooms().size());
         CosmicPVE.LOGGER.debug("Scaling profiles: {}", active.scalingProfiles().keySet());
         CosmicPVE.LOGGER.debug("Stack definitions: {}", active.stackDefinitions().keySet());
         CosmicPVE.LOGGER.debug("Armor sets: {}", active.armorSetDefinitions().keySet());
         CosmicPVE.LOGGER.debug("Reward tables: {}", active.rewardTables().keySet());
+        CosmicPVE.LOGGER.debug("Trial rooms: {}", active.trialRooms().keySet());
     }
 
     private static <T> void loadDefinitions(

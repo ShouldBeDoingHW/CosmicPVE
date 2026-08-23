@@ -8,6 +8,7 @@ import com.cosmicpve.network.CosmicNetwork;
 import com.cosmicpve.registry.ModAttachments;
 import com.cosmicpve.registry.ModDataComponents;
 import com.cosmicpve.registry.ModItems;
+import com.cosmicpve.registry.ModBlocks;
 import com.cosmicpve.registry.ModEntities;
 import com.cosmicpve.registry.ModMenus;
 import com.cosmicpve.spacechest.SpaceChestEventBridge;
@@ -23,6 +24,7 @@ import com.cosmicpve.equipment.enchantment.OxygenateService;
 import com.cosmicpve.equipment.enchantment.EffectiveEnchantmentsResolver;
 import com.cosmicpve.equipment.enchantment.MiningEnchantmentEventBridge;
 import com.cosmicpve.equipment.repair.RepairScrollEventBridge;
+import com.cosmicpve.trial.TrialBootstrap;
 import com.mojang.logging.LogUtils;
 import net.minecraft.resources.Identifier;
 import net.minecraft.network.chat.Component;
@@ -43,6 +45,7 @@ public final class CosmicPVE {
     public CosmicPVE(IEventBus modBus) {
         ModDataComponents.register(modBus);
         ModAttachments.register(modBus);
+        ModBlocks.register(modBus);
         ModItems.register(modBus);
         ModEntities.register(modBus);
         ModMenus.register(modBus);
@@ -70,6 +73,7 @@ public final class CosmicPVE {
         var repairs = new RepairScrollEventBridge();
         NeoForge.EVENT_BUS.addListener(repairs::onStacked);
         ArmorRecipeProgression.register();
+        TrialBootstrap.register();
         var spaceChests = new SpaceChestEventBridge();
         NeoForge.EVENT_BUS.addListener(spaceChests::onLogin);
         NeoForge.EVENT_BUS.addListener(spaceChests::onRespawn);

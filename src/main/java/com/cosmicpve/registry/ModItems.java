@@ -15,6 +15,7 @@ import com.cosmicpve.equipment.enchantment.UnexaminedEnchantmentBookItem;
 import com.cosmicpve.economy.BanknoteItem;
 import com.cosmicpve.reward.spawner.TypedMobSpawnerItem;
 import com.cosmicpve.spacechest.SpaceChestItem;
+import com.cosmicpve.trial.portal.TrialPortalItem;
 
 public final class ModItems {
     private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(CosmicPVE.MOD_ID);
@@ -69,6 +70,9 @@ public final class ModItems {
 
     public static final DeferredItem<SpaceChestItem> SPACE_CHEST = ITEMS.registerItem(
             "space_chest", SpaceChestItem::new, properties -> properties.stacksTo(1));
+
+    public static final DeferredItem<TrialPortalItem> TRIAL_PORTAL = ITEMS.registerItem(
+            "trial_portal", TrialPortalItem::new, properties -> properties.stacksTo(64));
 
     private ModItems() {}
 
