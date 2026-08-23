@@ -1,8 +1,8 @@
 # CosmicPVE Development Handoff
 
-Current verified and accepted gameplay commit: `8af58c550d5ecbe8429e55b3e8fb176848cd2971` (`Add progression cleanup and Unexamined Books`). This is the accepted Steps 6A–6I baseline.
+Current verified and accepted gameplay commit: `8af58c5e7b8a39ff1f312f5d0ff6a1b25ce23ad1` (`Add progression cleanup and Unexamined Books`). This is the accepted Steps 6A–6I baseline.
 
-Repository state after Step 6I gameplay closure: tracked gameplay is clean at `8af58c550d5ecbe8429e55b3e8fb176848cd2971`, apart from this canonical documentation-baseline follow-up. The root `assets` source-art folder and root `trial rooms` structure-development folder remain deliberately untracked and unrelated.
+Repository state after Step 6I gameplay closure: tracked gameplay is clean at `8af58c5e7b8a39ff1f312f5d0ff6a1b25ce23ad1`, apart from this canonical documentation-baseline follow-up. The root `assets` source-art folder and root `trial rooms` structure-development folder remain deliberately untracked and unrelated.
 
 Last handoff update: 2026-08-23
 
@@ -458,7 +458,7 @@ For the accepted Step 6I implementation:
 - Dedicated-server startup automatically enabled the required progression datapack, loaded 1,462 recipes, verified all eight forbidden armor recipe IDs absent and eight Iron/tool control recipes present in the live recipe manager, published current content, and reached `Done` without datapack, recipe, modifier, registry, or sided-classloading errors.
 - Client startup completed CosmicPVE resource reload, sound initialization, and item-atlas creation without missing-model, missing-texture, malformed-resource, tint-source, localization, or item-registration errors in the runtime log.
 - Pinned environment values remain unchanged. The user manually re-tested and accepted final-stack/full-stack Unexamined opening, Diamond crafting and recipe-book removal after a fresh restart, Netherite armor smithing removal, and Diamond-armor loot replacement. Glowing's visual flicker remains deliberately unresolved for Step 6J.
-- Step 6I gameplay is committed at `8af58c550d5ecbe8429e55b3e8fb176848cd2971` (`Add progression cleanup and Unexamined Books`).
+- Step 6I gameplay is committed at `8af58c5e7b8a39ff1f312f5d0ff6a1b25ce23ad1` (`Add progression cleanup and Unexamined Books`).
 
 For the accepted Step 6H implementation and final accepted refinements:
 
