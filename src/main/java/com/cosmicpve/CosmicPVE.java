@@ -19,6 +19,7 @@ import com.cosmicpve.equipment.heroic.HeroicCrystalEventBridge;
 import com.cosmicpve.equipment.enchantment.OxygenateEventBridge;
 import com.cosmicpve.equipment.enchantment.OxygenateService;
 import com.cosmicpve.equipment.enchantment.EffectiveEnchantmentsResolver;
+import com.cosmicpve.equipment.repair.RepairScrollEventBridge;
 import com.mojang.logging.LogUtils;
 import net.minecraft.resources.Identifier;
 import net.minecraft.network.chat.Component;
@@ -60,6 +61,8 @@ public final class CosmicPVE {
         NeoForge.EVENT_BUS.addListener(heroic::onStacked);
         var oxygenate = new OxygenateEventBridge(new OxygenateService(new EffectiveEnchantmentsResolver()));
         NeoForge.EVENT_BUS.addListener(oxygenate::onBlockDrops);
+        var repairs = new RepairScrollEventBridge();
+        NeoForge.EVENT_BUS.addListener(repairs::onStacked);
         ArmorRecipeProgression.register();
     }
 

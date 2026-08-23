@@ -1,12 +1,11 @@
 package com.cosmicpve.command;
 
 import com.cosmicpve.data.component.CosmicEnchantmentBookData;
-import com.cosmicpve.data.component.EnchantmentOrbData;
-import com.cosmicpve.data.component.BlackScrollData;
 import com.cosmicpve.equipment.enchantment.OrbType;
 import com.cosmicpve.equipment.enchantment.CosmicEnchantmentSpecs;
 import com.cosmicpve.equipment.enchantment.CosmicEnchantmentTier;
 import com.cosmicpve.equipment.enchantment.UnexaminedBooks;
+import com.cosmicpve.equipment.enchantment.EnchantingRewardItemFactory;
 import com.cosmicpve.registry.ModDataComponents;
 import com.cosmicpve.registry.ModItems;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -55,7 +54,9 @@ public final class EnchantingCommands {
                 .then(orbType("armor", OrbType.ARMOR, false)).then(orbType("weapon", OrbType.WEAPON, false)));
         var orbRandom = Commands.literal("give-random").then(Commands.argument("player", EntityArgument.player())
                 .then(orbType("armor", OrbType.ARMOR, true)).then(orbType("weapon", OrbType.WEAPON, true)));
-        var orbs = Commands.literal("orb").then(orbGive).then(orbRandom);
+        var orbFixed = Commands.literal("give-fixed").then(Commands.argument("player", EntityArgument.player())
+                .then(fixedOrbType("armor", OrbType.ARMOR)).then(fixedOrbType("weapon", OrbType.WEAPON)));
+        var orbs = Commands.literal("orb").then(orbGive).then(orbRandom).then(orbFixed);
         var blackScroll = Commands.literal("black-scroll").then(Commands.literal("give")
                 .then(Commands.argument("player", EntityArgument.player())
                         .then(Commands.argument("returned-success", IntegerArgumentType.integer(1, 100))
@@ -107,12 +108,21 @@ public final class EnchantingCommands {
     }
 
     private static int giveOrb(net.minecraft.server.level.ServerPlayer player, OrbType type, int success, int destroy) {
-        var item = type == OrbType.ARMOR ? ModItems.ARMOR_ENCHANTMENT_ORB.get() : ModItems.WEAPON_ENCHANTMENT_ORB.get();
-        var stack = new ItemStack(item);
-        stack.set(ModDataComponents.ENCHANTMENT_ORB.get(),
-                new EnchantmentOrbData(EnchantmentOrbData.CURRENT_DATA_VERSION, success, destroy));
+        var stack = new EnchantingRewardItemFactory().orb(type, success, destroy);
         player.getInventory().placeItemBackInInventory(stack);
         return 1;
+    }
+
+    private static com.mojang.brigadier.builder.LiteralArgumentBuilder<net.minecraft.commands.CommandSourceStack>
+            fixedOrbType(String literal, OrbType type) {
+        return Commands.literal(literal).then(Commands.argument("success", IntegerArgumentType.integer(1, 100))
+                .executes(c -> {
+                    var stack = new EnchantingRewardItemFactory().orb(type,
+                            IntegerArgumentType.getInteger(c, "success"),
+                            c.getSource().getServer().overworld().getRandom());
+                    EntityArgument.getPlayer(c, "player").getInventory().placeItemBackInInventory(stack);
+                    return 1;
+                }));
     }
 
     private static int giveSimple(net.minecraft.server.level.ServerPlayer player, net.minecraft.world.item.Item item, int count) {
@@ -121,9 +131,7 @@ public final class EnchantingCommands {
     }
 
     private static int giveBlackScroll(net.minecraft.server.level.ServerPlayer player, int returnedSuccessRate) {
-        var stack = new ItemStack(ModItems.BLACK_SCROLL.get());
-        stack.set(ModDataComponents.BLACK_SCROLL.get(), new BlackScrollData(
-                BlackScrollData.CURRENT_DATA_VERSION, returnedSuccessRate));
+        var stack = new EnchantingRewardItemFactory().blackScroll(returnedSuccessRate);
         player.getInventory().placeItemBackInInventory(stack);
         return 1;
     }

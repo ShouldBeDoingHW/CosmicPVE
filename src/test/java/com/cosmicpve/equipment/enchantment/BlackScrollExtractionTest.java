@@ -135,6 +135,19 @@ class BlackScrollExtractionTest {
     }
 
     @Test
+    void actualMasteryDeathPactIsNotExtractable() {
+        var fixture = fixture();
+        var target = new ItemStack(Items.DIAMOND_CHESTPLATE);
+        addEnchant(target, fixture.deathPact(), 5);
+        var scroll = scroll(75);
+        var service = new BlackScrollExtractionService(fixture.registry(), ignored -> 0, () -> 50);
+        assertEquals(BlackScrollExtractionResult.Outcome.REJECTED_NO_ELIGIBLE_ENCHANTMENTS,
+                service.apply(scroll, target, target).outcome());
+        assertEquals(5, EnchantmentHelper.getEnchantmentsForCrafting(target).getLevel(fixture.deathPact()));
+        assertEquals(1, scroll.getCount());
+    }
+
+    @Test
     void staleTargetRejectsAndSuccessfulOutputReplacesCursorWithoutInventorySpace() {
         var fixture = fixture();
         var expected = new ItemStack(Items.DIAMOND_SWORD);
@@ -177,8 +190,10 @@ class BlackScrollExtractionTest {
                 ModEnchantments.DOUBLESTRIKE, enchantment("doublestrike", 3), RegistrationInfo.BUILT_IN);
         var vanillaKey = ModEnchantments.createKey("test_vanilla");
         var vanilla = registry.register(vanillaKey, enchantment("test_vanilla", 5), RegistrationInfo.BUILT_IN);
+        var deathPact = registry.register(ModEnchantments.DEATH_PACT,
+                enchantment("death_pact", 5), RegistrationInfo.BUILT_IN);
         registry.freeze();
-        return new Fixture(registry, execute, doublestrike, vanilla);
+        return new Fixture(registry, execute, doublestrike, vanilla, deathPact);
     }
 
     private static Enchantment enchantment(String name, int maximumLevel) {
@@ -189,5 +204,5 @@ class BlackScrollExtractionTest {
     }
 
     private record Fixture(MappedRegistry<Enchantment> registry, Holder<Enchantment> execute,
-            Holder<Enchantment> doublestrike, Holder<Enchantment> vanilla) {}
+            Holder<Enchantment> doublestrike, Holder<Enchantment> vanilla, Holder<Enchantment> deathPact) {}
 }

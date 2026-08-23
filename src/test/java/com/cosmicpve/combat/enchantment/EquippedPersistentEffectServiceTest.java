@@ -6,10 +6,13 @@ import net.minecraft.world.effect.MobEffects;
 import org.junit.jupiter.api.Test;
 
 class EquippedPersistentEffectServiceTest {
-    @Test void managedLeaseIsHiddenShortAndRecognizable() {
+    @Test void glowingLeaseRefreshesSafelyAboveTheNightVisionFlickerWindow() {
         var lease = EquippedPersistentEffectService.managed(
                 MobEffects.NIGHT_VISION, EquippedPersistentEffectService.GLOWING_LEASE_TICKS);
-        assertEquals(220, lease.getDuration());
+        assertEquals(600, lease.getDuration());
+        assertTrue(EquippedPersistentEffectService.GLOWING_REFRESH_AT > 200);
+        assertTrue(EquippedPersistentEffectService.GLOWING_LEASE_TICKS
+                > EquippedPersistentEffectService.GLOWING_REFRESH_AT);
         assertTrue(lease.isAmbient());
         assertFalse(lease.isVisible());
         assertFalse(lease.showIcon());

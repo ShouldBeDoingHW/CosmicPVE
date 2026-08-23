@@ -11,6 +11,7 @@ import com.cosmicpve.data.component.WeaponSkinIdentity;
 import com.cosmicpve.data.component.WeaponSkinItemData;
 import com.cosmicpve.data.component.HeroicIdentity;
 import com.cosmicpve.data.component.UnexaminedBookData;
+import com.cosmicpve.data.component.BanknoteData;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -72,6 +73,11 @@ public final class ModDataComponents {
             COMPONENTS.registerComponentType("heroic",
                     builder -> builder.persistent(HeroicIdentity.CODEC)
                             .networkSynchronized(ByteBufCodecs.fromCodecWithRegistries(HeroicIdentity.CODEC)).cacheEncoding());
+
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<BanknoteData>> BANKNOTE =
+            COMPONENTS.registerComponentType("banknote",
+                    builder -> builder.persistent(BanknoteData.CODEC)
+                            .networkSynchronized(ByteBufCodecs.fromCodecWithRegistries(BanknoteData.CODEC)).cacheEncoding());
 
     private ModDataComponents() {}
 

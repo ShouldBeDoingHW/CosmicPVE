@@ -26,6 +26,8 @@ public final class ModEnchantments {
     public static final ResourceKey<Enchantment> GLOWING = createKey("glowing");
     public static final ResourceKey<Enchantment> OBSIDIANSHIELD = createKey("obsidianshield");
     public static final ResourceKey<Enchantment> OXYGENATE = createKey("oxygenate");
+    public static final ResourceKey<Enchantment> ARMORED = createKey("armored");
+    public static final ResourceKey<Enchantment> DEATH_PACT = createKey("death_pact");
 
     private ModEnchantments() {}
 

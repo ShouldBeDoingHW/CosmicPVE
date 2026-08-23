@@ -35,7 +35,9 @@ class CosmicEnchantmentRegistrationTest {
                 Map.entry("nutrition", 3),
                 Map.entry("glowing", 1),
                 Map.entry("obsidianshield", 1),
-                Map.entry("oxygenate", 2));
+                Map.entry("oxygenate", 2),
+                Map.entry("armored", 4),
+                Map.entry("death_pact", 5));
         for (var entry : expected.entrySet()) {
             var resource = getClass().getClassLoader()
                     .getResourceAsStream("data/cosmicpve/enchantment/" + entry.getKey() + ".json");
@@ -43,7 +45,7 @@ class CosmicEnchantmentRegistrationTest {
             try (var reader = new InputStreamReader(resource, StandardCharsets.UTF_8)) {
                 var json = JsonParser.parseReader(reader).getAsJsonObject();
                 assertEquals(entry.getValue().intValue(), json.get("max_level").getAsInt());
-                assertEquals(0, json.getAsJsonObject("effects").size());
+                if (!entry.getKey().equals("armored")) assertEquals(0, json.getAsJsonObject("effects").size());
                 if (entry.getKey().equals("aegis")) {
                     assertEquals("#cosmicpve:enchantable/chestplate", json.get("supported_items").getAsString());
                     assertEquals("chest", json.getAsJsonArray("slots").get(0).getAsString());
@@ -60,10 +62,17 @@ class CosmicEnchantmentRegistrationTest {
                 } else if (entry.getKey().equals("oxygenate")) {
                     assertEquals("#cosmicpve:enchantable/pickaxe", json.get("supported_items").getAsString());
                     assertEquals("mainhand", json.getAsJsonArray("slots").get(0).getAsString());
+                } else if (entry.getKey().equals("armored")) {
+                    var effect = json.getAsJsonObject("effects").getAsJsonArray("minecraft:damage_protection")
+                            .get(0).getAsJsonObject().getAsJsonObject("effect").getAsJsonObject("value");
+                    assertEquals(0.5, effect.get("base").getAsDouble());
+                    assertEquals(0.5, effect.get("per_level_above_first").getAsDouble());
+                } else if (entry.getKey().equals("death_pact")) {
+                    assertEquals("#cosmicpve:enchantable/chestplate", json.get("supported_items").getAsString());
                 }
             }
         }
-        assertEquals(20, CosmicEnchantmentSpecs.ALL.size());
+        assertEquals(22, CosmicEnchantmentSpecs.ALL.size());
         assertEquals(CosmicEnchantmentTier.ELITE, CosmicEnchantmentSpecs.EXECUTE.tier());
         assertEquals(CosmicEnchantmentTier.ULTIMATE, CosmicEnchantmentSpecs.ANGELIC.tier());
         assertEquals(CosmicEnchantmentTier.SIMPLE, CosmicEnchantmentSpecs.LIGHTNING.tier());
@@ -88,6 +97,9 @@ class CosmicEnchantmentRegistrationTest {
         assertEquals("leggings", CosmicEnchantmentSpecs.NUTRITION.equipmentApplicability());
         assertEquals("pickaxe", CosmicEnchantmentSpecs.OXYGENATE.equipmentApplicability());
         assertTrue(CosmicEnchantmentSpecs.OXYGENATE.tier().extractableByBlackScroll());
+        assertEquals(CosmicEnchantmentTier.LEGENDARY, CosmicEnchantmentSpecs.ARMORED.tier());
+        assertEquals(CosmicEnchantmentTier.MASTERY, CosmicEnchantmentSpecs.DEATH_PACT.tier());
+        assertFalse(CosmicEnchantmentSpecs.DEATH_PACT.tier().extractableByBlackScroll());
     }
 
     @Test

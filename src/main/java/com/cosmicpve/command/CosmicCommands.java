@@ -21,6 +21,7 @@ public final class CosmicCommands {
     private CosmicCommands() {}
 
     public static void register(RegisterCommandsEvent event) {
+        EconomyCommands.registerPublic(event);
         var combat = Commands.literal("combat")
                 .then(Commands.literal("trace")
                         .then(Commands.literal("on").executes(context -> setTrace(context.getSource(), true)))
@@ -76,6 +77,7 @@ public final class CosmicCommands {
                 .then(EnchantingCommands.create())
                 .then(WeaponSkinCommands.create())
                 .then(HeroicCommands.create())
+                .then(EconomyCommands.create())
                 .then(FoodDebugCommands.create())
                 .then(CombatStackCommands.create()));
 

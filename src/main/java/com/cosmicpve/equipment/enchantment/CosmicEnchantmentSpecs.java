@@ -47,11 +47,15 @@ public final class CosmicEnchantmentSpecs {
             ModEnchantments.OBSIDIANSHIELD.identifier(), 1, CosmicEnchantmentTier.ULTIMATE, "leggings");
     public static final CosmicEnchantmentSpec OXYGENATE = new CosmicEnchantmentSpec(
             ModEnchantments.OXYGENATE.identifier(), 2, CosmicEnchantmentTier.SIMPLE, "pickaxe");
+    public static final CosmicEnchantmentSpec ARMORED = new CosmicEnchantmentSpec(
+            ModEnchantments.ARMORED.identifier(), 4, CosmicEnchantmentTier.LEGENDARY, "any_armor");
+    public static final CosmicEnchantmentSpec DEATH_PACT = new CosmicEnchantmentSpec(
+            ModEnchantments.DEATH_PACT.identifier(), 5, CosmicEnchantmentTier.MASTERY, "chestplate");
 
     public static final List<CosmicEnchantmentSpec> ALL =
             List.of(EXECUTE, ANGELIC, LIGHTNING, ENDER_SHIFT, DOUBLESTRIKE, BLEED, LUCK, POISON, PUMMEL,
                     GREATSWORD, INSANITY, VENOM, AEGIS, EAGLE_EYE, RAGE, MOLTEN, NUTRITION, GLOWING,
-                    OBSIDIANSHIELD, OXYGENATE);
+                    OBSIDIANSHIELD, OXYGENATE, ARMORED, DEATH_PACT);
 
     private CosmicEnchantmentSpecs() {}
 

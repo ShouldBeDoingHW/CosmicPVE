@@ -29,9 +29,13 @@ class UnexaminedBookOpeningServiceTest {
         }
     }
 
-    @Test void tierWithoutAnImplementedEnchantmentDoesNotConsumeAConceptualRoll() {
-        assertTrue(service.roll(CosmicEnchantmentTier.MASTERY, CosmicEnchantmentSpecs.ALL,
-                RandomSource.create(1L), null).isEmpty());
+    @Test void masteryNowRevealsDeathPactAtAValidLevelAndRestrictedRates() {
+        var result = service.roll(CosmicEnchantmentTier.MASTERY, CosmicEnchantmentSpecs.ALL,
+                RandomSource.create(1L), null).orElseThrow();
+        assertEquals(CosmicEnchantmentSpecs.DEATH_PACT, result.enchantment());
+        assertTrue(result.level() >= 1 && result.level() <= 5);
+        assertTrue(result.rates().successRate() <= 49);
+        assertTrue(result.rates().destroyRate() >= 51);
     }
 
     @Test void revealedBookUsesTheExistingActualCosmicBookComponentPath() {

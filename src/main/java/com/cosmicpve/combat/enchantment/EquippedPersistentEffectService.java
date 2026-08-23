@@ -17,9 +17,10 @@ import java.util.function.Function;
 
 /** Owns short hidden leases only when CosmicPVE created the effect. */
 public final class EquippedPersistentEffectService {
-    static final int GLOWING_LEASE_TICKS = 220;
+    static final int GLOWING_LEASE_TICKS = 600;
     static final int OBSIDIANSHIELD_LEASE_TICKS = 60;
-    static final int REFRESH_AT = 20;
+    static final int GLOWING_REFRESH_AT = 300;
+    static final int DEFAULT_REFRESH_AT = 20;
     private final EffectiveEnchantmentsResolver enchantments;
     private final Function<net.minecraft.world.item.ItemStack, List<VirtualEnchantmentGrant>> virtualGrants;
     private final Map<LivingEntity, Map<Holder<MobEffect>, Boolean>> owned =
@@ -38,13 +39,13 @@ public final class EquippedPersistentEffectService {
     public void tick(LivingEntity entity) {
         if (entity.level().isClientSide()) return;
         apply(entity, EquipmentSlot.HEAD, ModEnchantments.GLOWING.identifier(),
-                MobEffects.NIGHT_VISION, GLOWING_LEASE_TICKS);
+                MobEffects.NIGHT_VISION, GLOWING_LEASE_TICKS, GLOWING_REFRESH_AT);
         apply(entity, EquipmentSlot.LEGS, ModEnchantments.OBSIDIANSHIELD.identifier(),
-                MobEffects.FIRE_RESISTANCE, OBSIDIANSHIELD_LEASE_TICKS);
+                MobEffects.FIRE_RESISTANCE, OBSIDIANSHIELD_LEASE_TICKS, DEFAULT_REFRESH_AT);
     }
 
     private void apply(LivingEntity entity, EquipmentSlot slot, net.minecraft.resources.Identifier id,
-                       Holder<MobEffect> effect, int leaseTicks) {
+                       Holder<MobEffect> effect, int leaseTicks, int refreshAt) {
         var stack = entity.getItemBySlot(slot);
         int level = enchantments.resolve(stack, virtualGrants.apply(stack)).level(id);
         var effects = owned.computeIfAbsent(entity, ignored -> new java.util.HashMap<>());
@@ -56,7 +57,7 @@ public final class EquippedPersistentEffectService {
                 return;
             }
             if (!ours && current != null) return;
-            if (!ours || current.getDuration() <= REFRESH_AT) {
+            if (!ours || current.getDuration() <= refreshAt) {
                 entity.addEffect(managed(effect, leaseTicks));
                 effects.put(effect, Boolean.TRUE);
             }

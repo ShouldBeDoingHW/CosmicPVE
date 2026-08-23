@@ -27,6 +27,7 @@ import com.cosmicpve.combat.enchantment.AegisBehavior;
 import com.cosmicpve.combat.enchantment.EagleEyeBehavior;
 import com.cosmicpve.combat.enchantment.RageBehavior;
 import com.cosmicpve.combat.enchantment.NutritionFoodService;
+import com.cosmicpve.combat.enchantment.DeathPactBehavior;
 import com.cosmicpve.combat.cooldown.CooldownService;
 import com.cosmicpve.combat.proc.ProcCandidateSourceRegistry;
 import com.cosmicpve.combat.proc.ProcEngine;
@@ -92,6 +93,7 @@ public final class CosmicCombat {
     private CosmicCombat() {}
 
     public static void register() {
+        var deathPact = new DeathPactBehavior(ENCHANTMENTS);
         OUTGOING.register(new ExecuteBehavior());
         OUTGOING.register(new GreatswordBehavior());
         OUTGOING.register(new InsanityBehavior());
@@ -99,8 +101,10 @@ public final class CosmicCombat {
         OUTGOING.register(new RageBehavior(RECENT_COMBAT_MEMORY));
         OUTGOING.register(ARMOR_SET_COMBAT);
         OUTGOING.register(WEAPON_SKIN_COMBAT);
+        OUTGOING.register(deathPact);
         INCOMING.register(ARMOR_SET_COMBAT);
         INCOMING.register(WEAPON_SKIN_COMBAT);
+        INCOMING.register(deathPact);
         PRE_DEFENSE_BOUNDS.register(new AegisBehavior(ENCHANTMENTS));
         PROC_MODIFIERS.register(new LuckBehavior());
         PROC_MODIFIERS.register(new ArmorSetProcModifierResolver(ARMOR_SETS));

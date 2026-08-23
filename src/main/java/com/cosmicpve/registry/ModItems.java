@@ -12,6 +12,7 @@ import com.cosmicpve.equipment.enchantment.BlackScrollItem;
 import com.cosmicpve.equipment.skin.WeaponSkinItem;
 import com.cosmicpve.equipment.heroic.HeroicCrystalItem;
 import com.cosmicpve.equipment.enchantment.UnexaminedEnchantmentBookItem;
+import com.cosmicpve.economy.BanknoteItem;
 
 public final class ModItems {
     private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(CosmicPVE.MOD_ID);
@@ -54,6 +55,12 @@ public final class ModItems {
     public static final DeferredItem<HeroicCrystalItem> HEROIC_CRYSTAL = ITEMS.registerItem(
             "heroic_crystal", HeroicCrystalItem::new,
             properties -> properties.stacksTo(HeroicCrystalItem.MAX_STACK_SIZE));
+
+    public static final DeferredItem<BanknoteItem> BANKNOTE = ITEMS.registerItem(
+            "banknote", BanknoteItem::new, properties -> properties.stacksTo(1));
+
+    public static final DeferredItem<Item> REPAIR_SCROLL = ITEMS.registerSimpleItem(
+            "repair_scroll", properties -> properties.stacksTo(64));
 
     private ModItems() {}
 

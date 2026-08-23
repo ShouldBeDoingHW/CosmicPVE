@@ -62,6 +62,15 @@ public final class EquipmentTooltipService {
             event.getToolTip().add(Component.translatable("tooltip.cosmicpve.transmog.purpose"));
             event.getToolTip().add(Component.translatable("tooltip.cosmicpve.transmog.instruction"));
         }
+        if (stack.is(com.cosmicpve.registry.ModItems.REPAIR_SCROLL.get())) {
+            event.getToolTip().add(Component.translatable("tooltip.cosmicpve.repair_scroll.purpose")
+                    .withStyle(net.minecraft.ChatFormatting.YELLOW));
+            event.getToolTip().add(Component.translatable("tooltip.cosmicpve.repair_scroll.instruction")
+                    .withStyle(net.minecraft.ChatFormatting.GRAY));
+        }
+        var banknote = stack.get(ModDataComponents.BANKNOTE.get());
+        if (banknote != null) event.getToolTip().add(Component.translatable("tooltip.cosmicpve.banknote.value",
+                com.cosmicpve.economy.MoneyAmount.format(banknote.valueCents())).withStyle(net.minecraft.ChatFormatting.YELLOW));
         var orb = stack.get(ModDataComponents.ENCHANTMENT_ORB.get());
         if (orb != null) {
             boolean armor = stack.is(com.cosmicpve.registry.ModItems.ARMOR_ENCHANTMENT_ORB.get());
