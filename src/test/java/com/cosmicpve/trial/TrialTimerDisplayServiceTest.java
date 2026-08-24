@@ -19,4 +19,10 @@ class TrialTimerDisplayServiceTest {
         assertTrue(service.accept(player,599));
         assertFalse(service.accept(player,599));
     }
+    @Test void immutableOwnerHeadingIsAcceptedOnlyWhenItChanges() {
+        var service=new TrialTimerDisplayService(); UUID player=UUID.randomUUID();
+        assertTrue(service.acceptOwner(player,"MrWoofless Trial"));
+        assertFalse(service.acceptOwner(player,"MrWoofless Trial"));
+        assertTrue(service.acceptOwner(player,"Another Trial"));
+    }
 }

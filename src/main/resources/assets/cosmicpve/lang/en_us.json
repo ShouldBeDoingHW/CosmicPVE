@@ -230,4 +230,6 @@
   ,"item.cosmicpve.trial_trinket_skip_2":"Skip 2 Rooms Trial Trinket"
   ,"enchantment.cosmicpve.trap":"Trap"
   ,"enchantment.cosmicpve.trap.description":"Successful sword attacks may inflict Slowness V."
+  ,"enchantment.cosmicpve.cactus":"Cactus"
+  ,"enchantment.cosmicpve.cactus.description":"Taking damage may retaliate with true damage against the attacker."
 }

@@ -13,6 +13,7 @@ import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.entity.monster.Shulker;
 import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 import net.minecraft.world.phys.BlockHitResult;
+import net.neoforged.neoforge.event.level.BlockEvent;
 
 public final class TrialEventBridge {
     public void onServerStarted(ServerStartedEvent event) { TrialRuntime.sessions().recoverInterrupted(event.getServer()); }
@@ -51,8 +52,14 @@ public final class TrialEventBridge {
         }
     }
     public void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
-        if (event.getEntity() instanceof ServerPlayer player)
-            { TrialRuntime.sessions().onCircuitLever(player, event.getPos());
-              TrialRuntime.sessions().onFireColonyLever(player, event.getPos()); }
+        if (event.getEntity() instanceof ServerPlayer player) {
+            TrialRuntime.sessions().onCircuitLever(player, event.getPos());
+            TrialRuntime.sessions().onFireColonyLever(player, event.getPos());
+            TrialRuntime.sessions().onColdSnapLever(player, event.getPos());
+        }
+    }
+    public void onNeighborNotify(BlockEvent.NeighborNotifyEvent event) {
+        if (event.getLevel() instanceof net.minecraft.server.level.ServerLevel level)
+            TrialRuntime.sessions().onColdSnapPlate(level, event.getPos(), event.getState());
     }
 }

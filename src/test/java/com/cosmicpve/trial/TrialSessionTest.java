@@ -54,6 +54,15 @@ class TrialSessionTest {
         var json=TrialSession.CODEC.encodeStart(JsonOps.INSTANCE,original).getOrThrow();
         assertEquals(original,TrialSession.CODEC.parse(JsonOps.INSTANCE,json).getOrThrow());
     }
+    @Test void portalOwnerIsStableAndPersistsEvenAfterOwnerLeaves() {
+        UUID ownerId=UUID.randomUUID(); var owner=new TrialOwner(ownerId,"MrWoofless");
+        var original=TrialSession.joining(UUID.randomUUID(),Identifier.parse("minecraft:overworld"),BlockPos.ZERO,
+                List.of(),List.of(new InstanceBounds(BlockPos.ZERO,BlockPos.ZERO)),owner).addParticipant(ownerId);
+        var withoutOwner=original.removeParticipant(ownerId);
+        assertEquals(owner,withoutOwner.owner()); assertEquals("MrWoofless Trial",withoutOwner.owner().header());
+        var json=TrialSession.CODEC.encodeStart(JsonOps.INSTANCE,withoutOwner).getOrThrow();
+        assertEquals(owner,TrialSession.CODEC.parse(JsonOps.INSTANCE,json).getOrThrow().owner());
+    }
     @Test void productionPotDecisionsAppearancesAndEncounterRoundTrip() {
         UUID player=UUID.randomUUID(); var room=Identifier.parse("cosmicpve:trial/raiding_rainbow");
         var encounter=new TrialEncounterState(List.of("red","blue"),1,List.of(),List.of(),List.of());
@@ -79,5 +88,14 @@ class TrialSessionTest {
         assertEquals(100,intro.stateTicksRemaining());
         assertEquals(TrialLifecycleState.ROOM_INTRO,intro.state());
         assertEquals(12_000,TrialStateMachine.tickGameplayTimer(intro).timerTicks());
+    }
+    @Test void onlyActiveColdSnapParticipantsCanActivateSharedRoomMechanics() {
+        UUID participant=UUID.randomUUID(),outsider=UUID.randomUUID();
+        var active=session().addParticipant(participant).withState(TrialLifecycleState.ROOM_ACTIVE,0,
+                Optional.of(TrialSessionService.COLD_SNAP),false,session().protectedBounds());
+        assertTrue(TrialSessionService.canActivateColdSnap(active,participant));
+        assertFalse(TrialSessionService.canActivateColdSnap(active,outsider));
+        assertFalse(TrialSessionService.canActivateColdSnap(active.withState(TrialLifecycleState.ROOM_INTRO,100,
+                Optional.of(TrialSessionService.COLD_SNAP),false,active.protectedBounds()),participant));
     }
 }

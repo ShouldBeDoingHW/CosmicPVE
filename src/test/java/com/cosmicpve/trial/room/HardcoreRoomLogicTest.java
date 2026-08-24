@@ -65,6 +65,8 @@ class HardcoreRoomLogicTest {
         assertEquals(3,TrialRoomLoadoutService.RAIDING_RAINBOW_UNBREAKING_LEVEL);
         assertEquals(16,TrialRoomLoadoutService.RAIDING_RAINBOW_PORKCHOPS);
         assertEquals(0,TrialRoomLoadoutService.RAIDING_RAINBOW_ENDER_PEARLS);
+        assertEquals(4,TrialRoomLoadoutService.COLD_SNAP_FEATHER_FALLING_LEVEL);
+        assertEquals(16,TrialRoomLoadoutService.COLD_SNAP_PORKCHOPS);
         assertEquals(List.of(net.minecraft.world.item.Items.NETHERITE_HELMET,net.minecraft.world.item.Items.NETHERITE_CHESTPLATE,
                 net.minecraft.world.item.Items.NETHERITE_LEGGINGS,net.minecraft.world.item.Items.NETHERITE_BOOTS),
                 TrialRoomLoadoutService.RAIDING_RAINBOW_ARMOR);

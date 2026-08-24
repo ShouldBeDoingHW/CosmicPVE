@@ -43,7 +43,7 @@ public final class TrialCommands {
                                                 ctx.getSource().getServer(), IntegerArgumentType.getInteger(ctx, "completed")))))))
                         .then(Commands.literal("force-room").then(Commands.argument("room", StringArgumentType.word())
                                 .suggests((ctx, builder) -> net.minecraft.commands.SharedSuggestionProvider.suggest(
-                                        new String[]{"raiding_rainbow","circuit_circus","fire_colony","zero_g"}, builder))
+                                        new String[]{"raiding_rainbow","circuit_circus","cold_snap","fire_colony","zero_g"}, builder))
                                 .executes(ctx -> forceRoom(ctx.getSource(), StringArgumentType.getString(ctx, "room")))))
                         .then(Commands.literal("timer")
                                 .then(Commands.literal("set").then(Commands.argument("seconds", IntegerArgumentType.integer(0))
@@ -87,6 +87,10 @@ public final class TrialCommands {
                     + session.progress().encounter().completedObjectives().size() + "/10 encounter entities="
                     + session.progress().encounter().encounterEntities().size() + " completed positions="
                     + session.progress().encounter().completedObjectives()), false);
+        if (session.currentRoom().filter(com.cosmicpve.trial.TrialSessionService.COLD_SNAP::equals).isPresent())
+            source.sendSuccess(() -> Component.literal("  cold snap door="
+                    + (com.cosmicpve.trial.room.ColdSnapService.doorUnlocked(session.progress().encounter()) ? "unlocked" : "locked")
+                    + " secret=" + (com.cosmicpve.trial.room.ColdSnapService.secretRevealed(session.progress().encounter()) ? "revealed" : "hidden")), false);
         for (var id : session.participants()) {
             var player = source.getServer().getPlayerList().getPlayer(id);
             String snapshot = player == null ? "offline/preserved" : String.valueOf(player.getExistingDataOrNull(ModAttachments.TRIAL_PLAYER_STATE));

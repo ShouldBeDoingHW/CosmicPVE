@@ -1,0 +1,8 @@
+{
+  "display_name": "Cold Snap",
+  "category": "apprentice",
+  "pieces": [{"structure": "cosmicpve:trial/cold_snap"}],
+  "spawn_marker": "emerald_block",
+  "spawn_marker_position": [5, 10, 17],
+  "bounds": {"min": [0, 0, 0], "max": [38, 30, 36]}
+}

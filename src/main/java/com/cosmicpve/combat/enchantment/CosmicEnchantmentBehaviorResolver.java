@@ -26,6 +26,7 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
     public static final Identifier ANGELIC_ONCE_KEY = CosmicPVE.id("angelic_once_per_damage");
     public static final Identifier ENDER_SHIFT_COOLDOWN = CosmicPVE.id("ender_shift");
     public static final Identifier MOLTEN_ONCE_KEY = CosmicPVE.id("molten_once_per_damage");
+    public static final Identifier CACTUS_ONCE_KEY = CosmicPVE.id("cactus_once_per_damage");
 
     private final ChildCombatActionService childActions;
     private final CombatStackService stacks;
@@ -57,6 +58,7 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
             addAngelic(event, result);
             addEnderShift(event, result);
             addMolten(event, result);
+            addCactus(event, result);
         }
         return List.copyOf(result);
     }
@@ -240,6 +242,22 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
                     }
                 },
                 new ProcProvenance(ProcSourceKind.ACTUAL_ENCHANTMENT, CosmicPVE.id("equipped_armor"))));
+    }
+
+    private void addCactus(ProcEvent event, List<ProcCandidate> result) {
+        if (event.target() == null || event.attacker() == null || event.attacker() == event.target()
+                || event.attacker().isDeadOrDying() || event.combatResult().isEmpty()) return;
+        int level = CactusBehavior.equippedLevel(event.target());
+        if (level <= 0) return;
+        result.add(candidate(ModEnchantments.CACTUS.identifier(), ProcHook.ON_DAMAGE_TAKEN,
+                CactusBehavior.chance(level), Optional.empty(), 0L, Optional.of(CACTUS_ONCE_KEY),
+                ChildProcEligibility.LIMITED_DEFENSIVE_REACTION,
+                activation -> {
+                    var attacker = activation.event().attacker();
+                    var parent = activation.event().combatResult().orElse(null);
+                    if (attacker != null && parent != null && attacker != activation.event().target() && !attacker.isDeadOrDying())
+                        childActions.deliverTrue(parent.context(), attacker, CactusBehavior.packet(), CactusBehavior.RECURSION_POLICY);
+                }, new ProcProvenance(ProcSourceKind.ACTUAL_ENCHANTMENT, CosmicPVE.id("actual_leggings"))));
     }
 
     private static ProcCandidate candidate(

@@ -1,6 +1,6 @@
 # CosmicPVE Development Handoff
 
-Current verified and accepted gameplay commit: `ef219223b8cc1a627c60342e70e305c2c15320b1` (`Add playable Apprentice Trial loop`). This is the accepted Steps 6A–6N baseline.
+Current verified and accepted gameplay commit: `f5d5a4df160b549d26995f5462d95c3180e04eb4` (`Add Hardcore Trial rooms and Trial polish`). This is the accepted Steps 6A–6P baseline.
 
 Repository state: Steps 6A–6P are implemented, automated/runtime verified, and manually accepted. The root `assets` source-art folder and root `trial rooms` structure-development folder remain deliberately untracked and unrelated.
 
@@ -208,6 +208,14 @@ The 27-slot Decision screen now renders the vanilla three-row region plus the ac
 
 Successful DEAL schedules one harmless client-side Minecraft firework burst per actually completed room at offsets 0, 10, 20, ... ticks after outside restoration and payout delivery. These payload-driven particles create no rocket items, entities, explosion damage, or terrain effects; disconnection simply cancels subsequent scheduled launches. Confirmed waste removed: the Decision menu no longer rebuilds 27 preview stacks every broadcast tick. Likely hot paths improved: Zero-G fixture/objective maintenance changed from every tick to every ten ticks, stable positions/UUIDs remain cached, and volatile timer SavedData checkpoints changed from forced synchronous one-second flushes to five-second flushes. Snapshot creation, entry/exit/DEAL/death/disconnect, room/phase transitions, and other meaningful transactions retain immediate durable persistence.
 
+### Step 6Q — IMPLEMENTED; AUTOMATED/RUNTIME VERIFIED; MANUALLY VERIFIED / ACCEPTED
+
+Cold Snap is the third production Apprentice room. Its tracked structure uses the explicit Emerald marker at local `[5,10,17]`, inferred Packed-Ice floor replacement, Gold plate `[11,14,9]`, Iron plate `[1,14,32]`, two-block Iron Door `[3,14,32]`/`[3,15,32]`, and final lever `[36,15,2]`. Initialization caches and hides only the exact bounded 26 ordinary-Ice shortcut blocks at local Y 13–14 before teleport; the other 2,450 ordinary-Ice structural/decorative blocks and 217 Powder Snow blocks are untouched. Plate behavior is event-driven and idempotent: the Gold plate removes both door halves without drops, the Iron plate restores the full cached route in one activation, and only the final lever completes the room. Cleanup discards cached state and structure cleanup restores the pristine room. The temporary loadout is Diamond Boots with Feather Falling IV and 16 Cooked Porkchops. The production Apprentice pool is exactly Circuit Circus, Raiding Rainbow, and Cold Snap under the existing weighted/no-consecutive-repeat selector.
+
+Trial sessions now persist immutable portal-owner UUID and name-snapshot identity. Every participant receives a cached participant-only `<PortalOwner> Trial` top HUD line once on join/change, with the existing authoritative timer beneath it; the owner line survives owner departure and all room/Decision transitions without per-tick packets. Trial exit clears both payloads. Phase and room lines remain deliberately deferred.
+
+Implemented Elite `cosmicpve:cactus` II on leggings, bringing the total to 28 real Cosmic enchantments. A committed damaging hit with a meaningful attributed living attacker creates one 3%/6% Luck-modified defensive candidate. Success delivers exactly 1.5 HP standard Cosmic true damage to the attributed attacker (including projectile owners) through a `NO_PROCS` child, preserving absorption semantics while preventing retaliation chains. Environmental/unattributed, rejected, zero-health-loss, self, and dead-attacker cases produce no useful candidate. Cactus has no cooldown, CombatStack, status effect, or other damage packet and integrates through the normal Book, Unexamined Elite, Black Scroll, capacity, Transmog, lore, persistence, and command seams.
+
 ## 3. Current Real Enchantments
 
 These are registered through Minecraft's enchantment infrastructure, use actual enchantment data on the item, and are not present in normal enchanting-table, librarian, random-loot, random-equipment, or mob-equipment acquisition pools.
@@ -243,6 +251,7 @@ These are registered through Minecraft's enchantment infrastructure, use actual 
 | `cosmicpve:blessed` | IV | Axe | Ultimate | On a committed melee hit, has 2% per level to uniformly remove either one eligible negative Cosmic stack instance or one entire harmful vanilla effect from the attacker. Luck modifies the chance relatively. |
 | `cosmicpve:implants` | III | Helmet | Ultimate | While continuously equipped, heals exactly 1 HP every 85/70/55 ticks at levels I/II/III, without overhealing or catch-up bursts. |
 | `cosmicpve:trap` | III | Sword | Elite | Each committed positive-health-loss melee hit has a flat 4% Luck-modified chance to apply Slowness V for 25/30/35 ticks. Eligible Doublestrike child hits may reroll it. |
+| `cosmicpve:cactus` | II | Leggings | Elite | A committed damaging hit has 3% per level, modified relatively by Luck, to retaliate against the attributed living attacker for exactly 1.5 HP standard Cosmic true damage through a non-proccing child. |
 
 ### DESIGNED BUT NOT IMPLEMENTED
 
@@ -497,7 +506,7 @@ The following are confirmed in current source and permission-gated under `/cosmi
 - `/cosmic trial debug status|complete-room|continue|exit|abort`
 - `/cosmic trial debug timer set|add|remove <seconds>`
 - `/cosmic trial debug progress set <0..8>`
-- `/cosmic trial debug force-room <raiding_rainbow|circuit_circus|fire_colony|zero_g>`
+- `/cosmic trial debug force-room <raiding_rainbow|circuit_circus|cold_snap|fire_colony|zero_g>`
 - `/cosmic trial debug restore <player>`
 - `/feed`, `/heal`, and `/restore` are separate permission-gated development convenience commands.
 
@@ -519,11 +528,11 @@ The final post-Orb capacity is no longer unresolved for current target classes: 
 
 ## 16. Current Next Milestone
 
-**Next milestone: Step 6Q — Cold Snap Apprentice Room + Trial Owner HUD + Cactus II.**
+**Next milestone: Step 6R — Bomb Squad Hardcore Room.**
 
-The combined Step 6O Hardcore implementation and Step 6P four-room corrective/QOL/performance checkpoint are manually accepted. Step 6Q adds Cold Snap to the Apprentice pool, the portal-owner Trial HUD header, and Cactus II. Bomb Squad moves to Step 6R; Hidden Graveyard and Deadeye remain later milestones.
+Step 6R should use the Bomb Squad structure's Stone only where encounter Creeper destruction is intended, while its Obsidian/Bedrock structure remains physically blast-resistant. Prefer ordinary encounter-Creeper explosion behavior if vanilla blast resistance supplies the intended boundary; keep the special Gold supply plates and Iron exit plates explosion-proof. The next incremental participant HUD element is the phase line: Apprentice `#E6E032`, Hardcore `#E6A732`, or Demonic `#E65C32`. Tentative Step 6S adds `Room #N---Room Name`. Hidden Graveyard and Deadeye remain later milestones.
 
-Do not begin Step 6Q until the accepted Step 6O/6P tree is committed. Bomb Squad, Hidden Graveyard, Deadeye, Memory Chests, and Cosmic Crates remain deliberately deferred.
+Step 6Q is manually accepted and ready for its closure commit. Hidden Graveyard, Deadeye, Memory Chests, and Cosmic Crates remain deliberately deferred.
 
 ## 17. Development Workflow
 
@@ -539,6 +548,13 @@ Do not begin Step 6Q until the accepted Step 6O/6P tree is committed. Bomb Squad
 Preserve unrelated dirty changes. Never change pinned versions as a side effect of gameplay work. Prefer service-level rules and typed data over one-off event logic, and keep client-only classes isolated from dedicated-server loading.
 
 ## 18. Verification Snapshot
+
+For the manually accepted Step 6Q checkpoint:
+
+- `gradlew.bat cleanTest test build` passes all 300 automated tests across 89 suites with 0 failures, 0 errors, and 0 skipped. New coverage pins the Cold Snap NBT dimensions and exact marker/mechanic positions, the 26-of-2,476 bounded Ice subset, preserved Powder Snow, Packed-Ice spawn-floor inference, nonlethal highest intended fall calculation with Feather Falling IV, ordered/idempotent shortcut flags, participant/active-room activation boundary, the exact three-room Apprentice pool, persistent immutable portal ownership, owner-packet update suppression, 28 real enchantments, Cactus 3%/6% chance, relative chance multiplication, 1.5-HP standard true packet, absorption semantics, and `NO_PROCS` recursion policy.
+- All 151 main-resource JSON files parse successfully. The dedicated server loaded 1,462 recipes, atomically published six reward tables and seven Trial rooms including `trial/cold_snap`, and reached `Done` without relevant codec, datapack, structure, dimension, registry, event-handler, payload, or common-side classloading errors.
+- Fresh client startup loaded both common and client entry points, registered the owner/timer payload and participant HUD layer, completed resource reload, initialized OpenAL, and created block/item/GUI/chest atlases without relevant missing-model, missing-texture, malformed-resource, payload, or client/server loading errors. The client was terminated at the smoke-test boundary.
+- `git diff --check` passes with only normal Windows line-ending notices. Pinned Minecraft 1.21.11, NeoForge 21.11.45, Java 21, Gradle 9.2.1, ModDevGradle 2.0.144, mod ID `cosmicpve`, and package `com.cosmicpve` remain unchanged.
 
 For the accepted Step 6O/6P implementation:
 

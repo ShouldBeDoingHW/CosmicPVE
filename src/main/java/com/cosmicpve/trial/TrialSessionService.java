@@ -17,6 +17,7 @@ import com.cosmicpve.trial.room.CircuitPlacementPolicy;
 import com.cosmicpve.trial.room.RaidingRainbowService;
 import com.cosmicpve.trial.room.FireColonyService;
 import com.cosmicpve.trial.room.ZeroGService;
+import com.cosmicpve.trial.room.ColdSnapService;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -51,9 +52,10 @@ public final class TrialSessionService {
     public static final Identifier CIRCUIT_CIRCUS = CosmicPVE.id("trial/circuit_circus");
     public static final Identifier FIRE_COLONY = CosmicPVE.id("trial/fire_colony");
     public static final Identifier ZERO_G = CosmicPVE.id("trial/zero_g");
+    public static final Identifier COLD_SNAP = CosmicPVE.id("trial/cold_snap");
     public static final Identifier APPRENTICE_REWARDS = CosmicPVE.id("trial/apprentice");
     public static final Identifier HARDCORE_REWARDS = CosmicPVE.id("trial/hardcore_development");
-    private static final List<Identifier> APPRENTICE_ROOMS = List.of(RAIDING_RAINBOW, CIRCUIT_CIRCUS);
+    private static final List<Identifier> APPRENTICE_ROOMS = List.of(CIRCUIT_CIRCUS, RAIDING_RAINBOW, COLD_SNAP);
     private static final List<Identifier> HARDCORE_ROOMS = List.of(FIRE_COLONY, ZERO_G);
     static final int APPRENTICE_REWARD_TIME = 600;
     static final int HARDCORE_REWARD_TIME = 300;
@@ -72,6 +74,7 @@ public final class TrialSessionService {
     private final CircuitCircusService circuit = new CircuitCircusService();
     private final FireColonyService fireColony = new FireColonyService();
     private final ZeroGService zeroG = new ZeroGService();
+    private final ColdSnapService coldSnap = new ColdSnapService();
     private final TrialTimerDisplayService timerDisplay = new TrialTimerDisplayService();
     private final TrialCelebrationService celebrations = new TrialCelebrationService();
     private final TrialDecisionEntryService decisionEntries = new TrialDecisionEntryService();
@@ -100,7 +103,8 @@ public final class TrialSessionService {
             placedDecision = structures.place(instance, CosmicContent.repository().requireTrialRoom(DECISION_ROOM), DECISION_ORIGIN);
             List<BlockPos> portalBlocks = List.of(bottom.immutable(), bottom.above().immutable());
             TrialSession session = TrialSession.joining(UUID.randomUUID(), owner.level().dimension().identifier(), bottom,
-                    portalBlocks, List.of(placedDecision.bounds()));
+                    portalBlocks, List.of(placedDecision.bounds()),
+                    new TrialOwner(owner.getUUID(), owner.getName().getString()));
             owner.level().setBlock(bottom, com.cosmicpve.registry.ModBlocks.TRIAL_GATEWAY.get().defaultBlockState(), 3);
             owner.level().setBlock(bottom.above(), com.cosmicpve.registry.ModBlocks.TRIAL_GATEWAY.get().defaultBlockState(), 3);
             repository.publish(server, session); decisionSpawns.put(session.sessionId(), placedDecision.participantSpawn());
@@ -126,7 +130,7 @@ public final class TrialSessionService {
             TrialSession joined = session.addParticipant(player.getUUID()); repository.publish(player.level().getServer(), joined);
             decisionEntries.enter(player, () -> teleport(player, decisionSpawn(joined)), () ->
                     titles.decision(player, true, Math.max(1, (joined.stateTicksRemaining() + 19) / 20)));
-            timerDisplay.show(player, joined.timerTicks());
+            timerDisplay.show(player, joined);
             return TrialOperationResult.ok("Joined Trial " + joined.sessionId());
         } catch (RuntimeException exception) {
             inventories.restore(player); return TrialOperationResult.rejected("Trial entry failed; your outside inventory was restored.");
@@ -323,6 +327,7 @@ public final class TrialSessionService {
         if (room.equals(RAIDING_RAINBOW)) encounter = rainbow.initialize(level, session, placed.bounds(), net.minecraft.util.RandomSource.create());
         else if (room.equals(CIRCUIT_CIRCUS)) encounter = circuit.initialize(level, ROOM_ORIGIN, placed.bounds(), net.minecraft.util.RandomSource.create());
         else if (room.equals(ZERO_G)) encounter = zeroG.initialize(level, session, placed.bounds(), ROOM_ORIGIN);
+        else if (room.equals(COLD_SNAP)) encounter = coldSnap.initialize(level, session, ROOM_ORIGIN, placed.bounds());
         else { fireColony.initialize(level, session, placed.bounds()); encounter = TrialEncounterState.EMPTY; }
         TrialProgress progress = session.progress().beginRoom(room, encounter);
         InstanceBounds decisionBounds = InstanceBounds.from(CosmicContent.repository().requireTrialRoom(DECISION_ROOM).bounds().at(DECISION_ORIGIN));
@@ -334,7 +339,8 @@ public final class TrialSessionService {
             if (room.equals(RAIDING_RAINBOW)) loadouts.applyRaidingRainbow(player);
             else if (room.equals(CIRCUIT_CIRCUS)) loadouts.applyCircuitCircus(player);
             else if (room.equals(FIRE_COLONY)) loadouts.applyFireColony(player);
-            else loadouts.applyZeroG(player);
+            else if (room.equals(ZERO_G)) loadouts.applyZeroG(player);
+            else loadouts.applyColdSnap(player);
             teleport(player, placed.participantSpawn());
         });
     }
@@ -403,7 +409,15 @@ public final class TrialSessionService {
     }
 
     public boolean allowsProtectedRoomUse(ServerPlayer player, BlockPos pos) {
-        return allowsCircuitUse(player, pos) || allowsFireColonyUse(player, pos);
+        return allowsCircuitUse(player, pos) || allowsFireColonyUse(player, pos) || allowsColdSnapUse(player, pos);
+    }
+
+    public boolean allowsColdSnapUse(ServerPlayer player, BlockPos pos) {
+        TrialSession session = active(player.level().getServer()).orElse(null);
+        return session != null && session.state() == TrialLifecycleState.ROOM_ACTIVE
+                && session.activeParticipant(player.getUUID())
+                && session.currentRoom().filter(COLD_SNAP::equals).isPresent()
+                && coldSnap.isFinalLever(pos, ROOM_ORIGIN);
     }
 
     public void onCircuitLever(ServerPlayer player, BlockPos pos) {
@@ -415,6 +429,31 @@ public final class TrialSessionService {
 
     public void onFireColonyLever(ServerPlayer player, BlockPos pos) {
         if (allowsFireColonyUse(player, pos)) completeProductionRoom(player.level().getServer());
+    }
+
+    public void onColdSnapLever(ServerPlayer player, BlockPos pos) {
+        if (allowsColdSnapUse(player, pos)) completeProductionRoom(player.level().getServer());
+    }
+
+    public void onColdSnapPlate(ServerLevel level, BlockPos pos, BlockState state) {
+        if (!state.hasProperty(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWER)
+                || state.getValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWER) <= 0) return;
+        TrialSession session = active(level.getServer()).orElse(null);
+        if (session == null || session.state() != TrialLifecycleState.ROOM_ACTIVE
+                || session.currentRoom().filter(COLD_SNAP::equals).isEmpty()) return;
+        boolean gold = pos.equals(ROOM_ORIGIN.offset(ColdSnapService.GOLD_PLATE_LOCAL));
+        boolean iron = pos.equals(ROOM_ORIGIN.offset(ColdSnapService.IRON_PLATE_LOCAL));
+        if (!gold && !iron) return;
+        boolean participantPresent = level.getEntitiesOfClass(ServerPlayer.class,
+                new net.minecraft.world.phys.AABB(pos).inflate(0.1D), player -> canActivateColdSnap(session, player.getUUID())).stream().findAny().isPresent();
+        if (!participantPresent) return;
+        var result = gold ? coldSnap.activateGold(level, session, ROOM_ORIGIN) : coldSnap.activateIron(level, session);
+        if (result.accepted()) repository.publish(level.getServer(), session.withProgress(session.progress().withEncounter(result.state())));
+    }
+
+    static boolean canActivateColdSnap(TrialSession session, UUID playerId) {
+        return session.state() == TrialLifecycleState.ROOM_ACTIVE && session.activeParticipant(playerId)
+                && session.currentRoom().filter(COLD_SNAP::equals).isPresent();
     }
 
     private ZeroGTickResult tickZeroGObjectives(MinecraftServer server, ServerLevel level, TrialSession session) {
@@ -525,7 +564,7 @@ public final class TrialSessionService {
         removePortal(server, session); ServerLevel instance = server.getLevel(TrialRuntime.INSTANCE_DIMENSION);
         if (instance != null) {
             if (session.currentRoom().filter(ZERO_G::equals).isPresent()) zeroG.cleanup(instance, session, roomBounds(session));
-            fireColony.cleanup(session.sessionId());
+            fireColony.cleanup(session.sessionId()); coldSnap.cleanup(session.sessionId());
             session.protectedBounds().forEach(bounds -> structures.cleanup(instance, bounds));
         }
     }
@@ -533,6 +572,7 @@ public final class TrialSessionService {
         if (level == null || session.currentRoom().isEmpty()) return;
         if (session.currentRoom().filter(ZERO_G::equals).isPresent()) zeroG.cleanup(level, session, roomBounds(session));
         if (session.currentRoom().filter(FIRE_COLONY::equals).isPresent()) fireColony.cleanup(session.sessionId());
+        if (session.currentRoom().filter(COLD_SNAP::equals).isPresent()) coldSnap.cleanup(session.sessionId());
         InstanceBounds decision = InstanceBounds.from(CosmicContent.repository().requireTrialRoom(DECISION_ROOM).bounds().at(DECISION_ORIGIN));
         session.protectedBounds().stream().filter(bounds -> !bounds.equals(decision)).forEach(bounds -> structures.cleanup(level, bounds));
     }

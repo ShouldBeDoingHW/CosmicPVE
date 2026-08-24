@@ -19,6 +19,7 @@ class TrialResourceTest {
         assertRoom("trial/circuit_circus",1,24,24,30);
         assertRoom("trial/fire_colony",1,46,30,10);
         assertRoom("trial/zero_g",1,21,44,20);
+        assertRoom("trial/cold_snap",1,38,30,36);
     }
     @Test void importedStructuresAreValidAndContainOneEmeraldSpawnMarker() throws Exception {
         assertStructure("decision_box",47,28,47);
@@ -27,6 +28,7 @@ class TrialResourceTest {
         assertStructure("circuit_circus",25,25,31,5);
         assertStructure("fire_colony",47,31,11,1);
         assertStructure("zero_g",22,45,21,1);
+        assertStructure("cold_snap",39,31,37,1);
         assertStructureEntities("zero_g",8,"minecraft:shulker");
     }
     @Test void hardcoreDevelopmentTablePreservesEveryCurrentlySupportedCanonicalRow() throws Exception {

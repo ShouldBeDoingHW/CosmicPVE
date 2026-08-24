@@ -2,6 +2,7 @@ package com.cosmicpve.client;
 
 import com.cosmicpve.network.TrialCelebrationPayload;
 import com.cosmicpve.network.TrialTimerPayload;
+import com.cosmicpve.network.TrialOwnerPayload;
 import it.unimi.dsi.fastutil.ints.IntList;
 import java.util.List;
 import net.minecraft.client.Minecraft;
@@ -16,12 +17,14 @@ import net.neoforged.neoforge.client.network.event.RegisterClientPayloadHandlers
 public final class TrialClientPresentation {
     private static int timerSeconds = -1;
     private static String timerText = "";
+    private static String ownerHeading = "";
     private TrialClientPresentation() {}
 
     public static void registerPayloadHandlers(RegisterClientPayloadHandlersEvent event) {
         event.register(TrialTimerPayload.TYPE, (payload, context) -> {
             timerSeconds = payload.seconds(); timerText = formatSeconds(timerSeconds);
         });
+        event.register(TrialOwnerPayload.TYPE, (payload, context) -> ownerHeading = payload.heading());
         event.register(TrialCelebrationPayload.TYPE, (payload, context) -> {
             var level = Minecraft.getInstance().level;
             if (level == null) return;
@@ -40,7 +43,7 @@ public final class TrialClientPresentation {
         Minecraft minecraft = Minecraft.getInstance();
         if (timerSeconds < 0 || minecraft.options.hideGui) return;
         String value = timerText;
-        String heading = "Trial Timer";
+        String heading = ownerHeading.isBlank() ? "Trial" : ownerHeading;
         int width = Math.max(minecraft.font.width(heading), minecraft.font.width(value)) + 12;
         int right = graphics.guiWidth() - 3;
         int left = right - width;

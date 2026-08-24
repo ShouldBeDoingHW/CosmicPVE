@@ -15,8 +15,8 @@ public record TrialSession(int dataVersion, UUID sessionId, TrialLifecycleState 
         Identifier portalDimension, BlockPos portalOrigin, List<BlockPos> portalBlocks,
         List<UUID> participants, List<UUID> removedParticipants, int stateTicksRemaining,
         int timerTicks, Optional<Identifier> currentRoom, List<InstanceBounds> protectedBounds,
-        boolean initialDecision, TrialProgress progress, long transitionSerial) {
-    public static final int DATA_VERSION = 2;
+        boolean initialDecision, TrialProgress progress, long transitionSerial, TrialOwner owner) {
+    public static final int DATA_VERSION = 3;
     public static final int INITIAL_TIMER_TICKS = 12_000;
     public static final int JOIN_TICKS = 600;
     public static final int ROOM_INTRO_TICKS = 100;
@@ -38,7 +38,8 @@ public record TrialSession(int dataVersion, UUID sessionId, TrialLifecycleState 
             InstanceBounds.CODEC.listOf().fieldOf("protected_bounds").forGetter(TrialSession::protectedBounds),
             Codec.BOOL.optionalFieldOf("initial_decision", true).forGetter(TrialSession::initialDecision),
             TrialProgress.CODEC.optionalFieldOf("progress", TrialProgress.EMPTY).forGetter(TrialSession::progress),
-            Codec.LONG.optionalFieldOf("transition_serial", 0L).forGetter(TrialSession::transitionSerial)
+            Codec.LONG.optionalFieldOf("transition_serial", 0L).forGetter(TrialSession::transitionSerial),
+            TrialOwner.CODEC.optionalFieldOf("owner", TrialOwner.DEVELOPMENT).forGetter(TrialSession::owner)
     ).apply(instance, TrialSession::new));
 
     public TrialSession {
@@ -52,9 +53,14 @@ public record TrialSession(int dataVersion, UUID sessionId, TrialLifecycleState 
 
     public static TrialSession joining(UUID id, Identifier dimension, BlockPos origin, List<BlockPos> portalBlocks,
                                        List<InstanceBounds> bounds) {
+        return joining(id, dimension, origin, portalBlocks, bounds, TrialOwner.DEVELOPMENT);
+    }
+
+    public static TrialSession joining(UUID id, Identifier dimension, BlockPos origin, List<BlockPos> portalBlocks,
+                                       List<InstanceBounds> bounds, TrialOwner owner) {
         return new TrialSession(DATA_VERSION, id, TrialLifecycleState.JOINING, dimension, origin, portalBlocks,
                 List.of(), List.of(), JOIN_TICKS, INITIAL_TIMER_TICKS, Optional.empty(), bounds, true,
-                TrialProgress.EMPTY, 0L);
+                TrialProgress.EMPTY, 0L, owner);
     }
 
     public boolean acceptsJoins() { return initialDecision && (state == TrialLifecycleState.JOINING || state == TrialLifecycleState.DECISION); }
@@ -106,6 +112,6 @@ public record TrialSession(int dataVersion, UUID sessionId, TrialLifecycleState 
             int stateTicks, int timer, Optional<Identifier> room, List<InstanceBounds> bounds,
             boolean initial, TrialProgress nextProgress, long serial) {
         return new TrialSession(dataVersion, sessionId, nextState, portalDimension, portalOrigin, portalBlocks,
-                nextParticipants, removed, stateTicks, timer, room, bounds, initial, nextProgress, serial);
+                nextParticipants, removed, stateTicks, timer, room, bounds, initial, nextProgress, serial, owner);
     }
 }

@@ -36,4 +36,14 @@ class TrialRoomSelectionServiceTest {
         assertEquals(TrialSessionService.ZERO_G,service.select(afterFire,pool,RandomSource.create(7)).orElseThrow());
         assertEquals(3,service.weight(afterFire,TrialSessionService.FIRE_COLONY));
     }
+    @Test void apprenticePoolContainsExactlyThreeProductionRoomsAndColdSnapUsesNormalWeighting() {
+        var pool=TrialSessionService.roomPool(TrialPhase.APPRENTICE);
+        assertEquals(List.of(TrialSessionService.CIRCUIT_CIRCUS,TrialSessionService.RAIDING_RAINBOW,
+                TrialSessionService.COLD_SNAP),pool);
+        var service=new TrialRoomSelectionService(); var current=session(TrialProgress.EMPTY);
+        assertEquals(5,service.weight(current,TrialSessionService.COLD_SNAP));
+        var afterCold=session(current.progress().beginRoom(TrialSessionService.COLD_SNAP,TrialEncounterState.EMPTY));
+        assertEquals(3,service.weight(afterCold,TrialSessionService.COLD_SNAP));
+        assertNotEquals(TrialSessionService.COLD_SNAP,service.select(afterCold,pool,RandomSource.create(4)).orElseThrow());
+    }
 }

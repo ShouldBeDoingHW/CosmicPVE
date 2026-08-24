@@ -23,6 +23,8 @@ public final class TrialRoomLoadoutService {
     public static final int RAIDING_RAINBOW_UNBREAKING_LEVEL = 3;
     public static final int RAIDING_RAINBOW_PORKCHOPS = 16;
     public static final int RAIDING_RAINBOW_ENDER_PEARLS = 0;
+    public static final int COLD_SNAP_FEATHER_FALLING_LEVEL = 4;
+    public static final int COLD_SNAP_PORKCHOPS = 16;
     public static final java.util.List<net.minecraft.world.item.Item> RAIDING_RAINBOW_ARMOR = java.util.List.of(
             Items.NETHERITE_HELMET, Items.NETHERITE_CHESTPLATE, Items.NETHERITE_LEGGINGS, Items.NETHERITE_BOOTS);
     private final TrialInventoryTransactionService inventories;
@@ -76,6 +78,16 @@ public final class TrialRoomLoadoutService {
         player.getInventory().setItem(1, new ItemStack(Items.MILK_BUCKET));
         player.getInventory().setItem(2, new ItemStack(Items.MILK_BUCKET));
         player.getInventory().setItem(3, new ItemStack(Items.MILK_BUCKET));
+        player.getInventory().setSelectedSlot(0);
+    }
+    public void applyColdSnap(ServerPlayer player) {
+        clear(player);
+        ItemStack boots = new ItemStack(Items.DIAMOND_BOOTS);
+        var registry = player.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
+        EnchantmentHelper.updateEnchantments(boots, mutable -> mutable.set(
+                registry.getOrThrow(Enchantments.FEATHER_FALLING), COLD_SNAP_FEATHER_FALLING_LEVEL));
+        player.setItemSlot(EquipmentSlot.FEET, boots);
+        player.getInventory().setItem(0, new ItemStack(Items.COOKED_PORKCHOP, COLD_SNAP_PORKCHOPS));
         player.getInventory().setSelectedSlot(0);
     }
     private static void equipDyed(ServerPlayer player, EquipmentSlot slot, net.minecraft.world.item.Item item) {

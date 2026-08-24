@@ -776,9 +776,23 @@ Rooms can be duplicated across a run, but the same room cannot appear twice cons
 
 > Every visible one-second Trial Room or Decision Box title countdown update plays `minecraft:block.note_block.basedrum` once for each participating player. When a room's five-second introduction finishes and gameplay becomes active, `minecraft:entity.ender_dragon.growl` plays once for each participant; Decision Box entry never plays the growl.
 
+> Decision Box title announcements are brief flashes at 30, 25, 20, 15, 10, 5, 4, 3, 2, and 1 seconds rather than a continuously redrawn title. Each displayed announcement receives one basedrum sound.
+
 > A room's resolved Emerald spawn marker is metadata rather than terrain. Only the exact marker selected by the room definition is consumed, it is replaced with the matching floor before players arrive, and unrelated Emerald Blocks remain untouched. Definitions with multiple Emerald mechanics identify their spawn marker explicitly and may override the replacement BlockState when inference is unsuitable.
 
 Trial portals can be modified with Trial Trinkets (orange dye item) that give various buffs to the player. There are 3 kinds of trinkets, with several variants each.
+
+The eventual participant-only Trial sidebar is ordered as follows:
+
+```text
+MrWoofless Trial
+Apprentice
+Room #3---Cold Snap
+
+8:35
+```
+
+Line one is the immutable portal creator's name followed by `Trial`. The phase line displays only the current phase: Apprentice `#E6E032`, Hardcore `#E6A732`, or Demonic `#E65C32`. The room number is the overall room ordinal for the run, followed by the room display name. The authoritative timer appears below a small spacer. Implementation is incremental: the owner line is current, while the phase and room lines are later milestones.
 
 Skip: Allows the player to skip 1, 2, or 3 rooms at the beginning of the Trial with no time spent and the skipped-room loot already added to the deal pot. Skipped rooms do not grant their normal room-completion time bonuses.
 
@@ -867,6 +881,16 @@ Trial Edge Cases and Multiplayer Rules
 \- Trial-specific exceptions to normal instance protection are defined per room. For example, Bomb Squad may allow only its intended Creeper explosions to destroy designated walls.
 
 # Rooms
+
+***Cold Snap — Apprentice Room***
+
+Cold Snap is an ice-themed parkour room. Players spawn at the explicitly resolved standalone Emerald Block marker, which is replaced with matching Packed Ice before arrival. Each participant receives temporary Diamond Boots with Feather Falling IV and 16 Cooked Porkchops, with no other starting equipment or consumables.
+
+Ordinary falls are soft failures: players land in the traversable lower area and recover back toward the route without automatic teleport or execution. The lower floor's Powder Snow traps retain normal behavior and make recovery cost Trial time. The supplied boots are intended to make designed full-health falls survivable.
+
+An optional detour reaches a Gold light-weighted pressure plate. Its first participating-player activation removes both halves of a later Iron Door without a drop, unlocking the area for the whole party. The Iron heavy-weighted pressure plate behind that door then reveals the prebuilt secret shortcut simultaneously. Only the bounded 26-block ordinary-Ice route at local Y 13–14 is hidden and restored; the room's thousands of structural/decorative Ice blocks remain unchanged. Shortcut state is shared and resets with the room.
+
+Neither shortcut is required. A participating player may complete the normal longer route and use the final lever directly. The final lever is the only completion trigger and performs the normal party-wide Apprentice reward, +30 seconds, cleanup, and Decision Box transition.
 
 ***Circuit Circus — Apprentice Room***
 
@@ -959,7 +983,7 @@ Players are expected to use the information learned from previous successful kil
 
 When the eighth Zombie is killed in the correct position, **Raiding Rainbow immediately completes** and the entire active party transitions directly to the Decision Box under the normal Trial-room completion rules.
 
-Each player spawns into the room with an unbreaking 3 wooden sword, 16 cooked porkchop, and 2 enderpearls.
+Each player spawns into the room with full Netherite armor carrying Unbreaking III, a Wooden Sword with Unbreaking III, and 16 Cooked Porkchops. No Ender Pearls are supplied.
 
 All Raiding Rainbow Zombies and associated temporary encounter state are cleared during the transition.
 
