@@ -13,6 +13,9 @@ import java.util.function.Consumer;
 import com.cosmicpve.data.component.TrialPortalModifiers;
 import com.cosmicpve.registry.ModDataComponents;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.ChatFormatting;
+import java.util.ArrayList;
+import java.util.List;
 
 public final class TrialPortalItem extends Item {
     public TrialPortalItem(Properties properties) { super(properties); }
@@ -38,28 +41,54 @@ public final class TrialPortalItem extends Item {
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display,
                                 Consumer<Component> tooltip, TooltipFlag flag) {
-        tooltip.accept(Component.translatable("item.cosmicpve.trial_portal.description")
-                .withStyle(style -> style.withColor(0xFFFF55)));
-        tooltip.accept(Component.translatable("item.cosmicpve.trial_portal.use")
-                .withStyle(style -> style.withColor(0xAAAAAA)));
         var modifiers = stack.getOrDefault(ModDataComponents.TRIAL_PORTAL_MODIFIERS.get(), TrialPortalModifiers.EMPTY);
-        modifierLines(modifiers).forEach(tooltip);
+        tooltipLines(modifiers).forEach(tooltip);
     }
 
-    public static java.util.List<Component> modifierLines(TrialPortalModifiers modifiers) {
-        var lines = new java.util.ArrayList<Component>(3);
-        if (modifiers.timeMinutes() > 0) lines.add(Component.translatable(
-                modifiers.timeMinutes() == 1 ? "tooltip.cosmicpve.trial_portal.time_one"
-                        : "tooltip.cosmicpve.trial_portal.time", modifiers.timeMinutes()).withColor(
-                                com.cosmicpve.data.component.TrialTrinketType.TIME.presentationColor()));
-        if (modifiers.skipRooms() > 0) lines.add(Component.translatable(
-                modifiers.skipRooms() == 1 ? "tooltip.cosmicpve.trial_portal.skip_one"
-                        : "tooltip.cosmicpve.trial_portal.skip", modifiers.skipRooms()).withColor(
-                                com.cosmicpve.data.component.TrialTrinketType.SKIP.presentationColor()));
-        if (modifiers.insuranceLevel() > 0) lines.add(Component.translatable(
-                "tooltip.cosmicpve.trial_portal.insurance", modifiers.insuranceLevel()).withColor(
-                        com.cosmicpve.data.component.TrialTrinketType.INSURANCE.presentationColor()));
-        return java.util.List.copyOf(lines);
+    public static List<Component> tooltipLines(TrialPortalModifiers modifiers) {
+        var lines = new ArrayList<Component>(11);
+        lines.add(Component.translatable("item.cosmicpve.trial_portal.description").withColor(0xFFFF55));
+        lines.add(Component.translatable("item.cosmicpve.trial_portal.use").withColor(0xAAAAAA));
+        lines.add(Component.empty());
+        lines.add(Component.translatable("tooltip.cosmicpve.trial_portal.trinkets")
+                .withColor(0xFFAA00).withStyle(ChatFormatting.BOLD));
+        lines.addAll(modifierLines(modifiers));
+        return List.copyOf(lines);
+    }
+
+    public static List<Component> modifierLines(TrialPortalModifiers modifiers) {
+        var lines = new ArrayList<Component>(6);
+        if (modifiers.skipRooms() > 0) addModifier(lines,
+                Component.translatable(modifiers.skipRooms() == 1
+                                ? "tooltip.cosmicpve.trial_portal.skip_one"
+                                : "tooltip.cosmicpve.trial_portal.skip", modifiers.skipRooms()),
+                com.cosmicpve.data.component.TrialTrinketType.SKIP.presentationColor(),
+                Component.translatable(modifiers.skipRooms() == 1
+                        ? "tooltip.cosmicpve.trial_portal.skip_description_one"
+                        : "tooltip.cosmicpve.trial_portal.skip_description", modifiers.skipRooms()));
+        if (modifiers.timeMinutes() > 0) addModifier(lines,
+                Component.translatable(modifiers.timeMinutes() == 1
+                                ? "tooltip.cosmicpve.trial_portal.time_one"
+                                : "tooltip.cosmicpve.trial_portal.time", modifiers.timeMinutes()),
+                com.cosmicpve.data.component.TrialTrinketType.TIME.presentationColor(),
+                Component.translatable(modifiers.timeMinutes() == 1
+                        ? "tooltip.cosmicpve.trial_portal.time_description_one"
+                        : "tooltip.cosmicpve.trial_portal.time_description", modifiers.timeMinutes()));
+        if (modifiers.insuranceLevel() > 0) addModifier(lines,
+                Component.translatable(modifiers.insuranceLevel() == 1
+                                ? "tooltip.cosmicpve.trial_portal.insurance_one"
+                                : "tooltip.cosmicpve.trial_portal.insurance", modifiers.insuranceLevel()),
+                com.cosmicpve.data.component.TrialTrinketType.INSURANCE.presentationColor(),
+                Component.translatable(modifiers.insuranceLevel() == 1
+                        ? "tooltip.cosmicpve.trial_portal.insurance_description_one"
+                        : "tooltip.cosmicpve.trial_portal.insurance_description", modifiers.insuranceLevel()));
+        if (lines.isEmpty()) lines.add(Component.translatable("tooltip.cosmicpve.trial_portal.none").withColor(0x777777));
+        return List.copyOf(lines);
+    }
+
+    private static void addModifier(List<Component> lines, Component name, int color, Component description) {
+        lines.add(Component.literal("✖ ").withColor(0xFFAA00).append(name.copy().withColor(color)));
+        lines.add(Component.literal("  ").append(description.copy().withColor(0x777777)));
     }
 
     /** Applies the persistent modifier and its per-stack maximum as one invariant. */

@@ -14,19 +14,20 @@ import net.minecraft.world.item.component.FireworkExplosion;
 import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 import net.neoforged.neoforge.client.network.event.RegisterClientPayloadHandlersEvent;
+import net.minecraft.ChatFormatting;
 
 /** Client-only participant HUD and harmless cash-out firework particles. */
 public final class TrialClientPresentation {
     static final int HUD_HEIGHT = 132;
-    static final int MIN_HUD_WIDTH = 150;
-    static final int HORIZONTAL_PADDING = 18;
-    static final int LINE_STEP = 27;
+    static final int HUD_WIDTH = 120;
+    static final int HORIZONTAL_PADDING = 8;
     private static int timerSeconds = -1;
     private static String timerText = "";
     private static String ownerHeading = "";
     private static String phaseLabel = "";
     private static int phaseColor = 0xFFFFFF;
-    private static String roomLine = "";
+    private static int roomOrdinal;
+    private static String roomName = "";
     private TrialClientPresentation() {}
 
     public static void registerPayloadHandlers(RegisterClientPayloadHandlersEvent event) {
@@ -37,7 +38,9 @@ public final class TrialClientPresentation {
         event.register(TrialPhasePayload.TYPE, (payload, context) -> {
             phaseLabel = payload.label(); phaseColor = payload.color();
         });
-        event.register(TrialRoomPayload.TYPE, (payload, context) -> roomLine = payload.line());
+        event.register(TrialRoomPayload.TYPE, (payload, context) -> {
+            roomOrdinal = payload.ordinal(); roomName = payload.displayName();
+        });
         event.register(TrialCelebrationPayload.TYPE, (payload, context) -> {
             var level = Minecraft.getInstance().level;
             if (level == null) return;
@@ -57,28 +60,28 @@ public final class TrialClientPresentation {
         if (timerSeconds < 0 || minecraft.options.hideGui) return;
         String value = timerText;
         String heading = ownerHeading.isBlank() ? "Trial" : ownerHeading;
-        int maxWidth = Math.max(48, graphics.guiWidth() - 12);
-        int contentWidth = Math.max(minecraft.font.width(heading), minecraft.font.width(value));
-        if (!phaseLabel.isBlank()) contentWidth = Math.max(contentWidth, minecraft.font.width(phaseLabel));
-        if (!roomLine.isBlank()) contentWidth = Math.max(contentWidth, minecraft.font.width(roomLine));
-        int width = Math.min(maxWidth, Math.max(MIN_HUD_WIDTH, contentWidth + HORIZONTAL_PADDING * 2));
-        int right = graphics.guiWidth() - 3;
-        int left = right - width;
-        int top = 34;
-        int textWidth = Math.max(1, width - HORIZONTAL_PADDING * 2);
+        PanelLayout layout = layout(graphics.guiWidth(), graphics.guiHeight());
+        int textWidth = Math.max(1, layout.width() - HORIZONTAL_PADDING * 2);
         heading = fit(minecraft.font, heading, textWidth);
         String phase = fit(minecraft.font, phaseLabel, textWidth);
-        String room = fit(minecraft.font, roomLine, textWidth);
-        graphics.fill(left, top, right, top + HUD_HEIGHT, 0x88000000);
-        graphics.fill(left, top, right, top + 1, 0xAAFFAA00);
-        graphics.drawString(minecraft.font, Component.literal(heading), left + HORIZONTAL_PADDING, top + 13, 0xFFFFAA00, false);
+        String room = fit(minecraft.font, roomName, textWidth);
+        int x = layout.left() + HORIZONTAL_PADDING;
+        int top = layout.top();
+        graphics.fill(layout.left(), top, layout.right(), top + layout.height(), 0x88000000);
+        graphics.fill(layout.left(), top, layout.right(), top + 1, 0xAAFFAA00);
+        graphics.drawString(minecraft.font, Component.literal(heading).withStyle(ChatFormatting.BOLD),
+                x, top + 10, 0xFFFFAA00, false);
+        graphics.drawString(minecraft.font, Component.literal(tierHeading(phaseLabel)).withStyle(ChatFormatting.BOLD),
+                x, top + 30, 0xFFFFFFFF, false);
         if (!phase.isBlank()) graphics.drawString(minecraft.font, Component.literal(phase),
-                left + HORIZONTAL_PADDING, top + 13 + LINE_STEP, 0xFF000000 | phaseColor, false);
+                x, top + 41, 0xFF000000 | phaseColor, false);
+        graphics.drawString(minecraft.font, Component.literal(roomHeading(roomOrdinal)).withStyle(ChatFormatting.BOLD),
+                x, top + 61, 0xFFFFFFFF, false);
         if (!room.isBlank()) graphics.drawString(minecraft.font, Component.literal(room),
-                left + HORIZONTAL_PADDING, top + 13 + LINE_STEP * 2, 0xFFFFFFFF, false);
-        graphics.drawString(minecraft.font, Component.literal(value), right - HORIZONTAL_PADDING - minecraft.font.width(value),
-                top + 13 + LINE_STEP * 3,
-                0xFFFFFFFF, false);
+                x, top + 72, 0xFFE0E0E0, false);
+        graphics.drawString(minecraft.font, Component.literal("Time Left").withStyle(ChatFormatting.BOLD),
+                x, top + 93, 0xFFFFFFFF, false);
+        graphics.drawString(minecraft.font, Component.literal(value), x, top + 104, 0xFFE0E0E0, false);
     }
 
     private static String fit(net.minecraft.client.gui.Font font, String value, int width) {
@@ -88,7 +91,26 @@ public final class TrialClientPresentation {
     }
 
     static String formatSeconds(int seconds) {
-        int safe = Math.max(0, seconds);
-        return safe / 60 + ":" + String.format(java.util.Locale.ROOT, "%02d", safe % 60);
+        return com.cosmicpve.trial.TrialTimerDisplayService.formatSeconds(seconds);
+    }
+
+    static String tierHeading(String phase) {
+        return "Tier (" + switch (phase) {
+            case "Hardcore" -> 2;
+            case "Demonic" -> 3;
+            default -> 1;
+        } + "/3)";
+    }
+
+    static String roomHeading(int ordinal) { return ordinal > 0 ? "Room (#" + ordinal + ")" : "Room"; }
+
+    static PanelLayout layout(int guiWidth, int guiHeight) {
+        int width = Math.max(1, Math.min(HUD_WIDTH, guiWidth));
+        int height = Math.max(1, Math.min(HUD_HEIGHT, guiHeight));
+        return new PanelLayout(guiWidth - width, Math.max(0, (guiHeight - height) / 2), width, height);
+    }
+
+    record PanelLayout(int left, int top, int width, int height) {
+        int right() { return left + width; }
     }
 }

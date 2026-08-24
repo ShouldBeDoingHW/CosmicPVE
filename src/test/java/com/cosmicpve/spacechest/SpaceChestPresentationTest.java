@@ -38,7 +38,7 @@ class SpaceChestPresentationTest {
     }
 
     @Test void soundPolicyUsesCanonicalEventsAndDoesNotDuplicateClosedOrClaimedTransitions() {
-        assertEquals(SoundEvents.ARMOR_EQUIP_LEATHER.value(), SpaceChestSounds.initialSelection());
+        assertEquals(SoundEvents.ARMOR_EQUIP_NETHERITE.value(), SpaceChestSounds.initialSelection());
         assertEquals(SoundEvents.CHICKEN_EGG, SpaceChestSounds.missedRewardsCleared());
         assertEquals(SoundEvents.EXPERIENCE_ORB_PICKUP, SpaceChestSounds.selectedRewardRevealed());
         assertEquals(SoundEvents.CHEST_CLOSE, SpaceChestSounds.committedMenuClosed());

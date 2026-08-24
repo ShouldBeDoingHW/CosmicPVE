@@ -11,8 +11,10 @@ import com.cosmicpve.registry.ModDataComponents;
 import com.cosmicpve.registry.ModItems;
 import com.cosmicpve.trial.trinket.TrialTrinketApplicationService;
 import com.cosmicpve.trial.trinket.TrialTrinkets;
+import com.cosmicpve.trial.portal.TrialPortalItem;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.network.chat.contents.TranslatableContents;
 
 class TrialTrinketFoundationTest {
     @Test void allNineCanonicalVariantsValidate() {
@@ -97,8 +99,53 @@ class TrialTrinketFoundationTest {
         }
         var lines = com.cosmicpve.trial.portal.TrialPortalItem.modifierLines(
                 new TrialPortalModifiers(1, 5, 3, 3));
-        assertEquals(0x0A5751, lines.get(0).getStyle().getColor().getValue());
-        assertEquals(0x2BC2B8, lines.get(1).getStyle().getColor().getValue());
-        assertEquals(0x0A5721, lines.get(2).getStyle().getColor().getValue());
+        assertEquals(6, lines.size());
+        assertEquals(0xFFAA00, lines.get(0).getStyle().getColor().getValue());
+        assertEquals(0x2BC2B8, lines.get(0).getSiblings().getFirst().getStyle().getColor().getValue());
+        assertEquals(0x0A5751, lines.get(2).getSiblings().getFirst().getStyle().getColor().getValue());
+        assertEquals(0x0A5721, lines.get(4).getSiblings().getFirst().getStyle().getColor().getValue());
+        assertEquals(0x777777, lines.get(1).getSiblings().getFirst().getStyle().getColor().getValue());
+    }
+
+    @Test void portalTooltipIsInformativeOrderedAndDataPureForEmptyAndFullyModifiedPortals() {
+        var empty = com.cosmicpve.trial.portal.TrialPortalItem.tooltipLines(TrialPortalModifiers.EMPTY);
+        assertEquals(5, empty.size());
+        assertTrue(empty.get(3).getStyle().isBold());
+        assertEquals(0xFFAA00, empty.get(3).getStyle().getColor().getValue());
+        assertEquals(0x777777, empty.get(4).getStyle().getColor().getValue());
+        assertFalse(empty.toString().contains("/trials"));
+
+        var modifiers = new TrialPortalModifiers(1, 5, 3, 3);
+        var before = modifiers;
+        var full = com.cosmicpve.trial.portal.TrialPortalItem.tooltipLines(modifiers);
+        assertEquals(10, full.size());
+        assertEquals(0x2BC2B8, full.get(4).getSiblings().getFirst().getStyle().getColor().getValue());
+        assertEquals(0x0A5751, full.get(6).getSiblings().getFirst().getStyle().getColor().getValue());
+        assertEquals(0x0A5721, full.get(8).getSiblings().getFirst().getStyle().getColor().getValue());
+        assertTrue(full.get(4).toString().contains("skip"));
+        assertTrue(full.get(6).toString().contains("time"));
+        assertTrue(full.get(8).toString().contains("insurance"));
+        assertFalse(full.toString().contains("/trials"));
+        assertEquals(before, modifiers);
+    }
+
+    @Test void everyCanonicalModifierValueIsRenderedThroughItsFamilyMetadata() {
+        for (int skip = 1; skip <= 3; skip++) {
+            assertEquals(skip, modifierArgument(TrialPortalItem.modifierLines(
+                    new TrialPortalModifiers(1, 0, skip, 0)).getFirst()));
+        }
+        for (int time : new int[]{1, 3, 5}) {
+            assertEquals(time, modifierArgument(TrialPortalItem.modifierLines(
+                    new TrialPortalModifiers(1, time, 0, 0)).getFirst()));
+        }
+        for (int insurance = 1; insurance <= 3; insurance++) {
+            assertEquals(insurance, modifierArgument(TrialPortalItem.modifierLines(
+                    new TrialPortalModifiers(1, 0, 0, insurance)).getFirst()));
+        }
+    }
+
+    private static int modifierArgument(net.minecraft.network.chat.Component bulletLine) {
+        var contents = (TranslatableContents) bulletLine.getSiblings().getFirst().getContents();
+        return ((Number) contents.getArgs()[0]).intValue();
     }
 }

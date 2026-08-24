@@ -17,11 +17,11 @@ public final class TrialTimerDisplayService {
     private final Map<UUID, Integer> displayedSeconds = new HashMap<>();
     private final Map<UUID, String> displayedOwners = new HashMap<>();
     private final Map<UUID, TrialPhase> displayedPhases = new HashMap<>();
-    private final Map<UUID, String> displayedRooms = new HashMap<>();
+    private final Map<UUID, RoomDisplay> displayedRooms = new HashMap<>();
     private TrialLifecycleState cachedRoomState;
     private net.minecraft.resources.Identifier cachedRoomId;
     private int cachedRoomOrdinal = -1;
-    private String cachedRoomLine = "";
+    private RoomDisplay cachedRoom = RoomDisplay.DECISION_BOX;
 
     public void update(MinecraftServer server, TrialSession session) {
         int seconds = displayedSeconds(session.timerTicks());
@@ -33,7 +33,7 @@ public final class TrialTimerDisplayService {
         if (stale != null) for (UUID id : stale) hide(server, id);
         String owner = session.owner().header();
         TrialPhase phase = session.progress().phase();
-        String room = cachedRoomLine(session);
+        RoomDisplay room = cachedRoom(session);
         for (UUID id : session.participants()) {
             ServerPlayer player = server.getPlayerList().getPlayer(id);
             if (player != null) showOwnerIfChanged(player, owner);
@@ -50,7 +50,7 @@ public final class TrialTimerDisplayService {
         displayedSeconds.put(player.getUUID(), seconds);
         showOwnerIfChanged(player, session.owner().header());
         showPhaseIfChanged(player, session.progress().phase());
-        showRoomIfChanged(player, roomLine(session));
+        showRoomIfChanged(player, roomDisplay(session));
         PacketDistributor.sendToPlayer(player, new TrialTimerPayload(seconds));
     }
 
@@ -62,12 +62,12 @@ public final class TrialTimerDisplayService {
         PacketDistributor.sendToPlayer(player, new TrialTimerPayload(-1));
         PacketDistributor.sendToPlayer(player, new TrialOwnerPayload(""));
         PacketDistributor.sendToPlayer(player, new TrialPhasePayload("", 0));
-        PacketDistributor.sendToPlayer(player, new TrialRoomPayload(""));
+        PacketDistributor.sendToPlayer(player, new TrialRoomPayload(0, ""));
     }
 
     public void hideAll(MinecraftServer server) {
         java.util.List.copyOf(displayedSeconds.keySet()).forEach(id -> hide(server, id));
-        cachedRoomState = null; cachedRoomId = null; cachedRoomOrdinal = -1; cachedRoomLine = "";
+        cachedRoomState = null; cachedRoomId = null; cachedRoomOrdinal = -1; cachedRoom = RoomDisplay.DECISION_BOX;
     }
 
     private void hide(MinecraftServer server, UUID id) {
@@ -80,14 +80,18 @@ public final class TrialTimerDisplayService {
             PacketDistributor.sendToPlayer(player, new TrialTimerPayload(-1));
             PacketDistributor.sendToPlayer(player, new TrialOwnerPayload(""));
             PacketDistributor.sendToPlayer(player, new TrialPhasePayload("", 0));
-            PacketDistributor.sendToPlayer(player, new TrialRoomPayload(""));
+            PacketDistributor.sendToPlayer(player, new TrialRoomPayload(0, ""));
         }
     }
 
     public static int displayedSeconds(int ticks) { return ticks <= 0 ? 0 : (ticks + 19) / 20; }
     public static String formatTicks(int ticks) {
         int seconds = displayedSeconds(ticks);
-        return seconds / 60 + ":" + String.format(java.util.Locale.ROOT, "%02d", seconds % 60);
+        return formatSeconds(seconds);
+    }
+    public static String formatSeconds(int seconds) {
+        int safe = Math.max(0, seconds);
+        return safe / 60 + "m " + String.format(java.util.Locale.ROOT, "%02d", safe % 60) + "s";
     }
     boolean accept(UUID player, int seconds) {
         return !Integer.valueOf(seconds).equals(displayedSeconds.put(player, seconds));
@@ -101,13 +105,13 @@ public final class TrialTimerDisplayService {
         return phase != displayedPhases.put(player, phase);
     }
 
-    boolean acceptRoom(UUID player, String line) { return !line.equals(displayedRooms.put(player, line)); }
+    boolean acceptRoom(UUID player, RoomDisplay room) { return !room.equals(displayedRooms.put(player, room)); }
 
-    public static String roomLine(TrialSession session) {
-        return roomLine(session, id -> CosmicContent.repository().requireTrialRoom(id).displayName());
+    public static RoomDisplay roomDisplay(TrialSession session) {
+        return roomDisplay(session, id -> CosmicContent.repository().requireTrialRoom(id).displayName());
     }
 
-    private String cachedRoomLine(TrialSession session) {
+    private RoomDisplay cachedRoom(TrialSession session) {
         boolean inRoom = session.state() == TrialLifecycleState.ROOM_INTRO
                 || session.state() == TrialLifecycleState.ROOM_ACTIVE;
         net.minecraft.resources.Identifier roomId = inRoom ? session.currentRoom().orElse(null) : null;
@@ -115,17 +119,18 @@ public final class TrialTimerDisplayService {
         if (cachedRoomState != session.state() || !java.util.Objects.equals(cachedRoomId, roomId)
                 || cachedRoomOrdinal != ordinal) {
             cachedRoomState = session.state(); cachedRoomId = roomId; cachedRoomOrdinal = ordinal;
-            cachedRoomLine = roomLine(session);
+            cachedRoom = roomDisplay(session);
         }
-        return cachedRoomLine;
+        return cachedRoom;
     }
 
-    static String roomLine(TrialSession session, java.util.function.Function<net.minecraft.resources.Identifier, String> names) {
+    static RoomDisplay roomDisplay(TrialSession session,
+                                   java.util.function.Function<net.minecraft.resources.Identifier, String> names) {
         if (session.state() == TrialLifecycleState.ROOM_INTRO || session.state() == TrialLifecycleState.ROOM_ACTIVE) {
-            return session.currentRoom().map(id -> "Room #" + (session.progress().completedRooms() + 1) + "---"
-                    + names.apply(id)).orElse("Decision Box");
+            return session.currentRoom().map(id -> new RoomDisplay(session.progress().completedRooms() + 1,
+                    names.apply(id))).orElse(RoomDisplay.DECISION_BOX);
         }
-        return "Decision Box";
+        return RoomDisplay.DECISION_BOX;
     }
 
     private void showOwnerIfChanged(ServerPlayer player, String heading) {
@@ -140,7 +145,17 @@ public final class TrialTimerDisplayService {
         }
     }
 
-    private void showRoomIfChanged(ServerPlayer player, String line) {
-        if (acceptRoom(player.getUUID(), line)) PacketDistributor.sendToPlayer(player, new TrialRoomPayload(line));
+    private void showRoomIfChanged(ServerPlayer player, RoomDisplay room) {
+        if (acceptRoom(player.getUUID(), room)) {
+            PacketDistributor.sendToPlayer(player, new TrialRoomPayload(room.ordinal(), room.displayName()));
+        }
+    }
+
+    public record RoomDisplay(int ordinal, String displayName) {
+        public static final RoomDisplay DECISION_BOX = new RoomDisplay(0, "Decision Box");
+        public RoomDisplay {
+            if (ordinal < 0) throw new IllegalArgumentException("Room ordinal cannot be negative");
+            displayName = displayName == null ? "" : displayName;
+        }
     }
 }

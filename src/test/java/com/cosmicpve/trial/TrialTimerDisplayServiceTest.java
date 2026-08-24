@@ -10,11 +10,11 @@ import net.minecraft.resources.Identifier;
 
 class TrialTimerDisplayServiceTest {
     @Test void formatsAuthoritativeTicksWithPositiveCeiling() {
-        assertEquals("10:00",TrialTimerDisplayService.formatTicks(12_000));
-        assertEquals("8:35",TrialTimerDisplayService.formatTicks(10_300));
-        assertEquals("0:09",TrialTimerDisplayService.formatTicks(180));
-        assertEquals("0:01",TrialTimerDisplayService.formatTicks(1));
-        assertEquals("0:00",TrialTimerDisplayService.formatTicks(0));
+        assertEquals("10m 00s",TrialTimerDisplayService.formatTicks(12_000));
+        assertEquals("8m 35s",TrialTimerDisplayService.formatTicks(10_300));
+        assertEquals("0m 09s",TrialTimerDisplayService.formatTicks(180));
+        assertEquals("0m 01s",TrialTimerDisplayService.formatTicks(1));
+        assertEquals("0m 00s",TrialTimerDisplayService.formatTicks(0));
     }
     @Test void unchangedDisplayedSecondDoesNotRefresh() {
         var service=new TrialTimerDisplayService(); UUID player=UUID.randomUUID();
@@ -39,16 +39,18 @@ class TrialTimerDisplayServiceTest {
         assertEquals(0xE6A732,TrialPhase.HARDCORE.color());
         assertEquals(0xE65C32,TrialPhase.DEMONIC.color());
     }
-    @Test void roomLineUsesOverallOrdinalAndDecisionContextWithoutPacketSpam() {
+    @Test void roomDisplayKeepsOrdinalAndNameSeparateWithoutPacketSpam() {
         var base=TrialSession.joining(UUID.randomUUID(),Identifier.parse("minecraft:overworld"),BlockPos.ZERO,List.of(),List.of());
         var service=new TrialTimerDisplayService(); UUID player=UUID.randomUUID();
-        assertEquals("Decision Box",TrialTimerDisplayService.roomLine(base,id->"Cold Snap"));
+        assertEquals(new TrialTimerDisplayService.RoomDisplay(0,"Decision Box"),
+                TrialTimerDisplayService.roomDisplay(base,id->"Cold Snap"));
         var room=base.withProgress(base.progress().debugSetCompletedRooms(2)).withState(
                 TrialLifecycleState.ROOM_INTRO,100,Optional.of(Identifier.parse("cosmicpve:trial/cold_snap")),false,List.of());
-        assertEquals("Room #3---Cold Snap",TrialTimerDisplayService.roomLine(room,id->"Cold Snap"));
-        assertTrue(service.acceptRoom(player,"Room #3---Cold Snap"));
-        assertFalse(service.acceptRoom(player,"Room #3---Cold Snap"));
-        assertTrue(service.acceptRoom(player,"Decision Box"));
+        var display = new TrialTimerDisplayService.RoomDisplay(3,"Cold Snap");
+        assertEquals(display,TrialTimerDisplayService.roomDisplay(room,id->"Cold Snap"));
+        assertTrue(service.acceptRoom(player,display));
+        assertFalse(service.acceptRoom(player,display));
+        assertTrue(service.acceptRoom(player,TrialTimerDisplayService.RoomDisplay.DECISION_BOX));
     }
     @Test void introAnchorDetectsTranslationButDoesNotConstrainRotation() {
         assertFalse(TrialSessionService.needsIntroCorrection(10.5, 64, 20.5, 10.5, 64, 20.5));

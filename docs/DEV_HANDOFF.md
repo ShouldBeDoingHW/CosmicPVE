@@ -250,6 +250,14 @@ The bounded performance pass moved Fire Colony's already ten-tick maintenance ga
 
 The generic placed Spawner investigation traced the pinned 1.21.11 `BaseSpawner` path and found no Cosmic entity-ID, SpawnData, timing, update, or synchronization defect. All representative typed items use the same configuration path and retain vanilla delay/count/range fields. The observed split is explained by vanilla `SpawnPlacements`: Blaze accepts any light, Iron Golem uses the basic mob predicate, ordinary hostile mobs such as Creeper/Zombie still require their spawner-reason darkness predicate, and Pig/Sheep still require an animal-spawnable floor and sufficient light. `/cosmic reward spawner inspect <x> <y> <z>` exposes the complete live state/environment and `/cosmic reward spawner debug-delay <x> <y> <z> <ticks>` shortens only the current delay for controlled testing; normal subsequent delays remain vanilla.
 
+### Step 6S.2 — IMPLEMENTED; AUTOMATED/RUNTIME VERIFIED; MANUALLY VERIFIED / ACCEPTED
+
+Trial Portals now present concise creation guidance followed by a bold warm-gold `Trinkets:` section. Active modifiers use gold `✖` bullets, stable Skip → Extra Time → Insurance ordering, their established family colors, and muted player-facing explanations with correct singular/plural grammar; an unmodified portal shows muted `None`. Tooltip construction is read-only, and the accepted single-stack invariant for modified portals is unchanged.
+
+The participant HUD is a fixed 120-pixel-wide card anchored flush to the right GUI edge and vertically centered. It presents the immutable possessive owner heading, `Tier (1/3)` / `(2/3)` / `(3/3)` with the established phase colors, separate `Room (#N)` and room-name lines, and `Time Left` with `Xm YYs`. Long content ellipsizes inside the stable width. Room ordinal/name remain lifecycle-cached, and the existing owner/phase/room change suppression plus displayed-second timer suppression are unchanged.
+
+Normal Ultimate, Legendary, and Mastery Space Chests now play `minecraft:item.armor.equip_netherite` exactly once for each newly selected valid pane. Rejected/repeated selections, committed rewards, reveal/close behavior, and Memory Chests are unchanged. The Design Doc's `Enchantments → Balance Candidates` material remains prospective, entirely unimplemented, and is not implementation-authoritative without a future explicit balance-patch instruction.
+
 ## 3. Current Real Enchantments
 
 These are registered through Minecraft's enchantment infrastructure, use actual enchantment data on the item, and are not present in normal enchanting-table, librarian, random-loot, random-equipment, or mob-equipment acquisition pools.
@@ -563,9 +571,9 @@ The final post-Orb capacity is no longer unresolved for current target classes: 
 
 **Next milestone: Step 6T — Trial Reward / Supporting-System Gap Closure.**
 
-Step 6T should close Trial reward/support gaps: Masks/Multi-Mask foundations, Mask Splicer, missing Trial-linked Armor Set reward primitives such as Yeti/Ranger procurement where appropriate, additional Apprentice/Hardcore/Demonic reward-table dependencies, and the next small Trial HUD spacing refinement before the timer. The agreed wave then moves through 6U Hidden Graveyard and 6V Deadeye/Trial 1.0 stabilization before shifting focus toward Conquest Chests.
+Step 6T should close Trial reward/support gaps: Masks/Multi-Mask foundations, Mask Splicer, missing Trial-linked Armor Set reward primitives such as Yeti/Ranger procurement where appropriate, and additional Apprentice/Hardcore/Demonic reward-table dependencies. The agreed wave then moves through 6U Hidden Graveyard and 6V Deadeye/Trial 1.0 stabilization before shifting focus toward Conquest Chests.
 
-Step 6R is committed. Step 6S and its Step 6S.1 corrective pass are manually verified and accepted and are ready for their closure commit. Hidden Graveyard, Deadeye, Memory Chests, and Cosmic Crates remain deliberately deferred.
+The accepted combined Step 6S/6S.1 baseline is committed at `48df94312186551944e7c6364cb760da69657a8b` (`Add Trial trinkets and corrective polish`). Step 6S.2 is manually verified and accepted. Hidden Graveyard, Deadeye, Memory Chests, and Cosmic Crates remain deliberately deferred.
 
 ## 17. Development Workflow
 
@@ -581,6 +589,13 @@ Step 6R is committed. Step 6S and its Step 6S.1 corrective pass are manually ver
 Preserve unrelated dirty changes. Never change pinned versions as a side effect of gameplay work. Prefer service-level rules and typed data over one-off event logic, and keep client-only classes isolated from dedicated-server loading.
 
 ## 18. Verification Snapshot
+
+For the manually accepted Step 6S.2 checkpoint:
+
+- `gradlew.bat cleanTest test build` passes all 331 automated tests across 95 suites with 0 failures, errors, or skips. Focused coverage pins the empty and fully modified portal tooltip, all nine canonical modifier values, stable category order/colors and data purity, fixed flush-right/vertically-centered 120-pixel HUD layout, phase tier headings/colors, separate room ordinal/name semantics, `Xm YYs` formatting, unchanged update suppression, and Netherite-equip pane-selection feedback.
+- All 156 main-resource JSON files decode. Dedicated-server startup publishes six reward tables and eight Trial rooms, loads 1,462 recipes, verifies progression controls, and reaches `Done` without relevant common-side, payload, codec, tooltip, or resource errors. Fresh client startup loads both entrypoints, reloads resources, initializes OpenAL, and builds block/item/GUI/chest atlases without relevant localization, component, HUD registration, model, texture, audio, or sided-loading errors.
+- `git diff --check` passes with only normal Windows line-ending notices. Pinned Minecraft 1.21.11, NeoForge 21.11.45, Java 21, Gradle 9.2.1, ModDevGradle 2.0.144, mod ID `cosmicpve`, and package `com.cosmicpve` remain unchanged.
+- The user manually verified the revised Trial Portal tooltip, narrow right-edge Trial HUD and tier/room/time hierarchy, Netherite Space Chest pane-selection feedback, all previously accepted 6S/6S.1 behavior, and placed Cosmic spawners under their applicable vanilla environmental requirements.
 
 For the manually accepted Step 6S.1 corrective checkpoint:
 

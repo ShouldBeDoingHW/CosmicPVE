@@ -11,7 +11,7 @@ import net.minecraft.sounds.SoundSource;
 public final class SpaceChestSounds {
     private SpaceChestSounds() {}
 
-    public static SoundEvent initialSelection() { return SoundEvents.ARMOR_EQUIP_LEATHER.value(); }
+    public static SoundEvent initialSelection() { return SoundEvents.ARMOR_EQUIP_NETHERITE.value(); }
     public static SoundEvent missedRewardsCleared() { return SoundEvents.CHICKEN_EGG; }
     public static SoundEvent selectedRewardRevealed() { return SoundEvents.EXPERIENCE_ORB_PICKUP; }
     public static SoundEvent committedMenuClosed() { return SoundEvents.CHEST_CLOSE; }
