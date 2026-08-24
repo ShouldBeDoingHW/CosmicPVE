@@ -57,6 +57,12 @@ public final class InstanceStructureService {
                     .orElseThrow(() -> new IllegalStateException("Unknown spawn marker replacement for " + definition.id()))
                     .value().defaultBlockState();
         }
+        return inferredFloorReplacement(level, marker, definition.id().toString());
+    }
+
+    /** Resolves the same deterministic floor used by consumed structure markers in bespoke multi-marker rooms. */
+    public static net.minecraft.world.level.block.state.BlockState inferredFloorReplacement(
+            ServerLevel level, BlockPos marker, String context) {
         var candidates = new ArrayList<net.minecraft.world.level.block.state.BlockState>();
         for (Direction direction : Direction.Plane.HORIZONTAL) {
             BlockPos neighbor = marker.relative(direction);
@@ -67,8 +73,8 @@ public final class InstanceStructureService {
         if (inferred.isPresent()) return inferred.orElseThrow();
         var below = level.getBlockState(marker.below());
         if (suitableFloor(level, marker.below(), below)) return below;
-        CosmicPVE.LOGGER.warn("Using smooth-stone fallback for unresolved Trial spawn floor in {} at {}",
-                definition.id(), marker);
+        CosmicPVE.LOGGER.warn("Using smooth-stone fallback for unresolved Trial marker floor in {} at {}",
+                context, marker);
         return Blocks.SMOOTH_STONE.defaultBlockState();
     }
 

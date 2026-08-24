@@ -59,7 +59,7 @@ class TrialSessionTest {
         var original=TrialSession.joining(UUID.randomUUID(),Identifier.parse("minecraft:overworld"),BlockPos.ZERO,
                 List.of(),List.of(new InstanceBounds(BlockPos.ZERO,BlockPos.ZERO)),owner).addParticipant(ownerId);
         var withoutOwner=original.removeParticipant(ownerId);
-        assertEquals(owner,withoutOwner.owner()); assertEquals("MrWoofless Trial",withoutOwner.owner().header());
+        assertEquals(owner,withoutOwner.owner()); assertEquals("MrWoofless's Trial",withoutOwner.owner().header());
         var json=TrialSession.CODEC.encodeStart(JsonOps.INSTANCE,withoutOwner).getOrThrow();
         assertEquals(owner,TrialSession.CODEC.parse(JsonOps.INSTANCE,json).getOrThrow().owner());
     }

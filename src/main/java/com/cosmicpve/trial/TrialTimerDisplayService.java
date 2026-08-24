@@ -2,6 +2,7 @@ package com.cosmicpve.trial;
 
 import com.cosmicpve.network.TrialTimerPayload;
 import com.cosmicpve.network.TrialOwnerPayload;
+import com.cosmicpve.network.TrialPhasePayload;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -14,6 +15,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 public final class TrialTimerDisplayService {
     private final Map<UUID, Integer> displayedSeconds = new HashMap<>();
     private final Map<UUID, String> displayedOwners = new HashMap<>();
+    private final Map<UUID, TrialPhase> displayedPhases = new HashMap<>();
 
     public void update(MinecraftServer server, TrialSession session) {
         int seconds = displayedSeconds(session.timerTicks());
@@ -22,6 +24,7 @@ public final class TrialTimerDisplayService {
         for (UUID id : session.participants()) {
             ServerPlayer player = server.getPlayerList().getPlayer(id);
             if (player != null) showOwnerIfChanged(player, session.owner().header());
+            if (player != null) showPhaseIfChanged(player, session.progress().phase());
             if (player != null && accept(id, seconds)) {
                 PacketDistributor.sendToPlayer(player, new TrialTimerPayload(seconds));
             }
@@ -32,14 +35,17 @@ public final class TrialTimerDisplayService {
         int seconds = displayedSeconds(session.timerTicks());
         displayedSeconds.put(player.getUUID(), seconds);
         showOwnerIfChanged(player, session.owner().header());
+        showPhaseIfChanged(player, session.progress().phase());
         PacketDistributor.sendToPlayer(player, new TrialTimerPayload(seconds));
     }
 
     public void hide(ServerPlayer player) {
         displayedSeconds.remove(player.getUUID());
         displayedOwners.remove(player.getUUID());
+        displayedPhases.remove(player.getUUID());
         PacketDistributor.sendToPlayer(player, new TrialTimerPayload(-1));
         PacketDistributor.sendToPlayer(player, new TrialOwnerPayload(""));
+        PacketDistributor.sendToPlayer(player, new TrialPhasePayload("", 0));
     }
 
     public void hideAll(MinecraftServer server) {
@@ -49,10 +55,12 @@ public final class TrialTimerDisplayService {
     private void hide(MinecraftServer server, UUID id) {
         displayedSeconds.remove(id);
         displayedOwners.remove(id);
+        displayedPhases.remove(id);
         ServerPlayer player = server.getPlayerList().getPlayer(id);
         if (player != null) {
             PacketDistributor.sendToPlayer(player, new TrialTimerPayload(-1));
             PacketDistributor.sendToPlayer(player, new TrialOwnerPayload(""));
+            PacketDistributor.sendToPlayer(player, new TrialPhasePayload("", 0));
         }
     }
 
@@ -69,9 +77,19 @@ public final class TrialTimerDisplayService {
         return !heading.equals(displayedOwners.put(player, heading));
     }
 
+    boolean acceptPhase(UUID player, TrialPhase phase) {
+        return phase != displayedPhases.put(player, phase);
+    }
+
     private void showOwnerIfChanged(ServerPlayer player, String heading) {
         if (acceptOwner(player.getUUID(), heading)) {
             PacketDistributor.sendToPlayer(player, new TrialOwnerPayload(heading));
+        }
+    }
+
+    private void showPhaseIfChanged(ServerPlayer player, TrialPhase phase) {
+        if (acceptPhase(player.getUUID(), phase)) {
+            PacketDistributor.sendToPlayer(player, new TrialPhasePayload(phase.displayName(), phase.color()));
         }
     }
 }

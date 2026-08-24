@@ -21,8 +21,18 @@ class TrialTimerDisplayServiceTest {
     }
     @Test void immutableOwnerHeadingIsAcceptedOnlyWhenItChanges() {
         var service=new TrialTimerDisplayService(); UUID player=UUID.randomUUID();
-        assertTrue(service.acceptOwner(player,"MrWoofless Trial"));
-        assertFalse(service.acceptOwner(player,"MrWoofless Trial"));
-        assertTrue(service.acceptOwner(player,"Another Trial"));
+        assertTrue(service.acceptOwner(player,"MrWoofless's Trial"));
+        assertFalse(service.acceptOwner(player,"MrWoofless's Trial"));
+        assertTrue(service.acceptOwner(player,"Another's Trial"));
+    }
+    @Test void authoritativePhaseIsAcceptedOnlyWhenItChangesAndUsesCanonicalColors() {
+        var service=new TrialTimerDisplayService(); UUID player=UUID.randomUUID();
+        assertTrue(service.acceptPhase(player,TrialPhase.APPRENTICE));
+        assertFalse(service.acceptPhase(player,TrialPhase.APPRENTICE));
+        assertTrue(service.acceptPhase(player,TrialPhase.HARDCORE));
+        assertFalse(service.acceptPhase(player,TrialPhase.HARDCORE));
+        assertEquals(0xE6E032,TrialPhase.APPRENTICE.color());
+        assertEquals(0xE6A732,TrialPhase.HARDCORE.color());
+        assertEquals(0xE65C32,TrialPhase.DEMONIC.color());
     }
 }

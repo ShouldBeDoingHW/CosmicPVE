@@ -11,6 +11,7 @@ public final class CosmicNetwork {
         var registrar = event.registrar(PROTOCOL_VERSION);
         registrar.playToClient(TrialTimerPayload.TYPE, TrialTimerPayload.STREAM_CODEC);
         registrar.playToClient(TrialOwnerPayload.TYPE, TrialOwnerPayload.STREAM_CODEC);
+        registrar.playToClient(TrialPhasePayload.TYPE, TrialPhasePayload.STREAM_CODEC);
         registrar.playToClient(TrialCelebrationPayload.TYPE, TrialCelebrationPayload.STREAM_CODEC);
     }
 }

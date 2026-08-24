@@ -19,6 +19,7 @@ public final class TrialBootstrap {
         NeoForge.EVENT_BUS.addListener(trials::onProjectileImpact);
         NeoForge.EVENT_BUS.addListener(trials::onRightClickBlock);
         NeoForge.EVENT_BUS.addListener(trials::onNeighborNotify);
+        NeoForge.EVENT_BUS.addListener(trials::onEntityJoin);
         var protection = new InstanceProtectionEventBridge(TrialRuntime.protection());
         NeoForge.EVENT_BUS.addListener(protection::onBreak);
         NeoForge.EVENT_BUS.addListener(protection::onPlace);

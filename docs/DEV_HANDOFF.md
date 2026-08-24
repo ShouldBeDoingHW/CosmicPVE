@@ -210,11 +210,21 @@ Successful DEAL schedules one harmless client-side Minecraft firework burst per 
 
 ### Step 6Q — IMPLEMENTED; AUTOMATED/RUNTIME VERIFIED; MANUALLY VERIFIED / ACCEPTED
 
+Closure commit: `4bf477fa2fa7a9fd03a2474856a154347814af7d` (`Add Cold Snap, Trial owner HUD, and Cactus`).
+
 Cold Snap is the third production Apprentice room. Its tracked structure uses the explicit Emerald marker at local `[5,10,17]`, inferred Packed-Ice floor replacement, Gold plate `[11,14,9]`, Iron plate `[1,14,32]`, two-block Iron Door `[3,14,32]`/`[3,15,32]`, and final lever `[36,15,2]`. Initialization caches and hides only the exact bounded 26 ordinary-Ice shortcut blocks at local Y 13–14 before teleport; the other 2,450 ordinary-Ice structural/decorative blocks and 217 Powder Snow blocks are untouched. Plate behavior is event-driven and idempotent: the Gold plate removes both door halves without drops, the Iron plate restores the full cached route in one activation, and only the final lever completes the room. Cleanup discards cached state and structure cleanup restores the pristine room. The temporary loadout is Diamond Boots with Feather Falling IV and 16 Cooked Porkchops. The production Apprentice pool is exactly Circuit Circus, Raiding Rainbow, and Cold Snap under the existing weighted/no-consecutive-repeat selector.
 
-Trial sessions now persist immutable portal-owner UUID and name-snapshot identity. Every participant receives a cached participant-only `<PortalOwner> Trial` top HUD line once on join/change, with the existing authoritative timer beneath it; the owner line survives owner departure and all room/Decision transitions without per-tick packets. Trial exit clears both payloads. Phase and room lines remain deliberately deferred.
+Trial sessions persist immutable portal-owner UUID and name-snapshot identity. The owner identity survives owner departure and all room/Decision transitions without per-tick packets; Trial exit clears participant HUD state. The current possessive owner/phase/timer presentation is recorded in Step 6R below.
 
 Implemented Elite `cosmicpve:cactus` II on leggings, bringing the total to 28 real Cosmic enchantments. A committed damaging hit with a meaningful attributed living attacker creates one 3%/6% Luck-modified defensive candidate. Success delivers exactly 1.5 HP standard Cosmic true damage to the attributed attacker (including projectile owners) through a `NO_PROCS` child, preserving absorption semantics while preventing retaliation chains. Environmental/unattributed, rejected, zero-health-loss, self, and dead-attacker cases produce no useful candidate. Cactus has no cooldown, CombatStack, status effect, or other damage packet and integrates through the normal Book, Unexamined Elite, Black Scroll, capacity, Transmog, lore, persistence, and command seams.
+
+### Step 6R — IMPLEMENTED; AUTOMATED/RUNTIME VERIFIED; MANUALLY VERIFIED / ACCEPTED
+
+Bomb Squad is the third production Hardcore room. Its tracked `45×21×45` structure contains four shared-party Emerald starts, four event-driven Gold egg-supply plates, nineteen cached Diamond exit markers, and a stable seven-block 6×6 grid mapping. Each attempt chooses one start and two distinct exit cells outside the start's clipped 3×3 neighborhood. All Emerald/Diamond metadata is replaced before arrival; selected exits become protected Heavy Weighted Pressure Plates. The temporary loadout is full Leather Armor with Blast Protection I/Unbreaking III, Unbreaking III Flint and Steel, Knockback II/Unbreaking III Wooden Sword, five Steak, and five Golden Apples.
+
+Room-issued typed Creeper Eggs create tracked ordinary Creepers only during the active attempt. Per-player supply eligibility is inventory-based, so one player holding an egg cannot block another. Tracked Creepers retain vanilla AI, fuse, ignition, damage, and knockback while awarding no XP/loot. Their localized mob-grief permission and detonation exception allow only ordinary Stone inside current Bomb Squad bounds; the structure's low-resistance glass and Sea Lantern surfaces remain protected along with Obsidian, Bedrock, all Gold supply plates, and both active Iron exits. No gamerule is changed. Cleanup discards tracked Creepers and the existing structure lifecycle restores every destroyed passage before replay. The production Hardcore pool is exactly Fire Colony, Zero-G, and Bomb Squad under the shared weighted/no-consecutive-repeat selector.
+
+The participant HUD now renders the immutable possessive portal-owner heading (`Dev's Trial`), authoritative phase, and existing `M:SS` timer. Phase colors are Apprentice `#E6E032`, Hardcore `#E6A732`, and Demonic `#E65C32`. Owner and phase packets are cached and sent only on initialization/change; timer suppression is unchanged. The future `Room #N---Room Name` line remains deferred.
 
 ## 3. Current Real Enchantments
 
@@ -528,11 +538,11 @@ The final post-Orb capacity is no longer unresolved for current target classes: 
 
 ## 16. Current Next Milestone
 
-**Next milestone: Step 6R — Bomb Squad Hardcore Room.**
+**Next milestone: Step 6S — Trial Trinkets + Deal Pagination + Room HUD Line.**
 
-Step 6R should use the Bomb Squad structure's Stone only where encounter Creeper destruction is intended, while its Obsidian/Bedrock structure remains physically blast-resistant. Prefer ordinary encounter-Creeper explosion behavior if vanilla blast resistance supplies the intended boundary; keep the special Gold supply plates and Iron exit plates explosion-proof. The next incremental participant HUD element is the phase line: Apprentice `#E6E032`, Hardcore `#E6A732`, or Demonic `#E65C32`. Tentative Step 6S adds `Room #N---Room Name`. Hidden Graveyard and Deadeye remain later milestones.
+Step 6S should implement Time, Skip, and Insurance Trial Trinkets; Deal-pot pagination beyond eighteen visible entries; and the participant HUD line `Room #N---Room Name` (for example, `Room #3---Cold Snap`), where N is the overall room ordinal. The current agreed wave then moves through 6T reward/support gap closure, 6U Hidden Graveyard, and 6V Deadeye/Trial 1.0 stabilization before shifting focus toward Conquest Chests.
 
-Step 6Q is manually accepted and ready for its closure commit. Hidden Graveyard, Deadeye, Memory Chests, and Cosmic Crates remain deliberately deferred.
+Step 6R is manually verified and accepted. Hidden Graveyard, Deadeye, Memory Chests, and Cosmic Crates remain deliberately deferred.
 
 ## 17. Development Workflow
 
@@ -548,6 +558,12 @@ Step 6Q is manually accepted and ready for its closure commit. Hidden Graveyard,
 Preserve unrelated dirty changes. Never change pinned versions as a side effect of gameplay work. Prefer service-level rules and typed data over one-off event logic, and keep client-only classes isolated from dedicated-server loading.
 
 ## 18. Verification Snapshot
+
+For the manually accepted Step 6R checkpoint:
+
+- `gradlew.bat cleanTest test build` passes all 308 automated tests across 91 suites with 0 failures, errors, or skips. New coverage pins the Bomb Squad NBT dimensions/palette/markers, all four start-cell exit eligibility, seeded two-exit selection, canonical loadout, the material-scoped terrain exception, typed encounter egg identity, the exact three-room Hardcore pool, possessive owner formatting, phase colors, and phase update suppression.
+- All 152 main-resource JSON files decode. The dedicated server publishes six reward tables and eight Trial rooms including Bomb Squad and reaches `Done`; fresh client startup completes resource/audio/atlas initialization with the new participant-only phase payload and no relevant model, resource, payload, or sided-loading error.
+- `git diff --check` passes with only normal Windows line-ending notices. Pinned versions, mod ID, and root package remain unchanged.
 
 For the manually accepted Step 6Q checkpoint:
 

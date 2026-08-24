@@ -28,12 +28,13 @@ class TrialRoomSelectionServiceTest {
     }
     @Test void hardcorePoolUsesTheSharedWeightingServiceAndContainsOnlyProductionRooms() {
         var pool=TrialSessionService.roomPool(TrialPhase.HARDCORE);
-        assertEquals(List.of(TrialSessionService.FIRE_COLONY,TrialSessionService.ZERO_G),pool);
+        assertEquals(List.of(TrialSessionService.FIRE_COLONY,TrialSessionService.ZERO_G,TrialSessionService.BOMB_SQUAD),pool);
         var service=new TrialRoomSelectionService(); var current=session(TrialProgress.EMPTY.debugEnterPhase(TrialPhase.HARDCORE));
         assertEquals(5,service.weight(current,TrialSessionService.FIRE_COLONY));
         assertEquals(5,service.weight(current,TrialSessionService.ZERO_G));
+        assertEquals(5,service.weight(current,TrialSessionService.BOMB_SQUAD));
         var afterFire=session(current.progress().beginRoom(TrialSessionService.FIRE_COLONY,TrialEncounterState.EMPTY));
-        assertEquals(TrialSessionService.ZERO_G,service.select(afterFire,pool,RandomSource.create(7)).orElseThrow());
+        assertNotEquals(TrialSessionService.FIRE_COLONY,service.select(afterFire,pool,RandomSource.create(7)).orElseThrow());
         assertEquals(3,service.weight(afterFire,TrialSessionService.FIRE_COLONY));
     }
     @Test void apprenticePoolContainsExactlyThreeProductionRoomsAndColdSnapUsesNormalWeighting() {

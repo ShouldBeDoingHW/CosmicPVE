@@ -785,14 +785,14 @@ Trial portals can be modified with Trial Trinkets (orange dye item) that give va
 The eventual participant-only Trial sidebar is ordered as follows:
 
 ```text
-MrWoofless Trial
+MrWoofless's Trial
 Apprentice
 Room #3---Cold Snap
 
 8:35
 ```
 
-Line one is the immutable portal creator's name followed by `Trial`. The phase line displays only the current phase: Apprentice `#E6E032`, Hardcore `#E6A732`, or Demonic `#E65C32`. The room number is the overall room ordinal for the run, followed by the room display name. The authoritative timer appears below a small spacer. Implementation is incremental: the owner line is current, while the phase and room lines are later milestones.
+Line one is the immutable portal creator's name in possessive form followed by `Trial` (for example, `Dev's Trial`). The phase line displays only the current phase: Apprentice `#E6E032`, Hardcore `#E6A732`, or Demonic `#E65C32`. The room number is the overall room ordinal for the run, followed by the room display name. The authoritative timer appears below a small spacer. Implementation is incremental: the possessive owner and phase lines are current, while the room line is a later milestone.
 
 Skip: Allows the player to skip 1, 2, or 3 rooms at the beginning of the Trial with no time spent and the skipped-room loot already added to the deal pot. Skipped rooms do not grant their normal room-completion time bonuses.
 
@@ -1294,11 +1294,11 @@ Encounter Creepers retain their normal aggression toward participating players. 
 
 Bomb Squad is one of the explicit exceptions to normal Trial terrain protection.
 
-The shared walls between neighboring grid rooms contain specifically designated **Stone sections** that may be destroyed by Bomb Squad encounter Creeper explosions.
+The shared walls between neighboring grid rooms contain **Stone sections** that may be destroyed by Bomb Squad encounter Creeper explosions. Non-destructible structural portions are physically built from Obsidian and Bedrock. The room should use ordinary encounter-Creeper blast propagation and resistance rather than a coordinate-heavy Stone-wall whitelist.
 
 Destroying these sections opens passages into adjacent rooms and allows the party to explore the 6×6 grid.
 
-Creeper explosions must **not** destroy unrelated Trial terrain. Floors, ceilings, structural/decorative blocks, markers, and other non-designated terrain remain protected.
+Creeper explosions must **not** destroy unrelated Trial terrain. Floors, ceilings, structural/decorative blocks, markers, and other non-designated terrain remain protected. The Gold supply plates and selected Iron exits are explicitly removed from explosion destruction.
 
 Encounter Creepers award no XP or normal mob loot.
 

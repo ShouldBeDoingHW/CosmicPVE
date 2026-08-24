@@ -25,6 +25,11 @@ public final class TrialRoomLoadoutService {
     public static final int RAIDING_RAINBOW_ENDER_PEARLS = 0;
     public static final int COLD_SNAP_FEATHER_FALLING_LEVEL = 4;
     public static final int COLD_SNAP_PORKCHOPS = 16;
+    public static final int BOMB_SQUAD_UNBREAKING_LEVEL = 3;
+    public static final int BOMB_SQUAD_BLAST_PROTECTION_LEVEL = 1;
+    public static final int BOMB_SQUAD_KNOCKBACK_LEVEL = 2;
+    public static final int BOMB_SQUAD_STEAK = 5;
+    public static final int BOMB_SQUAD_GOLDEN_APPLES = 5;
     public static final java.util.List<net.minecraft.world.item.Item> RAIDING_RAINBOW_ARMOR = java.util.List.of(
             Items.NETHERITE_HELMET, Items.NETHERITE_CHESTPLATE, Items.NETHERITE_LEGGINGS, Items.NETHERITE_BOOTS);
     private final TrialInventoryTransactionService inventories;
@@ -90,6 +95,27 @@ public final class TrialRoomLoadoutService {
         player.getInventory().setItem(0, new ItemStack(Items.COOKED_PORKCHOP, COLD_SNAP_PORKCHOPS));
         player.getInventory().setSelectedSlot(0);
     }
+    public void applyBombSquad(ServerPlayer player) {
+        clear(player);
+        var registry = player.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
+        equipBombSquad(player, EquipmentSlot.HEAD, Items.LEATHER_HELMET, registry);
+        equipBombSquad(player, EquipmentSlot.CHEST, Items.LEATHER_CHESTPLATE, registry);
+        equipBombSquad(player, EquipmentSlot.LEGS, Items.LEATHER_LEGGINGS, registry);
+        equipBombSquad(player, EquipmentSlot.FEET, Items.LEATHER_BOOTS, registry);
+        ItemStack flint = new ItemStack(Items.FLINT_AND_STEEL);
+        EnchantmentHelper.updateEnchantments(flint, mutable -> mutable.set(
+                registry.getOrThrow(Enchantments.UNBREAKING), BOMB_SQUAD_UNBREAKING_LEVEL));
+        ItemStack sword = new ItemStack(Items.WOODEN_SWORD);
+        EnchantmentHelper.updateEnchantments(sword, mutable -> {
+            mutable.set(registry.getOrThrow(Enchantments.KNOCKBACK), BOMB_SQUAD_KNOCKBACK_LEVEL);
+            mutable.set(registry.getOrThrow(Enchantments.UNBREAKING), BOMB_SQUAD_UNBREAKING_LEVEL);
+        });
+        player.getInventory().setItem(0, flint);
+        player.getInventory().setItem(1, sword);
+        player.getInventory().setItem(2, new ItemStack(Items.COOKED_BEEF, BOMB_SQUAD_STEAK));
+        player.getInventory().setItem(3, new ItemStack(Items.GOLDEN_APPLE, BOMB_SQUAD_GOLDEN_APPLES));
+        player.getInventory().setSelectedSlot(0);
+    }
     private static void equipDyed(ServerPlayer player, EquipmentSlot slot, net.minecraft.world.item.Item item) {
         ItemStack stack = new ItemStack(item); stack.set(DataComponents.DYED_COLOR, new DyedItemColor(FIRE_COLONY_ARMOR_COLOR));
         player.setItemSlot(slot, stack);
@@ -108,6 +134,15 @@ public final class TrialRoomLoadoutService {
             net.minecraft.core.Holder.Reference<net.minecraft.world.item.enchantment.Enchantment> unbreaking) {
         ItemStack stack = new ItemStack(item);
         EnchantmentHelper.updateEnchantments(stack, mutable -> mutable.set(unbreaking, RAIDING_RAINBOW_UNBREAKING_LEVEL));
+        player.setItemSlot(slot, stack);
+    }
+    private static void equipBombSquad(ServerPlayer player, EquipmentSlot slot, net.minecraft.world.item.Item item,
+            net.minecraft.core.Registry<net.minecraft.world.item.enchantment.Enchantment> registry) {
+        ItemStack stack = new ItemStack(item);
+        EnchantmentHelper.updateEnchantments(stack, mutable -> {
+            mutable.set(registry.getOrThrow(Enchantments.BLAST_PROTECTION), BOMB_SQUAD_BLAST_PROTECTION_LEVEL);
+            mutable.set(registry.getOrThrow(Enchantments.UNBREAKING), BOMB_SQUAD_UNBREAKING_LEVEL);
+        });
         player.setItemSlot(slot, stack);
     }
 }

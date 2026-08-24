@@ -3,6 +3,7 @@ package com.cosmicpve.client;
 import com.cosmicpve.network.TrialCelebrationPayload;
 import com.cosmicpve.network.TrialTimerPayload;
 import com.cosmicpve.network.TrialOwnerPayload;
+import com.cosmicpve.network.TrialPhasePayload;
 import it.unimi.dsi.fastutil.ints.IntList;
 import java.util.List;
 import net.minecraft.client.Minecraft;
@@ -18,6 +19,8 @@ public final class TrialClientPresentation {
     private static int timerSeconds = -1;
     private static String timerText = "";
     private static String ownerHeading = "";
+    private static String phaseLabel = "";
+    private static int phaseColor = 0xFFFFFF;
     private TrialClientPresentation() {}
 
     public static void registerPayloadHandlers(RegisterClientPayloadHandlersEvent event) {
@@ -25,6 +28,9 @@ public final class TrialClientPresentation {
             timerSeconds = payload.seconds(); timerText = formatSeconds(timerSeconds);
         });
         event.register(TrialOwnerPayload.TYPE, (payload, context) -> ownerHeading = payload.heading());
+        event.register(TrialPhasePayload.TYPE, (payload, context) -> {
+            phaseLabel = payload.label(); phaseColor = payload.color();
+        });
         event.register(TrialCelebrationPayload.TYPE, (payload, context) -> {
             var level = Minecraft.getInstance().level;
             if (level == null) return;
@@ -44,14 +50,18 @@ public final class TrialClientPresentation {
         if (timerSeconds < 0 || minecraft.options.hideGui) return;
         String value = timerText;
         String heading = ownerHeading.isBlank() ? "Trial" : ownerHeading;
-        int width = Math.max(minecraft.font.width(heading), minecraft.font.width(value)) + 12;
+        int contentWidth = Math.max(minecraft.font.width(heading), minecraft.font.width(value));
+        if (!phaseLabel.isBlank()) contentWidth = Math.max(contentWidth, minecraft.font.width(phaseLabel));
+        int width = contentWidth + 12;
         int right = graphics.guiWidth() - 3;
         int left = right - width;
         int top = 34;
-        graphics.fill(left, top, right, top + 24, 0x88000000);
+        graphics.fill(left, top, right, top + 34, 0x88000000);
         graphics.fill(left, top, right, top + 1, 0xAAFFAA00);
         graphics.drawString(minecraft.font, Component.literal(heading), left + 6, top + 4, 0xFFFFAA00, false);
-        graphics.drawString(minecraft.font, Component.literal(value), right - 6 - minecraft.font.width(value), top + 14,
+        if (!phaseLabel.isBlank()) graphics.drawString(minecraft.font, Component.literal(phaseLabel),
+                left + 6, top + 14, 0xFF000000 | phaseColor, false);
+        graphics.drawString(minecraft.font, Component.literal(value), right - 6 - minecraft.font.width(value), top + 24,
                 0xFFFFFFFF, false);
     }
 

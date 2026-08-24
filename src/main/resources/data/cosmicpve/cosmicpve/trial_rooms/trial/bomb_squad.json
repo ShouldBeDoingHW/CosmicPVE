@@ -1,0 +1,9 @@
+{
+  "display_name": "Bomb Squad",
+  "category": "hardcore",
+  "pieces": [{"structure": "cosmicpve:trial/bomb_squad"}],
+  "spawn_marker": "emerald_block",
+  "spawn_marker_position": [2, 1, 2],
+  "spawn_marker_replacement": "minecraft:bedrock",
+  "bounds": {"min": [0, 0, 0], "max": [44, 20, 44]}
+}

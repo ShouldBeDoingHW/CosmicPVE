@@ -76,4 +76,11 @@ class HardcoreRoomLogicTest {
         for(int i=0;i<1000;i++) if(ZeroGService.awardsPearl(random)) awards++;
         assertTrue(awards>200 && awards<300, "seeded sample should remain near 25%, got "+awards);
     }
+    @Test void bombSquadLoadoutConstantsPinCanonicalProtectionToolsAndFood() {
+        assertEquals(1,TrialRoomLoadoutService.BOMB_SQUAD_BLAST_PROTECTION_LEVEL);
+        assertEquals(3,TrialRoomLoadoutService.BOMB_SQUAD_UNBREAKING_LEVEL);
+        assertEquals(2,TrialRoomLoadoutService.BOMB_SQUAD_KNOCKBACK_LEVEL);
+        assertEquals(5,TrialRoomLoadoutService.BOMB_SQUAD_STEAK);
+        assertEquals(5,TrialRoomLoadoutService.BOMB_SQUAD_GOLDEN_APPLES);
+    }
 }

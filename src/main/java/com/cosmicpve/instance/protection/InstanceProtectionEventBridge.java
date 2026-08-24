@@ -41,7 +41,8 @@ public final class InstanceProtectionEventBridge {
             boolean circuitPlacement = TrialRuntime.sessions().allowsCircuitPlacementUse(
                     player, intendedPlacement, event.getItemStack());
             boolean roomUse = TrialRuntime.sessions().allowsProtectedRoomUse(player, event.getPos());
-            if (explicitAllowOverridesDefaultDeny(circuitPlacement, roomUse)) return;
+            boolean bombEgg = TrialRuntime.sessions().allowsBombSquadEggUse(player, event.getPos(), event.getItemStack());
+            if (explicitAllowOverridesDefaultDeny(circuitPlacement, roomUse) || bombEgg) return;
         }
         if (event.getLevel() instanceof ServerLevel level
                 && service.denies(level, event.getPlayer(), event.getPos(), InstanceMutationCause.USE)) {
@@ -55,7 +56,9 @@ public final class InstanceProtectionEventBridge {
 
     public void onExplosion(ExplosionEvent.Detonate event) {
         if (event.getLevel() instanceof ServerLevel level) {
-            event.getAffectedBlocks().removeIf(pos -> service.denies(level, null, pos, InstanceMutationCause.EXPLOSION));
+            event.getAffectedBlocks().removeIf(pos -> !TrialRuntime.sessions().allowsBombSquadExplosion(
+                    level, event.getExplosion(), pos)
+                    && service.denies(level, null, pos, InstanceMutationCause.EXPLOSION));
         }
     }
 
@@ -80,6 +83,8 @@ public final class InstanceProtectionEventBridge {
 
     public void onMobGrief(EntityMobGriefingEvent event) {
         if (event.getEntity().level() instanceof ServerLevel level
-                && service.protectedPosition(level, event.getEntity().blockPosition())) event.setCanGrief(false);
+                && service.protectedPosition(level, event.getEntity().blockPosition())) {
+            event.setCanGrief(TrialRuntime.sessions().allowsBombSquadMobGrief(event.getEntity()));
+        }
     }
 }

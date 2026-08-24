@@ -19,5 +19,5 @@ public record TrialOwner(UUID playerId, String nameSnapshot) {
         }
     }
 
-    public String header() { return nameSnapshot + " Trial"; }
+    public String header() { return nameSnapshot + "'s Trial"; }
 }
