@@ -10,6 +10,7 @@ import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.resources.Identifier;
+import com.cosmicpve.data.component.TrialPortalModifiers;
 
 public record TrialSession(int dataVersion, UUID sessionId, TrialLifecycleState state,
         Identifier portalDimension, BlockPos portalOrigin, List<BlockPos> portalBlocks,
@@ -58,9 +59,14 @@ public record TrialSession(int dataVersion, UUID sessionId, TrialLifecycleState 
 
     public static TrialSession joining(UUID id, Identifier dimension, BlockPos origin, List<BlockPos> portalBlocks,
                                        List<InstanceBounds> bounds, TrialOwner owner) {
+        return joining(id, dimension, origin, portalBlocks, bounds, owner, TrialPortalModifiers.EMPTY);
+    }
+
+    public static TrialSession joining(UUID id, Identifier dimension, BlockPos origin, List<BlockPos> portalBlocks,
+                                       List<InstanceBounds> bounds, TrialOwner owner, TrialPortalModifiers modifiers) {
         return new TrialSession(DATA_VERSION, id, TrialLifecycleState.JOINING, dimension, origin, portalBlocks,
-                List.of(), List.of(), JOIN_TICKS, INITIAL_TIMER_TICKS, Optional.empty(), bounds, true,
-                TrialProgress.EMPTY, 0L, owner);
+                List.of(), List.of(), JOIN_TICKS, modifiers.initialTimerTicks(), Optional.empty(), bounds, true,
+                TrialProgress.initial(modifiers), 0L, owner);
     }
 
     public boolean acceptsJoins() { return initialDecision && (state == TrialLifecycleState.JOINING || state == TrialLifecycleState.DECISION); }

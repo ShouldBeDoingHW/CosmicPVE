@@ -53,6 +53,39 @@ class MobSpawnerDataTest {
         assertEquals(16, integerField(blockEntity, "requiredPlayerRange"));
     }
 
+    @Test void representativeSpawnerTypesAllUseTheSameCompleteVanillaConfigurationPath() throws Exception {
+        for (EntityType<?> type : new EntityType<?>[]{EntityType.BLAZE, EntityType.IRON_GOLEM, EntityType.CREEPER,
+                EntityType.ZOMBIE, EntityType.PIG, EntityType.SHEEP}) {
+            BlockPos position = new BlockPos(4, 5, 6);
+            var blockEntity = new SpawnerBlockEntity(position, Blocks.SPAWNER.defaultBlockState());
+            MobSpawnerConfiguration.configureSpawnData(blockEntity.getSpawner(), type,
+                    null, RandomSource.create(42), position);
+            var spawnDataField = net.minecraft.world.level.BaseSpawner.class.getDeclaredField("nextSpawnData");
+            spawnDataField.setAccessible(true);
+            SpawnData spawnData = (SpawnData) spawnDataField.get(blockEntity.getSpawner());
+            assertEquals(BuiltInRegistries.ENTITY_TYPE.getKey(type).toString(),
+                    spawnData.getEntityToSpawn().getString("id").orElseThrow());
+            assertEquals(20, integerField(blockEntity, "spawnDelay"));
+            assertEquals(200, integerField(blockEntity, "minSpawnDelay"));
+            assertEquals(800, integerField(blockEntity, "maxSpawnDelay"));
+            assertEquals(4, integerField(blockEntity, "spawnCount"));
+            assertEquals(6, integerField(blockEntity, "maxNearbyEntities"));
+            assertEquals(16, integerField(blockEntity, "requiredPlayerRange"));
+            assertEquals(4, integerField(blockEntity, "spawnRange"));
+        }
+    }
+
+    @Test void observedWorkingPatternMatchesPinnedVanillaSpawnPlacementPredicates() {
+        assertTrue(net.minecraft.world.entity.SpawnPlacements.hasPlacement(EntityType.BLAZE));
+        assertTrue(net.minecraft.world.entity.SpawnPlacements.hasPlacement(EntityType.IRON_GOLEM));
+        assertTrue(net.minecraft.world.entity.SpawnPlacements.hasPlacement(EntityType.CREEPER));
+        assertTrue(net.minecraft.world.entity.SpawnPlacements.hasPlacement(EntityType.ZOMBIE));
+        assertTrue(net.minecraft.world.entity.SpawnPlacements.hasPlacement(EntityType.PIG));
+        assertTrue(net.minecraft.world.entity.SpawnPlacements.hasPlacement(EntityType.SHEEP));
+        assertFalse(net.minecraft.world.entity.EntitySpawnReason.ignoresLightRequirements(
+                net.minecraft.world.entity.EntitySpawnReason.SPAWNER));
+    }
+
     private static int integerField(SpawnerBlockEntity blockEntity, String name) throws Exception {
         var field = net.minecraft.world.level.BaseSpawner.class.getDeclaredField(name);
         field.setAccessible(true);

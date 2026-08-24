@@ -22,10 +22,11 @@ public final class TrialSessionRepository {
     }
 
     public void publishVolatile(MinecraftServer server, TrialSession session) {
-        data(server).setActiveSession(session);
+        data(server).setActiveSessionVolatile(session);
     }
 
     public void flush(MinecraftServer server) {
+        data(server).markCheckpointDirty();
         server.getLevel(Level.OVERWORLD).getDataStorage().scheduleSave().join();
     }
 

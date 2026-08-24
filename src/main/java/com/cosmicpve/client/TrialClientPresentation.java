@@ -4,6 +4,7 @@ import com.cosmicpve.network.TrialCelebrationPayload;
 import com.cosmicpve.network.TrialTimerPayload;
 import com.cosmicpve.network.TrialOwnerPayload;
 import com.cosmicpve.network.TrialPhasePayload;
+import com.cosmicpve.network.TrialRoomPayload;
 import it.unimi.dsi.fastutil.ints.IntList;
 import java.util.List;
 import net.minecraft.client.Minecraft;
@@ -16,11 +17,16 @@ import net.neoforged.neoforge.client.network.event.RegisterClientPayloadHandlers
 
 /** Client-only participant HUD and harmless cash-out firework particles. */
 public final class TrialClientPresentation {
+    static final int HUD_HEIGHT = 132;
+    static final int MIN_HUD_WIDTH = 150;
+    static final int HORIZONTAL_PADDING = 18;
+    static final int LINE_STEP = 27;
     private static int timerSeconds = -1;
     private static String timerText = "";
     private static String ownerHeading = "";
     private static String phaseLabel = "";
     private static int phaseColor = 0xFFFFFF;
+    private static String roomLine = "";
     private TrialClientPresentation() {}
 
     public static void registerPayloadHandlers(RegisterClientPayloadHandlersEvent event) {
@@ -31,6 +37,7 @@ public final class TrialClientPresentation {
         event.register(TrialPhasePayload.TYPE, (payload, context) -> {
             phaseLabel = payload.label(); phaseColor = payload.color();
         });
+        event.register(TrialRoomPayload.TYPE, (payload, context) -> roomLine = payload.line());
         event.register(TrialCelebrationPayload.TYPE, (payload, context) -> {
             var level = Minecraft.getInstance().level;
             if (level == null) return;
@@ -50,19 +57,34 @@ public final class TrialClientPresentation {
         if (timerSeconds < 0 || minecraft.options.hideGui) return;
         String value = timerText;
         String heading = ownerHeading.isBlank() ? "Trial" : ownerHeading;
+        int maxWidth = Math.max(48, graphics.guiWidth() - 12);
         int contentWidth = Math.max(minecraft.font.width(heading), minecraft.font.width(value));
         if (!phaseLabel.isBlank()) contentWidth = Math.max(contentWidth, minecraft.font.width(phaseLabel));
-        int width = contentWidth + 12;
+        if (!roomLine.isBlank()) contentWidth = Math.max(contentWidth, minecraft.font.width(roomLine));
+        int width = Math.min(maxWidth, Math.max(MIN_HUD_WIDTH, contentWidth + HORIZONTAL_PADDING * 2));
         int right = graphics.guiWidth() - 3;
         int left = right - width;
         int top = 34;
-        graphics.fill(left, top, right, top + 34, 0x88000000);
+        int textWidth = Math.max(1, width - HORIZONTAL_PADDING * 2);
+        heading = fit(minecraft.font, heading, textWidth);
+        String phase = fit(minecraft.font, phaseLabel, textWidth);
+        String room = fit(minecraft.font, roomLine, textWidth);
+        graphics.fill(left, top, right, top + HUD_HEIGHT, 0x88000000);
         graphics.fill(left, top, right, top + 1, 0xAAFFAA00);
-        graphics.drawString(minecraft.font, Component.literal(heading), left + 6, top + 4, 0xFFFFAA00, false);
-        if (!phaseLabel.isBlank()) graphics.drawString(minecraft.font, Component.literal(phaseLabel),
-                left + 6, top + 14, 0xFF000000 | phaseColor, false);
-        graphics.drawString(minecraft.font, Component.literal(value), right - 6 - minecraft.font.width(value), top + 24,
+        graphics.drawString(minecraft.font, Component.literal(heading), left + HORIZONTAL_PADDING, top + 13, 0xFFFFAA00, false);
+        if (!phase.isBlank()) graphics.drawString(minecraft.font, Component.literal(phase),
+                left + HORIZONTAL_PADDING, top + 13 + LINE_STEP, 0xFF000000 | phaseColor, false);
+        if (!room.isBlank()) graphics.drawString(minecraft.font, Component.literal(room),
+                left + HORIZONTAL_PADDING, top + 13 + LINE_STEP * 2, 0xFFFFFFFF, false);
+        graphics.drawString(minecraft.font, Component.literal(value), right - HORIZONTAL_PADDING - minecraft.font.width(value),
+                top + 13 + LINE_STEP * 3,
                 0xFFFFFFFF, false);
+    }
+
+    private static String fit(net.minecraft.client.gui.Font font, String value, int width) {
+        if (value.isBlank() || font.width(value) <= width) return value;
+        String ellipsis = "...";
+        return font.plainSubstrByWidth(value, Math.max(1, width - font.width(ellipsis))) + ellipsis;
     }
 
     static String formatSeconds(int seconds) {

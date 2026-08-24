@@ -25,6 +25,7 @@ import com.cosmicpve.equipment.enchantment.EffectiveEnchantmentsResolver;
 import com.cosmicpve.equipment.enchantment.MiningEnchantmentEventBridge;
 import com.cosmicpve.equipment.repair.RepairScrollEventBridge;
 import com.cosmicpve.trial.TrialBootstrap;
+import com.cosmicpve.trial.trinket.TrialTrinketEventBridge;
 import com.mojang.logging.LogUtils;
 import net.minecraft.resources.Identifier;
 import net.minecraft.network.chat.Component;
@@ -72,6 +73,8 @@ public final class CosmicPVE {
         NeoForge.EVENT_BUS.addListener(miningEnchantments::onBlockDrops);
         var repairs = new RepairScrollEventBridge();
         NeoForge.EVENT_BUS.addListener(repairs::onStacked);
+        var trialTrinkets = new TrialTrinketEventBridge();
+        NeoForge.EVENT_BUS.addListener(trialTrinkets::onStacked);
         ArmorRecipeProgression.register();
         TrialBootstrap.register();
         var spaceChests = new SpaceChestEventBridge();

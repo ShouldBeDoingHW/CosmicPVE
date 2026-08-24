@@ -18,4 +18,7 @@ class CircuitCircusLogicTest {
         assertFalse(CircuitCircusService.orthogonallyConnected(java.util.Set.of(new BlockPos(1,1,1),new BlockPos(2,2,1)),java.util.Set.of(new BlockPos(1,1,1)),java.util.Set.of(new BlockPos(2,2,1)),bounds));
         assertTrue(CircuitCircusService.orthogonallyConnected(java.util.Set.of(new BlockPos(1,1,1),new BlockPos(1,2,1)),java.util.Set.of(new BlockPos(1,1,1)),java.util.Set.of(new BlockPos(1,2,1)),bounds));
     }
+    @Test void acceptedTargetFeedbackUsesArrowHitPlayerSound() {
+        assertEquals(net.minecraft.sounds.SoundEvents.ARROW_HIT_PLAYER, CircuitCircusService.targetFeedbackSound());
+    }
 }

@@ -12,6 +12,7 @@ public final class CosmicNetwork {
         registrar.playToClient(TrialTimerPayload.TYPE, TrialTimerPayload.STREAM_CODEC);
         registrar.playToClient(TrialOwnerPayload.TYPE, TrialOwnerPayload.STREAM_CODEC);
         registrar.playToClient(TrialPhasePayload.TYPE, TrialPhasePayload.STREAM_CODEC);
+        registrar.playToClient(TrialRoomPayload.TYPE, TrialRoomPayload.STREAM_CODEC);
         registrar.playToClient(TrialCelebrationPayload.TYPE, TrialCelebrationPayload.STREAM_CODEC);
     }
 }

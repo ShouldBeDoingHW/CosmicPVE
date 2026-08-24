@@ -3,8 +3,9 @@ package com.cosmicpve.trial;
 import com.cosmicpve.network.TrialTimerPayload;
 import com.cosmicpve.network.TrialOwnerPayload;
 import com.cosmicpve.network.TrialPhasePayload;
+import com.cosmicpve.network.TrialRoomPayload;
+import com.cosmicpve.content.CosmicContent;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.UUID;
 import net.minecraft.server.MinecraftServer;
@@ -16,15 +17,28 @@ public final class TrialTimerDisplayService {
     private final Map<UUID, Integer> displayedSeconds = new HashMap<>();
     private final Map<UUID, String> displayedOwners = new HashMap<>();
     private final Map<UUID, TrialPhase> displayedPhases = new HashMap<>();
+    private final Map<UUID, String> displayedRooms = new HashMap<>();
+    private TrialLifecycleState cachedRoomState;
+    private net.minecraft.resources.Identifier cachedRoomId;
+    private int cachedRoomOrdinal = -1;
+    private String cachedRoomLine = "";
 
     public void update(MinecraftServer server, TrialSession session) {
         int seconds = displayedSeconds(session.timerTicks());
-        var active = new HashSet<>(session.participants());
-        displayedSeconds.keySet().stream().filter(id -> !active.contains(id)).toList().forEach(id -> hide(server, id));
+        java.util.ArrayList<UUID> stale = null;
+        for (UUID id : displayedSeconds.keySet()) if (!session.participants().contains(id)) {
+            if (stale == null) stale = new java.util.ArrayList<>();
+            stale.add(id);
+        }
+        if (stale != null) for (UUID id : stale) hide(server, id);
+        String owner = session.owner().header();
+        TrialPhase phase = session.progress().phase();
+        String room = cachedRoomLine(session);
         for (UUID id : session.participants()) {
             ServerPlayer player = server.getPlayerList().getPlayer(id);
-            if (player != null) showOwnerIfChanged(player, session.owner().header());
-            if (player != null) showPhaseIfChanged(player, session.progress().phase());
+            if (player != null) showOwnerIfChanged(player, owner);
+            if (player != null) showPhaseIfChanged(player, phase);
+            if (player != null) showRoomIfChanged(player, room);
             if (player != null && accept(id, seconds)) {
                 PacketDistributor.sendToPlayer(player, new TrialTimerPayload(seconds));
             }
@@ -36,6 +50,7 @@ public final class TrialTimerDisplayService {
         displayedSeconds.put(player.getUUID(), seconds);
         showOwnerIfChanged(player, session.owner().header());
         showPhaseIfChanged(player, session.progress().phase());
+        showRoomIfChanged(player, roomLine(session));
         PacketDistributor.sendToPlayer(player, new TrialTimerPayload(seconds));
     }
 
@@ -43,24 +58,29 @@ public final class TrialTimerDisplayService {
         displayedSeconds.remove(player.getUUID());
         displayedOwners.remove(player.getUUID());
         displayedPhases.remove(player.getUUID());
+        displayedRooms.remove(player.getUUID());
         PacketDistributor.sendToPlayer(player, new TrialTimerPayload(-1));
         PacketDistributor.sendToPlayer(player, new TrialOwnerPayload(""));
         PacketDistributor.sendToPlayer(player, new TrialPhasePayload("", 0));
+        PacketDistributor.sendToPlayer(player, new TrialRoomPayload(""));
     }
 
     public void hideAll(MinecraftServer server) {
         java.util.List.copyOf(displayedSeconds.keySet()).forEach(id -> hide(server, id));
+        cachedRoomState = null; cachedRoomId = null; cachedRoomOrdinal = -1; cachedRoomLine = "";
     }
 
     private void hide(MinecraftServer server, UUID id) {
         displayedSeconds.remove(id);
         displayedOwners.remove(id);
         displayedPhases.remove(id);
+        displayedRooms.remove(id);
         ServerPlayer player = server.getPlayerList().getPlayer(id);
         if (player != null) {
             PacketDistributor.sendToPlayer(player, new TrialTimerPayload(-1));
             PacketDistributor.sendToPlayer(player, new TrialOwnerPayload(""));
             PacketDistributor.sendToPlayer(player, new TrialPhasePayload("", 0));
+            PacketDistributor.sendToPlayer(player, new TrialRoomPayload(""));
         }
     }
 
@@ -81,6 +101,33 @@ public final class TrialTimerDisplayService {
         return phase != displayedPhases.put(player, phase);
     }
 
+    boolean acceptRoom(UUID player, String line) { return !line.equals(displayedRooms.put(player, line)); }
+
+    public static String roomLine(TrialSession session) {
+        return roomLine(session, id -> CosmicContent.repository().requireTrialRoom(id).displayName());
+    }
+
+    private String cachedRoomLine(TrialSession session) {
+        boolean inRoom = session.state() == TrialLifecycleState.ROOM_INTRO
+                || session.state() == TrialLifecycleState.ROOM_ACTIVE;
+        net.minecraft.resources.Identifier roomId = inRoom ? session.currentRoom().orElse(null) : null;
+        int ordinal = inRoom ? session.progress().completedRooms() + 1 : 0;
+        if (cachedRoomState != session.state() || !java.util.Objects.equals(cachedRoomId, roomId)
+                || cachedRoomOrdinal != ordinal) {
+            cachedRoomState = session.state(); cachedRoomId = roomId; cachedRoomOrdinal = ordinal;
+            cachedRoomLine = roomLine(session);
+        }
+        return cachedRoomLine;
+    }
+
+    static String roomLine(TrialSession session, java.util.function.Function<net.minecraft.resources.Identifier, String> names) {
+        if (session.state() == TrialLifecycleState.ROOM_INTRO || session.state() == TrialLifecycleState.ROOM_ACTIVE) {
+            return session.currentRoom().map(id -> "Room #" + (session.progress().completedRooms() + 1) + "---"
+                    + names.apply(id)).orElse("Decision Box");
+        }
+        return "Decision Box";
+    }
+
     private void showOwnerIfChanged(ServerPlayer player, String heading) {
         if (acceptOwner(player.getUUID(), heading)) {
             PacketDistributor.sendToPlayer(player, new TrialOwnerPayload(heading));
@@ -91,5 +138,9 @@ public final class TrialTimerDisplayService {
         if (acceptPhase(player.getUUID(), phase)) {
             PacketDistributor.sendToPlayer(player, new TrialPhasePayload(phase.displayName(), phase.color()));
         }
+    }
+
+    private void showRoomIfChanged(ServerPlayer player, String line) {
+        if (acceptRoom(player.getUUID(), line)) PacketDistributor.sendToPlayer(player, new TrialRoomPayload(line));
     }
 }

@@ -46,6 +46,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.ServerExplosion;
+import com.cosmicpve.data.component.TrialPortalModifiers;
 
 public final class TrialSessionService {
     public static final BlockPos DECISION_ORIGIN = new BlockPos(0, 64, 0);
@@ -84,6 +85,8 @@ public final class TrialSessionService {
     private final TrialTimerDisplayService timerDisplay = new TrialTimerDisplayService();
     private final TrialCelebrationService celebrations = new TrialCelebrationService();
     private final TrialDecisionEntryService decisionEntries = new TrialDecisionEntryService();
+    private final TrialInsuranceService insurance = new TrialInsuranceService();
+    private final TrialPerformanceTracker performance = new TrialPerformanceTracker();
     private final Map<UUID, BlockPos> decisionSpawns = new HashMap<>();
     private final Map<UUID, BlockPos> roomSpawns = new HashMap<>();
 
@@ -96,7 +99,13 @@ public final class TrialSessionService {
     public Optional<TrialSession> active(MinecraftServer server) { return repository.active(server); }
 
     public TrialOperationResult createPortal(ServerPlayer owner, BlockPos bottom) {
+        return createPortal(owner, bottom, TrialPortalModifiers.EMPTY);
+    }
+
+    public TrialOperationResult createPortal(ServerPlayer owner, BlockPos bottom, TrialPortalModifiers modifiers) {
         MinecraftServer server = owner.level().getServer();
+        if (modifiers == null || !modifiers.valid())
+            return TrialOperationResult.rejected("The Trial Portal contains invalid modifier data.");
         if (owner.level().dimension().equals(TrialRuntime.INSTANCE_DIMENSION))
             return TrialOperationResult.rejected("Trial Portals cannot be placed inside the instance dimension.");
         if (active(server).isPresent()) return TrialOperationResult.rejected("A Trial is already active.");
@@ -110,7 +119,7 @@ public final class TrialSessionService {
             List<BlockPos> portalBlocks = List.of(bottom.immutable(), bottom.above().immutable());
             TrialSession session = TrialSession.joining(UUID.randomUUID(), owner.level().dimension().identifier(), bottom,
                     portalBlocks, List.of(placedDecision.bounds()),
-                    new TrialOwner(owner.getUUID(), owner.getName().getString()));
+                    new TrialOwner(owner.getUUID(), owner.getName().getString()), modifiers);
             owner.level().setBlock(bottom, com.cosmicpve.registry.ModBlocks.TRIAL_GATEWAY.get().defaultBlockState(), 3);
             owner.level().setBlock(bottom.above(), com.cosmicpve.registry.ModBlocks.TRIAL_GATEWAY.get().defaultBlockState(), 3);
             repository.publish(server, session); decisionSpawns.put(session.sessionId(), placedDecision.participantSpawn());
@@ -146,22 +155,30 @@ public final class TrialSessionService {
     public void tick(MinecraftServer server) {
         celebrations.tick(server);
         TrialSession session = active(server).orElse(null); if (session == null) return;
+        long started = System.nanoTime();
+        try { tickActive(server, session); }
+        finally { performance.record(System.nanoTime() - started, session); }
+    }
+
+    private void tickActive(MinecraftServer server, TrialSession session) {
         timerDisplay.update(server, session);
         switch (session.state()) {
             case JOINING, DECISION -> tickDecision(server, session);
             case ROOM_INTRO -> tickRoomIntro(server, session);
             case ROOM_ACTIVE -> {
                 ServerLevel level = server.getLevel(TrialRuntime.INSTANCE_DIMENSION);
-                if (session.currentRoom().filter(FIRE_COLONY::equals).isPresent()) fireColony.tick(level, session);
+                Identifier room = session.currentRoom().orElse(null);
+                boolean maintenanceTick = server.getTickCount() % 10 == 0;
+                if (maintenanceTick && FIRE_COLONY.equals(room)) fireColony.tick(level, session);
                 TrialSession current = session;
-                if (session.currentRoom().filter(ZERO_G::equals).isPresent() && server.getTickCount() % 10 == 0) {
+                if (maintenanceTick && ZERO_G.equals(room)) {
                     zeroG.keepFixturesPinned(level, session);
                     ZeroGTickResult objectives = tickZeroGObjectives(server, level, session);
                     if (objectives.completed()) return;
                     current = objectives.session();
                 }
                 int remaining = TrialStateMachine.tickGameplayTimer(current).timerTicks();
-                if (remaining == 0) abort(server, "Trial timer expired."); else publishTick(server, current.withTimer(remaining));
+                if (remaining == 0) failForTimeout(server, current); else publishTick(server, current.withTimer(remaining));
             }
             default -> { }
         }
@@ -173,7 +190,14 @@ public final class TrialSessionService {
             if (current % 20 == 0 && TrialTitleService.shouldAnnounceDecision(current / 20))
                 forOnline(server, session, player -> titles.decision(player, true, current / 20));
             int next = Math.max(0, current - 1);
-            if (next == 0) { if (session.participants().isEmpty()) cleanupAndClose(server, session); else beginNextRoom(server, session); }
+            if (next == 0) {
+                if (session.participants().isEmpty()) cleanupAndClose(server, session);
+                else {
+                    TrialSession processed = processInitialSkip(server, session);
+                    if (processed.progress().initialSkipProcessed()) beginNextRoom(server, processed);
+                    else publishTick(server, session.withStateTicks(0));
+                }
+            }
             else publishTick(server, session.withStateTicks(next));
             return;
         }
@@ -189,6 +213,7 @@ public final class TrialSessionService {
     }
 
     private void tickRoomIntro(MinecraftServer server, TrialSession session) {
+        lockIntroParticipants(server, session);
         int current = session.stateTicksRemaining();
         if (current % 20 == 0 && current > 0) {
             int seconds = current / 20; String name = CosmicContent.repository()
@@ -205,6 +230,24 @@ public final class TrialSessionService {
             if (active.currentRoom().filter(ZERO_G::equals).isPresent())
                 zeroG.activate(server.getLevel(TrialRuntime.INSTANCE_DIMENSION), active);
         } else publishTick(server, session.withStateTicks(next));
+    }
+
+    private void lockIntroParticipants(MinecraftServer server, TrialSession session) {
+        BlockPos anchor = roomSpawns.get(session.sessionId());
+        if (anchor == null) return;
+        double x = anchor.getX() + 0.5D, y = anchor.getY(), z = anchor.getZ() + 0.5D;
+        forOnline(server, session, player -> {
+            player.setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
+            player.fallDistance = 0.0F;
+            if (needsIntroCorrection(player.getX(), player.getY(), player.getZ(), x, y, z)) {
+                player.connection.teleport(x, y, z, player.getYRot(), player.getXRot());
+            }
+        });
+    }
+
+    static boolean needsIntroCorrection(double x, double y, double z, double anchorX, double anchorY, double anchorZ) {
+        double dx = x - anchorX, dy = y - anchorY, dz = z - anchorZ;
+        return dx * dx + dy * dy + dz * dz > 1.0E-6D;
     }
 
     public TrialOperationResult completeRoom(MinecraftServer server) { return completeProductionRoom(server); }
@@ -246,6 +289,26 @@ public final class TrialSessionService {
         int transition = after.hardcoreBonusApplied() && !before.hardcoreBonusApplied() ? PHASE_ENTRY_BONUS : 0;
         if (after.demonicBonusApplied() && !before.demonicBonusApplied()) transition += PHASE_ENTRY_BONUS;
         return roomBonus + transition;
+    }
+
+    private TrialSession processInitialSkip(MinecraftServer server, TrialSession session) {
+        TrialProgress progress = session.progress();
+        if (progress.initialSkipProcessed()) return session;
+        try {
+            for (int i = 0; i < progress.portalModifiers().skipRooms(); i++) {
+                List<ItemStack> reward = rewards.roll(APPRENTICE_REWARDS, 1,
+                        new RewardGenerationContext(server.registryAccess(), net.minecraft.util.RandomSource.create(), null));
+                progress = progress.appendSkippedReward(reward);
+            }
+            TrialSession processed = session.withProgress(progress.markInitialSkipProcessed());
+            repository.publish(server, processed);
+            return processed;
+        } catch (RuntimeException exception) {
+            CosmicPVE.LOGGER.error("Could not apply initial Skip rewards for Trial {}", session.sessionId(), exception);
+            forOnline(server, session, player -> player.sendSystemMessage(Component.literal(
+                    "Initial Trial rewards could not be prepared. The session remains safe in the Decision Box.")));
+            return session;
+        }
     }
 
     public TrialOperationResult continueRoom(MinecraftServer server) {
@@ -507,6 +570,7 @@ public final class TrialSessionService {
     }
 
     public String bombSquadStatus(UUID sessionId) { return bombSquad.status(sessionId); }
+    public TrialPerformanceTracker.Snapshot performanceSnapshot() { return performance.snapshot(); }
 
     static boolean canActivateColdSnap(TrialSession session, UUID playerId) {
         return session.state() == TrialLifecycleState.ROOM_ACTIVE && session.activeParticipant(playerId)
@@ -555,6 +619,18 @@ public final class TrialSessionService {
         forOnline(server, session, player -> { loadouts.clear(player); inventories.restore(player); timerDisplay.hide(player); }); cleanupAndClose(server, session);
         return TrialOperationResult.ok(reason);
     }
+    private void failForTimeout(MinecraftServer server, TrialSession session) {
+        int level = session.progress().portalModifiers().insuranceLevel();
+        forOnline(server, session, player -> {
+            loadouts.clear(player);
+            if (level > 0) {
+                prepareInsurance(player, session, net.minecraft.util.RandomSource.create());
+                inventories.restoreCashout(player, delivery);
+            } else inventories.restore(player);
+            timerDisplay.hide(player);
+        });
+        cleanupAndClose(server, session);
+    }
     public TrialOperationResult adjustTimer(MinecraftServer server, int ticks, boolean absolute) {
         TrialSession session = active(server).orElse(null); if (session == null) return TrialOperationResult.rejected("No active Trial exists.");
         long candidate = absolute ? ticks : (long) session.timerTicks() + ticks;
@@ -578,12 +654,21 @@ public final class TrialSessionService {
     }
     public void onDeath(ServerPlayer player) {
         active(player.level().getServer()).filter(session -> session.activeParticipant(player.getUUID())).ifPresent(session -> {
+            int level = session.progress().portalModifiers().insuranceLevel();
+            if (level > 0 && !prepareInsurance(player, session, net.minecraft.util.RandomSource.create()))
+                CosmicPVE.LOGGER.error("Could not durably prepare insured Trial recovery for {}", player.getUUID());
             timerDisplay.hide(player); inventories.clearTrialInventory(player); TrialSession next = session.removeParticipant(player.getUUID());
             if (next.participants().isEmpty()) cleanupAndClose(player.level().getServer(), next); else repository.publish(player.level().getServer(), next);
         });
     }
     public void onRespawn(ServerPlayer player) { if (inventories.pending(player).isPresent()) inventories.recover(player, delivery); }
     public boolean emergencyRestore(ServerPlayer player) { return inventories.recover(player, delivery); }
+    boolean prepareInsurance(ServerPlayer player, TrialSession session, net.minecraft.util.RandomSource random) {
+        int level = session.progress().portalModifiers().insuranceLevel();
+        if (level <= 0) return true;
+        var selected = insurance.select(session.progress().pot(), level, random);
+        return inventories.prepareRewardedRestore(player, insurance.flattenedCopies(selected));
+    }
     public void debugSound(ServerPlayer player, boolean roomStart) {
         if (roomStart) titles.debugRoomStartSound(player); else titles.debugCountdownSound(player);
     }
@@ -592,6 +677,15 @@ public final class TrialSessionService {
         if (session == null) return TrialOperationResult.rejected("No active Trial exists.");
         repository.publish(server, session.withProgress(session.progress().debugSetCompletedRooms(rooms)));
         return TrialOperationResult.ok("Trial completed-room count set to " + rooms + " for development testing.");
+    }
+    public TrialOperationResult debugFillPot(MinecraftServer server, int count) {
+        TrialSession session = active(server).orElse(null);
+        if (session == null) return TrialOperationResult.rejected("No active Trial exists.");
+        repository.publish(server, session.withProgress(session.progress().debugFillPot(count)));
+        forOnline(server, session, player -> {
+            if (player.containerMenu instanceof TrialDecisionMenu menu) menu.refresh();
+        });
+        return TrialOperationResult.ok("Trial pot filled with " + count + " development entries.");
     }
     public TrialOperationResult debugForceRoom(MinecraftServer server, Identifier room) {
         TrialSession session = active(server).orElse(null);
@@ -651,7 +745,10 @@ public final class TrialSessionService {
                 Set.<Relative>of(), 0.0F, 0.0F, false)) throw new IllegalStateException("Could not teleport Trial participant");
     }
     private static void forOnline(MinecraftServer server, TrialSession session, java.util.function.Consumer<ServerPlayer> action) {
-        session.participants().stream().map(server.getPlayerList()::getPlayer).filter(java.util.Objects::nonNull).forEach(action);
+        for (UUID id : session.participants()) {
+            ServerPlayer player = server.getPlayerList().getPlayer(id);
+            if (player != null) action.accept(player);
+        }
     }
     private static void broadcast(MinecraftServer server, TrialSession session, String message) {
         forOnline(server, session, player -> player.sendSystemMessage(Component.literal(message)));

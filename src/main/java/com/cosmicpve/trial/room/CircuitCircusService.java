@@ -11,6 +11,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
@@ -49,6 +50,7 @@ public final class CircuitCircusService {
         level.setBlock(target, Blocks.AIR.defaultBlockState(), 3);
         int quantity = random.nextBoolean() ? 2 : 1;
         player.getInventory().placeItemBackInInventory(new ItemStack(material.glassItem(), quantity));
+        player.playSound(SoundEvents.ARROW_HIT_PLAYER, 1.0F, 1.0F);
         var claimed = new ArrayList<>(state.claimedTargets()); claimed.add(local.immutable());
         return new TargetResult(true, new TrialEncounterState(state.hiddenSequence(), state.sequenceProgress(),
                 state.pillarMaterials(), claimed, state.completedCircuits()), quantity, material);
@@ -122,4 +124,5 @@ public final class CircuitCircusService {
 
     public record TargetResult(boolean accepted, TrialEncounterState state, int quantity, CircuitMaterial material) {}
     public record ValidationResult(boolean newlyCompleted, TrialEncounterState state, CircuitMaterial material) {}
+    public static net.minecraft.sounds.SoundEvent targetFeedbackSound() { return SoundEvents.ARROW_HIT_PLAYER; }
 }

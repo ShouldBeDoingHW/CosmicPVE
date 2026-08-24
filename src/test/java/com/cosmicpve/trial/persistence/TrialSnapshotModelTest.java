@@ -46,6 +46,16 @@ class TrialSnapshotModelTest {
         var json=TrialPlayerState.CODEC.codec().encodeStart(JsonOps.INSTANCE,state).getOrThrow();
         var decoded=TrialPlayerState.CODEC.codec().parse(JsonOps.INSTANCE,json).getOrThrow();
         assertEquals(3,decoded.pendingRewards().getFirst().getCount());
+        assertTrue(decoded.rewardRestorePrepared());
         assertEquals(snapshot,decoded.snapshot().orElseThrow());
+    }
+    @Test void emptyInsuranceSelectionStillPersistsPreparedTombstone() {
+        var snapshot=new TrialOutsideSnapshot(1,UUID.randomUUID(),UUID.randomUUID(),
+                java.util.Collections.nCopies(36,ItemStack.EMPTY),java.util.Collections.nCopies(4,ItemStack.EMPTY),
+                ItemStack.EMPTY,ItemStack.EMPTY,0,Identifier.parse("minecraft:overworld"),0,64,0,0,0);
+        var state=TrialPlayerState.committed(snapshot).inTrial().withPreparedRewards(List.of());
+        var json=TrialPlayerState.CODEC.codec().encodeStart(JsonOps.INSTANCE,state).getOrThrow();
+        var decoded=TrialPlayerState.CODEC.codec().parse(JsonOps.INSTANCE,json).getOrThrow();
+        assertTrue(decoded.rewardRestorePrepared()); assertTrue(decoded.pendingRewards().isEmpty());
     }
 }

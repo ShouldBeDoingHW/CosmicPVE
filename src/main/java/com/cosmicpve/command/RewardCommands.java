@@ -12,6 +12,7 @@ import com.cosmicpve.reward.RewardGeneratorService;
 import com.cosmicpve.reward.RewardTableService;
 import com.cosmicpve.reward.spawner.MobSpawners;
 import com.cosmicpve.reward.spawner.MobSpawnerEligibility;
+import com.cosmicpve.reward.spawner.MobSpawnerConfiguration;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import java.util.List;
@@ -48,7 +49,13 @@ public final class RewardCommands {
                 .then(Commands.literal("inspect")
                         .then(Commands.argument("position", BlockPosArgument.blockPos())
                                 .executes(context -> inspectSpawner(context.getSource(),
-                                        BlockPosArgument.getLoadedBlockPos(context, "position")))));
+                                        BlockPosArgument.getLoadedBlockPos(context, "position")))))
+                .then(Commands.literal("debug-delay")
+                        .then(Commands.argument("position", BlockPosArgument.blockPos())
+                                .then(Commands.argument("ticks", IntegerArgumentType.integer(1, Short.MAX_VALUE))
+                                        .executes(context -> debugSpawnerDelay(context.getSource(),
+                                                BlockPosArgument.getLoadedBlockPos(context, "position"),
+                                                IntegerArgumentType.getInteger(context, "ticks"))))));
         return Commands.literal("reward")
                 .then(Commands.literal("list").executes(context -> list(context.getSource())))
                 .then(Commands.literal("inspect").then(tableId.executes(context -> inspect(
@@ -151,9 +158,26 @@ public final class RewardCommands {
         int skyLight = level.getBrightness(net.minecraft.world.level.LightLayer.SKY, position);
         boolean playerInRange = level.hasNearbyAlivePlayer(position.getX() + 0.5D, position.getY() + 0.5D,
                 position.getZ() + 0.5D, 16.0D);
+        boolean chunkLoaded = level.hasChunkAt(position);
+        boolean spawnersEnabled = level.isSpawnerBlockEnabled();
         source.sendSuccess(() -> Component.literal("Spawner at " + position.toShortString() + ": " + tag
                 + ", difficulty=" + level.getDifficulty() + ", block_light=" + blockLight
-                + ", sky_light=" + skyLight + ", player_within_16=" + playerInRange), false);
+                + ", sky_light=" + skyLight + ", player_within_16=" + playerInRange
+                + ", chunk_loaded=" + chunkLoaded + ", spawners_enabled=" + spawnersEnabled), false);
+        return 1;
+    }
+
+    private static int debugSpawnerDelay(net.minecraft.commands.CommandSourceStack source,
+            net.minecraft.core.BlockPos position, int ticks) {
+        if (!(source.getLevel().getBlockEntity(position)
+                instanceof net.minecraft.world.level.block.entity.SpawnerBlockEntity spawner)) {
+            source.sendFailure(Component.literal("No mob spawner exists at " + position.toShortString() + "."));
+            return 0;
+        }
+        boolean changed = MobSpawnerConfiguration.setDebugDelay(spawner, source.getLevel(), position, ticks);
+        if (!changed) { source.sendFailure(Component.literal("Invalid debug delay.")); return 0; }
+        source.sendSuccess(() -> Component.literal("Set spawner delay at " + position.toShortString()
+                + " to " + ticks + " tick(s). Normal future delays remain vanilla."), true);
         return 1;
     }
 

@@ -7,6 +7,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.junit.jupiter.api.Test;
+import com.cosmicpve.data.component.TrialPortalModifiers;
 
 class TrialProgressTest {
     @Test void rewardsRemainOrderedAndIdenticalResultsStayDistinct() {
@@ -61,5 +62,17 @@ class TrialProgressTest {
                 .beginRoom(room, TrialEncounterState.EMPTY);
         assertEquals(1, progress.appearances(room));
         assertTrue(progress.decisions().isEmpty());
+    }
+
+    @Test void skippedRoomsAppendIndependentRewardsWithoutAppearancesOrTimeBonus() {
+        var progress=TrialProgress.initial(new TrialPortalModifiers(1,0,3,0));
+        for(int i=0;i<3;i++) progress=progress.appendSkippedReward(List.of(new ItemStack(Items.APPLE)));
+        progress=progress.markInitialSkipProcessed();
+        assertEquals(3,progress.completedRooms()); assertEquals(3,progress.pot().size());
+        assertTrue(progress.appearances().isEmpty()); assertTrue(progress.initialSkipProcessed());
+        assertEquals(3,progress.pot().stream().map(TrialPotEntry::acquisitionId).distinct().count());
+        var completed=progress.completeRoom(List.of(new ItemStack(Items.CARROT)));
+        assertEquals(4,completed.completedRooms()); assertEquals(TrialPhase.HARDCORE,completed.phase());
+        assertEquals(4_200,TrialSessionService.completionTimeBonus(progress,completed));
     }
 }

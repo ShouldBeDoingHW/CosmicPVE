@@ -182,7 +182,7 @@ Implemented Ultimate `cosmicpve:implants` III on helmets, bringing the total to 
 
 ### Step 6N — IMPLEMENTED; AUTOMATED/RUNTIME VERIFIED; MANUALLY VERIFIED / ACCEPTED
 
-The production Apprentice Trial loop now uses the Step 6M durable session rather than a parallel activity. Every completed room atomically appends one resolved reward bundle to the persistent ordered shared pot, adds 600 gameplay ticks, increments the room count once, and enters the paused Decision Box. The canonical reloadable Apprentice table produces Unexamined rarity books, scrolls, typed spawners, the Ultimate Space Chest, and three Orange-Dye-presented tier-1 Trial Trinket identities whose portal-application mechanics remain deferred. Pot entries retain independent acquisition identities, so separately rolled duplicates do not merge or reroll.
+The production Apprentice Trial loop now uses the Step 6M durable session rather than a parallel activity. Every completed room atomically appends one resolved reward bundle to the persistent ordered shared pot, adds 600 gameplay ticks, increments the room count once, and enters the paused Decision Box. The canonical reloadable Apprentice table produces Unexamined rarity books, scrolls, typed spawners, the Ultimate Space Chest, and three Orange-Dye-presented tier-1 Trial Trinket identities now consumed by the Step 6S portal-modifier system. Pot entries retain independent acquisition identities, so separately rolled duplicates do not merge or reroll.
 
 The read-only 27-slot Decision menu exposes four DEAL panes, one blocked center pane, four NO DEAL panes, and ordered pot previews across rows two and three. DEAL is individual: the server durably records the payout, removes that player, restores the exact outside snapshot/location first, then safely delivers a full pot copy with overflow at the returned location. NO DEAL preserves both participation and the shared pot. Decisions resolve early when everyone responds; timeout treats undecided players as NO DEAL. The room selector uses `5 - 2 × appearances + modifiers`, excludes the immediately previous room, accepts injectable RNG, and has a contributor seam for future Snow Globes. The fourth Apprentice completion moves the persisted phase to Hardcore and applies the one-time 3-minute bonus. Because Step 6N has no Hardcore production room, NO DEAL is temporarily rejected safely at that final Decision Box while DEAL remains available; Step 6O must remove this development gate.
 
@@ -220,11 +220,35 @@ Implemented Elite `cosmicpve:cactus` II on leggings, bringing the total to 28 re
 
 ### Step 6R — IMPLEMENTED; AUTOMATED/RUNTIME VERIFIED; MANUALLY VERIFIED / ACCEPTED
 
+Closure commit: `44fb15489b7b10479a0aa25278e43ebc7dd9c2cf` (`Add Bomb Squad and Trial phase HUD`).
+
 Bomb Squad is the third production Hardcore room. Its tracked `45×21×45` structure contains four shared-party Emerald starts, four event-driven Gold egg-supply plates, nineteen cached Diamond exit markers, and a stable seven-block 6×6 grid mapping. Each attempt chooses one start and two distinct exit cells outside the start's clipped 3×3 neighborhood. All Emerald/Diamond metadata is replaced before arrival; selected exits become protected Heavy Weighted Pressure Plates. The temporary loadout is full Leather Armor with Blast Protection I/Unbreaking III, Unbreaking III Flint and Steel, Knockback II/Unbreaking III Wooden Sword, five Steak, and five Golden Apples.
 
 Room-issued typed Creeper Eggs create tracked ordinary Creepers only during the active attempt. Per-player supply eligibility is inventory-based, so one player holding an egg cannot block another. Tracked Creepers retain vanilla AI, fuse, ignition, damage, and knockback while awarding no XP/loot. Their localized mob-grief permission and detonation exception allow only ordinary Stone inside current Bomb Squad bounds; the structure's low-resistance glass and Sea Lantern surfaces remain protected along with Obsidian, Bedrock, all Gold supply plates, and both active Iron exits. No gamerule is changed. Cleanup discards tracked Creepers and the existing structure lifecycle restores every destroyed passage before replay. The production Hardcore pool is exactly Fire Colony, Zero-G, and Bomb Squad under the shared weighted/no-consecutive-repeat selector.
 
 The participant HUD now renders the immutable possessive portal-owner heading (`Dev's Trial`), authoritative phase, and existing `M:SS` timer. Phase colors are Apprentice `#E6E032`, Hardcore `#E6A732`, and Demonic `#E65C32`. Owner and phase packets are cached and sent only on initialization/change; timer suppression is unchanged. The future `Room #N---Room Name` line remains deferred.
+
+### Step 6S — IMPLEMENTED; AUTOMATED/RUNTIME VERIFIED; MANUALLY VERIFIED / ACCEPTED
+
+All nine Orange-Dye Trial Trinkets now share typed/versioned family-and-value data: Time +1/+3/+5 minutes, Skip 1/2/3 rooms, and Insurance 1/2/3. Server-authoritative drag-and-left-click application stores one independent value per category on a Trial Portal; stronger same-category values replace weaker ones, while equal/weaker or stale applications reject without consumption. Portal tooltips show only applied categories. Portal creation copies the immutable values into the persistent Trial session, after which the consumed item is no longer consulted.
+
+Time is incorporated once into the initial 12,000-tick clock, producing 13,200/15,600/18,000 ticks for +1/+3/+5. Skip resolves and persists one independent Apprentice reward bundle per skipped room after the initial joining period and before the first playable room, increments overall progression without room appearances or +600 completion bonuses, and never creates a pre-game DEAL opportunity. Insurance selects up to its level in complete pot entries without replacement for each failed participant, durably stages the exact selected reward contents, restores outside state first, and then safely delivers the copied salvage. It applies only to participant death and timer expiration; DEAL, voluntary/admin restoration, and disconnect alone do not invoke it.
+
+The existing 27-slot Decision menu now pages the ordered pot in 18-entry views through a per-menu top-center control. Navigation wraps, is player-local and read-only, and never mutates, merges, rerolls, or limits the persisted pot. DEAL and NO DEAL remain independent of page index, and DEAL always pays the complete pot. The participant HUD now adds lifecycle-cached `Room #N---Room Name` during room intro/active and `Decision Box` during both Decision states; N is overall progressed room ordinal, including Skip. Timer packets retain their displayed-second suppression.
+
+Eligible equipment now presents `N Enchantment Slots` in `#55FF55`. An Orb suffix appears only above base capacity and is derived from effective capacity minus the canonical base five, for example `8 Enchantment Slots (Orb [+3])`; actual capacity/application rules are unchanged. Armor and Weapon Enchantment Orb names now use the same `#55FF55` green while preserving their Eye-of-Ender model, no-glint state, rates, and transactions.
+
+The Design Doc subsection `Enchantments → Balance Changes` is prospective staging material. It does not change implemented enchantment behavior unless a later prompt explicitly authorizes a balance patch.
+
+### Step 6S.1 — IMPLEMENTED; AUTOMATED/RUNTIME VERIFIED; MANUALLY VERIFIED / ACCEPTED
+
+Trial Trinkets now reject any target Trial Portal stack whose count is not exactly one. A successful application stores both the typed portal modifiers and vanilla `max_stack_size=1`, so modified portals cannot merge with unmodified, differently modified, or identically modified portals. The exact same invariant owns command-created modified portals, persists with the stack, and is revalidated when a portal is used. Trinket names and matching portal modifier lines now use Skip `#2BC2B8`, Time `#0A5751`, and Insurance `#0A5721`.
+
+Every production room now anchors each participant to the resolved room spawn during `ROOM_INTRO`, zeros accumulated movement, preserves camera rotation, and stops anchoring immediately on `ROOM_ACTIVE`. Because the lock is derived only from the authoritative lifecycle and does not persist attributes/effects, abort, death, disconnect, restoration, debug transitions, and restart cannot leave an outside player immobilized. A valid first-time Circuit Circus target hit plays `minecraft:entity.arrow.hit_player` only to its shooter. The participant HUD retains normal text scale but uses a 132-pixel-tall card, at least 150 pixels of width, 18-pixel horizontal padding, and 27-pixel line spacing; dynamic width is clamped to the screen and long owner/room text is ellipsized.
+
+The bounded performance pass moved Fire Colony's already ten-tick maintenance gate to the central room dispatcher, so the service is no longer invoked on the other nine of ten ticks; Zero-G remains ten-tick-only; room dispatch now resolves its room ID once; participant delivery uses allocation-free bounded loops; unchanged HUD room content is cached before content/name resolution; stale HUD participant scans allocate only when a participant actually becomes stale; protection checks reuse one active-session lookup and bounded loops; and volatile timer updates no longer dirty SavedData every tick, while the established five-second checkpoint explicitly marks and synchronously flushes it. `/cosmic trial debug perf` reports a rolling 200-active-tick average/max without per-tick logging.
+
+The generic placed Spawner investigation traced the pinned 1.21.11 `BaseSpawner` path and found no Cosmic entity-ID, SpawnData, timing, update, or synchronization defect. All representative typed items use the same configuration path and retain vanilla delay/count/range fields. The observed split is explained by vanilla `SpawnPlacements`: Blaze accepts any light, Iron Golem uses the basic mob predicate, ordinary hostile mobs such as Creeper/Zombie still require their spawner-reason darkness predicate, and Pig/Sheep still require an animal-spawnable floor and sufficient light. `/cosmic reward spawner inspect <x> <y> <z>` exposes the complete live state/environment and `/cosmic reward spawner debug-delay <x> <y> <z> <ticks>` shortens only the current delay for controlled testing; normal subsequent delays remain vanilla.
 
 ## 3. Current Real Enchantments
 
@@ -525,7 +549,6 @@ Commands call gameplay services or create the same typed components used by game
 ## 15. Unresolved / Do Not Assume
 
 - **Trial scaling after departures:** architecture freezes initial party size so boss maximum health does not shrink, but detailed remaining objective/mob scaling and late-disconnect behavior still need acceptance criteria.
-- **Creeper Spawner runtime spawning:** the typed item and placed vanilla spawner preserve `minecraft:creeper` in `SpawnData`, and diagnostics/configuration appear correct, but manual testing has not produced Creepers under apparently valid conditions. This is deliberately deferred and does not block Trials.
 - **Scheduled instance mutation hooks:** direct block use/ignition, fluid block formation, explosions, pistons, entity grief, placement, and breaking are scoped and denied. Fire Colony adds a bounded cached baseline guard for its intentional fire/lava hazard neighborhood. NeoForge still does not expose a complete cancellable hook for every scheduled vanilla mutation, so other future hazard rooms need an equally scoped policy rather than global gamerule changes.
 - **Loot tables:** several current design tables are incomplete or malformed and contain ambiguous duplicates. Validation must distinguish intentional duplicate weights from mistakes.
 - **Attribute units/caps:** future health, movement, incoming damage, cooldown, and stacked modifier caps/floors need normalization before large content expansion.
@@ -538,11 +561,11 @@ The final post-Orb capacity is no longer unresolved for current target classes: 
 
 ## 16. Current Next Milestone
 
-**Next milestone: Step 6S — Trial Trinkets + Deal Pagination + Room HUD Line.**
+**Next milestone: Step 6T — Trial Reward / Supporting-System Gap Closure.**
 
-Step 6S should implement Time, Skip, and Insurance Trial Trinkets; Deal-pot pagination beyond eighteen visible entries; and the participant HUD line `Room #N---Room Name` (for example, `Room #3---Cold Snap`), where N is the overall room ordinal. The current agreed wave then moves through 6T reward/support gap closure, 6U Hidden Graveyard, and 6V Deadeye/Trial 1.0 stabilization before shifting focus toward Conquest Chests.
+Step 6T should close Trial reward/support gaps: Masks/Multi-Mask foundations, Mask Splicer, missing Trial-linked Armor Set reward primitives such as Yeti/Ranger procurement where appropriate, additional Apprentice/Hardcore/Demonic reward-table dependencies, and the next small Trial HUD spacing refinement before the timer. The agreed wave then moves through 6U Hidden Graveyard and 6V Deadeye/Trial 1.0 stabilization before shifting focus toward Conquest Chests.
 
-Step 6R is manually verified and accepted. Hidden Graveyard, Deadeye, Memory Chests, and Cosmic Crates remain deliberately deferred.
+Step 6R is committed. Step 6S and its Step 6S.1 corrective pass are manually verified and accepted and are ready for their closure commit. Hidden Graveyard, Deadeye, Memory Chests, and Cosmic Crates remain deliberately deferred.
 
 ## 17. Development Workflow
 
@@ -558,6 +581,19 @@ Step 6R is manually verified and accepted. Hidden Graveyard, Deadeye, Memory Che
 Preserve unrelated dirty changes. Never change pinned versions as a side effect of gameplay work. Prefer service-level rules and typed data over one-off event logic, and keep client-only classes isolated from dedicated-server loading.
 
 ## 18. Verification Snapshot
+
+For the manually accepted Step 6S.1 corrective checkpoint:
+
+- `gradlew.bat cleanTest test build` passes all 328 automated tests across 95 suites with 0 failures, errors, or skips. Added coverage pins stacked-portal rejection without mutation/consumption, single-stack modified portal components and command invariant, exact Trinket/portal-line colors, room-intro anchor correction, bounded performance sampling, expanded HUD layout constants, Circuit target sound identity, and identical representative vanilla Spawner configuration for Blaze, Iron Golem, Creeper, Zombie, Pig, and Sheep.
+- All 156 main-resource JSON files decode. Dedicated-server startup publishes six reward tables and eight Trial rooms, loads 1,462 recipes, verifies the progression invariant, and reaches `Done`. Fresh client startup loads both entrypoints, reloads resources, initializes OpenAL, and builds block/item/GUI/chest atlases without relevant model, texture, component, command, payload, codec, datapack, or sided-loading errors.
+- `git diff --check` passes with only normal Windows line-ending notices. Pinned Minecraft 1.21.11, NeoForge 21.11.45, Java 21, Gradle 9.2.1, ModDevGradle 2.0.144, mod ID `cosmicpve`, and package `com.cosmicpve` remain unchanged.
+- The user manually verified stacked-portal rejection and non-merging, Circuit Circus target feedback, Trinket colors, room-intro movement locking, acceptable Trial performance, and representative placed Cosmic spawners under their vanilla spawning conditions. The former generic/Creeper spawning concern is resolved; the permissioned inspect and debug-delay tools remain available.
+
+For the manually accepted Step 6S checkpoint:
+
+- `gradlew.bat cleanTest test build` passes all 320 automated tests across 94 suites with 0 failures, errors, or skips. New coverage pins all nine typed Trinket identities and exact values, independent upgrade/rejection rules, persistent portal modifiers, the four initial timer totals, Skip pot/progression semantics, deterministic Insurance selection without replacement, complete-bundle salvage, Decision pagination/wrapping, complete-pot payout independence from page, lifecycle-cached room-line presentation, capacity wording/suffix derivation, and green Orb names.
+- All 156 main-resource JSON files decode; the one blockstate with the canonical empty variant key is validated with an object parser that preserves empty property names. The dedicated server publishes six reward tables and eight Trial rooms, verifies the progression invariant, and reaches `Done` without relevant component, codec, datapack, payload, or common-side loading errors. Fresh client startup loads both entry points, completes resource reload, initializes OpenAL, and builds the block/item/GUI/chest atlases without relevant missing-model, missing-texture, payload, or sided-loading errors.
+- `git diff --check` passes with only normal Windows line-ending notices. Pinned Minecraft 1.21.11, NeoForge 21.11.45, Java 21, Gradle 9.2.1, ModDevGradle 2.0.144, mod ID `cosmicpve`, and package `com.cosmicpve` remain unchanged.
 
 For the manually accepted Step 6R checkpoint:
 
@@ -598,7 +634,7 @@ For the accepted Step 6L implementation:
 - The automated suite currently passes all 223 tests across 67 suites with 0 failures and 0 errors; focused coverage includes tier/table identity, exact production rows/weights and Unexamined Book semantics, persistence codecs and transaction invariants, the 80-tick reveal plus 30-tick pause, canonical presentation/sound policy, non-stackability, vanilla Creeper `SpawnData` and timing defaults, reward-bundle compaction, Blessed chances, and the 25-enchantment registration invariant.
 - The dedicated server atomically published all three production Space Chest tables plus the existing development table, loaded 1,462 recipes, retained the progression recipe invariant, and reached `Done` without relevant registry, datapack, command, menu, attachment, or sided-classloading errors.
 - Client startup completed resource reload, sound initialization, and texture-atlas creation with the Space Chest menu screen/item model registered and no relevant missing-model, malformed-resource, or localization errors. The client was deliberately terminated at the smoke-test boundary.
-- Pinned environment values remain unchanged. The user manually verified and accepted the corrected Space Chest presentation, timing, sounds, Unexamined rewards, transactional recovery, and Blessed behavior. Creeper Spawner runtime spawning remains a deferred, non-blocking issue: the typed item and placed vanilla spawner preserve `minecraft:creeper` in `SpawnData`, and configuration diagnostics appear correct, but manual testing has not yet produced Creepers under apparently valid conditions.
+- Pinned environment values remain unchanged. The user manually verified and accepted the corrected Space Chest presentation, timing, sounds, Unexamined rewards, transactional recovery, and Blessed behavior. Later controlled testing confirmed the generic placed Cosmic spawners work under the applicable vanilla spawning conditions.
 - Step 6L is committed at `14415b3c1bc51c4f489599131814f68f76744c15` (`Add Space Chests and Blessed`).
 
 For the accepted Step 6K implementation:

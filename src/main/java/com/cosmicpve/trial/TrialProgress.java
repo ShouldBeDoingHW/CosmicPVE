@@ -7,11 +7,13 @@ import java.util.Optional;
 import java.util.UUID;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
+import com.cosmicpve.data.component.TrialPortalModifiers;
 
 public record TrialProgress(List<TrialPotEntry> pot, List<TrialPlayerDecision> decisions,
         List<TrialRoomAppearance> appearances, int completedRooms, TrialPhase phase,
         boolean hardcoreBonusApplied, boolean demonicBonusApplied,
-        Optional<Identifier> lastRoom, TrialEncounterState encounter) {
+        Optional<Identifier> lastRoom, TrialEncounterState encounter,
+        TrialPortalModifiers portalModifiers, boolean initialSkipProcessed) {
     public static final Codec<TrialProgress> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             TrialPotEntry.CODEC.listOf().optionalFieldOf("pot", List.of()).forGetter(TrialProgress::pot),
             TrialPlayerDecision.CODEC.listOf().optionalFieldOf("decisions", List.of()).forGetter(TrialProgress::decisions),
@@ -21,10 +23,17 @@ public record TrialProgress(List<TrialPotEntry> pot, List<TrialPlayerDecision> d
             Codec.BOOL.optionalFieldOf("hardcore_bonus_applied", false).forGetter(TrialProgress::hardcoreBonusApplied),
             Codec.BOOL.optionalFieldOf("demonic_bonus_applied", false).forGetter(TrialProgress::demonicBonusApplied),
             Identifier.CODEC.optionalFieldOf("last_room").forGetter(TrialProgress::lastRoom),
-            TrialEncounterState.CODEC.optionalFieldOf("encounter", TrialEncounterState.EMPTY).forGetter(TrialProgress::encounter)
+            TrialEncounterState.CODEC.optionalFieldOf("encounter", TrialEncounterState.EMPTY).forGetter(TrialProgress::encounter),
+            TrialPortalModifiers.CODEC.optionalFieldOf("portal_modifiers", TrialPortalModifiers.EMPTY).forGetter(TrialProgress::portalModifiers),
+            Codec.BOOL.optionalFieldOf("initial_skip_processed", false).forGetter(TrialProgress::initialSkipProcessed)
     ).apply(instance, TrialProgress::new));
     public static final TrialProgress EMPTY = new TrialProgress(List.of(), List.of(), List.of(), 0,
-            TrialPhase.APPRENTICE, false, false, Optional.empty(), TrialEncounterState.EMPTY);
+            TrialPhase.APPRENTICE, false, false, Optional.empty(), TrialEncounterState.EMPTY,
+            TrialPortalModifiers.EMPTY, false);
+    public static TrialProgress initial(TrialPortalModifiers modifiers) {
+        return new TrialProgress(List.of(), List.of(), List.of(), 0, TrialPhase.APPRENTICE,
+                false, false, Optional.empty(), TrialEncounterState.EMPTY, modifiers, false);
+    }
     public TrialProgress { pot = List.copyOf(pot); decisions = List.copyOf(decisions); appearances = List.copyOf(appearances); }
 
     public TrialDecision decision(UUID player) {
@@ -36,17 +45,20 @@ public record TrialProgress(List<TrialPotEntry> pot, List<TrialPlayerDecision> d
     }
     public TrialProgress beginDecision(List<UUID> players) {
         return copy(pot, players.stream().map(id -> new TrialPlayerDecision(id, TrialDecision.UNDECIDED)).toList(),
-                appearances, completedRooms, phase, hardcoreBonusApplied, demonicBonusApplied, lastRoom, TrialEncounterState.EMPTY);
+                appearances, completedRooms, phase, hardcoreBonusApplied, demonicBonusApplied, lastRoom, TrialEncounterState.EMPTY,
+                portalModifiers, initialSkipProcessed);
     }
     public TrialProgress decide(UUID player, TrialDecision value) {
         var next = new java.util.ArrayList<>(decisions);
         next.removeIf(entry -> entry.playerId().equals(player)); next.add(new TrialPlayerDecision(player, value));
-        return copy(pot, next, appearances, completedRooms, phase, hardcoreBonusApplied, demonicBonusApplied, lastRoom, encounter);
+        return copy(pot, next, appearances, completedRooms, phase, hardcoreBonusApplied, demonicBonusApplied, lastRoom, encounter,
+                portalModifiers, initialSkipProcessed);
     }
     public TrialProgress beginRoom(Identifier room, TrialEncounterState state) {
         var next = new java.util.ArrayList<>(appearances); int count = appearances(room) + 1;
         next.removeIf(entry -> entry.roomId().equals(room)); next.add(new TrialRoomAppearance(room, count));
-        return copy(pot, List.of(), next, completedRooms, phase, hardcoreBonusApplied, demonicBonusApplied, Optional.of(room), state);
+        return copy(pot, List.of(), next, completedRooms, phase, hardcoreBonusApplied, demonicBonusApplied, Optional.of(room), state,
+                portalModifiers, initialSkipProcessed);
     }
     public TrialProgress completeRoom(List<ItemStack> reward) {
         var nextPot = new java.util.ArrayList<>(pot); nextPot.add(new TrialPotEntry(UUID.randomUUID(), reward));
@@ -56,25 +68,51 @@ public record TrialProgress(List<TrialPotEntry> pot, List<TrialPlayerDecision> d
         TrialPhase nextPhase = demonicBoundary ? TrialPhase.DEMONIC : hardcoreBoundary ? TrialPhase.HARDCORE : phase;
         return copy(nextPot, decisions, appearances, completed, nextPhase,
                 hardcoreBonusApplied || hardcoreBoundary, demonicBonusApplied || demonicBoundary,
-                lastRoom, TrialEncounterState.EMPTY);
+                lastRoom, TrialEncounterState.EMPTY, portalModifiers, initialSkipProcessed);
+    }
+    public TrialProgress appendSkippedReward(List<ItemStack> reward) {
+        if (phase != TrialPhase.APPRENTICE || completedRooms >= 3)
+            throw new IllegalStateException("Initial Skip can advance only the first three Apprentice rooms");
+        var nextPot = new java.util.ArrayList<>(pot); nextPot.add(new TrialPotEntry(UUID.randomUUID(), reward));
+        return copy(nextPot, decisions, appearances, completedRooms + 1, phase, hardcoreBonusApplied,
+                demonicBonusApplied, lastRoom, encounter, portalModifiers, false);
+    }
+    public TrialProgress markInitialSkipProcessed() {
+        return copy(pot, decisions, appearances, completedRooms, phase, hardcoreBonusApplied,
+                demonicBonusApplied, lastRoom, encounter, portalModifiers, true);
     }
     public TrialProgress withEncounter(TrialEncounterState state) {
-        return copy(pot, decisions, appearances, completedRooms, phase, hardcoreBonusApplied, demonicBonusApplied, lastRoom, state);
+        return copy(pot, decisions, appearances, completedRooms, phase, hardcoreBonusApplied, demonicBonusApplied, lastRoom, state,
+                portalModifiers, initialSkipProcessed);
     }
     public TrialProgress debugSetCompletedRooms(int rooms) {
         if (rooms < 0 || rooms > 8) throw new IllegalArgumentException("rooms must be in [0,8]");
         TrialPhase nextPhase = rooms >= 8 ? TrialPhase.DEMONIC : rooms >= 4 ? TrialPhase.HARDCORE : TrialPhase.APPRENTICE;
-        return copy(pot, decisions, appearances, rooms, nextPhase, rooms >= 4, rooms >= 8, lastRoom, encounter);
+        return copy(pot, decisions, appearances, rooms, nextPhase, rooms >= 4, rooms >= 8, lastRoom, encounter,
+                portalModifiers, initialSkipProcessed);
     }
     public TrialProgress debugEnterPhase(TrialPhase target) {
         return copy(pot, decisions, appearances, completedRooms, target,
                 hardcoreBonusApplied || target != TrialPhase.APPRENTICE,
-                demonicBonusApplied || target == TrialPhase.DEMONIC, lastRoom, encounter);
+                demonicBonusApplied || target == TrialPhase.DEMONIC, lastRoom, encounter, portalModifiers, initialSkipProcessed);
+    }
+    public TrialProgress debugFillPot(int count) {
+        if (count < 0 || count > 1000) throw new IllegalArgumentException("pot count must be in [0,1000]");
+        var entries = new java.util.ArrayList<TrialPotEntry>();
+        for (int i = 0; i < count; i++) {
+            ItemStack item = new ItemStack(net.minecraft.world.item.Items.PAPER);
+            item.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME,
+                    net.minecraft.network.chat.Component.literal("Development Reward " + (i + 1)));
+            entries.add(new TrialPotEntry(UUID.randomUUID(), List.of(item)));
+        }
+        return copy(entries, decisions, appearances, completedRooms, phase, hardcoreBonusApplied,
+                demonicBonusApplied, lastRoom, encounter, portalModifiers, initialSkipProcessed);
     }
     private static TrialProgress copy(List<TrialPotEntry> pot, List<TrialPlayerDecision> decisions,
             List<TrialRoomAppearance> appearances, int rooms, TrialPhase phase, boolean hardcoreBonus,
             boolean demonicBonus,
-            Optional<Identifier> last, TrialEncounterState encounter) {
-        return new TrialProgress(pot, decisions, appearances, rooms, phase, hardcoreBonus, demonicBonus, last, encounter);
+            Optional<Identifier> last, TrialEncounterState encounter, TrialPortalModifiers modifiers, boolean skipProcessed) {
+        return new TrialProgress(pot, decisions, appearances, rooms, phase, hardcoreBonus, demonicBonus, last, encounter,
+                modifiers, skipProcessed);
     }
 }

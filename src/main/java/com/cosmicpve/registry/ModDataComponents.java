@@ -14,6 +14,8 @@ import com.cosmicpve.data.component.UnexaminedBookData;
 import com.cosmicpve.data.component.BanknoteData;
 import com.cosmicpve.data.component.MobSpawnerData;
 import com.cosmicpve.data.component.SpaceChestData;
+import com.cosmicpve.data.component.TrialTrinketData;
+import com.cosmicpve.data.component.TrialPortalModifiers;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -90,6 +92,16 @@ public final class ModDataComponents {
             COMPONENTS.registerComponentType("space_chest",
                     builder -> builder.persistent(SpaceChestData.CODEC)
                             .networkSynchronized(ByteBufCodecs.fromCodecWithRegistries(SpaceChestData.CODEC)).cacheEncoding());
+
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<TrialTrinketData>> TRIAL_TRINKET =
+            COMPONENTS.registerComponentType("trial_trinket",
+                    builder -> builder.persistent(TrialTrinketData.CODEC)
+                            .networkSynchronized(ByteBufCodecs.fromCodecWithRegistries(TrialTrinketData.CODEC)).cacheEncoding());
+
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<TrialPortalModifiers>> TRIAL_PORTAL_MODIFIERS =
+            COMPONENTS.registerComponentType("trial_portal_modifiers",
+                    builder -> builder.persistent(TrialPortalModifiers.CODEC)
+                            .networkSynchronized(ByteBufCodecs.fromCodecWithRegistries(TrialPortalModifiers.CODEC)).cacheEncoding());
 
     private ModDataComponents() {}
 

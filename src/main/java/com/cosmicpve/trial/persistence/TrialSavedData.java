@@ -14,5 +14,7 @@ public final class TrialSavedData extends SavedData {
     private TrialSavedData(Optional<TrialSession> activeSession) { this.activeSession = activeSession; }
     public Optional<TrialSession> activeSession() { return activeSession; }
     public void setActiveSession(TrialSession session) { activeSession = Optional.of(session); setDirty(); }
+    public void setActiveSessionVolatile(TrialSession session) { activeSession = Optional.of(session); }
+    public void markCheckpointDirty() { setDirty(); }
     public void clearActiveSession() { activeSession = Optional.empty(); setDirty(); }
 }

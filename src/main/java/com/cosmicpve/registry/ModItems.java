@@ -16,6 +16,9 @@ import com.cosmicpve.economy.BanknoteItem;
 import com.cosmicpve.reward.spawner.TypedMobSpawnerItem;
 import com.cosmicpve.spacechest.SpaceChestItem;
 import com.cosmicpve.trial.portal.TrialPortalItem;
+import com.cosmicpve.trial.trinket.TrialTrinketItem;
+import com.cosmicpve.data.component.TrialTrinketData;
+import com.cosmicpve.data.component.TrialTrinketType;
 
 public final class ModItems {
     private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(CosmicPVE.MOD_ID);
@@ -74,16 +77,20 @@ public final class ModItems {
     public static final DeferredItem<TrialPortalItem> TRIAL_PORTAL = ITEMS.registerItem(
             "trial_portal", TrialPortalItem::new, properties -> properties.stacksTo(64));
 
-    public static final DeferredItem<Item> TRIAL_TRINKET_TIME_1 = ITEMS.registerSimpleItem(
-            "trial_trinket_time_1", properties -> properties.stacksTo(64));
-    public static final DeferredItem<Item> TRIAL_TRINKET_INSURANCE_1 = ITEMS.registerSimpleItem(
-            "trial_trinket_insurance_1", properties -> properties.stacksTo(64));
-    public static final DeferredItem<Item> TRIAL_TRINKET_SKIP_1 = ITEMS.registerSimpleItem(
-            "trial_trinket_skip_1", properties -> properties.stacksTo(64));
-    public static final DeferredItem<Item> TRIAL_TRINKET_TIME_3 = ITEMS.registerSimpleItem(
-            "trial_trinket_time_3", properties -> properties.stacksTo(64));
-    public static final DeferredItem<Item> TRIAL_TRINKET_SKIP_2 = ITEMS.registerSimpleItem(
-            "trial_trinket_skip_2", properties -> properties.stacksTo(64));
+    public static final DeferredItem<TrialTrinketItem> TRIAL_TRINKET_TIME_1 = trinket("trial_trinket_time_1", TrialTrinketType.TIME, 1);
+    public static final DeferredItem<TrialTrinketItem> TRIAL_TRINKET_TIME_3 = trinket("trial_trinket_time_3", TrialTrinketType.TIME, 3);
+    public static final DeferredItem<TrialTrinketItem> TRIAL_TRINKET_TIME_5 = trinket("trial_trinket_time_5", TrialTrinketType.TIME, 5);
+    public static final DeferredItem<TrialTrinketItem> TRIAL_TRINKET_SKIP_1 = trinket("trial_trinket_skip_1", TrialTrinketType.SKIP, 1);
+    public static final DeferredItem<TrialTrinketItem> TRIAL_TRINKET_SKIP_2 = trinket("trial_trinket_skip_2", TrialTrinketType.SKIP, 2);
+    public static final DeferredItem<TrialTrinketItem> TRIAL_TRINKET_SKIP_3 = trinket("trial_trinket_skip_3", TrialTrinketType.SKIP, 3);
+    public static final DeferredItem<TrialTrinketItem> TRIAL_TRINKET_INSURANCE_1 = trinket("trial_trinket_insurance_1", TrialTrinketType.INSURANCE, 1);
+    public static final DeferredItem<TrialTrinketItem> TRIAL_TRINKET_INSURANCE_2 = trinket("trial_trinket_insurance_2", TrialTrinketType.INSURANCE, 2);
+    public static final DeferredItem<TrialTrinketItem> TRIAL_TRINKET_INSURANCE_3 = trinket("trial_trinket_insurance_3", TrialTrinketType.INSURANCE, 3);
+
+    private static DeferredItem<TrialTrinketItem> trinket(String name, TrialTrinketType type, int value) {
+        return ITEMS.registerItem(name, TrialTrinketItem::new, properties -> properties.stacksTo(64)
+                .component(ModDataComponents.TRIAL_TRINKET.get(), new TrialTrinketData(type, value)));
+    }
 
     private ModItems() {}
 

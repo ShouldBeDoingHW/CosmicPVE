@@ -106,10 +106,19 @@ public final class EquipmentTooltipService {
         var capacity = new CustomEnchantCapacityService();
         int used = capacity.used(stack);
         if (used > 0 || CustomEnchantCapacityService.isArmor(stack) || CustomEnchantCapacityService.isWeapon(stack))
-            event.getToolTip().add(Component.translatable(
-                "tooltip.cosmicpve.enchant_capacity", used, capacity.capacity(stack)));
+            event.getToolTip().add(capacityLine(capacity.capacity(stack)));
         sortTransmogEnchantments(event);
         recolorCosmicEnchantments(event);
+    }
+
+    public static Component capacityLine(int effectiveCapacity) {
+        int safe = Math.max(CustomEnchantCapacityService.BASE_CAPACITY, effectiveCapacity);
+        var line = Component.literal(safe + " Enchantment Slots").withColor(0x55FF55);
+        int increase = safe - CustomEnchantCapacityService.BASE_CAPACITY;
+        if (increase > 0) line.append(Component.literal(" (Orb ").withStyle(net.minecraft.ChatFormatting.GRAY))
+                .append(Component.literal("[+" + increase + "]").withColor(0x55FF55))
+                .append(Component.literal(")").withStyle(net.minecraft.ChatFormatting.GRAY));
+        return line;
     }
 
     static void sortTransmogEnchantments(ItemTooltipEvent event) {

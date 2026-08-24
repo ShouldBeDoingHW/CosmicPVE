@@ -11,6 +11,10 @@ import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
+import com.cosmicpve.data.component.TrialPortalModifiers;
+import com.cosmicpve.data.component.TrialTrinketType;
+import com.cosmicpve.registry.ModDataComponents;
+import com.cosmicpve.trial.trinket.TrialTrinkets;
 
 public final class TrialCommands {
     private TrialCommands() {}
@@ -21,9 +25,34 @@ public final class TrialCommands {
                                 .executes(ctx -> givePortal(ctx.getSource(), EntityArgument.getPlayer(ctx, "player"), 1))
                                 .then(Commands.argument("count", IntegerArgumentType.integer(1, 64))
                                         .executes(ctx -> givePortal(ctx.getSource(), EntityArgument.getPlayer(ctx, "player"),
-                                                IntegerArgumentType.getInteger(ctx, "count")))))))
+                                                IntegerArgumentType.getInteger(ctx, "count"))))))
+                        .then(Commands.literal("give-modified").then(Commands.argument("player", EntityArgument.player())
+                                .then(Commands.argument("time", IntegerArgumentType.integer(0, 5))
+                                        .then(Commands.argument("skip", IntegerArgumentType.integer(0, 3))
+                                                .then(Commands.argument("insurance", IntegerArgumentType.integer(0, 3))
+                                                        .executes(ctx -> giveModifiedPortal(ctx.getSource(),
+                                                                EntityArgument.getPlayer(ctx, "player"),
+                                                                IntegerArgumentType.getInteger(ctx, "time"),
+                                                                IntegerArgumentType.getInteger(ctx, "skip"),
+                                                                IntegerArgumentType.getInteger(ctx, "insurance"))))))))
+                        .then(Commands.literal("inspect").executes(ctx -> inspectPortal(ctx.getSource()))))
+                .then(Commands.literal("trinket").then(Commands.literal("give")
+                        .then(Commands.argument("player", EntityArgument.player())
+                                .then(Commands.argument("type", StringArgumentType.word())
+                                        .suggests((ctx, builder) -> net.minecraft.commands.SharedSuggestionProvider.suggest(
+                                                new String[]{"time", "skip", "insurance"}, builder))
+                                        .then(Commands.argument("value", IntegerArgumentType.integer(1, 5))
+                                                .executes(ctx -> giveTrinket(ctx.getSource(), EntityArgument.getPlayer(ctx, "player"),
+                                                        StringArgumentType.getString(ctx, "type"),
+                                                        IntegerArgumentType.getInteger(ctx, "value"), 1))
+                                                .then(Commands.argument("count", IntegerArgumentType.integer(1, 64))
+                                                        .executes(ctx -> giveTrinket(ctx.getSource(), EntityArgument.getPlayer(ctx, "player"),
+                                                                StringArgumentType.getString(ctx, "type"),
+                                                                IntegerArgumentType.getInteger(ctx, "value"),
+                                                                IntegerArgumentType.getInteger(ctx, "count")))))))))
                 .then(Commands.literal("debug")
                         .then(Commands.literal("status").executes(ctx -> status(ctx.getSource())))
+                        .then(Commands.literal("perf").executes(ctx -> perf(ctx.getSource())))
                         .then(Commands.literal("complete-room").executes(ctx -> send(ctx.getSource(),
                                 TrialRuntime.sessions().completeRoom(ctx.getSource().getServer()))))
                         .then(Commands.literal("continue").executes(ctx -> send(ctx.getSource(),
@@ -41,6 +70,10 @@ public final class TrialCommands {
                                 .then(Commands.argument("completed", IntegerArgumentType.integer(0, 8))
                                         .executes(ctx -> send(ctx.getSource(), TrialRuntime.sessions().debugSetCompletedRooms(
                                                 ctx.getSource().getServer(), IntegerArgumentType.getInteger(ctx, "completed")))))))
+                        .then(Commands.literal("pot").then(Commands.literal("fill")
+                                .then(Commands.argument("count", IntegerArgumentType.integer(0, 1000))
+                                        .executes(ctx -> send(ctx.getSource(), TrialRuntime.sessions().debugFillPot(
+                                                ctx.getSource().getServer(), IntegerArgumentType.getInteger(ctx, "count")))))))
                         .then(Commands.literal("force-room").then(Commands.argument("room", StringArgumentType.word())
                                 .suggests((ctx, builder) -> net.minecraft.commands.SharedSuggestionProvider.suggest(
                                         new String[]{"raiding_rainbow","circuit_circus","cold_snap","fire_colony","zero_g","bomb_squad"}, builder))
@@ -63,6 +96,45 @@ public final class TrialCommands {
         return count;
     }
 
+    private static int giveModifiedPortal(net.minecraft.commands.CommandSourceStack source, ServerPlayer player,
+                                          int time, int skip, int insurance) {
+        TrialPortalModifiers modifiers = new TrialPortalModifiers(TrialPortalModifiers.DATA_VERSION, time, skip, insurance);
+        if (!modifiers.valid()) {
+            source.sendFailure(Component.literal("Time must be 0, 1, 3, or 5; Skip and Insurance must be 0-3."));
+            return 0;
+        }
+        ItemStack stack = new ItemStack(ModItems.TRIAL_PORTAL.get());
+        com.cosmicpve.trial.portal.TrialPortalItem.applyModifiers(stack, modifiers);
+        if (!player.getInventory().add(stack)) player.drop(stack, false);
+        source.sendSuccess(() -> Component.literal("Gave modified Trial Portal: time=" + time
+                + " skip=" + skip + " insurance=" + insurance + "."), true);
+        return 1;
+    }
+
+    private static int inspectPortal(net.minecraft.commands.CommandSourceStack source)
+            throws com.mojang.brigadier.exceptions.CommandSyntaxException {
+        ItemStack held = source.getPlayerOrException().getMainHandItem();
+        if (!held.is(ModItems.TRIAL_PORTAL.get())) {
+            source.sendFailure(Component.literal("Hold a Trial Portal in your main hand.")); return 0;
+        }
+        var modifiers = held.getOrDefault(ModDataComponents.TRIAL_PORTAL_MODIFIERS.get(), TrialPortalModifiers.EMPTY);
+        source.sendSuccess(() -> Component.literal("Trial Portal modifiers: time=" + modifiers.timeMinutes()
+                + " skip=" + modifiers.skipRooms() + " insurance=" + modifiers.insuranceLevel()), false);
+        return 1;
+    }
+
+    private static int giveTrinket(net.minecraft.commands.CommandSourceStack source, ServerPlayer player,
+                                   String typeName, int value, int count) {
+        TrialTrinketType type;
+        try { type = TrialTrinketType.valueOf(typeName.toUpperCase(java.util.Locale.ROOT)); }
+        catch (IllegalArgumentException exception) { source.sendFailure(Component.literal("Unknown Trinket type.")); return 0; }
+        if (!type.validValue(value)) { source.sendFailure(Component.literal("Invalid value for " + typeName + " Trinket.")); return 0; }
+        ItemStack stack = TrialTrinkets.create(type, value, count);
+        if (!player.getInventory().add(stack)) player.drop(stack, false);
+        source.sendSuccess(() -> Component.literal("Gave " + count + " " + typeName + " " + value + " Trial Trinket(s)."), true);
+        return count;
+    }
+
     private static int status(net.minecraft.commands.CommandSourceStack source) {
         var active = TrialRuntime.sessions().active(source.getServer());
         if (active.isEmpty()) { source.sendSuccess(() -> Component.literal("No active Trial session."), false); return 0; }
@@ -75,7 +147,8 @@ public final class TrialCommands {
                 + " participants=[" + players + "] timer=" + session.timerTicks() + "t room="
                 + session.currentRoom().map(Object::toString).orElse("none") + " transition=" + session.transitionSerial()
                 + " phase=" + session.progress().phase() + " completed=" + session.progress().completedRooms()
-                + " pot=" + session.progress().pot().size()), false);
+                + " pot=" + session.progress().pot().size() + " modifiers=" + session.progress().portalModifiers()
+                + " skipProcessed=" + session.progress().initialSkipProcessed()), false);
         if (!session.progress().encounter().hiddenSequence().isEmpty())
             source.sendSuccess(() -> Component.literal("  hidden sequence=" + session.progress().encounter().hiddenSequence()
                     + " progress=" + session.progress().encounter().sequenceProgress()), false);
@@ -100,6 +173,14 @@ public final class TrialCommands {
             source.sendSuccess(() -> Component.literal("  " + id + " snapshot=" + snapshot), false);
         }
         return 1;
+    }
+
+    private static int perf(net.minecraft.commands.CommandSourceStack source) {
+        var snapshot = TrialRuntime.sessions().performanceSnapshot();
+        source.sendSuccess(() -> Component.literal("Trial perf: samples=" + snapshot.samples()
+                + " avg=" + snapshot.averageMicros() + "us max=" + snapshot.maximumMicros() + "us state="
+                + snapshot.state() + " room=" + snapshot.room() + " participants=" + snapshot.participants()), false);
+        return snapshot.samples();
     }
 
     private static int restore(net.minecraft.commands.CommandSourceStack source, ServerPlayer player) {

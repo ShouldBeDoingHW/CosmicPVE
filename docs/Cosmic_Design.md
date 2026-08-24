@@ -774,13 +774,13 @@ Rooms can be duplicated across a run, but the same room cannot appear twice cons
 
 > The Decision Box then begins its normal 30-second decision period.
 
-> Every visible one-second Trial Room or Decision Box title countdown update plays `minecraft:block.note_block.basedrum` once for each participating player. When a room's five-second introduction finishes and gameplay becomes active, `minecraft:entity.ender_dragon.growl` plays once for each participant; Decision Box entry never plays the growl.
+> Every visible one-second Trial Room or Decision Box title countdown update plays `minecraft:block.note_block.basedrum` once for each participating player. During a room's five-second introduction, participants remain anchored at the resolved room spawn while retaining camera rotation. When gameplay becomes active the anchor releases immediately and `minecraft:entity.ender_dragon.growl` plays once for each participant; Decision Box entry never plays the growl.
 
 > Decision Box title announcements are brief flashes at 30, 25, 20, 15, 10, 5, 4, 3, 2, and 1 seconds rather than a continuously redrawn title. Each displayed announcement receives one basedrum sound.
 
 > A room's resolved Emerald spawn marker is metadata rather than terrain. Only the exact marker selected by the room definition is consumed, it is replaced with the matching floor before players arrive, and unrelated Emerald Blocks remain untouched. Definitions with multiple Emerald mechanics identify their spawn marker explicitly and may override the replacement BlockState when inference is unsuitable.
 
-Trial portals can be modified with Trial Trinkets (orange dye item) that give various buffs to the player. There are 3 kinds of trinkets, with several variants each.
+Trial portals can be modified before use by dragging a Trial Trinket (orange dye item) onto exactly one separated portal item. Trinkets reject portal stacks larger than one; once modified, that portal is non-stackable. A portal stores at most one Time, one Skip, and one Insurance modifier; all three categories may coexist, and a stronger Trinket replaces a weaker modifier in its own category while equal or weaker applications are rejected. Trinket/portal-line family colors are Skip `#2BC2B8`, Time `#0A5751`, and Insurance `#0A5721`.
 
 The eventual participant-only Trial sidebar is ordered as follows:
 
@@ -792,13 +792,13 @@ Room #3---Cold Snap
 8:35
 ```
 
-Line one is the immutable portal creator's name in possessive form followed by `Trial` (for example, `Dev's Trial`). The phase line displays only the current phase: Apprentice `#E6E032`, Hardcore `#E6A732`, or Demonic `#E65C32`. The room number is the overall room ordinal for the run, followed by the room display name. The authoritative timer appears below a small spacer. Implementation is incremental: the possessive owner and phase lines are current, while the room line is a later milestone.
+Line one is the immutable portal creator's name in possessive form followed by `Trial` (for example, `Dev's Trial`). The phase line displays only the current phase: Apprentice `#E6E032`, Hardcore `#E6A732`, or Demonic `#E65C32`. The room number is the overall room ordinal for the run, including skipped progression, followed by the room display name. Decision states display `Decision Box` instead. The authoritative timer follows beneath the room/Decision context.
 
-Skip: Allows the player to skip 1, 2, or 3 rooms at the beginning of the Trial with no time spent and the skipped-room loot already added to the deal pot. Skipped rooms do not grant their normal room-completion time bonuses.
+Skip: Allows the party to skip 1, 2, or 3 rooms at the beginning of the Trial with no time spent and one independently rolled reward bundle per skipped room already persisted in the deal pot. Skipped rooms advance overall room progression but do not count as room appearances and do not grant normal room-completion time bonuses. The initial joining Decision Box never offers a pre-game cash-out; the first DEAL opportunity still follows a successfully completed playable room.
 
 Time bonus: Adds 1, 3, or 5 minutes to the Trial’s initial duration.
 
-Insurance: Randomly salvages 1, 2, or 3, loot items from the accumulated pot should the player die or run out of time in their trial.
+Insurance: Randomly salvages 1, 2, or 3 complete acquired pot entries if a participant dies or remains active when Trial time expires. Selection is without replacement and is independent per participant; the shared pot remains unchanged for survivors. Outside inventory/location restoration occurs before insured copies are delivered. Insurance does not apply to DEAL, voluntary/admin abort, or disconnect alone.
 
 Apprentice Room Loot Pool:
 

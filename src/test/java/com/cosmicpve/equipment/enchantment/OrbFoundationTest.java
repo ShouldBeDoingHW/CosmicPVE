@@ -26,6 +26,7 @@ class OrbFoundationTest {
     @Test void orbItemsAreNonStackingAndNeverForceGlint() {
         assertEquals(1, EnchantmentOrbItem.MAX_STACK_SIZE);
         assertFalse(EnchantmentOrbItem.FORCE_GLINT);
+        assertEquals(0x55FF55,EnchantmentOrbItem.NAME_COLOR);
     }
 
     @Test void bothOrbModelsUseTheVanillaEyeOfEnderTexture() throws Exception {

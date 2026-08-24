@@ -50,10 +50,14 @@ public final class TrialInventoryTransactionService {
     }
 
     public boolean prepareCashout(ServerPlayer player, List<ItemStack> rewards) {
+        return prepareRewardedRestore(player, rewards);
+    }
+
+    public boolean prepareRewardedRestore(ServerPlayer player, List<ItemStack> rewards) {
         TrialPlayerState state = player.getExistingDataOrNull(ModAttachments.TRIAL_PLAYER_STATE);
         if (state == null || state.phase() == TrialSnapshotPhase.RESTORED || state.snapshot().isEmpty()
-                || !state.pendingRewards().isEmpty()) return false;
-        player.setData(ModAttachments.TRIAL_PLAYER_STATE, state.withPendingRewards(rewards));
+                || state.rewardRestorePrepared()) return false;
+        player.setData(ModAttachments.TRIAL_PLAYER_STATE, state.withPreparedRewards(rewards));
         persistPlayer(player);
         return true;
     }
@@ -65,7 +69,7 @@ public final class TrialInventoryTransactionService {
     public boolean recover(ServerPlayer player, RewardDeliveryService delivery) {
         TrialPlayerState state = player.getExistingDataOrNull(ModAttachments.TRIAL_PLAYER_STATE);
         if (state == null || state.phase() == TrialSnapshotPhase.RESTORED) return false;
-        return state.pendingRewards().isEmpty() ? restore(player) : restoreCashout(player, delivery);
+        return state.rewardRestorePrepared() ? restoreCashout(player, delivery) : restore(player);
     }
 
     private boolean restoreInternal(ServerPlayer player, boolean cashout) {
@@ -75,7 +79,7 @@ public final class TrialInventoryTransactionService {
     private boolean restoreInternal(ServerPlayer player, boolean cashout, RewardDeliveryService delivery) {
         TrialPlayerState state = player.getExistingDataOrNull(ModAttachments.TRIAL_PLAYER_STATE);
         if (state == null || state.phase() == TrialSnapshotPhase.RESTORED || state.snapshot().isEmpty()) return false;
-        if (cashout && (delivery == null || state.pendingRewards().isEmpty())) return false;
+        if (cashout && (delivery == null || !state.rewardRestorePrepared())) return false;
         TrialOutsideSnapshot snapshot = state.snapshot().orElseThrow();
         clearTrialInventory(player);
         var destination = player.getInventory().getNonEquipmentItems();

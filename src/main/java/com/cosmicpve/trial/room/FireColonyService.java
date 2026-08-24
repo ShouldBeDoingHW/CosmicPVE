@@ -32,7 +32,6 @@ public final class FireColonyService {
     }
 
     public void tick(ServerLevel level, TrialSession session) {
-        if (level.getServer().getTickCount() % 10 != 0) return;
         Map<BlockPos, BlockState> baseline = hazardBaselines.get(session.sessionId());
         if (baseline == null) return;
         baseline.forEach((pos, expected) -> {
