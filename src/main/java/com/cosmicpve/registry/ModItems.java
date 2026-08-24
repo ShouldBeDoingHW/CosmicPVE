@@ -80,6 +80,10 @@ public final class ModItems {
             "trial_trinket_insurance_1", properties -> properties.stacksTo(64));
     public static final DeferredItem<Item> TRIAL_TRINKET_SKIP_1 = ITEMS.registerSimpleItem(
             "trial_trinket_skip_1", properties -> properties.stacksTo(64));
+    public static final DeferredItem<Item> TRIAL_TRINKET_TIME_3 = ITEMS.registerSimpleItem(
+            "trial_trinket_time_3", properties -> properties.stacksTo(64));
+    public static final DeferredItem<Item> TRIAL_TRINKET_SKIP_2 = ITEMS.registerSimpleItem(
+            "trial_trinket_skip_2", properties -> properties.stacksTo(64));
 
     private ModItems() {}
 

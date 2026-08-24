@@ -15,15 +15,17 @@ import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 
 public final class TrialTitleService {
     private static final TextColor ORANGE = TextColor.fromRgb(0xFFAA00);
+    private static final java.util.Set<Integer> DECISION_ANNOUNCEMENTS = java.util.Set.of(30,25,20,15,10,5,4,3,2,1);
     private final java.util.Map<java.util.UUID, String> lastPresentation = new java.util.HashMap<>();
     public void decision(ServerPlayer player, boolean joining, int seconds) {
+        if (!shouldAnnounceDecision(seconds)) return;
         if (!newPresentation(player, "decision:" + joining + ":" + seconds)) return;
-        send(player, decisionTitle(), decisionSubtitle(joining, seconds));
+        send(player, decisionTitle(), decisionSubtitle(joining, seconds), 10, 10, 5);
         playForPlayer(player, countdownSound());
     }
     public void roomCountdown(ServerPlayer player, String roomName, int seconds) {
         if (!newPresentation(player, "room:" + roomName + ":" + seconds)) return;
-        send(player, roomTitle(roomName), roomSubtitle(seconds));
+        send(player, roomTitle(roomName), roomSubtitle(seconds), 0, 25, 5);
         playForPlayer(player, countdownSound());
     }
     public void roomStarted(ServerPlayer player) {
@@ -38,8 +40,10 @@ public final class TrialTitleService {
     }
     static Component decisionTitle() { return Component.literal("Decision Box").withStyle(style -> style.withColor(ORANGE)); }
     static Component decisionSubtitle(boolean joining, int seconds) {
-        return Component.literal(joining ? seconds + " seconds for players to join!" : seconds + " seconds to choose!");
+        String unit = seconds == 1 ? " second" : " seconds";
+        return Component.literal(joining ? seconds + unit + " for players to join!" : seconds + unit + " to choose!");
     }
+    static boolean shouldAnnounceDecision(int seconds) { return DECISION_ANNOUNCEMENTS.contains(seconds); }
     static Component roomTitle(String roomName) { return Component.literal(roomName).withStyle(style -> style.withColor(ORANGE)); }
     static Component roomSubtitle(int seconds) {
         return Component.literal("Starting in... ")
@@ -54,8 +58,8 @@ public final class TrialTitleService {
                 SoundSource.PLAYERS, player.getX(), player.getY(), player.getZ(), 1.0F, 1.0F,
                 player.getRandom().nextLong()));
     }
-    private static void send(ServerPlayer player, Component title, Component subtitle) {
-        player.connection.send(new ClientboundSetTitlesAnimationPacket(0, 25, 5));
+    private static void send(ServerPlayer player, Component title, Component subtitle, int fadeIn, int stay, int fadeOut) {
+        player.connection.send(new ClientboundSetTitlesAnimationPacket(fadeIn, stay, fadeOut));
         player.connection.send(new ClientboundSetTitleTextPacket(title));
         player.connection.send(new ClientboundSetSubtitleTextPacket(subtitle));
     }

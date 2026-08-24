@@ -10,6 +10,7 @@ import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
 import net.neoforged.neoforge.event.entity.living.LivingExperienceDropEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.minecraft.world.entity.monster.zombie.Zombie;
+import net.minecraft.world.entity.monster.Shulker;
 import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 import net.minecraft.world.phys.BlockHitResult;
 
@@ -33,10 +34,14 @@ public final class TrialEventBridge {
     public void onDrops(LivingDropsEvent event) {
         if (event.getEntity() instanceof Zombie zombie
                 && com.cosmicpve.trial.room.RaidingRainbowService.encounterZombie(zombie)) event.getDrops().clear();
+        if (event.getEntity() instanceof Shulker shulker
+                && com.cosmicpve.trial.room.ZeroGService.encounterShulker(shulker)) event.getDrops().clear();
     }
     public void onExperience(LivingExperienceDropEvent event) {
         if (event.getEntity() instanceof Zombie zombie
                 && com.cosmicpve.trial.room.RaidingRainbowService.encounterZombie(zombie)) event.setDroppedExperience(0);
+        if (event.getEntity() instanceof Shulker shulker
+                && com.cosmicpve.trial.room.ZeroGService.encounterShulker(shulker)) event.setDroppedExperience(0);
     }
     public void onProjectileImpact(ProjectileImpactEvent event) {
         if (event.getProjectile() instanceof AbstractArrow arrow && arrow.getOwner() instanceof ServerPlayer player
@@ -47,6 +52,7 @@ public final class TrialEventBridge {
     }
     public void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
         if (event.getEntity() instanceof ServerPlayer player)
-            TrialRuntime.sessions().onCircuitLever(player, event.getPos());
+            { TrialRuntime.sessions().onCircuitLever(player, event.getPos());
+              TrialRuntime.sessions().onFireColonyLever(player, event.getPos()); }
     }
 }

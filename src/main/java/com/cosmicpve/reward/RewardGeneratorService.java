@@ -26,10 +26,12 @@ public final class RewardGeneratorService {
                     .map(UnexaminedBooks::revealed);
             case RewardDescriptor.UnexaminedBook reward -> Optional.of(UnexaminedBooks.create(reward.rarity()));
             case RewardDescriptor.BlackScroll reward -> Optional.of(enchanting.blackScroll(reward.successRate()));
-            case RewardDescriptor.ArmorOrb reward -> Optional.of(
-                    enchanting.orb(OrbType.ARMOR, reward.successRate(), context.random()));
-            case RewardDescriptor.WeaponOrb reward -> Optional.of(
-                    enchanting.orb(OrbType.WEAPON, reward.successRate(), context.random()));
+            case RewardDescriptor.ArmorOrb reward -> Optional.of(reward.successRate() == 0
+                    ? enchanting.randomOrb(OrbType.ARMOR, context.random())
+                    : enchanting.orb(OrbType.ARMOR, reward.successRate(), context.random()));
+            case RewardDescriptor.WeaponOrb reward -> Optional.of(reward.successRate() == 0
+                    ? enchanting.randomOrb(OrbType.WEAPON, context.random())
+                    : enchanting.orb(OrbType.WEAPON, reward.successRate(), context.random()));
             case RewardDescriptor.MobSpawner reward -> Optional.of(MobSpawners.create(reward.entityTypeId(), 1));
             case RewardDescriptor.GeneratedEquipment reward -> Optional.of(equipment.generate(
                     reward.definition(), context.registries().lookupOrThrow(Registries.ENCHANTMENT), context.random()));

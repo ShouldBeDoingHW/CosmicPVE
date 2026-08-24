@@ -226,6 +226,8 @@
   ,"item.cosmicpve.trial_trinket_time_1":"+1 Minute Trial Trinket"
   ,"item.cosmicpve.trial_trinket_insurance_1":"+1 Insurance Trial Trinket"
   ,"item.cosmicpve.trial_trinket_skip_1":"Skip 1 Room Trial Trinket"
+  ,"item.cosmicpve.trial_trinket_time_3":"+3 Minutes Trial Trinket"
+  ,"item.cosmicpve.trial_trinket_skip_2":"Skip 2 Rooms Trial Trinket"
   ,"enchantment.cosmicpve.trap":"Trap"
   ,"enchantment.cosmicpve.trap.description":"Successful sword attacks may inflict Slowness V."
 }

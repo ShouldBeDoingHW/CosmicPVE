@@ -5,6 +5,7 @@ import com.cosmicpve.registry.ModItems;
 import com.cosmicpve.trial.TrialOperationResult;
 import com.cosmicpve.trial.TrialRuntime;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
@@ -36,6 +37,14 @@ public final class TrialCommands {
                         .then(Commands.literal("sound")
                                 .then(Commands.literal("countdown").executes(ctx -> sound(ctx.getSource(), false)))
                                 .then(Commands.literal("start").executes(ctx -> sound(ctx.getSource(), true))))
+                        .then(Commands.literal("progress").then(Commands.literal("set")
+                                .then(Commands.argument("completed", IntegerArgumentType.integer(0, 8))
+                                        .executes(ctx -> send(ctx.getSource(), TrialRuntime.sessions().debugSetCompletedRooms(
+                                                ctx.getSource().getServer(), IntegerArgumentType.getInteger(ctx, "completed")))))))
+                        .then(Commands.literal("force-room").then(Commands.argument("room", StringArgumentType.word())
+                                .suggests((ctx, builder) -> net.minecraft.commands.SharedSuggestionProvider.suggest(
+                                        new String[]{"raiding_rainbow","circuit_circus","fire_colony","zero_g"}, builder))
+                                .executes(ctx -> forceRoom(ctx.getSource(), StringArgumentType.getString(ctx, "room")))))
                         .then(Commands.literal("timer")
                                 .then(Commands.literal("set").then(Commands.argument("seconds", IntegerArgumentType.integer(0))
                                         .executes(ctx -> timer(ctx.getSource(), IntegerArgumentType.getInteger(ctx, "seconds"), true))))
@@ -73,6 +82,11 @@ public final class TrialCommands {
         if (!session.progress().encounter().pillarMaterials().isEmpty())
             source.sendSuccess(() -> Component.literal("  pillars=" + session.progress().encounter().pillarMaterials()
                     + " completed circuits=" + session.progress().encounter().completedCircuits()), false);
+        if (session.currentRoom().filter(com.cosmicpve.trial.TrialSessionService.ZERO_G::equals).isPresent())
+            source.sendSuccess(() -> Component.literal("  objectives="
+                    + session.progress().encounter().completedObjectives().size() + "/10 encounter entities="
+                    + session.progress().encounter().encounterEntities().size() + " completed positions="
+                    + session.progress().encounter().completedObjectives()), false);
         for (var id : session.participants()) {
             var player = source.getServer().getPlayerList().getPlayer(id);
             String snapshot = player == null ? "offline/preserved" : String.valueOf(player.getExistingDataOrNull(ModAttachments.TRIAL_PLAYER_STATE));
@@ -92,6 +106,11 @@ public final class TrialCommands {
         TrialRuntime.sessions().debugSound(source.getPlayerOrException(), start);
         source.sendSuccess(() -> Component.literal("Played Trial " + (start ? "room-start" : "countdown") + " sound."), false);
         return 1;
+    }
+
+    private static int forceRoom(net.minecraft.commands.CommandSourceStack source, String room) {
+        return send(source, TrialRuntime.sessions().debugForceRoom(source.getServer(),
+                com.cosmicpve.CosmicPVE.id("trial/" + room)));
     }
 
     private static int timer(net.minecraft.commands.CommandSourceStack source, int seconds, boolean absolute) {

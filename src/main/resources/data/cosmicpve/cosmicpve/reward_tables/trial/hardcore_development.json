@@ -1,0 +1,19 @@
+{
+  "entries": [
+    {"weight":12,"reward":{"type":"static_item","item":"cosmicpve:trial_trinket_time_3"}},
+    {"weight":10,"reward":{"type":"black_scroll","success_rate":75}},
+    {"weight":8,"reward":{"type":"armor_orb"}},
+    {"weight":10,"reward":{"type":"mob_spawner","entity_type":"minecraft:blaze"}},
+    {"weight":10,"reward":{"type":"mob_spawner","entity_type":"minecraft:creeper"}},
+    {"weight":10,"reward":{"type":"unexamined_book","rarity":"legendary"}},
+    {"weight":3,"minimum_quantity":2,"maximum_quantity":2,"reward":{"type":"unexamined_book","rarity":"legendary"}},
+    {"weight":12,"reward":{"type":"static_item","item":"cosmicpve:trial_trinket_skip_1"}},
+    {"weight":6,"reward":{"type":"static_item","item":"cosmicpve:trial_trinket_skip_2"}},
+    {"weight":10,"reward":{"type":"unexamined_book","rarity":"ultimate"}},
+    {"weight":5,"minimum_quantity":2,"maximum_quantity":2,"reward":{"type":"unexamined_book","rarity":"ultimate"}},
+    {"weight":8,"reward":{"type":"weapon_orb"}},
+    {"weight":15,"reward":{"type":"static_item","item":"cosmicpve:white_scroll"}},
+    {"weight":10,"reward":{"type":"static_item","item":"cosmicpve:repair_scroll"}},
+    {"weight":8,"reward":{"type":"space_chest","rarity":"legendary"}}
+  ]
+}

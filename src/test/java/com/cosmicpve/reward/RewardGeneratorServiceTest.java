@@ -70,6 +70,15 @@ class RewardGeneratorServiceTest {
         }
     }
 
+    @Test void unspecifiedOrbsRollIndependentValidSuccessAndDestroyRates() {
+        for (var descriptor : new RewardDescriptor[]{new RewardDescriptor.ArmorOrb(0),
+                new RewardDescriptor.WeaponOrb(0)}) {
+            EnchantmentOrbData data=generate(descriptor).get(ModDataComponents.ENCHANTMENT_ORB.get());
+            assertTrue(data.successRate()>=1 && data.successRate()<=100);
+            assertTrue(data.destroyRate()>=1 && data.destroyRate()<=100);
+        }
+    }
+
     @Test void spawnerRewardPersistsExactEntityIdentity() {
         var stack = generate(new RewardDescriptor.MobSpawner(Identifier.parse("minecraft:blaze")));
         assertEquals(ModItems.MOB_SPAWNER.get(), stack.getItem());

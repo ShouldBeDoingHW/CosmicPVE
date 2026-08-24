@@ -18,6 +18,8 @@ public final class CosmicPVEClient {
         modBus.addListener(CosmicPVEClient::registerItemTints);
         modBus.addListener(CosmicPVEClient::registerEntityRenderers);
         modBus.addListener(CosmicPVEClient::registerMenuScreens);
+        modBus.addListener(TrialClientPresentation::registerPayloadHandlers);
+        modBus.addListener(TrialClientPresentation::registerGuiLayers);
     }
 
     private static void registerMenuScreens(RegisterMenuScreensEvent event) {

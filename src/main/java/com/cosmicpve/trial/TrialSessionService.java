@@ -15,6 +15,8 @@ import com.cosmicpve.trial.persistence.TrialSessionRepository;
 import com.cosmicpve.trial.room.CircuitCircusService;
 import com.cosmicpve.trial.room.CircuitPlacementPolicy;
 import com.cosmicpve.trial.room.RaidingRainbowService;
+import com.cosmicpve.trial.room.FireColonyService;
+import com.cosmicpve.trial.room.ZeroGService;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -47,10 +49,15 @@ public final class TrialSessionService {
     public static final Identifier DEVELOPMENT_ROOM = CosmicPVE.id("trial/development_room");
     public static final Identifier RAIDING_RAINBOW = CosmicPVE.id("trial/raiding_rainbow");
     public static final Identifier CIRCUIT_CIRCUS = CosmicPVE.id("trial/circuit_circus");
+    public static final Identifier FIRE_COLONY = CosmicPVE.id("trial/fire_colony");
+    public static final Identifier ZERO_G = CosmicPVE.id("trial/zero_g");
     public static final Identifier APPRENTICE_REWARDS = CosmicPVE.id("trial/apprentice");
+    public static final Identifier HARDCORE_REWARDS = CosmicPVE.id("trial/hardcore_development");
     private static final List<Identifier> APPRENTICE_ROOMS = List.of(RAIDING_RAINBOW, CIRCUIT_CIRCUS);
-    static final int ROOM_REWARD_TIME = 600;
-    static final int HARDCORE_PHASE_BONUS = 3_600;
+    private static final List<Identifier> HARDCORE_ROOMS = List.of(FIRE_COLONY, ZERO_G);
+    static final int APPRENTICE_REWARD_TIME = 600;
+    static final int HARDCORE_REWARD_TIME = 300;
+    static final int PHASE_ENTRY_BONUS = 3_600;
 
     private final TrialSessionRepository repository;
     private final TrialInventoryTransactionService inventories;
@@ -63,6 +70,11 @@ public final class TrialSessionService {
     private final RewardTableService rewards = new RewardTableService(CosmicContent.repository(), new RewardGeneratorService());
     private final RaidingRainbowService rainbow = new RaidingRainbowService();
     private final CircuitCircusService circuit = new CircuitCircusService();
+    private final FireColonyService fireColony = new FireColonyService();
+    private final ZeroGService zeroG = new ZeroGService();
+    private final TrialTimerDisplayService timerDisplay = new TrialTimerDisplayService();
+    private final TrialCelebrationService celebrations = new TrialCelebrationService();
+    private final TrialDecisionEntryService decisionEntries = new TrialDecisionEntryService();
     private final Map<UUID, BlockPos> decisionSpawns = new HashMap<>();
     private final Map<UUID, BlockPos> roomSpawns = new HashMap<>();
 
@@ -112,8 +124,9 @@ public final class TrialSessionService {
         if (!inventories.enter(player, session.sessionId())) return TrialOperationResult.rejected("Could not durably snapshot your inventory.");
         try {
             TrialSession joined = session.addParticipant(player.getUUID()); repository.publish(player.level().getServer(), joined);
-            teleport(player, decisionSpawn(joined));
-            titles.decision(player, true, Math.max(1, (joined.stateTicksRemaining() + 19) / 20));
+            decisionEntries.enter(player, () -> teleport(player, decisionSpawn(joined)), () ->
+                    titles.decision(player, true, Math.max(1, (joined.stateTicksRemaining() + 19) / 20)));
+            timerDisplay.show(player, joined.timerTicks());
             return TrialOperationResult.ok("Joined Trial " + joined.sessionId());
         } catch (RuntimeException exception) {
             inventories.restore(player); return TrialOperationResult.rejected("Trial entry failed; your outside inventory was restored.");
@@ -121,13 +134,24 @@ public final class TrialSessionService {
     }
 
     public void tick(MinecraftServer server) {
+        celebrations.tick(server);
         TrialSession session = active(server).orElse(null); if (session == null) return;
+        timerDisplay.update(server, session);
         switch (session.state()) {
             case JOINING, DECISION -> tickDecision(server, session);
             case ROOM_INTRO -> tickRoomIntro(server, session);
             case ROOM_ACTIVE -> {
-                int remaining = TrialStateMachine.tickGameplayTimer(session).timerTicks();
-                if (remaining == 0) abort(server, "Trial timer expired."); else publishTick(server, session.withTimer(remaining));
+                ServerLevel level = server.getLevel(TrialRuntime.INSTANCE_DIMENSION);
+                if (session.currentRoom().filter(FIRE_COLONY::equals).isPresent()) fireColony.tick(level, session);
+                TrialSession current = session;
+                if (session.currentRoom().filter(ZERO_G::equals).isPresent() && server.getTickCount() % 10 == 0) {
+                    zeroG.keepFixturesPinned(level, session);
+                    ZeroGTickResult objectives = tickZeroGObjectives(server, level, session);
+                    if (objectives.completed()) return;
+                    current = objectives.session();
+                }
+                int remaining = TrialStateMachine.tickGameplayTimer(current).timerTicks();
+                if (remaining == 0) abort(server, "Trial timer expired."); else publishTick(server, current.withTimer(remaining));
             }
             default -> { }
         }
@@ -136,20 +160,20 @@ public final class TrialSessionService {
     private void tickDecision(MinecraftServer server, TrialSession session) {
         int current = session.stateTicksRemaining();
         if (session.initialDecision()) {
-            if (current >= 520 && current % 20 == 0)
+            if (current % 20 == 0 && TrialTitleService.shouldAnnounceDecision(current / 20))
                 forOnline(server, session, player -> titles.decision(player, true, current / 20));
             int next = Math.max(0, current - 1);
             if (next == 0) { if (session.participants().isEmpty()) cleanupAndClose(server, session); else beginNextRoom(server, session); }
             else publishTick(server, session.withStateTicks(next));
             return;
         }
-        if (current >= 520 && current % 20 == 0)
+        if (current % 20 == 0 && TrialTitleService.shouldAnnounceDecision(current / 20))
             forOnline(server, session, player -> titles.decision(player, false, current / 20));
         if (server.getTickCount() % 20 == 0) forOnline(server, session, player -> {
             if (session.progress().decision(player.getUUID()) == TrialDecision.UNDECIDED
                     && !(player.containerMenu instanceof TrialDecisionMenu)) openDecision(player);
         });
-        if (session.progress().phase() == TrialPhase.HARDCORE && session.progress().completedRooms() >= 4) return;
+        if (session.progress().phase() == TrialPhase.DEMONIC && session.progress().completedRooms() >= 8) return;
         int next = Math.max(0, current - 1);
         if (next == 0) timeoutDecisions(server, session); else publishTick(server, session.withStateTicks(next));
     }
@@ -168,6 +192,8 @@ public final class TrialSessionService {
             forOnline(server, active, player -> titles.roomStarted(player));
             if (active.currentRoom().filter(RAIDING_RAINBOW::equals).isPresent())
                 rainbow.activate(server.getLevel(TrialRuntime.INSTANCE_DIMENSION), active, roomBounds(active));
+            if (active.currentRoom().filter(ZERO_G::equals).isPresent())
+                zeroG.activate(server.getLevel(TrialRuntime.INSTANCE_DIMENSION), active);
         } else publishTick(server, session.withStateTicks(next));
     }
 
@@ -180,7 +206,8 @@ public final class TrialSessionService {
         TrialSession ending = session.withState(TrialLifecycleState.ENDING, 0, session.currentRoom(), false,
                 session.protectedBounds()); repository.publish(server, ending);
         try {
-            List<ItemStack> reward = rewards.roll(APPRENTICE_REWARDS, 1,
+            Identifier rewardTable = session.progress().phase() == TrialPhase.HARDCORE ? HARDCORE_REWARDS : APPRENTICE_REWARDS;
+            List<ItemStack> reward = rewards.roll(rewardTable, 1,
                     new RewardGenerationContext(server.registryAccess(), net.minecraft.util.RandomSource.create(), null));
             TrialProgress nextProgress = session.progress().completeRoom(reward).beginDecision(session.participants());
             int bonus = completionTimeBonus(session.progress(), nextProgress);
@@ -190,8 +217,12 @@ public final class TrialSessionService {
             TrialSession next = ending.withTimerAndProgress(session.timerTicks() + bonus, nextProgress)
                     .withState(TrialLifecycleState.DECISION, 600, Optional.empty(), false, List.of(decisionBounds));
             repository.publish(server, next);
-            forOnline(server, next, player -> { loadouts.clear(player); teleport(player, decisionSpawn(next));
-                titles.decision(player, false, 30); openDecision(player); });
+            forOnline(server, next, player -> {
+                loadouts.clear(player); player.removeEffect(net.minecraft.world.effect.MobEffects.LEVITATION);
+                decisionEntries.enter(player, () -> teleport(player, decisionSpawn(next)), () -> {
+                    titles.decision(player, false, 30); openDecision(player);
+                });
+            });
             return TrialOperationResult.ok("Room completed: one reward added and " + bonus / 20 + " seconds awarded.");
         } catch (RuntimeException exception) {
             CosmicPVE.LOGGER.error("Trial completion transaction failed before reward publication", exception);
@@ -200,17 +231,21 @@ public final class TrialSessionService {
     }
 
     static int completionTimeBonus(TrialProgress before, TrialProgress after) {
-        return ROOM_REWARD_TIME + (after.phase() == TrialPhase.HARDCORE
-                && !before.hardcoreBonusApplied() ? HARDCORE_PHASE_BONUS : 0);
+        int roomBonus = before.phase() == TrialPhase.APPRENTICE ? APPRENTICE_REWARD_TIME
+                : before.phase() == TrialPhase.HARDCORE ? HARDCORE_REWARD_TIME : 0;
+        int transition = after.hardcoreBonusApplied() && !before.hardcoreBonusApplied() ? PHASE_ENTRY_BONUS : 0;
+        if (after.demonicBonusApplied() && !before.demonicBonusApplied()) transition += PHASE_ENTRY_BONUS;
+        return roomBonus + transition;
     }
 
     public TrialOperationResult continueRoom(MinecraftServer server) {
         TrialSession session = active(server).orElse(null);
         if (session == null || session.state() != TrialLifecycleState.DECISION || session.initialDecision())
             return TrialOperationResult.rejected("The Trial is not waiting in a post-room Decision Box.");
-        if (session.progress().phase() == TrialPhase.HARDCORE)
-            return TrialOperationResult.rejected("Hardcore rooms are not enabled until Step 6O. The pot remains safe; choose DEAL to leave.");
-        beginNextRoom(server, session); return TrialOperationResult.ok("Continuing to the next Apprentice room.");
+        if (session.progress().phase() == TrialPhase.DEMONIC)
+            return TrialOperationResult.rejected("Demonic rooms are not enabled in this milestone. The pot remains safe; choose DEAL to leave.");
+        beginNextRoom(server, session); return TrialOperationResult.ok("Continuing to the next "
+                + session.progress().phase().getSerializedName() + " room.");
     }
 
     public TrialOperationResult decide(ServerPlayer player, TrialDecision decision) {
@@ -219,9 +254,9 @@ public final class TrialSessionService {
                 || !session.activeParticipant(player.getUUID())) return TrialOperationResult.rejected("No active Trial decision is available.");
         if (session.progress().decision(player.getUUID()) != TrialDecision.UNDECIDED)
             return TrialOperationResult.rejected("Your Trial decision is already committed.");
-        if (decision == TrialDecision.NO_DEAL && session.progress().phase() == TrialPhase.HARDCORE) {
-            player.sendSystemMessage(Component.literal("Hardcore rooms are not enabled in Step 6N. Your pot is safe; DEAL remains available."));
-            return TrialOperationResult.rejected("Hardcore room pool is not enabled yet.");
+        if (decision == TrialDecision.NO_DEAL && session.progress().phase() == TrialPhase.DEMONIC) {
+            player.sendSystemMessage(Component.literal("Demonic rooms are not enabled in Step 6O. Your pot is safe; DEAL remains available."));
+            return TrialOperationResult.rejected("Demonic room pool is not enabled yet.");
         }
         if (decision == TrialDecision.DEAL) {
             List<ItemStack> payout = session.progress().pot().stream().flatMap(entry -> entry.items().stream()).map(ItemStack::copy).toList();
@@ -230,6 +265,8 @@ public final class TrialSessionService {
             TrialSession next = session.withProgress(decided).removeParticipant(player.getUUID());
             repository.publish(server, next); player.closeContainer();
             if (!inventories.restoreCashout(player, delivery)) return TrialOperationResult.rejected("Payout is safely pending recovery.");
+            timerDisplay.hide(player);
+            celebrations.schedule(player, session.progress().completedRooms(), server.getTickCount());
             if (next.participants().isEmpty()) cleanupAndClose(server, next); else resolveIfReady(server, next);
             return TrialOperationResult.ok("DEAL accepted. Outside state restored and the full pot delivered.");
         }
@@ -247,38 +284,57 @@ public final class TrialSessionService {
 
     private void resolveIfReady(MinecraftServer server, TrialSession session) {
         if (session.participants().isEmpty()) { cleanupAndClose(server, session); return; }
-        boolean ready = session.participants().stream().allMatch(id -> session.progress().decision(id) == TrialDecision.NO_DEAL);
+        boolean ready = allContinuingReady(session);
         if (ready) beginNextRoom(server, session);
+    }
+    static boolean allContinuingReady(TrialSession session) {
+        return !session.participants().isEmpty()
+                && session.participants().stream().allMatch(id -> session.progress().decision(id) == TrialDecision.NO_DEAL);
     }
 
     private void beginNextRoom(MinecraftServer server, TrialSession session) {
-        if (session.progress().phase() != TrialPhase.APPRENTICE) {
+        if (session.progress().phase() == TrialPhase.DEMONIC) {
             TrialSession gated = session.withState(TrialLifecycleState.DECISION, 0, Optional.empty(), false,
                     session.protectedBounds()); repository.publish(server, gated);
             forOnline(server, gated, player -> player.sendSystemMessage(Component.literal(
-                    "Hardcore rooms are not enabled until Step 6O. Your pot remains safe in the Decision Box.")));
+                    "Demonic rooms are not enabled in Step 6O. Your pot remains safe in the Decision Box.")));
             return;
         }
-        Identifier room = selection.select(session, APPRENTICE_ROOMS, net.minecraft.util.RandomSource.create()).orElse(null);
+        List<Identifier> pool = roomPool(session.progress().phase());
+        Identifier room = selection.select(session, pool, net.minecraft.util.RandomSource.create()).orElse(null);
         if (room == null) {
-            CosmicPVE.LOGGER.error("No eligible Apprentice Trial room for session {}", session.sessionId());
+            CosmicPVE.LOGGER.error("No eligible {} Trial room for session {}", session.progress().phase(), session.sessionId());
             forOnline(server, session, player -> player.sendSystemMessage(Component.literal(
                     "No eligible Trial room is available. The session and pot remain safe in the Decision Box.")));
             return;
         }
+        beginRoom(server, session, room);
+    }
+
+    static List<Identifier> roomPool(TrialPhase phase) {
+        return phase == TrialPhase.HARDCORE ? HARDCORE_ROOMS : phase == TrialPhase.APPRENTICE ? APPRENTICE_ROOMS : List.of();
+    }
+
+    private void beginRoom(MinecraftServer server, TrialSession session, Identifier room) {
         removePortal(server, session); ServerLevel level = server.getLevel(TrialRuntime.INSTANCE_DIMENSION);
         var placed = structures.place(level, CosmicContent.repository().requireTrialRoom(room), ROOM_ORIGIN);
         roomSpawns.put(session.sessionId(), placed.participantSpawn());
-        TrialEncounterState encounter = room.equals(RAIDING_RAINBOW)
-                ? rainbow.initialize(level, session, placed.bounds(), net.minecraft.util.RandomSource.create())
-                : circuit.initialize(level, ROOM_ORIGIN, placed.bounds(), net.minecraft.util.RandomSource.create());
+        TrialEncounterState encounter;
+        if (room.equals(RAIDING_RAINBOW)) encounter = rainbow.initialize(level, session, placed.bounds(), net.minecraft.util.RandomSource.create());
+        else if (room.equals(CIRCUIT_CIRCUS)) encounter = circuit.initialize(level, ROOM_ORIGIN, placed.bounds(), net.minecraft.util.RandomSource.create());
+        else if (room.equals(ZERO_G)) encounter = zeroG.initialize(level, session, placed.bounds(), ROOM_ORIGIN);
+        else { fireColony.initialize(level, session, placed.bounds()); encounter = TrialEncounterState.EMPTY; }
         TrialProgress progress = session.progress().beginRoom(room, encounter);
-        var bounds = new ArrayList<>(session.protectedBounds()); bounds.add(placed.bounds());
+        InstanceBounds decisionBounds = InstanceBounds.from(CosmicContent.repository().requireTrialRoom(DECISION_ROOM).bounds().at(DECISION_ORIGIN));
+        var bounds = List.of(decisionBounds, placed.bounds());
         TrialSession next = session.withProgress(progress).withState(TrialLifecycleState.ROOM_INTRO,
                 TrialSession.ROOM_INTRO_TICKS, Optional.of(room), false, bounds);
         repository.publish(server, next);
         forOnline(server, next, player -> {
-            if (room.equals(RAIDING_RAINBOW)) loadouts.applyRaidingRainbow(player); else loadouts.applyCircuitCircus(player);
+            if (room.equals(RAIDING_RAINBOW)) loadouts.applyRaidingRainbow(player);
+            else if (room.equals(CIRCUIT_CIRCUS)) loadouts.applyCircuitCircus(player);
+            else if (room.equals(FIRE_COLONY)) loadouts.applyFireColony(player);
+            else loadouts.applyZeroG(player);
             teleport(player, placed.participantSpawn());
         });
     }
@@ -311,8 +367,9 @@ public final class TrialSessionService {
 
     public boolean allowsCircuitPlacement(ServerPlayer player, BlockPos pos, BlockState state) {
         TrialSession session = active(player.level().getServer()).orElse(null);
-        return session != null && CircuitPlacementPolicy.allows(session.activeParticipant(player.getUUID()),
-                session.currentRoom().filter(CIRCUIT_CIRCUS::equals).isPresent(), session.state(),
+        if (session == null || session.state() != TrialLifecycleState.ROOM_ACTIVE
+                || session.currentRoom().filter(CIRCUIT_CIRCUS::equals).isEmpty()) return false;
+        return CircuitPlacementPolicy.allows(session.activeParticipant(player.getUUID()), true, session.state(),
                 roomBounds(session), pos, state);
     }
 
@@ -337,6 +394,18 @@ public final class TrialSessionService {
                 && pos.equals(ROOM_ORIGIN.offset(CircuitCircusService.LEVER_LOCAL));
     }
 
+    public boolean allowsFireColonyUse(ServerPlayer player, BlockPos pos) {
+        TrialSession session = active(player.level().getServer()).orElse(null);
+        return session != null && session.state() == TrialLifecycleState.ROOM_ACTIVE
+                && session.activeParticipant(player.getUUID())
+                && session.currentRoom().filter(FIRE_COLONY::equals).isPresent()
+                && fireColony.isFinalLever(pos, ROOM_ORIGIN);
+    }
+
+    public boolean allowsProtectedRoomUse(ServerPlayer player, BlockPos pos) {
+        return allowsCircuitUse(player, pos) || allowsFireColonyUse(player, pos);
+    }
+
     public void onCircuitLever(ServerPlayer player, BlockPos pos) {
         if (!allowsCircuitUse(player, pos)) return;
         TrialSession session = active(player.level().getServer()).orElseThrow();
@@ -344,10 +413,42 @@ public final class TrialSessionService {
         else player.sendSystemMessage(Component.literal("All four circuits must be complete before using the lever."));
     }
 
+    public void onFireColonyLever(ServerPlayer player, BlockPos pos) {
+        if (allowsFireColonyUse(player, pos)) completeProductionRoom(player.level().getServer());
+    }
+
+    private ZeroGTickResult tickZeroGObjectives(MinecraftServer server, ServerLevel level, TrialSession session) {
+        TrialSession current = session;
+        for (UUID participant : session.participants()) {
+            ServerPlayer player = server.getPlayerList().getPlayer(participant);
+            if (player == null) continue;
+            Optional<BlockPos> objective = zeroG.objectiveAt(player.blockPosition(), ROOM_ORIGIN, current.progress().encounter());
+            if (objective.isEmpty()) continue;
+            var activation = zeroG.activatePlate(level, player, objective.orElseThrow(),
+                    current.progress().encounter(), net.minecraft.util.RandomSource.create());
+            if (!activation.accepted()) continue;
+            current = withZeroGEncounter(current, activation.state());
+            int completed = current.progress().encounter().completedObjectives().size();
+            broadcast(server, current, "Zero-G Objective " + completed + "/10!");
+            if (activation.complete()) {
+                repository.publish(server, current); // completion reads the exact authoritative ten-position set
+                completeProductionRoom(server);
+                return new ZeroGTickResult(current, true);
+            }
+        }
+        return new ZeroGTickResult(current, false);
+    }
+
+    record ZeroGTickResult(TrialSession session, boolean completed) {}
+    public static TrialSession withZeroGEncounter(TrialSession session, TrialEncounterState encounter) {
+        return session.withProgress(session.progress().withEncounter(encounter));
+    }
+
     public TrialOperationResult exit(ServerPlayer player) {
         TrialSession session = active(player.level().getServer()).orElse(null);
         if (session == null || !session.activeParticipant(player.getUUID())) return TrialOperationResult.rejected("You are not an active Trial participant.");
         loadouts.clear(player); if (!inventories.restore(player)) return TrialOperationResult.rejected("Your outside snapshot could not be restored safely.");
+        timerDisplay.hide(player);
         TrialSession next = session.removeParticipant(player.getUUID());
         if (next.participants().isEmpty()) cleanupAndClose(player.level().getServer(), next); else repository.publish(player.level().getServer(), next);
         return TrialOperationResult.ok("Exited the Trial and restored your outside state.");
@@ -355,7 +456,7 @@ public final class TrialSessionService {
 
     public TrialOperationResult abort(MinecraftServer server, String reason) {
         TrialSession session = active(server).orElse(null); if (session == null) return TrialOperationResult.rejected("No active Trial exists.");
-        forOnline(server, session, player -> { loadouts.clear(player); inventories.restore(player); }); cleanupAndClose(server, session);
+        forOnline(server, session, player -> { loadouts.clear(player); inventories.restore(player); timerDisplay.hide(player); }); cleanupAndClose(server, session);
         return TrialOperationResult.ok(reason);
     }
     public TrialOperationResult adjustTimer(MinecraftServer server, int ticks, boolean absolute) {
@@ -365,18 +466,23 @@ public final class TrialSessionService {
         return TrialOperationResult.ok("Trial timer is now " + bounded + " ticks.");
     }
     public void onDisconnect(ServerPlayer player) {
+        celebrations.cancel(player.getUUID());
         active(player.level().getServer()).filter(session -> session.activeParticipant(player.getUUID())).ifPresent(session -> {
+            timerDisplay.hide(player);
             TrialSession next = session.removeParticipant(player.getUUID());
             if (next.participants().isEmpty()) cleanupAndClose(player.level().getServer(), next); else repository.publish(player.level().getServer(), next);
         });
     }
     public void onLogin(ServerPlayer player) {
         boolean active = active(player.level().getServer()).map(session -> session.activeParticipant(player.getUUID())).orElse(false);
-        if (!active && inventories.pending(player).isPresent()) inventories.recover(player, delivery);
+        if (!active) {
+            timerDisplay.hide(player);
+            if (inventories.pending(player).isPresent()) inventories.recover(player, delivery);
+        }
     }
     public void onDeath(ServerPlayer player) {
         active(player.level().getServer()).filter(session -> session.activeParticipant(player.getUUID())).ifPresent(session -> {
-            inventories.clearTrialInventory(player); TrialSession next = session.removeParticipant(player.getUUID());
+            timerDisplay.hide(player); inventories.clearTrialInventory(player); TrialSession next = session.removeParticipant(player.getUUID());
             if (next.participants().isEmpty()) cleanupAndClose(player.level().getServer(), next); else repository.publish(player.level().getServer(), next);
         });
     }
@@ -384,6 +490,23 @@ public final class TrialSessionService {
     public boolean emergencyRestore(ServerPlayer player) { return inventories.recover(player, delivery); }
     public void debugSound(ServerPlayer player, boolean roomStart) {
         if (roomStart) titles.debugRoomStartSound(player); else titles.debugCountdownSound(player);
+    }
+    public TrialOperationResult debugSetCompletedRooms(MinecraftServer server, int rooms) {
+        TrialSession session = active(server).orElse(null);
+        if (session == null) return TrialOperationResult.rejected("No active Trial exists.");
+        repository.publish(server, session.withProgress(session.progress().debugSetCompletedRooms(rooms)));
+        return TrialOperationResult.ok("Trial completed-room count set to " + rooms + " for development testing.");
+    }
+    public TrialOperationResult debugForceRoom(MinecraftServer server, Identifier room) {
+        TrialSession session = active(server).orElse(null);
+        if (session == null || session.state() != TrialLifecycleState.DECISION)
+            return TrialOperationResult.rejected("Force-room requires an active Decision Box.");
+        if (!APPRENTICE_ROOMS.contains(room) && !HARDCORE_ROOMS.contains(room))
+            return TrialOperationResult.rejected("Unknown production Trial room: " + room);
+        TrialPhase phase = HARDCORE_ROOMS.contains(room) ? TrialPhase.HARDCORE : TrialPhase.APPRENTICE;
+        TrialSession prepared = session.withProgress(session.progress().debugEnterPhase(phase));
+        beginRoom(server, prepared, room);
+        return TrialOperationResult.ok("Forced Trial room " + room + ".");
     }
     public void recoverInterrupted(MinecraftServer server) {
         active(server).ifPresent(session -> { CosmicPVE.LOGGER.warn("Aborting interrupted Trial {} to preserve player snapshots", session.sessionId());
@@ -395,15 +518,21 @@ public final class TrialSessionService {
                 Component.literal("Trial Pot — DEAL or NO DEAL")), buffer -> buffer.writeInt(TrialDecisionMenu.SLOT_COUNT));
     }
     private void cleanupAndClose(MinecraftServer server, TrialSession session) {
-        cleanupWorldState(server, session); repository.clear(server); decisionSpawns.remove(session.sessionId());
+        timerDisplay.hideAll(server); cleanupWorldState(server, session); repository.clear(server); decisionSpawns.remove(session.sessionId());
         roomSpawns.remove(session.sessionId()); protection.clearExplicitAllows();
     }
     private void cleanupWorldState(MinecraftServer server, TrialSession session) {
         removePortal(server, session); ServerLevel instance = server.getLevel(TrialRuntime.INSTANCE_DIMENSION);
-        if (instance != null) session.protectedBounds().forEach(bounds -> structures.cleanup(instance, bounds));
+        if (instance != null) {
+            if (session.currentRoom().filter(ZERO_G::equals).isPresent()) zeroG.cleanup(instance, session, roomBounds(session));
+            fireColony.cleanup(session.sessionId());
+            session.protectedBounds().forEach(bounds -> structures.cleanup(instance, bounds));
+        }
     }
     private void cleanupCurrentRoom(ServerLevel level, TrialSession session) {
         if (level == null || session.currentRoom().isEmpty()) return;
+        if (session.currentRoom().filter(ZERO_G::equals).isPresent()) zeroG.cleanup(level, session, roomBounds(session));
+        if (session.currentRoom().filter(FIRE_COLONY::equals).isPresent()) fireColony.cleanup(session.sessionId());
         InstanceBounds decision = InstanceBounds.from(CosmicContent.repository().requireTrialRoom(DECISION_ROOM).bounds().at(DECISION_ORIGIN));
         session.protectedBounds().stream().filter(bounds -> !bounds.equals(decision)).forEach(bounds -> structures.cleanup(level, bounds));
     }
@@ -429,6 +558,6 @@ public final class TrialSessionService {
         forOnline(server, session, player -> player.sendSystemMessage(Component.literal(message)));
     }
     private void publishTick(MinecraftServer server, TrialSession session) {
-        repository.publishVolatile(server, session); if (server.getTickCount() % 20 == 0) repository.flush(server);
+        repository.publishVolatile(server, session); if (server.getTickCount() % 100 == 0) repository.flush(server);
     }
 }

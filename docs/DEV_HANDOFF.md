@@ -1,8 +1,8 @@
 # CosmicPVE Development Handoff
 
-Current verified and accepted gameplay commit: `3a110d64edb2623920b93c92d0e78f0f56a85c71` (`Add Trial instance foundation and Implants`). This is the accepted Steps 6A–6M baseline.
+Current verified and accepted gameplay commit: `ef219223b8cc1a627c60342e70e305c2c15320b1` (`Add playable Apprentice Trial loop`). This is the accepted Steps 6A–6N baseline.
 
-Repository state: Steps 6A–6M are implemented, automated/runtime verified, and manually accepted. The root `assets` source-art folder and root `trial rooms` structure-development folder remain deliberately untracked and unrelated.
+Repository state: Steps 6A–6P are implemented, automated/runtime verified, and manually accepted. The root `assets` source-art folder and root `trial rooms` structure-development folder remain deliberately untracked and unrelated.
 
 Last handoff update: 2026-08-23
 
@@ -189,6 +189,24 @@ The read-only 27-slot Decision menu exposes four DEAL panes, one blocked center 
 Raiding Rainbow and Circuit Circus use their actual tracked structure resources. Only the explicit resolved Emerald spawn-marker coordinate is consumed; an optional definition override or deterministic cardinal-neighbor inference replaces it with matching floor before teleport, leaving legitimate Emerald mechanics untouched. Raiding Rainbow owns one persisted shuffled eight-color sequence, shared progress, and a canonical active-Zombie factory shared by initial activation and every wrong-order reset; each fresh Zombie has 1 HP, normal AI/gravity/damage behavior, no loot/XP, wool identity plus authoritative color tags, and is added server-side as a new entity. Wrong kills retain the sequence, reset progress, remove survivors, and create a fresh full set. Circuit Circus persists a two-of-each randomized pillar assignment, independently claimable targets, 1-or-2 issued glass, bounded six-direction connectivity, one Beacon cue per newly completed circuit, and lever completion only after all four circuits are valid. Its scoped four-color placement exception is evaluated at item-use against the intended vanilla placement position and again at the resulting block-placement event; vanilla remains authoritative for placement and consumes exactly one block. Cleanup removes encounter entities/items and clears the declared room bounds before the next structure placement.
 
 Generic Trial title presentation sends a targeted server sound packet to each participant: one basedrum per displayed one-second Decision/room countdown update and one Ender Dragon growl when a room crosses `ROOM_INTRO` to `ROOM_ACTIVE`; Decision entry never plays the growl. The same delivery seam is independently testable with `/cosmic trial debug sound countdown` and `/cosmic trial debug sound start`. Implemented Elite sword enchantment `cosmicpve:trap` III, bringing the total to 27 real Cosmic enchantments. Each committed positive-health-loss melee hit has a flat 4% Luck-modified chance at every level to apply Slowness V for 25/30/35 ticks; eligible Doublestrike child hits may reroll it through the established limited offensive policy. Trap has no cooldown, stack, bonus damage, or hurt-immunity manipulation.
+
+### Steps 6O/6P — IMPLEMENTED; AUTOMATED/RUNTIME VERIFIED; MANUALLY VERIFIED / ACCEPTED
+
+The production Trial lifecycle now advances from Apprentice to Hardcore after room four and from Hardcore to the temporary Demonic boundary after room eight. The fourth Apprentice completion retains its reward and +600 ticks, then applies the persisted one-time +3,600-tick Hardcore entry bonus. Each Hardcore completion appends exactly one resolved Hardcore reward bundle, adds +300 ticks, and advances once. The eighth overall completion retains that reward/time before applying the persisted one-time +3,600-tick Demonic entry bonus. DEAL remains available at the Demonic boundary; NO DEAL safely reports that production Demonic rooms are not enabled. Hardcore selection reuses the existing weighted/no-consecutive-repeat selector with exactly Fire Colony and Zero-G.
+
+The development-partial Hardcore reward table contains the currently generatable canonical rows at their canonical weights and quantities: +3-minute and Skip-2 trinkets, 75% Black Scroll, randomly rated Armor/Weapon Orbs, Blaze/Creeper spawners, Unexamined Legendary and Ultimate Books in both quantity forms, Skip-1 Trinket, White Scroll, Repair Scroll, and Legendary Space Chest. Random Boss Spawn Egg, Random Mask, Abandoned Spaceship Dungeon Portal, 35% Yeti Crystal, 35% Ranger Crystal, and Mask Splicer remain intentionally omitted because their underlying reward systems/items are not implemented.
+
+Fire Colony uses its tracked production structure, explicit Emerald-marker replacement, red leather/no-enchantment armor, and one Golden Apple. Only its final lever completes the room. Its normal fire, soul-fire, and lava damage remains active while a cached bounded hazard-neighborhood baseline is restored every ten ticks to prevent lasting fire spread, burning, and lava-flow mutation without global gamerule changes. Zero-G uses its tracked production structure, ten persisted one-shot Cherry pressure-plate objectives, eight fixed real Shulker fixtures, and deterministic iron armor/loadout. Each armor piece has Protection IV, Angelic V, and Unbreaking III; the hotbar contains two Golden Apples and three Milk Buckets. The Shulkers retain normal targeting/projectiles but are invulnerable, UUID-tracked, re-pinned to their fixtures, drop no loot/XP, and are cleaned with bounded Shulker-bullet removal. Only participating players can claim plates; each claim has an independent 25% Ender Pearl chance for its activator, and the tenth completes the room once.
+
+Nutrition III was already a registered, accepted real enchantment from Step 6F and remains unchanged: successful food completion with enchanted leggings adds +1 hunger and +0.25 saturation per level through bounded vanilla food state. It already integrates with Books, Unexamined Unique Books, Black Scroll, capacity, Transmog, lore, and persistence. Step 6O verified this existing implementation rather than duplicating it, so the real-enchantment count remains exactly 27, not 28.
+
+Step 6P added the bounded four-room QOL/performance corrective pass. Zero-G's manual `1/10` reset was caused by the same tick publishing the updated encounter and then republishing a timer-decremented copy of the stale pre-activation session. Objective processing now carries one authoritative immutable completed-position set forward through the timer update, checks at a bounded ten-tick cadence, broadcasts its exact set size, and publishes the ten-position state before the normal exactly-once completion transaction. `/cosmic trial debug status` exposes the count and completed positions.
+
+Trial participants receive a client-only sidebar-style `M:SS` HUD driven by authoritative server payloads only when the ceiling-formatted displayed second changes; Decision states retain the frozen value, and all participant-removal/recovery paths hide it. This does not replace or mutate the world's scoreboard. Decision announcements are brief flashes only at 30, 25, 20, 15, 10, 5, 4, 3, 2, and 1 seconds, with one basedrum per visible flash; room 5–1 countdowns and the room-start growl remain unchanged. Solo NO DEAL already resolves through the shared ready predicate and proceeds directly into the normal 100-tick `ROOM_INTRO`, not immediate active gameplay.
+
+The 27-slot Decision screen now renders the vanilla three-row region plus the actual seven-pixel lower frame from the canonical container texture; its logical slot origins/hitboxes are unchanged, and the unused player-inventory label is suppressed. Each genuine Decision entry performs cleanup and teleport, then directly invokes the same `PlayerUtilityService.restore` heal/feed behavior as `/restore`, once, before presentation/menu opening. Menu reopening does not repeat restore. Raiding Rainbow now supplies full temporary Netherite armor with Unbreaking III, its existing Wooden Sword with Unbreaking III, and 16 Cooked Porkchops, with no Ender Pearls.
+
+Successful DEAL schedules one harmless client-side Minecraft firework burst per actually completed room at offsets 0, 10, 20, ... ticks after outside restoration and payout delivery. These payload-driven particles create no rocket items, entities, explosion damage, or terrain effects; disconnection simply cancels subsequent scheduled launches. Confirmed waste removed: the Decision menu no longer rebuilds 27 preview stacks every broadcast tick. Likely hot paths improved: Zero-G fixture/objective maintenance changed from every tick to every ten ticks, stable positions/UUIDs remain cached, and volatile timer SavedData checkpoints changed from forced synchronous one-second flushes to five-second flushes. Snapshot creation, entry/exit/DEAL/death/disconnect, room/phase transitions, and other meaningful transactions retain immediate durable persistence.
 
 ## 3. Current Real Enchantments
 
@@ -478,6 +496,8 @@ The following are confirmed in current source and permission-gated under `/cosmi
 - `/cosmic trial portal give <player> [count]`
 - `/cosmic trial debug status|complete-room|continue|exit|abort`
 - `/cosmic trial debug timer set|add|remove <seconds>`
+- `/cosmic trial debug progress set <0..8>`
+- `/cosmic trial debug force-room <raiding_rainbow|circuit_circus|fire_colony|zero_g>`
 - `/cosmic trial debug restore <player>`
 - `/feed`, `/heal`, and `/restore` are separate permission-gated development convenience commands.
 
@@ -487,7 +507,7 @@ Commands call gameplay services or create the same typed components used by game
 
 - **Trial scaling after departures:** architecture freezes initial party size so boss maximum health does not shrink, but detailed remaining objective/mob scaling and late-disconnect behavior still need acceptance criteria.
 - **Creeper Spawner runtime spawning:** the typed item and placed vanilla spawner preserve `minecraft:creeper` in `SpawnData`, and diagnostics/configuration appear correct, but manual testing has not produced Creepers under apparently valid conditions. This is deliberately deferred and does not block Trials.
-- **Scheduled instance mutation hooks:** direct block use/ignition, fluid block formation, explosions, pistons, entity grief, placement, and breaking are scoped and denied, but NeoForge does not expose a complete cancellable hook for every scheduled fire-spread or flowing-fluid state transition. Baseline cleanup currently contains residual mutation; rooms that intentionally use persistent fire/fluids need a bounded stronger policy.
+- **Scheduled instance mutation hooks:** direct block use/ignition, fluid block formation, explosions, pistons, entity grief, placement, and breaking are scoped and denied. Fire Colony adds a bounded cached baseline guard for its intentional fire/lava hazard neighborhood. NeoForge still does not expose a complete cancellable hook for every scheduled vanilla mutation, so other future hazard rooms need an equally scoped policy rather than global gamerule changes.
 - **Loot tables:** several current design tables are incomplete or malformed and contain ambiguous duplicates. Validation must distinguish intentional duplicate weights from mistakes.
 - **Attribute units/caps:** future health, movement, incoming damage, cooldown, and stacked modifier caps/floors need normalization before large content expansion.
 - **Pheonix/Phoenix identity and death order:** settle the stable spelling/ID and verify pinned NeoForge kill/death-prevention event ordering before implementing it.
@@ -499,11 +519,11 @@ The final post-Orb capacity is no longer unresolved for current target classes: 
 
 ## 16. Current Next Milestone
 
-**Next milestone: Step 6O — Hardcore Trial Expansion: Fire Colony + Zero-G.**
+**Next milestone: Step 6Q — Cold Snap Apprentice Room + Trial Owner HUD + Cactus II.**
 
-Step 6N is implemented, automated/runtime verified, and manually accepted. Step 6O should add the first production Hardcore rooms, remove the temporary post-Apprentice gate, exercise the Hardcore +15-second completion award, and continue the normal one-or-two-enchantment cadence.
+The combined Step 6O Hardcore implementation and Step 6P four-room corrective/QOL/performance checkpoint are manually accepted. Step 6Q adds Cold Snap to the Apprentice pool, the portal-owner Trial HUD header, and Cactus II. Bomb Squad moves to Step 6R; Hidden Graveyard and Deadeye remain later milestones.
 
-Do not begin Step 6O until Step 6N is committed. Memory Chests and Cosmic Crates remain deliberately deferred.
+Do not begin Step 6Q until the accepted Step 6O/6P tree is committed. Bomb Squad, Hidden Graveyard, Deadeye, Memory Chests, and Cosmic Crates remain deliberately deferred.
 
 ## 17. Development Workflow
 
@@ -519,6 +539,13 @@ Do not begin Step 6O until Step 6N is committed. Memory Chests and Cosmic Crates
 Preserve unrelated dirty changes. Never change pinned versions as a side effect of gameplay work. Prefer service-level rules and typed data over one-off event logic, and keep client-only classes isolated from dedicated-server loading.
 
 ## 18. Verification Snapshot
+
+For the accepted Step 6O/6P implementation:
+
+- `gradlew.bat cleanTest test build` passes all 289 automated tests across 87 suites with 0 failures, 0 errors, and 0 skipped. Coverage pins the Apprentice/Hardcore/Demonic transition bonuses and one-time flags, +600/+300 phase-specific room awards, the exact two-room Hardcore pool and shared weighting rules, Fire Colony and Zero-G production structures/objectives/fixtures, authoritative ten-objective Zero-G progression without stale timer publication, the supported development-partial Hardcore rows, random unspecified-Orb rates, the revised Raiding Rainbow loadout, Decision-entry restore ordering, participant timer formatting/update suppression, title cadence, Decision-menu framing, solo NO DEAL transition, DEAL celebration cadence, and existing Nutrition behavior.
+- The dedicated server loaded 1,462 recipes, atomically published six reward tables and six Trial rooms including `trial/hardcore_development`, Fire Colony, and Zero-G, and reached `Done` without relevant codec, datapack, structure, entity, dimension, registry, or common-side classloading errors.
+- Fresh client startup loaded CosmicPVE and NeoForge at the pinned versions, registered the client-only Trial payload handlers and HUD layer, completed resource reload, initialized OpenAL, and created the block, item, GUI, chest, and other texture atlases without relevant missing-model, missing-texture, malformed-resource, menu, or sided-loading errors. It was deliberately terminated at the smoke-test boundary.
+- All 149 main-resource JSON files parse successfully. `git diff --check` passes with only the repository's normal Windows line-ending notices. Pinned Minecraft 1.21.11, NeoForge 21.11.45, Java 21, Gradle 9.2.1, ModDevGradle 2.0.144, mod ID `cosmicpve`, and package `com.cosmicpve` remain unchanged. The user manually verified Circuit Circus, Raiding Rainbow, Fire Colony, corrected Zero-G progression/completion, DEAL/NO DEAL, the Trial timer HUD, Decision presentation/cadence, automatic restore, DEAL fireworks, and the targeted performance improvements, then accepted the combined milestone.
 
 For the accepted Step 6N implementation:
 

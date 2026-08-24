@@ -17,12 +17,31 @@ class TrialResourceTest {
         assertRoom("trial/development_room",1,40,16,40);
         assertRoom("trial/raiding_rainbow",1,40,16,40);
         assertRoom("trial/circuit_circus",1,24,24,30);
+        assertRoom("trial/fire_colony",1,46,30,10);
+        assertRoom("trial/zero_g",1,21,44,20);
     }
     @Test void importedStructuresAreValidAndContainOneEmeraldSpawnMarker() throws Exception {
         assertStructure("decision_box",47,28,47);
         assertStructure("development_room",41,17,41);
         assertStructure("raiding_rainbow",41,17,41,1);
         assertStructure("circuit_circus",25,25,31,5);
+        assertStructure("fire_colony",47,31,11,1);
+        assertStructure("zero_g",22,45,21,1);
+        assertStructureEntities("zero_g",8,"minecraft:shulker");
+    }
+    @Test void hardcoreDevelopmentTablePreservesEveryCurrentlySupportedCanonicalRow() throws Exception {
+        var stream=getClass().getClassLoader().getResourceAsStream(
+                "data/cosmicpve/cosmicpve/reward_tables/trial/hardcore_development.json");
+        assertNotNull(stream);
+        var entries=JsonParser.parseReader(new InputStreamReader(stream,StandardCharsets.UTF_8))
+                .getAsJsonObject().getAsJsonArray("entries");
+        assertEquals(15,entries.size());
+        assertEquals(137,entries.asList().stream().mapToInt(value -> value.getAsJsonObject().get("weight").getAsInt()).sum());
+        assertEquals(4,entries.asList().stream().map(value->value.getAsJsonObject().getAsJsonObject("reward"))
+                .filter(reward->reward.get("type").getAsString().equals("unexamined_book")).count());
+        assertEquals(2,entries.asList().stream().map(value->value.getAsJsonObject().getAsJsonObject("reward"))
+                .filter(reward->reward.get("type").getAsString().endsWith("_orb"))
+                .filter(reward->!reward.has("success_rate")).count());
     }
     @Test void instanceDimensionUsesControlledVoidFlatGenerator() throws Exception {
         var stream=getClass().getClassLoader().getResourceAsStream("data/cosmicpve/dimension/cosmic_instance.json");
@@ -67,5 +86,13 @@ class TrialResourceTest {
         for(var block:tag.getListOrEmpty("blocks")) if(block instanceof net.minecraft.nbt.CompoundTag compound
                 && compound.getIntOr("state",-1)==emeraldState) markers++;
         assertEquals(expectedEmeralds,markers,name);
+    }
+    private void assertStructureEntities(String name,int expected,String entityId) throws Exception {
+        var stream=getClass().getClassLoader().getResourceAsStream("data/cosmicpve/structure/trial/"+name+".nbt");
+        var tag=NbtIo.readCompressed(stream,NbtAccounter.unlimitedHeap());
+        var entities=tag.getListOrEmpty("entities");
+        assertEquals(expected,entities.size());
+        for(var value:entities) assertEquals(entityId,((net.minecraft.nbt.CompoundTag)value)
+                .getCompoundOrEmpty("nbt").getStringOr("id",""));
     }
 }

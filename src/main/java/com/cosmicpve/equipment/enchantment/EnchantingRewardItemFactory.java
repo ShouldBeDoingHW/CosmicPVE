@@ -20,6 +20,10 @@ public final class EnchantingRewardItemFactory {
         return orb(type, successRate, random.nextInt(100) + 1);
     }
 
+    public ItemStack randomOrb(OrbType type, RandomSource random) {
+        return orb(type, random.nextInt(100) + 1, random.nextInt(100) + 1);
+    }
+
     public ItemStack orb(OrbType type, int successRate, int destroyRate) {
         var stack = new ItemStack(type == OrbType.ARMOR
                 ? ModItems.ARMOR_ENCHANTMENT_ORB.get() : ModItems.WEAPON_ENCHANTMENT_ORB.get());

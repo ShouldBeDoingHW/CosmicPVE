@@ -8,7 +8,8 @@ public final class CosmicNetwork {
     private CosmicNetwork() {}
 
     public static void registerPayloads(RegisterPayloadHandlersEvent event) {
-        // Establish the versioned registration point. Feature-owned payloads are deliberately deferred.
-        event.registrar(PROTOCOL_VERSION);
+        var registrar = event.registrar(PROTOCOL_VERSION);
+        registrar.playToClient(TrialTimerPayload.TYPE, TrialTimerPayload.STREAM_CODEC);
+        registrar.playToClient(TrialCelebrationPayload.TYPE, TrialCelebrationPayload.STREAM_CODEC);
     }
 }

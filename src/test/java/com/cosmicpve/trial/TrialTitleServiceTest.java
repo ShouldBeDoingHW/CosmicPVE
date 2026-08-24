@@ -14,6 +14,7 @@ class TrialTitleServiceTest {
         assertEquals("Decision Box",TrialTitleService.decisionTitle().getString());
         assertEquals("30 seconds for players to join!",TrialTitleService.decisionSubtitle(true,30).getString());
         assertEquals("30 seconds to choose!",TrialTitleService.decisionSubtitle(false,30).getString());
+        assertEquals("1 second to choose!",TrialTitleService.decisionSubtitle(false,1).getString());
     }
     @Test void genericCountdownAndRoomStartSoundsArePinned() {
         assertSame(SoundEvents.NOTE_BLOCK_BASEDRUM.value(), TrialTitleService.countdownSound());
@@ -32,9 +33,12 @@ class TrialTitleServiceTest {
         assertFalse(service.acceptPresentation(first,"room_started"));
         assertTrue(service.acceptPresentation(second,"room_started"),"each participant receives one targeted event");
     }
-    @Test void decisionUpdatesNeverInventARoomStartPresentation() {
-        var service=new TrialTitleService(); UUID player=UUID.randomUUID(); int count=0;
-        for(int seconds=30;seconds>=26;seconds--) if(service.acceptPresentation(player,"decision:false:"+seconds)) count++;
-        assertEquals(5,count); assertFalse(service.acceptPresentation(player,"decision:false:26"));
+    @Test void decisionAnnouncementsUseOnlyCanonicalFlashCadence() {
+        var expected=java.util.Set.of(30,25,20,15,10,5,4,3,2,1); int count=0;
+        for(int seconds=30;seconds>=0;seconds--) {
+            assertEquals(expected.contains(seconds),TrialTitleService.shouldAnnounceDecision(seconds));
+            if(TrialTitleService.shouldAnnounceDecision(seconds)) count++;
+        }
+        assertEquals(10,count);
     }
 }

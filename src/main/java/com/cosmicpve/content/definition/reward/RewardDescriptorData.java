@@ -58,8 +58,8 @@ public record RewardDescriptorData(RewardType type, Optional<Identifier> itemId,
                     yield ValidationResult.success(new RewardDescriptor.UnexaminedBook(tier));
                 }
                 case BLACK_SCROLL -> ValidationResult.success(new RewardDescriptor.BlackScroll(rate()));
-                case ARMOR_ORB -> ValidationResult.success(new RewardDescriptor.ArmorOrb(rate()));
-                case WEAPON_ORB -> ValidationResult.success(new RewardDescriptor.WeaponOrb(rate()));
+                case ARMOR_ORB -> ValidationResult.success(new RewardDescriptor.ArmorOrb(optionalRate()));
+                case WEAPON_ORB -> ValidationResult.success(new RewardDescriptor.WeaponOrb(optionalRate()));
                 case MOB_SPAWNER -> {
                     var id = required(entityTypeId, "entity_type");
                     if (!MobSpawnerEligibility.isEligible(id))
@@ -91,6 +91,10 @@ public record RewardDescriptorData(RewardType type, Optional<Identifier> itemId,
         int value = required(successRate, "success_rate");
         if (value < 1 || value > 100) throw new IllegalArgumentException("success_rate must be in [1,100]");
         return value;
+    }
+    private int optionalRate() {
+        if (successRate.isEmpty()) return 0;
+        return rate();
     }
     private static <T> T required(Optional<T> value, String name) {
         return value.orElseThrow(() -> new IllegalArgumentException("Missing required field: " + name));

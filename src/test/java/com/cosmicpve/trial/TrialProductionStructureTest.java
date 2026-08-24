@@ -26,6 +26,18 @@ class TrialProductionStructureTest {
                 neighbors(circuit,new BlockPos(12,3,12)));
         assertEquals(5,circuit.values().stream().filter("minecraft:emerald_block"::equals).count(),
                 "four legitimate Emerald pillar blocks must remain in addition to the marker");
+
+        var fire=states("fire_colony");
+        assertEquals("minecraft:emerald_block",fire.get(new BlockPos(3,1,3)));
+        assertEquals(3,neighbors(fire,new BlockPos(3,1,3)).stream().filter("minecraft:netherrack"::equals).count());
+        assertEquals("minecraft:lever",fire.get(new BlockPos(43,20,7)));
+
+        var zero=states("zero_g");
+        assertEquals("minecraft:emerald_block",zero.get(new BlockPos(10,0,10)));
+        assertEquals(List.of("minecraft:quartz_block","minecraft:quartz_block","minecraft:quartz_block","minecraft:quartz_block"),
+                neighbors(zero,new BlockPos(10,0,10)));
+        assertEquals("minecraft:water",zero.get(new BlockPos(10,1,10)));
+        assertEquals(10,zero.values().stream().filter("minecraft:cherry_pressure_plate"::equals).count());
     }
 
     @Test void floorInferenceChoosesMostCommonStateAndNeverAirOrMarker() {

@@ -40,8 +40,8 @@ public final class InstanceProtectionEventBridge {
             BlockPos intendedPlacement = new BlockPlaceContext(event.getUseOnContext()).getClickedPos();
             boolean circuitPlacement = TrialRuntime.sessions().allowsCircuitPlacementUse(
                     player, intendedPlacement, event.getItemStack());
-            boolean circuitLever = TrialRuntime.sessions().allowsCircuitUse(player, event.getPos());
-            if (explicitAllowOverridesDefaultDeny(circuitPlacement, circuitLever)) return;
+            boolean roomUse = TrialRuntime.sessions().allowsProtectedRoomUse(player, event.getPos());
+            if (explicitAllowOverridesDefaultDeny(circuitPlacement, roomUse)) return;
         }
         if (event.getLevel() instanceof ServerLevel level
                 && service.denies(level, event.getPlayer(), event.getPos(), InstanceMutationCause.USE)) {

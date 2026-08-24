@@ -29,9 +29,29 @@ class TrialProgressTest {
         assertEquals(TrialPhase.HARDCORE, progress.phase());
         assertTrue(progress.hardcoreBonusApplied());
         assertEquals(4_200,TrialSessionService.completionTimeBonus(beforeBoundary,progress));
-        assertEquals(600,TrialSessionService.completionTimeBonus(progress,
+        assertEquals(300,TrialSessionService.completionTimeBonus(progress,
                 progress.completeRoom(List.of(new ItemStack(Items.POTATO)))));
         assertEquals(5, progress.completeRoom(List.of(new ItemStack(Items.POTATO))).completedRooms());
+    }
+
+    @Test void fourthHardcoreCompletionCrossesDemonicBoundaryExactlyOnce() {
+        var progress = TrialProgress.EMPTY;
+        for (int i=0;i<4;i++) progress=progress.completeRoom(List.of(new ItemStack(Items.APPLE)));
+        for (int i=0;i<3;i++) progress=progress.completeRoom(List.of(new ItemStack(Items.CARROT)));
+        assertEquals(7,progress.completedRooms()); assertEquals(TrialPhase.HARDCORE,progress.phase());
+        var before=progress; var after=progress.completeRoom(List.of(new ItemStack(Items.POTATO)));
+        assertEquals(8,after.completedRooms()); assertEquals(TrialPhase.DEMONIC,after.phase());
+        assertTrue(after.demonicBonusApplied()); assertEquals(3_900,TrialSessionService.completionTimeBonus(before,after));
+        assertEquals(0,TrialSessionService.completionTimeBonus(after,
+                after.completeRoom(List.of(new ItemStack(Items.BEETROOT)))));
+    }
+
+    @Test void ordinaryHardcoreCompletionAddsOnePotEntryAndExactlyThreeHundredTicks() {
+        var before=TrialProgress.EMPTY.debugSetCompletedRooms(4);
+        var after=before.completeRoom(List.of(new ItemStack(Items.DIAMOND)));
+        assertEquals(1,after.pot().size());
+        assertEquals(5,after.completedRooms());
+        assertEquals(300,TrialSessionService.completionTimeBonus(before,after));
     }
 
     @Test void decisionsAreIndividualAndAppearancesPersist() {

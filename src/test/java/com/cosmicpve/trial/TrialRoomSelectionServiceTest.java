@@ -26,4 +26,14 @@ class TrialRoomSelectionServiceTest {
         var current=session(TrialProgress.EMPTY.beginRoom(A,TrialEncounterState.EMPTY));
         assertEquals(B,service.select(current,List.of(A,B),RandomSource.create(42)).orElseThrow());
     }
+    @Test void hardcorePoolUsesTheSharedWeightingServiceAndContainsOnlyProductionRooms() {
+        var pool=TrialSessionService.roomPool(TrialPhase.HARDCORE);
+        assertEquals(List.of(TrialSessionService.FIRE_COLONY,TrialSessionService.ZERO_G),pool);
+        var service=new TrialRoomSelectionService(); var current=session(TrialProgress.EMPTY.debugEnterPhase(TrialPhase.HARDCORE));
+        assertEquals(5,service.weight(current,TrialSessionService.FIRE_COLONY));
+        assertEquals(5,service.weight(current,TrialSessionService.ZERO_G));
+        var afterFire=session(current.progress().beginRoom(TrialSessionService.FIRE_COLONY,TrialEncounterState.EMPTY));
+        assertEquals(TrialSessionService.ZERO_G,service.select(afterFire,pool,RandomSource.create(7)).orElseThrow());
+        assertEquals(3,service.weight(afterFire,TrialSessionService.FIRE_COLONY));
+    }
 }

@@ -68,4 +68,16 @@ class TrialSessionTest {
         assertEquals(2,decoded.progress().pot().getFirst().items().getFirst().getCount());
         assertEquals(TrialDecision.NO_DEAL,decoded.progress().decision(player));
     }
+    @Test void soloNoDealIsImmediatelyReadyButRoomStillUsesNormalIntroState() {
+        UUID player=UUID.randomUUID();
+        var decision=session().addParticipant(player)
+                .withState(TrialLifecycleState.DECISION,600,Optional.empty(),false,session().protectedBounds())
+                .withProgress(TrialProgress.EMPTY.beginDecision(List.of(player)).decide(player,TrialDecision.NO_DEAL));
+        assertTrue(TrialSessionService.allContinuingReady(decision));
+        var intro=decision.withState(TrialLifecycleState.ROOM_INTRO,TrialSession.ROOM_INTRO_TICKS,
+                Optional.of(Identifier.parse("cosmicpve:trial/raiding_rainbow")),false,decision.protectedBounds());
+        assertEquals(100,intro.stateTicksRemaining());
+        assertEquals(TrialLifecycleState.ROOM_INTRO,intro.state());
+        assertEquals(12_000,TrialStateMachine.tickGameplayTimer(intro).timerTicks());
+    }
 }

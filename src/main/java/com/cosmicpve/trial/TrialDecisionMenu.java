@@ -47,7 +47,6 @@ public final class TrialDecisionMenu extends AbstractContainerMenu {
             }
         }
     }
-    @Override public void broadcastChanges() { refresh(); super.broadcastChanges(); }
     @Override public void clicked(int slot, int button, ClickType type, Player player) {
         if (slot >= 0 && slot < 9 && button == 0 && type == ClickType.PICKUP
                 && player instanceof ServerPlayer serverPlayer) {
