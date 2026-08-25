@@ -36,6 +36,20 @@ public final class RewardGeneratorService {
             case RewardDescriptor.GeneratedEquipment reward -> Optional.of(equipment.generate(
                     reward.definition(), context.registries().lookupOrThrow(Registries.ENCHANTMENT), context.random()));
             case RewardDescriptor.SpaceChest reward -> Optional.of(com.cosmicpve.spacechest.SpaceChests.create(reward.tier()));
+            case RewardDescriptor.Mask reward -> {
+                var ids = new java.util.ArrayList<>(com.cosmicpve.content.CosmicContent.repository()
+                        .snapshot().maskDefinitions().keySet());
+                if (ids.size() < reward.maskCount()) yield Optional.empty();
+                for (int i = ids.size() - 1; i > 0; i--) {
+                    int j = context.random().nextInt(i + 1);
+                    var swap = ids.get(i); ids.set(i, ids.get(j)); ids.set(j, swap);
+                }
+                yield Optional.of(com.cosmicpve.equipment.mask.MaskItemFactory.create(
+                        ids.subList(0, reward.maskCount())));
+            }
+            case RewardDescriptor.ArmorSetCrystal reward -> com.cosmicpve.content.CosmicContent.repository()
+                    .findArmorSetDefinition(reward.armorSetId())
+                    .map(definition -> com.cosmicpve.equipment.armor.ArmorSetCrystals.create(definition, reward.successRate()));
         };
     }
 }

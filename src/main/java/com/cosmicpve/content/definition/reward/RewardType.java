@@ -6,7 +6,7 @@ import java.util.Locale;
 
 public enum RewardType {
     STATIC_ITEM, BANKNOTE, COSMIC_BOOK, UNEXAMINED_BOOK, BLACK_SCROLL, ARMOR_ORB, WEAPON_ORB,
-    MOB_SPAWNER, GENERATED_EQUIPMENT, SPACE_CHEST;
+    MOB_SPAWNER, GENERATED_EQUIPMENT, SPACE_CHEST, MASK, ARMOR_SET_CRYSTAL;
 
     public static final Codec<RewardType> CODEC = Codec.STRING.comapFlatMap(value -> {
         try { return DataResult.success(valueOf(value.toUpperCase(Locale.ROOT))); }

@@ -1,10 +1,10 @@
 # CosmicPVE Development Handoff
 
-Current verified and accepted gameplay commit: `f5d5a4df160b549d26995f5462d95c3180e04eb4` (`Add Hardcore Trial rooms and Trial polish`). This is the accepted Steps 6A–6P baseline.
+Current verified and accepted gameplay baseline: Step 6T. Its closure commit is the commit containing this handoff; use `git log -1` for the immutable hash.
 
-Repository state: Steps 6A–6P are implemented, automated/runtime verified, and manually accepted. The root `assets` source-art folder and root `trial rooms` structure-development folder remain deliberately untracked and unrelated.
+Repository state: Steps 6A–6T are implemented, automated/runtime verified, and manually accepted. The root `assets` source-art folder and root `trial rooms` structure-development folder remain deliberately untracked and unrelated.
 
-Last handoff update: 2026-08-23
+Last handoff update: 2026-08-24
 
 Pinned environment:
 
@@ -194,7 +194,7 @@ Generic Trial title presentation sends a targeted server sound packet to each pa
 
 The production Trial lifecycle now advances from Apprentice to Hardcore after room four and from Hardcore to the temporary Demonic boundary after room eight. The fourth Apprentice completion retains its reward and +600 ticks, then applies the persisted one-time +3,600-tick Hardcore entry bonus. Each Hardcore completion appends exactly one resolved Hardcore reward bundle, adds +300 ticks, and advances once. The eighth overall completion retains that reward/time before applying the persisted one-time +3,600-tick Demonic entry bonus. DEAL remains available at the Demonic boundary; NO DEAL safely reports that production Demonic rooms are not enabled. Hardcore selection reuses the existing weighted/no-consecutive-repeat selector with exactly Fire Colony and Zero-G.
 
-The development-partial Hardcore reward table contains the currently generatable canonical rows at their canonical weights and quantities: +3-minute and Skip-2 trinkets, 75% Black Scroll, randomly rated Armor/Weapon Orbs, Blaze/Creeper spawners, Unexamined Legendary and Ultimate Books in both quantity forms, Skip-1 Trinket, White Scroll, Repair Scroll, and Legendary Space Chest. Random Boss Spawn Egg, Random Mask, Abandoned Spaceship Dungeon Portal, 35% Yeti Crystal, 35% Ranger Crystal, and Mask Splicer remain intentionally omitted because their underlying reward systems/items are not implemented.
+The development-partial Hardcore reward table contains the currently generatable canonical rows at their canonical weights and quantities: +3-minute and Skip-2 trinkets, 75% Black Scroll, randomly rated Armor/Weapon Orbs, Blaze/Creeper spawners, Unexamined Legendary and Ultimate Books in both quantity forms, Skip-1 Trinket, White Scroll, Repair Scroll, Legendary Space Chest, and the Step 6T Mask, Mask Splicer, and 35% Yeti Crystal prerequisites. Random Boss Spawn Egg, Abandoned Spaceship Dungeon Portal, 35% Ranger Crystal, and broader unsupported Demonic dependencies remain deliberately unresolved rather than represented by fake rewards.
 
 Fire Colony uses its tracked production structure, explicit Emerald-marker replacement, red leather/no-enchantment armor, and one Golden Apple. Only its final lever completes the room. Its normal fire, soul-fire, and lava damage remains active while a cached bounded hazard-neighborhood baseline is restored every ten ticks to prevent lasting fire spread, burning, and lava-flow mutation without global gamerule changes. Zero-G uses its tracked production structure, ten persisted one-shot Cherry pressure-plate objectives, eight fixed real Shulker fixtures, and deterministic iron armor/loadout. Each armor piece has Protection IV, Angelic V, and Unbreaking III; the hotbar contains two Golden Apples and three Milk Buckets. The Shulkers retain normal targeting/projectiles but are invulnerable, UUID-tracked, re-pinned to their fixtures, drop no loot/XP, and are cleaned with bounded Shulker-bullet removal. Only participating players can claim plates; each claim has an independent 25% Ender Pearl chance for its activator, and the tenth completes the room once.
 
@@ -258,6 +258,18 @@ The participant HUD is a fixed 120-pixel-wide card anchored flush to the right G
 
 Normal Ultimate, Legendary, and Mastery Space Chests now play `minecraft:item.armor.equip_netherite` exactly once for each newly selected valid pane. Rejected/repeated selections, committed rewards, reveal/close behavior, and Memory Chests are unchanged. The Design Doc's `Enchantments → Balance Candidates` material remains prospective, entirely unimplemented, and is not implementation-authoritative without a future explicit balance-patch instruction.
 
+### Step 6T — IMPLEMENTED; AUTOMATED/RUNTIME VERIFIED; MANUALLY VERIFIED / ACCEPTED
+
+Implemented nine reloadable, validated mask definitions and one generic non-stackable typed Mask item. Helmet attachments persist an ordered, distinct 1–5-mask loadout without replacing the helmet or altering its other components. Single masks use their canonical profile data; 2–5-power Multi-Masks use the shared canonical profile and stable `Multi-Mask (A, B, ...)` presentation. Each created stack also synchronizes its resolved immutable display name, effect summary, color, and visual profile, so dedicated-server clients render tooltips and heads without owning the server datapack repository; gameplay continues to resolve stable IDs against the authoritative server snapshot. Server-authoritative drag/drop applies the layer only to helmets, and empty-cursor secondary click removes it and returns exactly one single- or Multi-Mask with the same order. The client uses Minecraft's vanilla player-head render state over the unchanged armor model.
+
+The concrete Santa, Reindeer, Purge, Party, Lover, Scarecrow, Zeus, Turkey, and Dragon effects use the established attribute, combat-contributor, ProcEngine, effect-applicability, and periodic-tick seams. Reindeer grants +5% movement speed. Turkey contributes one Luck-modified 2% targeted Dodge candidate before red-health loss; Zeus/Dragon immunities are scoped to their documented lightning/fire/poison effects. Loose Mask lore uses the canonical Design Doc information text, while an attached helmet shows one compact identity-only `ATTACHED:` line plus its removal instruction.
+
+Normal Multi-Mask creation uses the vanilla anvil and flattens left input followed by right input without nesting or duplicate identities. The persistent global `/masklimit [2..5]` setting defaults to 3 and gates only newly created anvil outputs; the absolute typed-data limit remains five, so existing/admin/reward-created 4/5-power items remain valid when the setting is lowered. Minecraft 1.21.11 refuses anvil pickup at a literal zero displayed cost, so the supported hook uses a one-level pickup gate and immediately refunds that level after a valid craft for exactly zero net XP and no prior-work escalation. The one-use Mask Splicer is disassembly-only: dragging it onto a loose 2–5-power Multi-Mask consumes both items and safely returns ordered single Masks through inventory/overflow delivery.
+
+Single and Multi-Mask render paths both suppress only the client helmet model and render their selected vanilla player-head profile while leaving the helmet mechanically equipped. Equipment identity metadata stays ahead of the capacity line. The complete attached Mask/Multi-Mask identity is reserved as one physical row: its full rendered width expands the tooltip instead of entering ordinary text wrapping. A focused client-only inventory/container tooltip scroller activates only for an actually overflowing item tooltip, accumulates approximately one row per wheel notch through the full geometric overflow range, clamps only at the real top/bottom bounds, and resets on item/slot/screen changes without packets or persistent state.
+
+Reward descriptors can now generate a random distinct Mask bundle or an exact-rate existing Armor Set Crystal through shared factories. The current Hardcore development table adds a single Mask, Mask Splicer, and 35% Yeti Crystal without inventing Ranger or other missing systems. Permissioned `/cosmic mask give`, `give-multi`, and `splicer give` tooling covers exact 1–5-power testing. The user manually verified and accepted the complete Mask/Multi-Mask flow, anvil creation, persistent creation limit, Splicer disassembly, rendering, effects, reward integration, full-range tooltip scrolling, and the non-wrapping attached identity row.
+
 ## 3. Current Real Enchantments
 
 These are registered through Minecraft's enchantment infrastructure, use actual enchantment data on the item, and are not present in normal enchanting-table, librarian, random-loot, random-equipment, or mob-equipment acquisition pools.
@@ -297,7 +309,7 @@ These are registered through Minecraft's enchantment infrastructure, use actual 
 
 ### DESIGNED BUT NOT IMPLEMENTED
 
-The design also names Divine Immolation, Gears, Hero Killer, Mortal Coil, Phoenix, Self Destruct, and Virus. None currently has a registered real enchantment or runtime behavior. There are exactly 27 implemented real Cosmic enchantments; Death Pact is currently the sole implemented Mastery enchantment. Do not add behavior assumptions beyond `Cosmic_Design.md`.
+The design also names Divine Immolation, Gears, Hero Killer, Mortal Coil, Phoenix, Self Destruct, and Virus. None currently has a registered real enchantment or runtime behavior. There are exactly 28 implemented real Cosmic enchantments; Death Pact is currently the sole implemented Mastery enchantment. Do not add behavior assumptions beyond `Cosmic_Design.md`.
 
 ## 4. Critical Combat Semantics
 
@@ -564,16 +576,17 @@ Commands call gameplay services or create the same typed components used by game
 - **Activity key/portal terminology and acquisition:** Dungeons are intended as costly/keyed activities, but current design text primarily describes portals; reconcile this before item implementation.
 - **Seasonal crate finalization:** substantial draft tables and mechanics exist, but their exact balance, rewards, acquisition rates, prerequisites, and implementation details remain subject to a bounded reconciliation milestone.
 - **Armorer trade policy:** Step 6I disables Diamond/Netherite armor recipes and replaces generated Diamond armor in the six audited chest tables. Vanilla Armorer villagers remain a separate Diamond-armor acquisition path because the current bounded rule did not specify trade replacement; settle whether those offers should be removed or replaced before declaring Iron the ceiling for every normal acquisition route.
+- **Remaining Trial reward dependencies:** Ranger Armor is not implemented, and Random Boss Spawn Egg, Dungeon Portal, and broader Demonic reward dependencies still require their own bounded systems. Step 6T deliberately does not fake those rows; the supported development table now includes Mask, Splicer, and 35% Yeti Crystal prerequisites only.
 
 The final post-Orb capacity is no longer unresolved for current target classes: armor is 8 and swords/axes/bows/crossbows are 10. Do not reopen those limits incidentally during unrelated work.
 
 ## 16. Current Next Milestone
 
-**Next milestone: Step 6T — Trial Reward / Supporting-System Gap Closure.**
+**Next milestone: Step 6U — Hidden Graveyard.**
 
-Step 6T should close Trial reward/support gaps: Masks/Multi-Mask foundations, Mask Splicer, missing Trial-linked Armor Set reward primitives such as Yeti/Ranger procurement where appropriate, and additional Apprentice/Hardcore/Demonic reward-table dependencies. The agreed wave then moves through 6U Hidden Graveyard and 6V Deadeye/Trial 1.0 stabilization before shifting focus toward Conquest Chests.
+Step 6U should implement Hidden Graveyard against the established Trial/session/reward foundations without reopening Step 6T's deliberately deferred major reward dependencies. The agreed wave then moves through 6V Deadeye/Trial 1.0 stabilization before shifting focus toward Conquest Chests.
 
-The accepted combined Step 6S/6S.1 baseline is committed at `48df94312186551944e7c6364cb760da69657a8b` (`Add Trial trinkets and corrective polish`). Step 6S.2 is manually verified and accepted. Hidden Graveyard, Deadeye, Memory Chests, and Cosmic Crates remain deliberately deferred.
+The accepted Step 6T baseline is the commit containing this handoff. Hidden Graveyard is the next bounded implementation; Deadeye, Memory Chests, and Cosmic Crates remain deliberately deferred.
 
 ## 17. Development Workflow
 
@@ -589,6 +602,13 @@ The accepted combined Step 6S/6S.1 baseline is committed at `48df94312186551944e
 Preserve unrelated dirty changes. Never change pinned versions as a side effect of gameplay work. Prefer service-level rules and typed data over one-off event logic, and keep client-only classes isolated from dedicated-server loading.
 
 ## 18. Verification Snapshot
+
+For the manually accepted Step 6T implementation:
+
+- `gradlew.bat cleanTest test build` passes all 356 automated tests across 102 suites with 0 failures, errors, or skips. Coverage pins definition decoding/validation, ordered 1–5-mask component and synchronized presentation round trips, all supported anvil input shapes and limit rejection, persistent setting codec round trips, 2/3/5-power Splicer disassembly and stale rejection, application/removal preservation, compact one-row identity-only equipment lore and name colors, Reindeer's exact +5% value, single/Multi helmet suppression, cumulative multi-notch scrolling through the real rendered bottom bound, tooltip item/screen reset behavior, canonical item models, and the expanded Hardcore development reward rows.
+- All 167 main-resource JSON files decode, including the canonical empty blockstate variant key. The dedicated server loads 1,462 recipes, atomically publishes six reward tables, eight Trial rooms, and all nine mask definitions, verifies progression controls, and reaches `Done` without relevant codec, datapack, registry, component, command, or common-side classloading errors.
+- Fresh client startup passes mask renderer and client-only tooltip-scroll registration, reloads resources, initializes OpenAL, and builds block/item/GUI/chest atlases without relevant model, texture, tooltip, renderer, or sided-loading errors. The client smoke was deliberately terminated after the initialization boundary.
+- Step 6T-owned paths pass `git diff --check` with only normal Windows line-ending notices. The separate pre-existing user edit to `docs/Cosmic_Design.md` retains intentional Markdown trailing-space line breaks and is not rewritten by this milestone. Pinned versions, mod ID, and package remain unchanged.
 
 For the manually accepted Step 6S.2 checkpoint:
 

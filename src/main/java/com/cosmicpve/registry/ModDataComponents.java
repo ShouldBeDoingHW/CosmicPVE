@@ -16,6 +16,7 @@ import com.cosmicpve.data.component.MobSpawnerData;
 import com.cosmicpve.data.component.SpaceChestData;
 import com.cosmicpve.data.component.TrialTrinketData;
 import com.cosmicpve.data.component.TrialPortalModifiers;
+import com.cosmicpve.data.component.MaskLoadout;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -103,6 +104,12 @@ public final class ModDataComponents {
                     builder -> builder.persistent(TrialPortalModifiers.CODEC)
                             .networkSynchronized(ByteBufCodecs.fromCodecWithRegistries(TrialPortalModifiers.CODEC)).cacheEncoding());
 
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<MaskLoadout>> MASK_ITEM =
+            COMPONENTS.registerComponentType("mask_item", builder -> builder.persistent(MaskLoadout.CODEC)
+                    .networkSynchronized(ByteBufCodecs.fromCodecWithRegistries(MaskLoadout.CODEC)).cacheEncoding());
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<MaskLoadout>> MASK_LOADOUT =
+            COMPONENTS.registerComponentType("mask_loadout", builder -> builder.persistent(MaskLoadout.CODEC)
+                    .networkSynchronized(ByteBufCodecs.fromCodecWithRegistries(MaskLoadout.CODEC)).cacheEncoding());
     private ModDataComponents() {}
 
     public static void register(IEventBus modBus) {

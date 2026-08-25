@@ -16,7 +16,8 @@ import net.minecraft.resources.Identifier;
 
 public record RewardDescriptorData(RewardType type, Optional<Identifier> itemId, Optional<Long> cents,
         Optional<CosmicEnchantmentTier> rarity, Optional<Integer> successRate,
-        Optional<Identifier> entityTypeId, Optional<GeneratedEquipmentDefinitionData> generatedEquipment) {
+        Optional<Identifier> entityTypeId, Optional<GeneratedEquipmentDefinitionData> generatedEquipment,
+        Optional<Integer> maskCount, Optional<Identifier> armorSetId) {
     public static final Codec<RewardDescriptorData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             RewardType.CODEC.fieldOf("type").forGetter(RewardDescriptorData::type),
             Identifier.CODEC.optionalFieldOf("item").forGetter(RewardDescriptorData::itemId),
@@ -25,7 +26,9 @@ public record RewardDescriptorData(RewardType type, Optional<Identifier> itemId,
             Codec.INT.optionalFieldOf("success_rate").forGetter(RewardDescriptorData::successRate),
             Identifier.CODEC.optionalFieldOf("entity_type").forGetter(RewardDescriptorData::entityTypeId),
             GeneratedEquipmentDefinitionData.CODEC.optionalFieldOf("generated_equipment")
-                    .forGetter(RewardDescriptorData::generatedEquipment)
+                    .forGetter(RewardDescriptorData::generatedEquipment),
+            Codec.INT.optionalFieldOf("mask_count").forGetter(RewardDescriptorData::maskCount),
+            Identifier.CODEC.optionalFieldOf("armor_set").forGetter(RewardDescriptorData::armorSetId)
     ).apply(instance, RewardDescriptorData::new));
 
     public ValidationResult<RewardDescriptor> resolve(String source, RegistryAccess registries) {
@@ -81,6 +84,13 @@ public record RewardDescriptorData(RewardType type, Optional<Identifier> itemId,
                         default -> throw new IllegalArgumentException("Space Chest rarity must be Ultimate, Legendary, or Mastery");
                     }));
                 }
+                case MASK -> {
+                    int count = maskCount.orElse(1);
+                    if (count < 1 || count > 5) yield failure(source, "mask_count must be in [1,5]");
+                    yield ValidationResult.success(new RewardDescriptor.Mask(count));
+                }
+                case ARMOR_SET_CRYSTAL -> ValidationResult.success(new RewardDescriptor.ArmorSetCrystal(
+                        required(armorSetId, "armor_set"), rate()));
             };
         } catch (IllegalArgumentException exception) {
             return failure(source, exception.getMessage());

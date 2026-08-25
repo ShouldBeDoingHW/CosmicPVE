@@ -103,6 +103,20 @@ public final class EquipmentTooltipService {
             com.cosmicpve.equipment.skin.WeaponSkinDefinitions.find(activeSkin.skinId()).ifPresent(definition ->
                     event.getToolTip().add(com.cosmicpve.equipment.skin.WeaponSkinLore.active(definition)));
         }
+        var maskItem = stack.get(ModDataComponents.MASK_ITEM.get());
+        if (maskItem != null && maskItem.valid()) {
+            if (maskItem.presentations().size() == maskItem.maskIds().size()) event.getToolTip().addAll(
+                    com.cosmicpve.equipment.mask.MaskLore.lines(maskItem.presentations(), true));
+        }
+        var activeMasks = stack.get(ModDataComponents.MASK_LOADOUT.get());
+        if (activeMasks != null && activeMasks.valid()) {
+            if (activeMasks.presentations().size() == activeMasks.maskIds().size()) event.getToolTip().addAll(
+                    com.cosmicpve.equipment.mask.MaskLore.attached(activeMasks.presentations()));
+        }
+        if (stack.is(com.cosmicpve.registry.ModItems.MASK_SPLICER.get())) {
+            event.getToolTip().add(Component.translatable("tooltip.cosmicpve.mask_splicer.purpose").withStyle(net.minecraft.ChatFormatting.YELLOW));
+            event.getToolTip().add(Component.translatable("tooltip.cosmicpve.mask_splicer.instruction").withStyle(net.minecraft.ChatFormatting.GRAY));
+        }
         var capacity = new CustomEnchantCapacityService();
         int used = capacity.used(stack);
         if (used > 0 || CustomEnchantCapacityService.isArmor(stack) || CustomEnchantCapacityService.isWeapon(stack))

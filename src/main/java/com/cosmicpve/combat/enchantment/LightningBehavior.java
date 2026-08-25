@@ -30,6 +30,9 @@ public final class LightningBehavior {
                 || !(target.level() instanceof ServerLevel level)) {
             return;
         }
+        if (new com.cosmicpve.equipment.mask.MaskResolver(com.cosmicpve.content.CosmicContent.repository())
+                .resolve(target).stream().anyMatch(mask -> mask.behavior()
+                        == com.cosmicpve.content.definition.mask.MaskBehavior.ZEUS)) return;
         var bolt = EntityType.LIGHTNING_BOLT.create(level, EntitySpawnReason.TRIGGERED);
         if (bolt != null) {
             bolt.setVisualOnly(true);

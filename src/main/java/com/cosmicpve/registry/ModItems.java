@@ -19,6 +19,8 @@ import com.cosmicpve.trial.portal.TrialPortalItem;
 import com.cosmicpve.trial.trinket.TrialTrinketItem;
 import com.cosmicpve.data.component.TrialTrinketData;
 import com.cosmicpve.data.component.TrialTrinketType;
+import com.cosmicpve.equipment.mask.MaskItem;
+import com.cosmicpve.equipment.mask.MaskSplicerItem;
 
 public final class ModItems {
     private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(CosmicPVE.MOD_ID);
@@ -76,6 +78,11 @@ public final class ModItems {
 
     public static final DeferredItem<TrialPortalItem> TRIAL_PORTAL = ITEMS.registerItem(
             "trial_portal", TrialPortalItem::new, properties -> properties.stacksTo(64));
+
+    public static final DeferredItem<MaskItem> MASK = ITEMS.registerItem(
+            "mask", MaskItem::new, properties -> properties.stacksTo(1));
+    public static final DeferredItem<MaskSplicerItem> MASK_SPLICER = ITEMS.registerItem(
+            "mask_splicer", MaskSplicerItem::new, properties -> properties.stacksTo(1));
 
     public static final DeferredItem<TrialTrinketItem> TRIAL_TRINKET_TIME_1 = trinket("trial_trinket_time_1", TrialTrinketType.TIME, 1);
     public static final DeferredItem<TrialTrinketItem> TRIAL_TRINKET_TIME_3 = trinket("trial_trinket_time_3", TrialTrinketType.TIME, 3);

@@ -160,6 +160,7 @@ public final class CombatEventBridge {
 
     public void onDamageAccepted(LivingDamageEvent.Pre event) {
         CombatResult result = incomingCandidates.remove(event.getContainer());
+        if (event.getNewDamage() <= 0.0F) return;
         if (result != null) {
             acceptedDamageStack.get().push(result);
         }

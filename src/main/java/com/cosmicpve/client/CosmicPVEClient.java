@@ -10,6 +10,7 @@ import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import com.cosmicpve.registry.ModEntities;
 import com.cosmicpve.client.entity.SpacePirateVariant1Renderer;
 import com.cosmicpve.client.entity.SpacePirateVariant2Renderer;
+import net.neoforged.neoforge.common.NeoForge;
 
 @Mod(value = CosmicPVE.MOD_ID, dist = Dist.CLIENT)
 public final class CosmicPVEClient {
@@ -20,6 +21,13 @@ public final class CosmicPVEClient {
         modBus.addListener(CosmicPVEClient::registerMenuScreens);
         modBus.addListener(TrialClientPresentation::registerPayloadHandlers);
         modBus.addListener(TrialClientPresentation::registerGuiLayers);
+        modBus.addListener(MaskClientPresentation::register);
+        modBus.addListener(ScrollableItemTooltip::registerTooltipComponents);
+        var scrollingTooltips = new ScrollableItemTooltip();
+        NeoForge.EVENT_BUS.addListener(scrollingTooltips::onGather);
+        NeoForge.EVENT_BUS.addListener(scrollingTooltips::onRender);
+        NeoForge.EVENT_BUS.addListener(scrollingTooltips::onMouseScrolled);
+        NeoForge.EVENT_BUS.addListener(scrollingTooltips::onScreenClosing);
     }
 
     private static void registerMenuScreens(RegisterMenuScreensEvent event) {

@@ -44,6 +44,9 @@ import com.cosmicpve.equipment.skin.WeaponSkinResolver;
 import com.cosmicpve.equipment.skin.WeaponSkinCombatResolver;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.bus.api.EventPriority;
+import com.cosmicpve.equipment.mask.MaskResolver;
+import com.cosmicpve.equipment.mask.MaskCombatResolver;
+import com.cosmicpve.equipment.mask.MaskRuntimeEventBridge;
 
 public final class CosmicCombat {
     private static final CombatEngine ENGINE = new CombatEngine();
@@ -89,6 +92,9 @@ public final class CosmicCombat {
     private static final ProcHookEventBridge PROC_HOOKS =
             new ProcHookEventBridge(PROC_EVENTS, EXECUTIONS, NUTRITION);
     private static final CombatStackEventBridge STACK_EVENTS = new CombatStackEventBridge(STACKS, BLEED_RUNTIME);
+    private static final MaskResolver MASKS = new MaskResolver(CosmicContent.repository());
+    private static final MaskCombatResolver MASK_COMBAT = new MaskCombatResolver(MASKS);
+    private static final MaskRuntimeEventBridge MASK_EVENTS = new MaskRuntimeEventBridge(MASKS, PROC_EVENTS);
 
     private CosmicCombat() {}
 
@@ -102,16 +108,20 @@ public final class CosmicCombat {
         OUTGOING.register(ARMOR_SET_COMBAT);
         OUTGOING.register(WEAPON_SKIN_COMBAT);
         OUTGOING.register(deathPact);
+        OUTGOING.register(MASK_COMBAT);
         INCOMING.register(ARMOR_SET_COMBAT);
         INCOMING.register(WEAPON_SKIN_COMBAT);
         INCOMING.register(deathPact);
+        INCOMING.register(MASK_COMBAT);
         PRE_DEFENSE_BOUNDS.register(new AegisBehavior(ENCHANTMENTS));
         PROC_MODIFIERS.register(new LuckBehavior());
         PROC_MODIFIERS.register(new ArmorSetProcModifierResolver(ARMOR_SETS));
         PROC_SOURCES.register(ENCHANTMENT_BEHAVIORS);
         PROC_SOURCES.register(WEAPON_SKIN_COMBAT);
+        PROC_SOURCES.register(MASK_COMBAT);
         NeoForge.EVENT_BUS.addListener(EVENTS::onIncomingDamage);
         NeoForge.EVENT_BUS.addListener(EVENTS::onDamageAccepted);
+        NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, MASK_EVENTS::onTargeted);
         NeoForge.EVENT_BUS.addListener(EVENTS::onDamageCommitted);
         NeoForge.EVENT_BUS.addListener(PROC_HOOKS::onPreDeath);
         NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, PROC_HOOKS::onBlockBreak);
@@ -125,6 +135,9 @@ public final class CosmicCombat {
         NeoForge.EVENT_BUS.addListener(ARMOR_SET_EVENTS::onEntityTick);
         NeoForge.EVENT_BUS.addListener(PERSISTENT_EFFECTS::onPlayerTick);
         NeoForge.EVENT_BUS.addListener(PERSISTENT_EFFECTS::onEntityTick);
+        NeoForge.EVENT_BUS.addListener(MASK_EVENTS::onEntityTick);
+        NeoForge.EVENT_BUS.addListener(MASK_EVENTS::onPlayerTick);
+        NeoForge.EVENT_BUS.addListener(MASK_EVENTS::onEffectApplicable);
         NeoForge.EVENT_BUS.addListener(RECENT_COMBAT_MEMORY_EVENTS::onServerTick);
     }
 

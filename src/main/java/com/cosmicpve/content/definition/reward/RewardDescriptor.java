@@ -6,7 +6,7 @@ import net.minecraft.resources.Identifier;
 public sealed interface RewardDescriptor permits RewardDescriptor.StaticItem, RewardDescriptor.Banknote,
         RewardDescriptor.CosmicBook, RewardDescriptor.UnexaminedBook, RewardDescriptor.BlackScroll, RewardDescriptor.ArmorOrb,
         RewardDescriptor.WeaponOrb, RewardDescriptor.MobSpawner, RewardDescriptor.GeneratedEquipment,
-        RewardDescriptor.SpaceChest {
+        RewardDescriptor.SpaceChest, RewardDescriptor.Mask, RewardDescriptor.ArmorSetCrystal {
     RewardType type();
     record StaticItem(Identifier itemId) implements RewardDescriptor { public RewardType type(){return RewardType.STATIC_ITEM;} }
     record Banknote(long cents) implements RewardDescriptor { public RewardType type(){return RewardType.BANKNOTE;} }
@@ -23,5 +23,9 @@ public sealed interface RewardDescriptor permits RewardDescriptor.StaticItem, Re
     }
     record SpaceChest(com.cosmicpve.spacechest.SpaceChestTier tier) implements RewardDescriptor {
         public RewardType type(){return RewardType.SPACE_CHEST;}
+    }
+    record Mask(int maskCount) implements RewardDescriptor { public RewardType type(){return RewardType.MASK;} }
+    record ArmorSetCrystal(Identifier armorSetId, int successRate) implements RewardDescriptor {
+        public RewardType type(){return RewardType.ARMOR_SET_CRYSTAL;}
     }
 }

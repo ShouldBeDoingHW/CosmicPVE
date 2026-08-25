@@ -39,13 +39,19 @@ class TrialResourceTest {
         assertNotNull(stream);
         var entries=JsonParser.parseReader(new InputStreamReader(stream,StandardCharsets.UTF_8))
                 .getAsJsonObject().getAsJsonArray("entries");
-        assertEquals(15,entries.size());
-        assertEquals(137,entries.asList().stream().mapToInt(value -> value.getAsJsonObject().get("weight").getAsInt()).sum());
+        assertEquals(18,entries.size());
+        assertEquals(145,entries.asList().stream().mapToInt(value -> value.getAsJsonObject().get("weight").getAsInt()).sum());
         assertEquals(4,entries.asList().stream().map(value->value.getAsJsonObject().getAsJsonObject("reward"))
                 .filter(reward->reward.get("type").getAsString().equals("unexamined_book")).count());
         assertEquals(2,entries.asList().stream().map(value->value.getAsJsonObject().getAsJsonObject("reward"))
                 .filter(reward->reward.get("type").getAsString().endsWith("_orb"))
                 .filter(reward->!reward.has("success_rate")).count());
+        assertTrue(entries.asList().stream().map(value->value.getAsJsonObject().getAsJsonObject("reward"))
+                .anyMatch(reward->reward.get("type").getAsString().equals("mask") && reward.get("mask_count").getAsInt()==1));
+        assertTrue(entries.asList().stream().map(value->value.getAsJsonObject().getAsJsonObject("reward"))
+                .anyMatch(reward->reward.get("type").getAsString().equals("armor_set_crystal")
+                        && reward.get("armor_set").getAsString().equals("cosmicpve:yeti")
+                        && reward.get("success_rate").getAsInt()==35));
     }
     @Test void instanceDimensionUsesControlledVoidFlatGenerator() throws Exception {
         var stream=getClass().getClassLoader().getResourceAsStream("data/cosmicpve/dimension/cosmic_instance.json");

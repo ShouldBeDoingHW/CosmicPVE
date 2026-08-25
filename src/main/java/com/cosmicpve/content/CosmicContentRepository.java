@@ -5,6 +5,7 @@ import com.cosmicpve.content.definition.stack.StackDefinition;
 import com.cosmicpve.content.definition.armor.ArmorSetDefinition;
 import com.cosmicpve.content.definition.reward.RewardTable;
 import com.cosmicpve.content.definition.trial.TrialRoomDefinition;
+import com.cosmicpve.content.definition.mask.MaskDefinition;
 import com.cosmicpve.content.validation.ValidationResult;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
@@ -58,6 +59,14 @@ public final class CosmicContentRepository {
 
     public TrialRoomDefinition requireTrialRoom(Identifier id) {
         return findTrialRoom(id).orElseThrow(() -> new UnknownContentDefinitionException("Trial room", id));
+    }
+
+    public Optional<MaskDefinition> findMaskDefinition(Identifier id) {
+        return Optional.ofNullable(snapshot().maskDefinitions().get(id));
+    }
+
+    public MaskDefinition requireMaskDefinition(Identifier id) {
+        return findMaskDefinition(id).orElseThrow(() -> new UnknownContentDefinitionException("mask", id));
     }
 
     public synchronized boolean publish(ValidationResult<ContentSnapshot> candidate) {

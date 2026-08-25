@@ -33,9 +33,7 @@ public final class ArmorSetCommands {
             source.sendFailure(Component.translatable("command.cosmicpve.armor.unknown_set", id));
             return 0;
         }
-        ItemStack stack = new ItemStack(ModItems.ARMOR_SET_CRYSTAL.get());
-        stack.set(ModDataComponents.ARMOR_SET_CRYSTAL.get(), new ArmorSetCrystalData(
-                ArmorSetCrystalData.CURRENT_DATA_VERSION, ArmorSetIdentity.from(definition.orElseThrow()), successRate));
+        ItemStack stack = com.cosmicpve.equipment.armor.ArmorSetCrystals.create(definition.orElseThrow(), successRate);
         player.getInventory().placeItemBackInInventory(stack);
         source.sendSuccess(() -> Component.translatable("command.cosmicpve.armor.given", id, successRate, player.getName()), true);
         return 1;
