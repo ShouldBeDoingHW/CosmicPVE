@@ -12,6 +12,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
@@ -102,5 +103,8 @@ public final class InstanceStructureService {
         for (BlockPos pos : BlockPos.betweenClosed(bounds.min(), bounds.max())) {
             level.setBlock(pos, Blocks.AIR.defaultBlockState(), 2);
         }
+        // Removing support blocks can create drops after the first entity purge. A second,
+        // item-only bounded pass prevents those transition drops from leaking into later rooms.
+        level.getEntitiesOfClass(ItemEntity.class, area).forEach(Entity::discard);
     }
 }

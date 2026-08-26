@@ -12,6 +12,8 @@ import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.component.DyedItemColor;
 import com.cosmicpve.registry.ModEnchantments;
+import com.cosmicpve.registry.ModDataComponents;
+import com.cosmicpve.data.component.CustomEnchantMetadata;
 
 public final class TrialRoomLoadoutService {
     public static final int FIRE_COLONY_ARMOR_COLOR = 0xFF0000;
@@ -38,6 +40,11 @@ public final class TrialRoomLoadoutService {
     public static final int HIDDEN_GRAVEYARD_PUMMEL = 3;
     public static final int HIDDEN_GRAVEYARD_APPLES = 5;
     public static final int HIDDEN_GRAVEYARD_HEALING_POTIONS = 4;
+    public static final int DEADEYE_GOLDEN_APPLES = 16;
+    public static final int DEADEYE_ARROWS = 1;
+    public static final int DEADEYE_NUTRITION = 3;
+    public static final int DEADEYE_LIGHTNING = 4;
+    public static final int DEADEYE_EAGLE_EYE = 5;
     public static final java.util.List<net.minecraft.world.item.Item> RAIDING_RAINBOW_ARMOR = java.util.List.of(
             Items.NETHERITE_HELMET, Items.NETHERITE_CHESTPLATE, Items.NETHERITE_LEGGINGS, Items.NETHERITE_BOOTS);
     private final TrialInventoryTransactionService inventories;
@@ -143,6 +150,29 @@ public final class TrialRoomLoadoutService {
         ItemStack healing = net.minecraft.world.item.alchemy.PotionContents.createItemStack(
                 Items.SPLASH_POTION, net.minecraft.world.item.alchemy.Potions.STRONG_HEALING);
         healing.setCount(HIDDEN_GRAVEYARD_HEALING_POTIONS); player.getInventory().setItem(2, healing);
+        player.getInventory().setSelectedSlot(0);
+    }
+    public void applyDeadeye(ServerPlayer player) {
+        clear(player);
+        var registry = player.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
+        ItemStack leggings = new ItemStack(Items.LEATHER_LEGGINGS);
+        EnchantmentHelper.updateEnchantments(leggings, mutable -> mutable.set(
+                registry.getOrThrow(ModEnchantments.NUTRITION), DEADEYE_NUTRITION));
+        player.setItemSlot(EquipmentSlot.LEGS, leggings);
+
+        ItemStack bow = new ItemStack(Items.BOW);
+        EnchantmentHelper.updateEnchantments(bow, mutable -> {
+            mutable.set(registry.getOrThrow(Enchantments.INFINITY), 1);
+            mutable.set(registry.getOrThrow(Enchantments.POWER), 5);
+            mutable.set(registry.getOrThrow(ModEnchantments.LIGHTNING), DEADEYE_LIGHTNING);
+            mutable.set(registry.getOrThrow(Enchantments.UNBREAKING), 3);
+            mutable.set(registry.getOrThrow(Enchantments.FLAME), 1);
+            mutable.set(registry.getOrThrow(ModEnchantments.EAGLE_EYE), DEADEYE_EAGLE_EYE);
+        });
+        bow.set(ModDataComponents.CUSTOM_ENCHANT_META.get(), CustomEnchantMetadata.DEFAULT.withTransmogSorted(true));
+        player.getInventory().setItem(0, bow);
+        player.getInventory().setItem(1, new ItemStack(Items.GOLDEN_APPLE, DEADEYE_GOLDEN_APPLES));
+        player.getInventory().setItem(2, new ItemStack(Items.ARROW, DEADEYE_ARROWS));
         player.getInventory().setSelectedSlot(0);
     }
     private static void equipDyed(ServerPlayer player, EquipmentSlot slot, net.minecraft.world.item.Item item) {

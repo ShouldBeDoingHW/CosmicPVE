@@ -56,9 +56,10 @@ public final class TrialEventBridge {
     }
     public void onProjectileImpact(ProjectileImpactEvent event) {
         if (event.getProjectile() instanceof AbstractArrow arrow && arrow.getOwner() instanceof ServerPlayer player
-                && event.getRayTraceResult() instanceof BlockHitResult hit
-                && TrialRuntime.sessions().onCircuitTarget(player, hit.getBlockPos())) {
-            arrow.discard(); event.setCanceled(true);
+                && event.getRayTraceResult() instanceof BlockHitResult hit) {
+            boolean accepted = TrialRuntime.sessions().onCircuitTarget(player, hit.getBlockPos())
+                    || TrialRuntime.sessions().onDeadeyeTarget(player, hit.getBlockPos());
+            if (accepted) { arrow.discard(); event.setCanceled(true); }
         }
     }
     public void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
@@ -66,6 +67,7 @@ public final class TrialEventBridge {
             TrialRuntime.sessions().onCircuitLever(player, event.getPos());
             TrialRuntime.sessions().onFireColonyLever(player, event.getPos());
             TrialRuntime.sessions().onColdSnapLever(player, event.getPos());
+            TrialRuntime.sessions().onDeadeyeLever(player, event.getPos());
         }
     }
     public void onNeighborNotify(BlockEvent.NeighborNotifyEvent event) {

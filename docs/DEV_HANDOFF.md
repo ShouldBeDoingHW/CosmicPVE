@@ -1,8 +1,8 @@
 # CosmicPVE Development Handoff
 
-Current verified and accepted gameplay baseline: Step 6U. Its closure commit is the commit containing this handoff; use `git log -1` for the immutable hash.
+Current verified and accepted gameplay baseline: Step 6V. Its closure commit is the commit containing this handoff; use `git log -1` for the immutable hash.
 
-Repository state: Steps 6A–6U are implemented, automated/runtime verified, and manually accepted. The root `assets` source-art folder and root `trial rooms` structure-development folder remain deliberately untracked and unrelated.
+Repository state: Steps 6A–6V are implemented, automated/runtime verified, and manually accepted. The root `assets` source-art folder and root `trial rooms` structure-development folder remain deliberately untracked and unrelated.
 
 Last handoff update: 2026-08-25
 
@@ -281,6 +281,16 @@ One typed/versioned vanilla-presented Trial Key is active at a time and is bound
 Each key destroys only its cached authored Cobblestone/Andesite/Stone grave group and spawns six provenance-tagged Corpses. Wave 1 uses Leather; Wave 2 uses Chainmail Protection I plus independent Luck I–X boots/leggings; Wave 3 uses Iron Protection II plus independent Luck V–X boots/leggings and Aegis I–VI chestplate. Three kills from the matching first or second wave unlock the next key exactly once; earlier survivors remain, permitting the intended 3+3+6 overlap. Completion requires Wave 3 to have started and every tracked Corpse from all waves to be dead, then commits one Demonic pot result and returns the party immediately to Decision. Demonic room completion adds no ordinary per-room time bonus. Cleanup removes Corpses, keys/items, chest/runtime state, temporary inventory, biome override, and placed structure state.
 
 Hidden Graveyard's hot path is event-driven for deaths/completion. Fixed marker, well, and grave data are cached; spawned entities are tracked by UUID; and only the tightly bounded key/chest maintenance runs at a 10-tick cadence. No per-tick structure parsing, full-room block scan, world-wide entity scan, or stream-heavy participant search was added. The currently supported Demonic development reward table contains only already implemented canonical reward primitives and deliberately omits unresolved Ranger, Conquest Flare, M-Kit, boss-egg, Dungeon Portal, and Memory Chest rows rather than faking them.
+
+### Step 6V — IMPLEMENTED; AUTOMATED/RUNTIME VERIFIED; MANUALLY VERIFIED / ACCEPTED
+
+Deadeye is the second production Demonic Trial room. Its authored West 41×31×43 and East 30×31×43 structures use the existing multi-piece placement service, with East placed at a +41 X offset and one combined 71×31×43 protected/cleanup footprint. The explicit West Emerald marker supplies the participant spawn and `spawnY - 10` execution threshold; the authored East lever is the only completion trigger after progression is complete. The temporary loadout is Leather Leggings with Nutrition III, 16 Golden Apples, exactly one Arrow, and a Transmogged Bow with Infinity I, Power V, Lightning IV, Unbreaking III, Flame I, and Eagle Eye V.
+
+The authored structures contain four actual target blocks across the Design Doc's five visual themes. Deadeye therefore uses four exact ordered, room-local target coordinates and four cached immutable reveal groups: Diamond, Gold, Resin/Purpur transition, and Crimson. The resin target reveals the authored resin route plus the purpur West/East transition; this preserves every authored theme without inventing a fifth target. Only a participating player's arrow on the current target advances shared state. Old, future, wrong, and nonparticipant hits do nothing. Reveals restore the cached authored BlockStates without drops, and the exact final lever refuses premature completion.
+
+Falling to or below the cached threshold invokes the existing terminal environmental execution path rather than damage. Armor, absorption, ordinary mitigation, Phoenix-style prevention, and normal procs are bypassed; normal individual Trial death/Insurance handling removes only that participant and survivors continue. The active-room hot path is one cached integer comparison per online Deadeye participant per tick, with no structure scans or metadata discovery.
+
+Trial 1.0 production registration is now three Apprentice rooms (Circuit Circus, Raiding Rainbow, Cold Snap), three Hardcore rooms (Fire Colony, Zero-G, Bomb Squad), and two Demonic rooms (Hidden Graveyard, Deadeye). The accepted Demonic mixed-pool selection, declining appearance weights, no-consecutive-repeat rule, Snow Globe modifier seam, Skip behavior, Decision/pot semantics, persistence, and snapshot restoration remain unchanged. Room teardown now performs a second ItemEntity-only purge inside the outgoing room AABB after block removal, closing the generic ladder/pressure-plate/support-drop leak without scanning the dimension or touching outside-world items.
 
 ## 3. Current Real Enchantments
 
@@ -572,7 +582,7 @@ The following are confirmed in current source and permission-gated under `/cosmi
 - `/cosmic trial debug status|complete-room|continue|exit|abort`
 - `/cosmic trial debug timer set|add|remove <seconds>`
 - `/cosmic trial debug progress set <0..8>`
-- `/cosmic trial debug force-room <raiding_rainbow|circuit_circus|cold_snap|fire_colony|zero_g>`
+- `/cosmic trial debug force-room <raiding_rainbow|circuit_circus|cold_snap|fire_colony|zero_g|bomb_squad|hidden_graveyard|deadeye>`
 - `/cosmic trial debug restore <player>`
 - `/feed`, `/heal`, and `/restore` are separate permission-gated development convenience commands.
 
@@ -594,9 +604,9 @@ The final post-Orb capacity is no longer unresolved for current target classes: 
 
 ## 16. Current Next Milestone
 
-**Next milestone: Step 6V — Deadeye / Trial 1.0 stabilization.**
+**Next milestone: Step 7A — Conquest Chests.**
 
-Step 6V should complete the production Trial 1.0 room pool with Deadeye and perform only bounded Trial regression/stabilization work. The planned shift toward Conquest Chests follows its acceptance. Conquest Chests, Tinkerer/Cosmic Dust, Fallen Heroes, G-/V-/M-Kit redesigns, Heroic Enchantments, Memory Chests, Cosmic Crates, and world-generation work remain outside the accepted Step 6U baseline.
+Trial 1.0 is complete. Step 7A should implement the bounded Conquest Chest Overworld event without folding in Tinkerer/Cosmic Dust, enchantment expansion/balance patches, Fallen Heroes, G-/V-/M-Kit redesigns, Heroic Enchantments, Dungeons, Invasions, Memory Chests, Cosmic Crates, or world-generation work.
 
 ## 17. Development Workflow
 
@@ -612,6 +622,13 @@ Step 6V should complete the production Trial 1.0 room pool with Deadeye and perf
 Preserve unrelated dirty changes. Never change pinned versions as a side effect of gameplay work. Prefer service-level rules and typed data over one-off event logic, and keep client-only classes isolated from dedicated-server loading.
 
 ## 18. Verification Snapshot
+
+For the manually accepted Step 6V implementation:
+
+- `gradlew.bat cleanTest test build` passes all 373 automated tests across 107 suites with 0 failures, errors, or skips. New coverage pins the two authored dimensions and +41 X composition, West spawn and East final lever, four exact targets, nonempty/nonduplicated authored reveal groups, ordered/no-skip progression predicates, inclusive fall boundary, canonical loadout quantities/levels, exact eight-room mixed Demonic pool, and Deadeye definition/category/resource decoding. Existing Trial suites continue to cover party removal, pot ordering/distinct duplicates, Decision pagination, phase timing, room weighting, persistence codecs, and snapshot tombstones.
+- All 170 main-resource JSON files decode. Dedicated-server startup loads 1,462 recipes, atomically publishes seven reward tables, ten Trial rooms including `cosmicpve:trial/deadeye`, and nine mask definitions, verifies progression controls, and reaches `Done` without relevant codec, structure, room-definition, registry, command, datapack, or common-side loading errors.
+- Fresh client startup loads both entrypoints, completes resource reload, initializes OpenAL, and builds the block/item/GUI/chest atlases without relevant model, texture, resource, or sided-loading errors. `git diff --check` reports no whitespace errors, only normal Windows line-ending notices. Pinned versions, mod ID, and package remain unchanged.
+- The user manually verified Deadeye's authored two-piece flow, ordered reveals, execution/survivor behavior, final-lever completion, Demonic reward/timing behavior, and Trial 1.0 stabilization. The original root `assets/` and `trial rooms/` development directories remain untouched and untracked.
 
 For the manually accepted Step 6U implementation:
 

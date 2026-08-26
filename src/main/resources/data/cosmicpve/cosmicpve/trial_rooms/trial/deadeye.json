@@ -1,0 +1,19 @@
+{
+  "display_name": "Deadeye",
+  "category": "demonic",
+  "pieces": [
+    {
+      "structure": "cosmicpve:trial/deadeye_west"
+    },
+    {
+      "structure": "cosmicpve:trial/deadeye_east",
+      "offset": [41, 0, 0]
+    }
+  ],
+  "spawn_marker": "emerald_block",
+  "spawn_marker_position": [2, 16, 21],
+  "bounds": {
+    "min": [0, 0, 0],
+    "max": [70, 30, 42]
+  }
+}

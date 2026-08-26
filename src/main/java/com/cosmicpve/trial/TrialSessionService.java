@@ -20,6 +20,9 @@ import com.cosmicpve.trial.room.ZeroGService;
 import com.cosmicpve.trial.room.ColdSnapService;
 import com.cosmicpve.trial.room.BombSquadService;
 import com.cosmicpve.trial.room.HiddenGraveyardService;
+import com.cosmicpve.trial.room.DeadeyeService;
+import com.cosmicpve.combat.CosmicCombat;
+import com.cosmicpve.combat.execution.ExecutionCause;
 import com.cosmicpve.entity.undeadcorpse.UndeadCorpseEntity;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -62,17 +65,19 @@ public final class TrialSessionService {
     public static final Identifier COLD_SNAP = CosmicPVE.id("trial/cold_snap");
     public static final Identifier BOMB_SQUAD = CosmicPVE.id("trial/bomb_squad");
     public static final Identifier HIDDEN_GRAVEYARD = CosmicPVE.id("trial/hidden_graveyard");
+    public static final Identifier DEADEYE = CosmicPVE.id("trial/deadeye");
     public static final Identifier APPRENTICE_REWARDS = CosmicPVE.id("trial/apprentice");
     public static final Identifier HARDCORE_REWARDS = CosmicPVE.id("trial/hardcore_development");
     public static final Identifier DEMONIC_REWARDS = CosmicPVE.id("trial/demonic_development");
     private static final List<Identifier> APPRENTICE_ROOMS = List.of(CIRCUIT_CIRCUS, RAIDING_RAINBOW, COLD_SNAP);
     private static final List<Identifier> HARDCORE_ROOMS = List.of(FIRE_COLONY, ZERO_G, BOMB_SQUAD);
     private static final List<Identifier> DEMONIC_ROOMS = java.util.stream.Stream.of(
-            APPRENTICE_ROOMS.stream(), HARDCORE_ROOMS.stream(), java.util.stream.Stream.of(HIDDEN_GRAVEYARD))
+            APPRENTICE_ROOMS.stream(), HARDCORE_ROOMS.stream(), java.util.stream.Stream.of(HIDDEN_GRAVEYARD, DEADEYE))
             .flatMap(java.util.function.Function.identity()).toList();
     static final int APPRENTICE_REWARD_TIME = 600;
     static final int HARDCORE_REWARD_TIME = 300;
     static final int PHASE_ENTRY_BONUS = 3_600;
+    private static final ExecutionCause DEADEYE_FALL = new ExecutionCause(CosmicPVE.id("trial_deadeye_fall"));
 
     private final TrialSessionRepository repository;
     private final TrialInventoryTransactionService inventories;
@@ -90,6 +95,7 @@ public final class TrialSessionService {
     private final ColdSnapService coldSnap = new ColdSnapService();
     private final BombSquadService bombSquad = new BombSquadService();
     private final HiddenGraveyardService hiddenGraveyard = new HiddenGraveyardService();
+    private final DeadeyeService deadeye = new DeadeyeService();
     private final TrialTimerDisplayService timerDisplay = new TrialTimerDisplayService();
     private final TrialCelebrationService celebrations = new TrialCelebrationService();
     private final TrialDecisionEntryService decisionEntries = new TrialDecisionEntryService();
@@ -180,6 +186,10 @@ public final class TrialSessionService {
                 if (maintenanceTick && HIDDEN_GRAVEYARD.equals(room)) hiddenGraveyard.tick(level, session);
                 if (maintenanceTick && FIRE_COLONY.equals(room)) fireColony.tick(level, session);
                 TrialSession current = session;
+                if (DEADEYE.equals(room)) {
+                    current = tickDeadeyeFalls(server, session);
+                    if (current == null) return;
+                }
                 if (maintenanceTick && ZERO_G.equals(room)) {
                     zeroG.keepFixturesPinned(level, session);
                     ZeroGTickResult objectives = tickZeroGObjectives(server, level, session);
@@ -257,6 +267,20 @@ public final class TrialSessionService {
         double dx = x - anchorX, dy = y - anchorY, dz = z - anchorZ;
         return dx * dx + dy * dy + dz * dz > 1.0E-6D;
     }
+
+    private TrialSession tickDeadeyeFalls(MinecraftServer server, TrialSession session) {
+        var threshold = deadeye.fallThreshold(session.sessionId());
+        if (threshold.isEmpty()) return session;
+        for (UUID participant : session.participants()) {
+            ServerPlayer player = server.getPlayerList().getPlayer(participant);
+            if (player != null && shouldExecuteDeadeyeFall(player.getY(), threshold.getAsInt())) {
+                CosmicCombat.executions().execute(player, DEADEYE_FALL, null, null);
+            }
+        }
+        return active(server).orElse(null);
+    }
+
+    static boolean shouldExecuteDeadeyeFall(double playerY, int thresholdY) { return playerY <= thresholdY; }
 
     public TrialOperationResult completeRoom(MinecraftServer server) { return completeProductionRoom(server); }
 
@@ -405,6 +429,8 @@ public final class TrialSessionService {
             var initialized = hiddenGraveyard.initialize(level, session, ROOM_ORIGIN, placed.bounds(),
                     net.minecraft.util.RandomSource.create()); encounter = initialized.encounter();
         }
+        else if (room.equals(DEADEYE)) encounter = deadeye.initialize(
+                level, session, ROOM_ORIGIN, participantSpawn.below(), placed.bounds());
         else { fireColony.initialize(level, session, placed.bounds()); encounter = TrialEncounterState.EMPTY; }
         roomSpawns.put(session.sessionId(), participantSpawn);
         TrialProgress progress = session.progress().beginRoom(room, encounter);
@@ -420,6 +446,7 @@ public final class TrialSessionService {
             else if (room.equals(ZERO_G)) loadouts.applyZeroG(player);
             else if (room.equals(COLD_SNAP)) loadouts.applyColdSnap(player);
             else if (room.equals(BOMB_SQUAD)) loadouts.applyBombSquad(player);
+            else if (room.equals(DEADEYE)) loadouts.applyDeadeye(player);
             else loadouts.applyHiddenGraveyard(player);
             teleport(player, roomSpawns.get(session.sessionId()));
         });
@@ -463,6 +490,24 @@ public final class TrialSessionService {
         return true;
     }
 
+    public boolean onDeadeyeTarget(ServerPlayer player, BlockPos target) {
+        TrialSession session = active(player.level().getServer()).orElse(null);
+        if (session == null || session.state() != TrialLifecycleState.ROOM_ACTIVE
+                || !session.activeParticipant(player.getUUID())
+                || session.currentRoom().filter(DEADEYE::equals).isEmpty()) return false;
+        var result = deadeye.hitTarget((ServerLevel) player.level(), session, target);
+        if (!result.accepted()) return false;
+        TrialSession next = session.withProgress(session.progress().withEncounter(result.state()));
+        repository.publish(player.level().getServer(), next);
+        forOnline(player.level().getServer(), next, member -> {
+            member.playSound(SoundEvents.BEACON_ACTIVATE, 1.0F, 1.0F);
+            member.sendSystemMessage(Component.literal("Deadeye " + result.section().name().toLowerCase(java.util.Locale.ROOT)
+                    .replace('_', ' ') + " section revealed (" + result.state().sequenceProgress() + "/"
+                    + DeadeyeService.SECTION_COUNT + ")."));
+        });
+        return true;
+    }
+
     public boolean allowsCircuitPlacement(ServerPlayer player, BlockPos pos, BlockState state) {
         TrialSession session = active(player.level().getServer()).orElse(null);
         if (session == null || session.state() != TrialLifecycleState.ROOM_ACTIVE
@@ -502,7 +547,15 @@ public final class TrialSessionService {
 
     public boolean allowsProtectedRoomUse(ServerPlayer player, BlockPos pos) {
         return allowsCircuitUse(player, pos) || allowsFireColonyUse(player, pos) || allowsColdSnapUse(player, pos)
-                || allowsHiddenGraveyardUse(player, pos);
+                || allowsHiddenGraveyardUse(player, pos) || allowsDeadeyeUse(player, pos);
+    }
+
+    public boolean allowsDeadeyeUse(ServerPlayer player, BlockPos pos) {
+        TrialSession session = active(player.level().getServer()).orElse(null);
+        return session != null && session.state() == TrialLifecycleState.ROOM_ACTIVE
+                && session.activeParticipant(player.getUUID())
+                && session.currentRoom().filter(DEADEYE::equals).isPresent()
+                && deadeye.isFinalLever(session.sessionId(), pos);
     }
 
     public boolean allowsHiddenGraveyardUse(ServerPlayer player, BlockPos pos) {
@@ -534,6 +587,14 @@ public final class TrialSessionService {
 
     public void onColdSnapLever(ServerPlayer player, BlockPos pos) {
         if (allowsColdSnapUse(player, pos)) completeProductionRoom(player.level().getServer());
+    }
+
+    public void onDeadeyeLever(ServerPlayer player, BlockPos pos) {
+        if (!allowsDeadeyeUse(player, pos)) return;
+        TrialSession session = active(player.level().getServer()).orElseThrow();
+        if (deadeye.canComplete(session.sessionId(), pos, session.progress().encounter()))
+            completeProductionRoom(player.level().getServer());
+        else player.sendSystemMessage(Component.literal("Reveal all Deadeye sections before using the final lever."));
     }
 
     public void onColdSnapPlate(ServerLevel level, BlockPos pos, BlockState state) {
@@ -597,6 +658,18 @@ public final class TrialSessionService {
 
     public String bombSquadStatus(UUID sessionId) { return bombSquad.status(sessionId); }
     public String hiddenGraveyardStatus(UUID sessionId) { return hiddenGraveyard.status(sessionId); }
+    public String deadeyeStatus(TrialSession session) {
+        var fallThreshold = deadeye.fallThreshold(session.sessionId());
+        String threshold = fallThreshold.isPresent() ? Integer.toString(fallThreshold.getAsInt()) : "unavailable";
+        return "Deadeye section=" + session.progress().encounter().sequenceProgress() + "/"
+                + DeadeyeService.SECTION_COUNT + " fallY=" + threshold
+                + " participants=" + session.participants().size();
+    }
+    public String productionPoolStatus(TrialSession session) {
+        return roomPool(session.progress().phase()).stream()
+                .map(room -> room.getPath().substring(room.getPath().lastIndexOf('/') + 1) + "=" + selection.weight(session, room))
+                .collect(java.util.stream.Collectors.joining(", "));
+    }
     public TrialPerformanceTracker.Snapshot performanceSnapshot() { return performance.snapshot(); }
 
     static boolean canActivateColdSnap(TrialSession session, UUID playerId) {
@@ -718,9 +791,10 @@ public final class TrialSessionService {
         TrialSession session = active(server).orElse(null);
         if (session == null || session.state() != TrialLifecycleState.DECISION)
             return TrialOperationResult.rejected("Force-room requires an active Decision Box.");
-        if (!APPRENTICE_ROOMS.contains(room) && !HARDCORE_ROOMS.contains(room) && !room.equals(HIDDEN_GRAVEYARD))
+        if (!APPRENTICE_ROOMS.contains(room) && !HARDCORE_ROOMS.contains(room)
+                && !room.equals(HIDDEN_GRAVEYARD) && !room.equals(DEADEYE))
             return TrialOperationResult.rejected("Unknown production Trial room: " + room);
-        TrialPhase phase = room.equals(HIDDEN_GRAVEYARD) ? TrialPhase.DEMONIC
+        TrialPhase phase = room.equals(HIDDEN_GRAVEYARD) || room.equals(DEADEYE) ? TrialPhase.DEMONIC
                 : HARDCORE_ROOMS.contains(room) ? TrialPhase.HARDCORE : TrialPhase.APPRENTICE;
         TrialSession prepared = session.withProgress(session.progress().debugEnterPhase(phase));
         beginRoom(server, prepared, room);
@@ -745,6 +819,7 @@ public final class TrialSessionService {
             if (session.currentRoom().filter(ZERO_G::equals).isPresent()) zeroG.cleanup(instance, session, roomBounds(session));
             if (session.currentRoom().filter(BOMB_SQUAD::equals).isPresent()) bombSquad.cleanup(instance, session.sessionId());
             if (session.currentRoom().filter(HIDDEN_GRAVEYARD::equals).isPresent()) hiddenGraveyard.cleanup(instance, session.sessionId());
+            if (session.currentRoom().filter(DEADEYE::equals).isPresent()) deadeye.cleanup(session.sessionId());
             fireColony.cleanup(session.sessionId()); coldSnap.cleanup(session.sessionId());
             session.protectedBounds().forEach(bounds -> structures.cleanup(instance, bounds));
         }
@@ -756,6 +831,7 @@ public final class TrialSessionService {
         if (session.currentRoom().filter(COLD_SNAP::equals).isPresent()) coldSnap.cleanup(session.sessionId());
         if (session.currentRoom().filter(BOMB_SQUAD::equals).isPresent()) bombSquad.cleanup(level, session.sessionId());
         if (session.currentRoom().filter(HIDDEN_GRAVEYARD::equals).isPresent()) hiddenGraveyard.cleanup(level, session.sessionId());
+        if (session.currentRoom().filter(DEADEYE::equals).isPresent()) deadeye.cleanup(session.sessionId());
         InstanceBounds decision = InstanceBounds.from(CosmicContent.repository().requireTrialRoom(DECISION_ROOM).bounds().at(DECISION_ORIGIN));
         session.protectedBounds().stream().filter(bounds -> !bounds.equals(decision)).forEach(bounds -> structures.cleanup(level, bounds));
     }

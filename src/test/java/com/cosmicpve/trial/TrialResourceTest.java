@@ -22,6 +22,7 @@ class TrialResourceTest {
         assertRoom("trial/cold_snap",1,38,30,36);
         assertRoom("trial/bomb_squad",1,44,20,44);
         assertRoom("trial/hidden_graveyard",1,39,17,42);
+        assertRoom("trial/deadeye",2,70,30,42);
     }
     @Test void importedStructuresAreValidAndContainOneEmeraldSpawnMarker() throws Exception {
         assertStructure("decision_box",47,28,47);
@@ -33,7 +34,24 @@ class TrialResourceTest {
         assertStructure("cold_snap",39,31,37,1);
         assertStructure("bomb_squad",45,21,45,4);
         assertStructure("hidden_graveyard",40,18,43,1);
+        assertStructure("deadeye_west",41,31,43,1);
+        assertStructure("deadeye_east",30,31,43,0);
         assertStructureEntities("zero_g",8,"minecraft:shulker");
+    }
+    @Test void deadeyeDefinitionIsDemonicAndComposesWestThenEast() throws Exception {
+        var stream=getClass().getClassLoader().getResourceAsStream(
+                "data/cosmicpve/cosmicpve/trial_rooms/trial/deadeye.json");
+        assertNotNull(stream);
+        var data=TrialRoomDefinitionData.CODEC.parse(JsonOps.INSTANCE,
+                JsonParser.parseReader(new InputStreamReader(stream,StandardCharsets.UTF_8))).getOrThrow();
+        var room=data.resolve(Identifier.parse("cosmicpve:trial/deadeye")).valueOrThrow();
+        assertEquals(com.cosmicpve.content.definition.trial.TrialRoomCategory.DEMONIC,room.category());
+        assertEquals(Identifier.parse("cosmicpve:trial/deadeye_west"),room.pieces().get(0).structure());
+        assertEquals(net.minecraft.core.BlockPos.ZERO,room.pieces().get(0).offset());
+        assertEquals(Identifier.parse("cosmicpve:trial/deadeye_east"),room.pieces().get(1).structure());
+        assertEquals(new net.minecraft.core.BlockPos(41,0,0),room.pieces().get(1).offset());
+        assertEquals(com.cosmicpve.trial.room.DeadeyeService.WEST_SPAWN_MARKER,
+                room.spawnMarkerPosition().orElseThrow());
     }
     @Test void demonicDevelopmentTableUsesOnlyCurrentRealRewardPrimitivesAtCanonicalWeights() throws Exception {
         var stream=getClass().getClassLoader().getResourceAsStream(
@@ -109,7 +127,7 @@ class TrialResourceTest {
         var size=tag.getListOrEmpty("size"); assertEquals(x,size.getIntOr(0,-1)); assertEquals(y,size.getIntOr(1,-1)); assertEquals(z,size.getIntOr(2,-1));
         var palette=tag.getListOrEmpty("palette"); int emeraldState=-1;
         for(int i=0;i<palette.size();i++) if("minecraft:emerald_block".equals(palette.getCompoundOrEmpty(i).getStringOr("Name",""))) emeraldState=i;
-        assertTrue(emeraldState>=0); int markers=0;
+        if(expectedEmeralds>0) assertTrue(emeraldState>=0); int markers=0;
         for(var block:tag.getListOrEmpty("blocks")) if(block instanceof net.minecraft.nbt.CompoundTag compound
                 && compound.getIntOr("state",-1)==emeraldState) markers++;
         assertEquals(expectedEmeralds,markers,name);

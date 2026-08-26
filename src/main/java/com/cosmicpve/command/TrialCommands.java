@@ -79,7 +79,7 @@ public final class TrialCommands {
                                                 ctx.getSource().getServer(), IntegerArgumentType.getInteger(ctx, "count")))))))
                         .then(Commands.literal("force-room").then(Commands.argument("room", StringArgumentType.word())
                                 .suggests((ctx, builder) -> net.minecraft.commands.SharedSuggestionProvider.suggest(
-                                        new String[]{"raiding_rainbow","circuit_circus","cold_snap","fire_colony","zero_g","bomb_squad","hidden_graveyard"}, builder))
+                                        new String[]{"raiding_rainbow","circuit_circus","cold_snap","fire_colony","zero_g","bomb_squad","hidden_graveyard","deadeye"}, builder))
                                 .executes(ctx -> forceRoom(ctx.getSource(), StringArgumentType.getString(ctx, "room")))))
                         .then(Commands.literal("timer")
                                 .then(Commands.literal("set").then(Commands.argument("seconds", IntegerArgumentType.integer(0))
@@ -152,6 +152,8 @@ public final class TrialCommands {
                 + " phase=" + session.progress().phase() + " completed=" + session.progress().completedRooms()
                 + " pot=" + session.progress().pot().size() + " modifiers=" + session.progress().portalModifiers()
                 + " skipProcessed=" + session.progress().initialSkipProcessed()), false);
+        source.sendSuccess(() -> Component.literal("  eligible pool weights: "
+                + TrialRuntime.sessions().productionPoolStatus(session)), false);
         if (!session.progress().encounter().hiddenSequence().isEmpty())
             source.sendSuccess(() -> Component.literal("  hidden sequence=" + session.progress().encounter().hiddenSequence()
                     + " progress=" + session.progress().encounter().sequenceProgress()), false);
@@ -173,6 +175,9 @@ public final class TrialCommands {
         if (session.currentRoom().filter(com.cosmicpve.trial.TrialSessionService.HIDDEN_GRAVEYARD::equals).isPresent())
             source.sendSuccess(() -> Component.literal("  "
                     + TrialRuntime.sessions().hiddenGraveyardStatus(session.sessionId())), false);
+        if (session.currentRoom().filter(com.cosmicpve.trial.TrialSessionService.DEADEYE::equals).isPresent())
+            source.sendSuccess(() -> Component.literal("  "
+                    + TrialRuntime.sessions().deadeyeStatus(session)), false);
         for (var id : session.participants()) {
             var player = source.getServer().getPlayerList().getPlayer(id);
             String snapshot = player == null ? "offline/preserved" : String.valueOf(player.getExistingDataOrNull(ModAttachments.TRIAL_PLAYER_STATE));
