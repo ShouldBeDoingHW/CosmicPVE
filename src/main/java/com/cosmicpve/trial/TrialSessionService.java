@@ -19,6 +19,8 @@ import com.cosmicpve.trial.room.FireColonyService;
 import com.cosmicpve.trial.room.ZeroGService;
 import com.cosmicpve.trial.room.ColdSnapService;
 import com.cosmicpve.trial.room.BombSquadService;
+import com.cosmicpve.trial.room.HiddenGraveyardService;
+import com.cosmicpve.entity.undeadcorpse.UndeadCorpseEntity;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -59,10 +61,15 @@ public final class TrialSessionService {
     public static final Identifier ZERO_G = CosmicPVE.id("trial/zero_g");
     public static final Identifier COLD_SNAP = CosmicPVE.id("trial/cold_snap");
     public static final Identifier BOMB_SQUAD = CosmicPVE.id("trial/bomb_squad");
+    public static final Identifier HIDDEN_GRAVEYARD = CosmicPVE.id("trial/hidden_graveyard");
     public static final Identifier APPRENTICE_REWARDS = CosmicPVE.id("trial/apprentice");
     public static final Identifier HARDCORE_REWARDS = CosmicPVE.id("trial/hardcore_development");
+    public static final Identifier DEMONIC_REWARDS = CosmicPVE.id("trial/demonic_development");
     private static final List<Identifier> APPRENTICE_ROOMS = List.of(CIRCUIT_CIRCUS, RAIDING_RAINBOW, COLD_SNAP);
     private static final List<Identifier> HARDCORE_ROOMS = List.of(FIRE_COLONY, ZERO_G, BOMB_SQUAD);
+    private static final List<Identifier> DEMONIC_ROOMS = java.util.stream.Stream.of(
+            APPRENTICE_ROOMS.stream(), HARDCORE_ROOMS.stream(), java.util.stream.Stream.of(HIDDEN_GRAVEYARD))
+            .flatMap(java.util.function.Function.identity()).toList();
     static final int APPRENTICE_REWARD_TIME = 600;
     static final int HARDCORE_REWARD_TIME = 300;
     static final int PHASE_ENTRY_BONUS = 3_600;
@@ -82,6 +89,7 @@ public final class TrialSessionService {
     private final ZeroGService zeroG = new ZeroGService();
     private final ColdSnapService coldSnap = new ColdSnapService();
     private final BombSquadService bombSquad = new BombSquadService();
+    private final HiddenGraveyardService hiddenGraveyard = new HiddenGraveyardService();
     private final TrialTimerDisplayService timerDisplay = new TrialTimerDisplayService();
     private final TrialCelebrationService celebrations = new TrialCelebrationService();
     private final TrialDecisionEntryService decisionEntries = new TrialDecisionEntryService();
@@ -169,6 +177,7 @@ public final class TrialSessionService {
                 ServerLevel level = server.getLevel(TrialRuntime.INSTANCE_DIMENSION);
                 Identifier room = session.currentRoom().orElse(null);
                 boolean maintenanceTick = server.getTickCount() % 10 == 0;
+                if (maintenanceTick && HIDDEN_GRAVEYARD.equals(room)) hiddenGraveyard.tick(level, session);
                 if (maintenanceTick && FIRE_COLONY.equals(room)) fireColony.tick(level, session);
                 TrialSession current = session;
                 if (maintenanceTick && ZERO_G.equals(room)) {
@@ -207,7 +216,6 @@ public final class TrialSessionService {
             if (session.progress().decision(player.getUUID()) == TrialDecision.UNDECIDED
                     && !(player.containerMenu instanceof TrialDecisionMenu)) openDecision(player);
         });
-        if (session.progress().phase() == TrialPhase.DEMONIC && session.progress().completedRooms() >= 8) return;
         int next = Math.max(0, current - 1);
         if (next == 0) timeoutDecisions(server, session); else publishTick(server, session.withStateTicks(next));
     }
@@ -259,7 +267,11 @@ public final class TrialSessionService {
         TrialSession ending = session.withState(TrialLifecycleState.ENDING, 0, session.currentRoom(), false,
                 session.protectedBounds()); repository.publish(server, ending);
         try {
-            Identifier rewardTable = session.progress().phase() == TrialPhase.HARDCORE ? HARDCORE_REWARDS : APPRENTICE_REWARDS;
+            Identifier rewardTable = switch (session.progress().phase()) {
+                case APPRENTICE -> APPRENTICE_REWARDS;
+                case HARDCORE -> HARDCORE_REWARDS;
+                case DEMONIC -> DEMONIC_REWARDS;
+            };
             List<ItemStack> reward = rewards.roll(rewardTable, 1,
                     new RewardGenerationContext(server.registryAccess(), net.minecraft.util.RandomSource.create(), null));
             TrialProgress nextProgress = session.progress().completeRoom(reward).beginDecision(session.participants());
@@ -315,8 +327,6 @@ public final class TrialSessionService {
         TrialSession session = active(server).orElse(null);
         if (session == null || session.state() != TrialLifecycleState.DECISION || session.initialDecision())
             return TrialOperationResult.rejected("The Trial is not waiting in a post-room Decision Box.");
-        if (session.progress().phase() == TrialPhase.DEMONIC)
-            return TrialOperationResult.rejected("Demonic rooms are not enabled in this milestone. The pot remains safe; choose DEAL to leave.");
         beginNextRoom(server, session); return TrialOperationResult.ok("Continuing to the next "
                 + session.progress().phase().getSerializedName() + " room.");
     }
@@ -327,10 +337,6 @@ public final class TrialSessionService {
                 || !session.activeParticipant(player.getUUID())) return TrialOperationResult.rejected("No active Trial decision is available.");
         if (session.progress().decision(player.getUUID()) != TrialDecision.UNDECIDED)
             return TrialOperationResult.rejected("Your Trial decision is already committed.");
-        if (decision == TrialDecision.NO_DEAL && session.progress().phase() == TrialPhase.DEMONIC) {
-            player.sendSystemMessage(Component.literal("Demonic rooms are not enabled in Step 6O. Your pot is safe; DEAL remains available."));
-            return TrialOperationResult.rejected("Demonic room pool is not enabled yet.");
-        }
         if (decision == TrialDecision.DEAL) {
             List<ItemStack> payout = session.progress().pot().stream().flatMap(entry -> entry.items().stream()).map(ItemStack::copy).toList();
             if (!inventories.prepareCashout(player, payout)) return TrialOperationResult.rejected("Could not durably prepare your Trial payout.");
@@ -366,13 +372,6 @@ public final class TrialSessionService {
     }
 
     private void beginNextRoom(MinecraftServer server, TrialSession session) {
-        if (session.progress().phase() == TrialPhase.DEMONIC) {
-            TrialSession gated = session.withState(TrialLifecycleState.DECISION, 0, Optional.empty(), false,
-                    session.protectedBounds()); repository.publish(server, gated);
-            forOnline(server, gated, player -> player.sendSystemMessage(Component.literal(
-                    "Demonic rooms are not enabled in Step 6O. Your pot remains safe in the Decision Box.")));
-            return;
-        }
         List<Identifier> pool = roomPool(session.progress().phase());
         Identifier room = selection.select(session, pool, net.minecraft.util.RandomSource.create()).orElse(null);
         if (room == null) {
@@ -385,7 +384,8 @@ public final class TrialSessionService {
     }
 
     static List<Identifier> roomPool(TrialPhase phase) {
-        return phase == TrialPhase.HARDCORE ? HARDCORE_ROOMS : phase == TrialPhase.APPRENTICE ? APPRENTICE_ROOMS : List.of();
+        return phase == TrialPhase.DEMONIC ? DEMONIC_ROOMS
+                : phase == TrialPhase.HARDCORE ? HARDCORE_ROOMS : APPRENTICE_ROOMS;
     }
 
     private void beginRoom(MinecraftServer server, TrialSession session, Identifier room) {
@@ -401,6 +401,10 @@ public final class TrialSessionService {
             var initialized = bombSquad.initialize(level, session, ROOM_ORIGIN, placed.bounds(), net.minecraft.util.RandomSource.create());
             participantSpawn = initialized.participantSpawn(); encounter = initialized.encounter();
         }
+        else if (room.equals(HIDDEN_GRAVEYARD)) {
+            var initialized = hiddenGraveyard.initialize(level, session, ROOM_ORIGIN, placed.bounds(),
+                    net.minecraft.util.RandomSource.create()); encounter = initialized.encounter();
+        }
         else { fireColony.initialize(level, session, placed.bounds()); encounter = TrialEncounterState.EMPTY; }
         roomSpawns.put(session.sessionId(), participantSpawn);
         TrialProgress progress = session.progress().beginRoom(room, encounter);
@@ -415,7 +419,8 @@ public final class TrialSessionService {
             else if (room.equals(FIRE_COLONY)) loadouts.applyFireColony(player);
             else if (room.equals(ZERO_G)) loadouts.applyZeroG(player);
             else if (room.equals(COLD_SNAP)) loadouts.applyColdSnap(player);
-            else loadouts.applyBombSquad(player);
+            else if (room.equals(BOMB_SQUAD)) loadouts.applyBombSquad(player);
+            else loadouts.applyHiddenGraveyard(player);
             teleport(player, roomSpawns.get(session.sessionId()));
         });
     }
@@ -431,6 +436,18 @@ public final class TrialSessionService {
         else broadcast(level.getServer(), session, result.color().display() + " was correct! "
                 + result.nextState().sequenceProgress() + "/8!");
         TrialSession next = session.withProgress(session.progress().withEncounter(result.nextState()));
+        repository.publish(level.getServer(), next);
+        if (result.complete()) completeProductionRoom(level.getServer());
+    }
+
+    public void onUndeadCorpseDeath(UndeadCorpseEntity corpse) {
+        if (!(corpse.level() instanceof ServerLevel level)) return;
+        TrialSession session = active(level.getServer()).orElse(null);
+        if (session == null || session.state() != TrialLifecycleState.ROOM_ACTIVE
+                || session.currentRoom().filter(HIDDEN_GRAVEYARD::equals).isEmpty()) return;
+        var result = hiddenGraveyard.onDeath(level, session, corpse);
+        if (!result.accepted()) return;
+        TrialSession next = session.withProgress(session.progress().withEncounter(result.encounter()));
         repository.publish(level.getServer(), next);
         if (result.complete()) completeProductionRoom(level.getServer());
     }
@@ -484,7 +501,16 @@ public final class TrialSessionService {
     }
 
     public boolean allowsProtectedRoomUse(ServerPlayer player, BlockPos pos) {
-        return allowsCircuitUse(player, pos) || allowsFireColonyUse(player, pos) || allowsColdSnapUse(player, pos);
+        return allowsCircuitUse(player, pos) || allowsFireColonyUse(player, pos) || allowsColdSnapUse(player, pos)
+                || allowsHiddenGraveyardUse(player, pos);
+    }
+
+    public boolean allowsHiddenGraveyardUse(ServerPlayer player, BlockPos pos) {
+        TrialSession session = active(player.level().getServer()).orElse(null);
+        return session != null && session.state() == TrialLifecycleState.ROOM_ACTIVE
+                && session.activeParticipant(player.getUUID())
+                && session.currentRoom().filter(HIDDEN_GRAVEYARD::equals).isPresent()
+                && hiddenGraveyard.activeChest(session.sessionId(), pos);
     }
 
     public boolean allowsColdSnapUse(ServerPlayer player, BlockPos pos) {
@@ -570,6 +596,7 @@ public final class TrialSessionService {
     }
 
     public String bombSquadStatus(UUID sessionId) { return bombSquad.status(sessionId); }
+    public String hiddenGraveyardStatus(UUID sessionId) { return hiddenGraveyard.status(sessionId); }
     public TrialPerformanceTracker.Snapshot performanceSnapshot() { return performance.snapshot(); }
 
     static boolean canActivateColdSnap(TrialSession session, UUID playerId) {
@@ -691,9 +718,10 @@ public final class TrialSessionService {
         TrialSession session = active(server).orElse(null);
         if (session == null || session.state() != TrialLifecycleState.DECISION)
             return TrialOperationResult.rejected("Force-room requires an active Decision Box.");
-        if (!APPRENTICE_ROOMS.contains(room) && !HARDCORE_ROOMS.contains(room))
+        if (!APPRENTICE_ROOMS.contains(room) && !HARDCORE_ROOMS.contains(room) && !room.equals(HIDDEN_GRAVEYARD))
             return TrialOperationResult.rejected("Unknown production Trial room: " + room);
-        TrialPhase phase = HARDCORE_ROOMS.contains(room) ? TrialPhase.HARDCORE : TrialPhase.APPRENTICE;
+        TrialPhase phase = room.equals(HIDDEN_GRAVEYARD) ? TrialPhase.DEMONIC
+                : HARDCORE_ROOMS.contains(room) ? TrialPhase.HARDCORE : TrialPhase.APPRENTICE;
         TrialSession prepared = session.withProgress(session.progress().debugEnterPhase(phase));
         beginRoom(server, prepared, room);
         return TrialOperationResult.ok("Forced Trial room " + room + ".");
@@ -716,6 +744,7 @@ public final class TrialSessionService {
         if (instance != null) {
             if (session.currentRoom().filter(ZERO_G::equals).isPresent()) zeroG.cleanup(instance, session, roomBounds(session));
             if (session.currentRoom().filter(BOMB_SQUAD::equals).isPresent()) bombSquad.cleanup(instance, session.sessionId());
+            if (session.currentRoom().filter(HIDDEN_GRAVEYARD::equals).isPresent()) hiddenGraveyard.cleanup(instance, session.sessionId());
             fireColony.cleanup(session.sessionId()); coldSnap.cleanup(session.sessionId());
             session.protectedBounds().forEach(bounds -> structures.cleanup(instance, bounds));
         }
@@ -726,6 +755,7 @@ public final class TrialSessionService {
         if (session.currentRoom().filter(FIRE_COLONY::equals).isPresent()) fireColony.cleanup(session.sessionId());
         if (session.currentRoom().filter(COLD_SNAP::equals).isPresent()) coldSnap.cleanup(session.sessionId());
         if (session.currentRoom().filter(BOMB_SQUAD::equals).isPresent()) bombSquad.cleanup(level, session.sessionId());
+        if (session.currentRoom().filter(HIDDEN_GRAVEYARD::equals).isPresent()) hiddenGraveyard.cleanup(level, session.sessionId());
         InstanceBounds decision = InstanceBounds.from(CosmicContent.repository().requireTrialRoom(DECISION_ROOM).bounds().at(DECISION_ORIGIN));
         session.protectedBounds().stream().filter(bounds -> !bounds.equals(decision)).forEach(bounds -> structures.cleanup(level, bounds));
     }

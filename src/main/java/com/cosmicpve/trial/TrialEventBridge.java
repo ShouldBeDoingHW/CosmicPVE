@@ -12,6 +12,7 @@ import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.entity.monster.Shulker;
 import net.minecraft.world.entity.monster.Creeper;
+import com.cosmicpve.entity.undeadcorpse.UndeadCorpseEntity;
 import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 import net.minecraft.world.phys.BlockHitResult;
 import net.neoforged.neoforge.event.level.BlockEvent;
@@ -32,6 +33,7 @@ public final class TrialEventBridge {
     public void onDeath(LivingDeathEvent event) {
         if (event.isCanceled()) return;
         if (event.getEntity() instanceof Zombie zombie) TrialRuntime.sessions().onRainbowZombieDeath(zombie);
+        if (event.getEntity() instanceof UndeadCorpseEntity corpse) TrialRuntime.sessions().onUndeadCorpseDeath(corpse);
         if (event.getEntity() instanceof ServerPlayer player) TrialRuntime.sessions().onDeath(player);
     }
     public void onDrops(LivingDropsEvent event) {
@@ -41,6 +43,7 @@ public final class TrialEventBridge {
                 && com.cosmicpve.trial.room.ZeroGService.encounterShulker(shulker)) event.getDrops().clear();
         if (event.getEntity() instanceof Creeper creeper
                 && com.cosmicpve.trial.room.BombSquadService.encounterCreeper(creeper)) event.getDrops().clear();
+        if (event.getEntity() instanceof UndeadCorpseEntity corpse && corpse.trialSession().isPresent()) event.getDrops().clear();
     }
     public void onExperience(LivingExperienceDropEvent event) {
         if (event.getEntity() instanceof Zombie zombie
@@ -49,6 +52,7 @@ public final class TrialEventBridge {
                 && com.cosmicpve.trial.room.ZeroGService.encounterShulker(shulker)) event.setDroppedExperience(0);
         if (event.getEntity() instanceof Creeper creeper
                 && com.cosmicpve.trial.room.BombSquadService.encounterCreeper(creeper)) event.setDroppedExperience(0);
+        if (event.getEntity() instanceof UndeadCorpseEntity corpse && corpse.trialSession().isPresent()) event.setDroppedExperience(0);
     }
     public void onProjectileImpact(ProjectileImpactEvent event) {
         if (event.getProjectile() instanceof AbstractArrow arrow && arrow.getOwner() instanceof ServerPlayer player

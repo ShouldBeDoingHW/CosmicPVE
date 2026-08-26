@@ -47,4 +47,17 @@ class TrialRoomSelectionServiceTest {
         assertEquals(3,service.weight(afterCold,TrialSessionService.COLD_SNAP));
         assertNotEquals(TrialSessionService.COLD_SNAP,service.select(afterCold,pool,RandomSource.create(4)).orElseThrow());
     }
+    @Test void demonicPoolAddsHiddenGraveyardWithoutDiscardingEarlierEligibleRooms() {
+        var pool=TrialSessionService.roomPool(TrialPhase.DEMONIC);
+        assertEquals(7,pool.size());
+        assertTrue(pool.containsAll(TrialSessionService.roomPool(TrialPhase.APPRENTICE)));
+        assertTrue(pool.containsAll(TrialSessionService.roomPool(TrialPhase.HARDCORE)));
+        assertTrue(pool.contains(TrialSessionService.HIDDEN_GRAVEYARD));
+        var service=new TrialRoomSelectionService(); var current=session(TrialProgress.EMPTY.debugEnterPhase(TrialPhase.DEMONIC));
+        assertEquals(5,service.weight(current,TrialSessionService.HIDDEN_GRAVEYARD));
+        var after=session(current.progress().beginRoom(TrialSessionService.HIDDEN_GRAVEYARD,TrialEncounterState.EMPTY));
+        assertEquals(3,service.weight(after,TrialSessionService.HIDDEN_GRAVEYARD));
+        assertNotEquals(TrialSessionService.HIDDEN_GRAVEYARD,
+                service.select(after,pool,RandomSource.create(11)).orElseThrow());
+    }
 }

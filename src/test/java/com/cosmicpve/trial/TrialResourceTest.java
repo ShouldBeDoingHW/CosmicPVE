@@ -21,6 +21,7 @@ class TrialResourceTest {
         assertRoom("trial/zero_g",1,21,44,20);
         assertRoom("trial/cold_snap",1,38,30,36);
         assertRoom("trial/bomb_squad",1,44,20,44);
+        assertRoom("trial/hidden_graveyard",1,39,17,42);
     }
     @Test void importedStructuresAreValidAndContainOneEmeraldSpawnMarker() throws Exception {
         assertStructure("decision_box",47,28,47);
@@ -31,7 +32,23 @@ class TrialResourceTest {
         assertStructure("zero_g",22,45,21,1);
         assertStructure("cold_snap",39,31,37,1);
         assertStructure("bomb_squad",45,21,45,4);
+        assertStructure("hidden_graveyard",40,18,43,1);
         assertStructureEntities("zero_g",8,"minecraft:shulker");
+    }
+    @Test void demonicDevelopmentTableUsesOnlyCurrentRealRewardPrimitivesAtCanonicalWeights() throws Exception {
+        var stream=getClass().getClassLoader().getResourceAsStream(
+                "data/cosmicpve/cosmicpve/reward_tables/trial/demonic_development.json");
+        assertNotNull(stream);
+        var entries=JsonParser.parseReader(new InputStreamReader(stream,StandardCharsets.UTF_8))
+                .getAsJsonObject().getAsJsonArray("entries");
+        assertEquals(12,entries.size());
+        assertEquals(101,entries.asList().stream().mapToInt(value->value.getAsJsonObject().get("weight").getAsInt()).sum());
+        assertTrue(entries.asList().stream().map(value->value.getAsJsonObject().getAsJsonObject("reward"))
+                .anyMatch(reward->reward.get("type").getAsString().equals("unexamined_book")
+                        && reward.get("rarity").getAsString().equals("mastery")));
+        assertTrue(entries.asList().stream().map(value->value.getAsJsonObject().getAsJsonObject("reward"))
+                .anyMatch(reward->reward.get("type").getAsString().equals("mask")
+                        && reward.get("mask_count").getAsInt()==2));
     }
     @Test void hardcoreDevelopmentTablePreservesEveryCurrentlySupportedCanonicalRow() throws Exception {
         var stream=getClass().getClassLoader().getResourceAsStream(

@@ -17,6 +17,7 @@ import com.cosmicpve.data.component.SpaceChestData;
 import com.cosmicpve.data.component.TrialTrinketData;
 import com.cosmicpve.data.component.TrialPortalModifiers;
 import com.cosmicpve.data.component.MaskLoadout;
+import com.cosmicpve.data.component.HiddenGraveyardKeyData;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -110,6 +111,10 @@ public final class ModDataComponents {
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<MaskLoadout>> MASK_LOADOUT =
             COMPONENTS.registerComponentType("mask_loadout", builder -> builder.persistent(MaskLoadout.CODEC)
                     .networkSynchronized(ByteBufCodecs.fromCodecWithRegistries(MaskLoadout.CODEC)).cacheEncoding());
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<HiddenGraveyardKeyData>> HIDDEN_GRAVEYARD_KEY =
+            COMPONENTS.registerComponentType("hidden_graveyard_key",
+                    builder -> builder.persistent(HiddenGraveyardKeyData.CODEC)
+                            .networkSynchronized(ByteBufCodecs.fromCodecWithRegistries(HiddenGraveyardKeyData.CODEC)).cacheEncoding());
     private ModDataComponents() {}
 
     public static void register(IEventBus modBus) {

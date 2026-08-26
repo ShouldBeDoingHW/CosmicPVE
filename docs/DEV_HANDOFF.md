@@ -1,10 +1,10 @@
 # CosmicPVE Development Handoff
 
-Current verified and accepted gameplay baseline: Step 6T. Its closure commit is the commit containing this handoff; use `git log -1` for the immutable hash.
+Current verified and accepted gameplay baseline: Step 6U. Its closure commit is the commit containing this handoff; use `git log -1` for the immutable hash.
 
-Repository state: Steps 6A–6T are implemented, automated/runtime verified, and manually accepted. The root `assets` source-art folder and root `trial rooms` structure-development folder remain deliberately untracked and unrelated.
+Repository state: Steps 6A–6U are implemented, automated/runtime verified, and manually accepted. The root `assets` source-art folder and root `trial rooms` structure-development folder remain deliberately untracked and unrelated.
 
-Last handoff update: 2026-08-24
+Last handoff update: 2026-08-25
 
 Pinned environment:
 
@@ -269,6 +269,18 @@ Normal Multi-Mask creation uses the vanilla anvil and flattens left input follow
 Single and Multi-Mask render paths both suppress only the client helmet model and render their selected vanilla player-head profile while leaving the helmet mechanically equipped. Equipment identity metadata stays ahead of the capacity line. The complete attached Mask/Multi-Mask identity is reserved as one physical row: its full rendered width expands the tooltip instead of entering ordinary text wrapping. A focused client-only inventory/container tooltip scroller activates only for an actually overflowing item tooltip, accumulates approximately one row per wheel notch through the full geometric overflow range, clamps only at the real top/bottom bounds, and resets on item/slot/screen changes without packets or persistent state.
 
 Reward descriptors can now generate a random distinct Mask bundle or an exact-rate existing Armor Set Crystal through shared factories. The current Hardcore development table adds a single Mask, Mask Splicer, and 35% Yeti Crystal without inventing Ranger or other missing systems. Permissioned `/cosmic mask give`, `give-multi`, and `splicer give` tooling covers exact 1–5-power testing. The user manually verified and accepted the complete Mask/Multi-Mask flow, anvil creation, persistent creation limit, Splicer disassembly, rendering, effects, reward integration, full-range tooltip scrolling, and the non-wrapping attached identity row.
+
+### Step 6U — IMPLEMENTED; AUTOMATED/RUNTIME VERIFIED; MANUALLY VERIFIED / ACCEPTED
+
+Implemented `cosmicpve:undead_corpse` as a reusable hostile mob, not room-private logic. It uses Zombie AI/model/texture at 0.9 visual and collision scale, 15 HP, movement speed 0.4, zero innate attack/armor/toughness, and an Iron Axe whose Sharpness III, Bleed III, and Rage III rolls are independently 30%. Its axe remains the source of melee damage, and actual Cosmic enchantments resolve through the shared LivingEntity combat path. The canonical entity has no default loot; Trial variants additionally suppress XP and all equipment drops. Permissioned corpse spawn/inspection commands expose generated equipment without changing production behavior.
+
+Hidden Graveyard is the first production Demonic Trial room and uses the existing durable session, inventory, transition, protection, room weighting, and cleanup foundations. The supplied 40×18×43 structure is tracked as `trial/hidden_graveyard`; its exact spawn marker, eleven authored Coal chest markers, central well, and three exact six-grave block groups are resolved once from audited structure coordinates. A bounded room-local Pale Garden biome override is applied for the attempt and restored to the instance baseline during cleanup. The accepted post-room-eight Demonic transition now continues through the normal mixed Apprentice/Hardcore/Demonic selection pool instead of stopping at the former no-room development gate.
+
+One typed/versioned vanilla-presented Trial Key is active at a time and is bound to the persistent Trial session, room attempt, and key sequence. The directly tracked ordinary chest contains exactly one current key and disappears without drops when emptied. Only the current key ItemEntity inside the tightly bounded well region advances a wave; ordinary, stale, wrong-session, and misplaced keys are not consumed. Low-cadence recovery examines only active participants and bounded room ItemEntities, and deterministically respawns a missing current key without duplicating a logically active one.
+
+Each key destroys only its cached authored Cobblestone/Andesite/Stone grave group and spawns six provenance-tagged Corpses. Wave 1 uses Leather; Wave 2 uses Chainmail Protection I plus independent Luck I–X boots/leggings; Wave 3 uses Iron Protection II plus independent Luck V–X boots/leggings and Aegis I–VI chestplate. Three kills from the matching first or second wave unlock the next key exactly once; earlier survivors remain, permitting the intended 3+3+6 overlap. Completion requires Wave 3 to have started and every tracked Corpse from all waves to be dead, then commits one Demonic pot result and returns the party immediately to Decision. Demonic room completion adds no ordinary per-room time bonus. Cleanup removes Corpses, keys/items, chest/runtime state, temporary inventory, biome override, and placed structure state.
+
+Hidden Graveyard's hot path is event-driven for deaths/completion. Fixed marker, well, and grave data are cached; spawned entities are tracked by UUID; and only the tightly bounded key/chest maintenance runs at a 10-tick cadence. No per-tick structure parsing, full-room block scan, world-wide entity scan, or stream-heavy participant search was added. The currently supported Demonic development reward table contains only already implemented canonical reward primitives and deliberately omits unresolved Ranger, Conquest Flare, M-Kit, boss-egg, Dungeon Portal, and Memory Chest rows rather than faking them.
 
 ## 3. Current Real Enchantments
 
@@ -582,11 +594,9 @@ The final post-Orb capacity is no longer unresolved for current target classes: 
 
 ## 16. Current Next Milestone
 
-**Next milestone: Step 6U — Hidden Graveyard.**
+**Next milestone: Step 6V — Deadeye / Trial 1.0 stabilization.**
 
-Step 6U should implement Hidden Graveyard against the established Trial/session/reward foundations without reopening Step 6T's deliberately deferred major reward dependencies. The agreed wave then moves through 6V Deadeye/Trial 1.0 stabilization before shifting focus toward Conquest Chests.
-
-The accepted Step 6T baseline is the commit containing this handoff. Hidden Graveyard is the next bounded implementation; Deadeye, Memory Chests, and Cosmic Crates remain deliberately deferred.
+Step 6V should complete the production Trial 1.0 room pool with Deadeye and perform only bounded Trial regression/stabilization work. The planned shift toward Conquest Chests follows its acceptance. Conquest Chests, Tinkerer/Cosmic Dust, Fallen Heroes, G-/V-/M-Kit redesigns, Heroic Enchantments, Memory Chests, Cosmic Crates, and world-generation work remain outside the accepted Step 6U baseline.
 
 ## 17. Development Workflow
 
@@ -602,6 +612,13 @@ The accepted Step 6T baseline is the commit containing this handoff. Hidden Grav
 Preserve unrelated dirty changes. Never change pinned versions as a side effect of gameplay work. Prefer service-level rules and typed data over one-off event logic, and keep client-only classes isolated from dedicated-server loading.
 
 ## 18. Verification Snapshot
+
+For the manually accepted Step 6U implementation:
+
+- `gradlew.bat cleanTest test build` passes all 366 automated tests across 105 suites with 0 failures, errors, or skips. New coverage pins canonical Corpse attributes/scale/equipment and independent rolls; the exact imported Hidden Graveyard structure dimensions, spawn/chest/well/grave coordinates; typed session/attempt/sequence key identity; wave thresholds, overlap, completion, loadouts, and armor ranges; Demonic eligibility/mixed-pool weighting and phase timing; and the partial supported Demonic reward table.
+- All 169 main-resource JSON files decode. The dedicated server loads 1,462 recipes, atomically publishes seven reward tables, nine Trial rooms, and nine mask definitions, verifies progression controls, and reaches `Done` without relevant entity, renderer, structure, biome, room-definition, reward, component, command, datapack, or common-side classloading errors.
+- Fresh client startup loads the common/client entry points and Undead Corpse renderer, reloads all resources, initializes OpenAL, and builds the block/item/GUI/chest atlases without relevant missing-model, missing-texture, entity-renderer, localization, or sided-loading errors. The client smoke was deliberately terminated after the initialization boundary.
+- Resource validation and Step 6U-owned paths pass `git diff --check`; the existing Design Doc Markdown line-break whitespace remains untouched. Minecraft 1.21.11, NeoForge 21.11.45, Java 21, Gradle 9.2.1, ModDevGradle 2.0.144, mod ID `cosmicpve`, and package `com.cosmicpve` remain unchanged. The user manually verified the reusable Corpse behavior, Pale Garden room presentation, typed key/chest flow, all three overlapping waves and equipment profiles, immediate final-Corpse completion, Demonic continuation, cleanup, and representative Trial regressions, then accepted the milestone.
 
 For the manually accepted Step 6T implementation:
 

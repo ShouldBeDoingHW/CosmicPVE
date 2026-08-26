@@ -1,0 +1,8 @@
+{
+  "display_name": "Hidden Graveyard",
+  "category": "demonic",
+  "pieces": [{"structure": "cosmicpve:trial/hidden_graveyard"}],
+  "spawn_marker": "emerald_block",
+  "spawn_marker_position": [14, 7, 39],
+  "bounds": {"min": [0, 0, 0], "max": [39, 17, 42]}
+}

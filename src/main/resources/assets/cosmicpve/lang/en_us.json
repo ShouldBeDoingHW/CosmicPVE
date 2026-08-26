@@ -299,4 +299,5 @@
   ,"message.cosmicpve.mask_splicer.stale":"The inventory changed; nothing was consumed."
   ,"message.cosmicpve.mask_splicer.invalid":"That is not a valid Multi-Mask."
   ,"message.cosmicpve.mask_splicer.single_mask":"Mask Splicers only separate Multi-Masks."
+  ,"entity.cosmicpve.undead_corpse":"Undead Corpse"
 }

@@ -30,6 +30,14 @@ public final class TrialRoomLoadoutService {
     public static final int BOMB_SQUAD_KNOCKBACK_LEVEL = 2;
     public static final int BOMB_SQUAD_STEAK = 5;
     public static final int BOMB_SQUAD_GOLDEN_APPLES = 5;
+    public static final int HIDDEN_GRAVEYARD_PROTECTION = 4;
+    public static final int HIDDEN_GRAVEYARD_UNBREAKING = 3;
+    public static final int HIDDEN_GRAVEYARD_ENDER_SHIFT = 3;
+    public static final int HIDDEN_GRAVEYARD_NUTRITION = 3;
+    public static final int HIDDEN_GRAVEYARD_INSANITY = 8;
+    public static final int HIDDEN_GRAVEYARD_PUMMEL = 3;
+    public static final int HIDDEN_GRAVEYARD_APPLES = 5;
+    public static final int HIDDEN_GRAVEYARD_HEALING_POTIONS = 4;
     public static final java.util.List<net.minecraft.world.item.Item> RAIDING_RAINBOW_ARMOR = java.util.List.of(
             Items.NETHERITE_HELMET, Items.NETHERITE_CHESTPLATE, Items.NETHERITE_LEGGINGS, Items.NETHERITE_BOOTS);
     private final TrialInventoryTransactionService inventories;
@@ -116,6 +124,27 @@ public final class TrialRoomLoadoutService {
         player.getInventory().setItem(3, new ItemStack(Items.GOLDEN_APPLE, BOMB_SQUAD_GOLDEN_APPLES));
         player.getInventory().setSelectedSlot(0);
     }
+    public void applyHiddenGraveyard(ServerPlayer player) {
+        clear(player);
+        var registry = player.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
+        equipHiddenGraveyard(player, EquipmentSlot.HEAD, Items.IRON_HELMET, registry);
+        equipHiddenGraveyard(player, EquipmentSlot.CHEST, Items.IRON_CHESTPLATE, registry);
+        equipHiddenGraveyard(player, EquipmentSlot.LEGS, Items.IRON_LEGGINGS, registry);
+        equipHiddenGraveyard(player, EquipmentSlot.FEET, Items.IRON_BOOTS, registry);
+        ItemStack axe = new ItemStack(Items.DIAMOND_AXE);
+        EnchantmentHelper.updateEnchantments(axe, mutable -> {
+            mutable.set(registry.getOrThrow(Enchantments.SHARPNESS), 5);
+            mutable.set(registry.getOrThrow(Enchantments.UNBREAKING), 3);
+            mutable.set(registry.getOrThrow(ModEnchantments.INSANITY), HIDDEN_GRAVEYARD_INSANITY);
+            mutable.set(registry.getOrThrow(ModEnchantments.PUMMEL), HIDDEN_GRAVEYARD_PUMMEL);
+        });
+        player.getInventory().setItem(0, axe);
+        player.getInventory().setItem(1, new ItemStack(Items.APPLE, HIDDEN_GRAVEYARD_APPLES));
+        ItemStack healing = net.minecraft.world.item.alchemy.PotionContents.createItemStack(
+                Items.SPLASH_POTION, net.minecraft.world.item.alchemy.Potions.STRONG_HEALING);
+        healing.setCount(HIDDEN_GRAVEYARD_HEALING_POTIONS); player.getInventory().setItem(2, healing);
+        player.getInventory().setSelectedSlot(0);
+    }
     private static void equipDyed(ServerPlayer player, EquipmentSlot slot, net.minecraft.world.item.Item item) {
         ItemStack stack = new ItemStack(item); stack.set(DataComponents.DYED_COLOR, new DyedItemColor(FIRE_COLONY_ARMOR_COLOR));
         player.setItemSlot(slot, stack);
@@ -142,6 +171,17 @@ public final class TrialRoomLoadoutService {
         EnchantmentHelper.updateEnchantments(stack, mutable -> {
             mutable.set(registry.getOrThrow(Enchantments.BLAST_PROTECTION), BOMB_SQUAD_BLAST_PROTECTION_LEVEL);
             mutable.set(registry.getOrThrow(Enchantments.UNBREAKING), BOMB_SQUAD_UNBREAKING_LEVEL);
+        });
+        player.setItemSlot(slot, stack);
+    }
+    private static void equipHiddenGraveyard(ServerPlayer player, EquipmentSlot slot, net.minecraft.world.item.Item item,
+            net.minecraft.core.Registry<net.minecraft.world.item.enchantment.Enchantment> registry) {
+        ItemStack stack = new ItemStack(item);
+        EnchantmentHelper.updateEnchantments(stack, mutable -> {
+            mutable.set(registry.getOrThrow(Enchantments.PROTECTION), HIDDEN_GRAVEYARD_PROTECTION);
+            mutable.set(registry.getOrThrow(Enchantments.UNBREAKING), HIDDEN_GRAVEYARD_UNBREAKING);
+            if (slot == EquipmentSlot.HEAD) mutable.set(registry.getOrThrow(ModEnchantments.ENDER_SHIFT), HIDDEN_GRAVEYARD_ENDER_SHIFT);
+            if (slot == EquipmentSlot.LEGS) mutable.set(registry.getOrThrow(ModEnchantments.NUTRITION), HIDDEN_GRAVEYARD_NUTRITION);
         });
         player.setItemSlot(slot, stack);
     }

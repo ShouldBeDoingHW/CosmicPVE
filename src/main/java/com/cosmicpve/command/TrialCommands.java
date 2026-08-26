@@ -53,6 +53,9 @@ public final class TrialCommands {
                 .then(Commands.literal("debug")
                         .then(Commands.literal("status").executes(ctx -> status(ctx.getSource())))
                         .then(Commands.literal("perf").executes(ctx -> perf(ctx.getSource())))
+                        .then(Commands.literal("corpse")
+                                .then(Commands.literal("spawn").executes(ctx -> spawnCorpse(ctx.getSource())))
+                                .then(Commands.literal("inspect").executes(ctx -> inspectCorpse(ctx.getSource()))))
                         .then(Commands.literal("complete-room").executes(ctx -> send(ctx.getSource(),
                                 TrialRuntime.sessions().completeRoom(ctx.getSource().getServer()))))
                         .then(Commands.literal("continue").executes(ctx -> send(ctx.getSource(),
@@ -76,7 +79,7 @@ public final class TrialCommands {
                                                 ctx.getSource().getServer(), IntegerArgumentType.getInteger(ctx, "count")))))))
                         .then(Commands.literal("force-room").then(Commands.argument("room", StringArgumentType.word())
                                 .suggests((ctx, builder) -> net.minecraft.commands.SharedSuggestionProvider.suggest(
-                                        new String[]{"raiding_rainbow","circuit_circus","cold_snap","fire_colony","zero_g","bomb_squad"}, builder))
+                                        new String[]{"raiding_rainbow","circuit_circus","cold_snap","fire_colony","zero_g","bomb_squad","hidden_graveyard"}, builder))
                                 .executes(ctx -> forceRoom(ctx.getSource(), StringArgumentType.getString(ctx, "room")))))
                         .then(Commands.literal("timer")
                                 .then(Commands.literal("set").then(Commands.argument("seconds", IntegerArgumentType.integer(0))
@@ -167,6 +170,9 @@ public final class TrialCommands {
         if (session.currentRoom().filter(com.cosmicpve.trial.TrialSessionService.BOMB_SQUAD::equals).isPresent())
             source.sendSuccess(() -> Component.literal("  "
                     + TrialRuntime.sessions().bombSquadStatus(session.sessionId())), false);
+        if (session.currentRoom().filter(com.cosmicpve.trial.TrialSessionService.HIDDEN_GRAVEYARD::equals).isPresent())
+            source.sendSuccess(() -> Component.literal("  "
+                    + TrialRuntime.sessions().hiddenGraveyardStatus(session.sessionId())), false);
         for (var id : session.participants()) {
             var player = source.getServer().getPlayerList().getPlayer(id);
             String snapshot = player == null ? "offline/preserved" : String.valueOf(player.getExistingDataOrNull(ModAttachments.TRIAL_PLAYER_STATE));
@@ -181,6 +187,33 @@ public final class TrialCommands {
                 + " avg=" + snapshot.averageMicros() + "us max=" + snapshot.maximumMicros() + "us state="
                 + snapshot.state() + " room=" + snapshot.room() + " participants=" + snapshot.participants()), false);
         return snapshot.samples();
+    }
+
+    private static int spawnCorpse(net.minecraft.commands.CommandSourceStack source)
+            throws com.mojang.brigadier.exceptions.CommandSyntaxException {
+        ServerPlayer player = source.getPlayerOrException();
+        var corpse = com.cosmicpve.registry.ModEntities.UNDEAD_CORPSE.get().create(
+                (net.minecraft.server.level.ServerLevel)player.level(), net.minecraft.world.entity.EntitySpawnReason.COMMAND);
+        if (corpse == null) { source.sendFailure(Component.literal("Could not create Undead Corpse.")); return 0; }
+        corpse.setPos(player.getX(), player.getY(), player.getZ() + 2.0D);
+        com.cosmicpve.entity.undeadcorpse.UndeadCorpseEquipmentService.equipBase(
+                corpse, player.registryAccess(), player.getRandom());
+        if (!player.level().addFreshEntity(corpse)) { source.sendFailure(Component.literal("Server rejected Undead Corpse.")); return 0; }
+        source.sendSuccess(() -> Component.literal("Spawned canonical Undead Corpse " + corpse.getUUID() + "."), true);
+        return 1;
+    }
+
+    private static int inspectCorpse(net.minecraft.commands.CommandSourceStack source)
+            throws com.mojang.brigadier.exceptions.CommandSyntaxException {
+        ServerPlayer player = source.getPlayerOrException();
+        var corpses = player.level().getEntitiesOfClass(com.cosmicpve.entity.undeadcorpse.UndeadCorpseEntity.class,
+                player.getBoundingBox().inflate(16.0D));
+        if (corpses.isEmpty()) { source.sendFailure(Component.literal("No Undead Corpse within 16 blocks.")); return 0; }
+        var corpse = corpses.stream().min(java.util.Comparator.comparingDouble(player::distanceToSqr)).orElseThrow();
+        source.sendSuccess(() -> Component.literal("Corpse " + corpse.getUUID() + " health=" + corpse.getHealth()
+                + " speed=" + corpse.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.MOVEMENT_SPEED)
+                + " axe=" + corpse.getMainHandItem().getEnchantments()), false);
+        return 1;
     }
 
     private static int restore(net.minecraft.commands.CommandSourceStack source, ServerPlayer player) {

@@ -1,0 +1,16 @@
+{
+  "entries": [
+    {"weight":12,"reward":{"type":"static_item","item":"cosmicpve:heroic_crystal"}},
+    {"weight":6,"reward":{"type":"armor_set_crystal","armor_set":"cosmicpve:yeti","success_rate":75}},
+    {"weight":10,"minimum_quantity":2,"maximum_quantity":2,"reward":{"type":"mob_spawner","entity_type":"minecraft:iron_golem"}},
+    {"weight":10,"minimum_quantity":2,"maximum_quantity":2,"reward":{"type":"mob_spawner","entity_type":"minecraft:witch"}},
+    {"weight":10,"minimum_quantity":2,"maximum_quantity":2,"reward":{"type":"mob_spawner","entity_type":"minecraft:blaze"}},
+    {"weight":10,"minimum_quantity":2,"maximum_quantity":2,"reward":{"type":"mob_spawner","entity_type":"minecraft:wither_skeleton"}},
+    {"weight":5,"reward":{"type":"static_item","item":"cosmicpve:trial_trinket_time_5"}},
+    {"weight":5,"reward":{"type":"static_item","item":"cosmicpve:trial_trinket_skip_3"}},
+    {"weight":5,"reward":{"type":"static_item","item":"cosmicpve:trial_trinket_insurance_3"}},
+    {"weight":12,"reward":{"type":"unexamined_book","rarity":"mastery"}},
+    {"weight":10,"reward":{"type":"mask","mask_count":2}},
+    {"weight":6,"reward":{"type":"space_chest","rarity":"mastery"}}
+  ]
+}

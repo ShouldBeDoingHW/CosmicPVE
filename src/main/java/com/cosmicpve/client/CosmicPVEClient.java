@@ -10,6 +10,7 @@ import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import com.cosmicpve.registry.ModEntities;
 import com.cosmicpve.client.entity.SpacePirateVariant1Renderer;
 import com.cosmicpve.client.entity.SpacePirateVariant2Renderer;
+import com.cosmicpve.client.entity.UndeadCorpseRenderer;
 import net.neoforged.neoforge.common.NeoForge;
 
 @Mod(value = CosmicPVE.MOD_ID, dist = Dist.CLIENT)
@@ -38,6 +39,7 @@ public final class CosmicPVEClient {
     private static void registerEntityRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(ModEntities.SPACE_PIRATE_VARIANT_1.get(), SpacePirateVariant1Renderer::new);
         event.registerEntityRenderer(ModEntities.SPACE_PIRATE_VARIANT_2.get(), SpacePirateVariant2Renderer::new);
+        event.registerEntityRenderer(ModEntities.UNDEAD_CORPSE.get(), UndeadCorpseRenderer::new);
     }
 
     private static void registerItemTints(RegisterColorHandlersEvent.ItemTintSources event) {
