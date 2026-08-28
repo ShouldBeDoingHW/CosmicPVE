@@ -18,6 +18,7 @@ import com.cosmicpve.data.component.TrialTrinketData;
 import com.cosmicpve.data.component.TrialPortalModifiers;
 import com.cosmicpve.data.component.MaskLoadout;
 import com.cosmicpve.data.component.HiddenGraveyardKeyData;
+import com.cosmicpve.data.component.CosmicDustData;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -49,6 +50,11 @@ public final class ModDataComponents {
             COMPONENTS.registerComponentType("cosmic_enchant_book",
                     builder -> builder.persistent(CosmicEnchantmentBookData.CODEC)
                             .networkSynchronized(ByteBufCodecs.fromCodecWithRegistries(CosmicEnchantmentBookData.CODEC)).cacheEncoding());
+
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<CosmicDustData>> COSMIC_DUST =
+            COMPONENTS.registerComponentType("cosmic_dust",
+                    builder -> builder.persistent(CosmicDustData.CODEC)
+                            .networkSynchronized(ByteBufCodecs.fromCodecWithRegistries(CosmicDustData.CODEC)).cacheEncoding());
 
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<UnexaminedBookData>> UNEXAMINED_BOOK =
             COMPONENTS.registerComponentType("unexamined_book",

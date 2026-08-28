@@ -22,6 +22,7 @@ import com.cosmicpve.data.component.TrialTrinketType;
 import com.cosmicpve.equipment.mask.MaskItem;
 import com.cosmicpve.equipment.mask.MaskSplicerItem;
 import com.cosmicpve.conquest.ConquestFlareItem;
+import com.cosmicpve.equipment.enchantment.CosmicDustItem;
 
 public final class ModItems {
     private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(CosmicPVE.MOD_ID);
@@ -36,6 +37,9 @@ public final class ModItems {
 
     public static final DeferredItem<CosmicEnchantmentBookItem> COSMIC_ENCHANTMENT_BOOK = ITEMS.registerItem(
             "cosmic_enchantment_book", CosmicEnchantmentBookItem::new, properties -> properties.stacksTo(1));
+
+    public static final DeferredItem<CosmicDustItem> COSMIC_DUST = ITEMS.registerItem(
+            "cosmic_dust", CosmicDustItem::new, properties -> properties.stacksTo(64));
 
     public static final DeferredItem<UnexaminedEnchantmentBookItem> UNEXAMINED_ENCHANTMENT_BOOK = ITEMS.registerItem(
             "unexamined_enchantment_book", UnexaminedEnchantmentBookItem::new, properties -> properties.stacksTo(64));

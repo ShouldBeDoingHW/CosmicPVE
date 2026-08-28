@@ -13,6 +13,13 @@ public final class EnchantingEventBridge {
     private final WhiteScrollProtectionService protection = new WhiteScrollProtectionService();
 
     public void onStacked(ItemStackedOnOtherEvent event) {
+        if (event.getClickAction() == ClickAction.PRIMARY
+                && event.getCarriedItem().is(ModItems.COSMIC_DUST.get())
+                && event.getStackedOnItem().is(ModItems.COSMIC_ENCHANTMENT_BOOK.get())) {
+            event.setCanceled(true);
+            if (event.getPlayer() instanceof ServerPlayer player) applyDust(event, player);
+            return;
+        }
         if (event.getClickAction() != ClickAction.PRIMARY || !EquipmentInteractionPolicy.isPotentialEquipment(event.getStackedOnItem())) return;
         boolean book = event.getCarriedItem().is(ModItems.COSMIC_ENCHANTMENT_BOOK.get());
         boolean scroll = event.getCarriedItem().is(ModItems.WHITE_SCROLL.get());
@@ -27,6 +34,25 @@ public final class EnchantingEventBridge {
         else if (transmog) applyTransmog(event, player);
         else if (orb) applyOrb(event, player);
         else applyBlackScroll(event, player);
+    }
+
+    private void applyDust(ItemStackedOnOtherEvent event, ServerPlayer player) {
+        var result = new CosmicDustService().apply(
+                event.getCarriedItem(), event.getStackedOnItem(), event.getSlot().getItem());
+        event.getCarriedSlotAccess().set(event.getCarriedItem());
+        event.getSlot().set(event.getSlot().getItem());
+        if (result.outcome() == CosmicDustService.ApplicationOutcome.SUCCESS) {
+            ItemApplicationFeedback.play(player, ItemApplicationFeedback.Cue.SUCCESS);
+            player.displayClientMessage(Component.translatable("message.cosmicpve.dust.success",
+                    result.consumed(), result.successAfter()), true);
+        } else {
+            String key = switch (result.outcome()) {
+                case REJECTED_RARITY -> "message.cosmicpve.dust.rarity";
+                case REJECTED_CAPPED -> "message.cosmicpve.dust.capped";
+                default -> "message.cosmicpve.dust.invalid";
+            };
+            player.displayClientMessage(Component.translatable(key), true);
+        }
     }
 
     private void applyBook(ItemStackedOnOtherEvent event, ServerPlayer player) {

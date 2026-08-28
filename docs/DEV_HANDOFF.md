@@ -1,8 +1,8 @@
 # CosmicPVE Development Handoff
 
-Current verified and accepted gameplay baseline: Step 7A (Conquest Chest world events, including corrective passes 7A.1 and 7A.2). Its accepted source, resources, tests, and handoff state are closed together in the Step 7A gameplay commit.
+Current verified and accepted gameplay baseline: Step 7B (Tinkerer / Cosmic Dust). Its accepted source, resources, tests, and handoff state are closed together in the Step 7B gameplay commit.
 
-Repository state: Steps 6A–7A are implemented, automated/runtime verified, and manually accepted. The root `assets` source-art folder and root `trial rooms` structure-development folder remain deliberately untracked and unrelated.
+Repository state: Steps 6A–7B are implemented, automated/runtime verified, and manually accepted. The root `assets` source-art folder and root `trial rooms` structure-development folder remain deliberately untracked and unrelated.
 
 Last handoff update: 2026-08-27
 
@@ -307,6 +307,14 @@ Permission-gated tooling supports natural/local Flare event creation, listing, U
 The first Step 7A candidate passed unit/build and startup checks but failed its core manual test: every shared command/Flare creation path reached block placement, where inherited `ChestBlock.newBlockEntity` constructed a vanilla `minecraft:chest` block entity for the custom `cosmicpve:conquest_chest` state. Minecraft rejected that mismatched block-entity state, so no usable chest could be created. `ConquestChestBlock` now explicitly constructs `ConquestChestBlockEntity`; the final placement transaction immediately verifies the block and custom block entity before publishing SavedData, and rolls the block back if persistence fails. Surface resolution now performs bounded chunk access, accepts ordinary replaceable dry surface vegetation, and retains sturdy/dry/exposure/overlap validation. `/cosmic conquest spawn-here` provides deterministic nearest-surface diagnosis through the same production creation transaction; `list`/`inspect` expose live block and block-entity consistency.
 
 Registered NeoForge real-level GameTests now cover an ordinary flat/replaceable surface, buried/lava/occupied rejection, no ghost event, physical block plus custom block entity plus persisted event, first interaction with 3–5 physical Space Pirates, exactly-once reward completion including the guaranteed Banknote, actual server Flare success/one-item consumption and failure/zero consumption, all three registered admin creation routes, and the real Survival mining calculation with loaded tags and Efficiency attributes. These regressions exist specifically because the original pure unit/startup suite could not detect invalid runtime block-entity or tool-tag behavior.
+
+### Step 7B — IMPLEMENTED; AUTOMATED/RUNTIME VERIFIED; MANUALLY VERIFIED / ACCEPTED
+
+`/tinkerer` is a normal-player command that opens a three-row chest-style server menu. Slot 0 is a read-only Red Stained Glass `Tinker Items` confirmation control; the other 26 menu slots accept only examined Cosmic Enchantment Books through ordinary clicks or shift-click. Vanilla books, Unexamined Books, and unrelated items are rejected. Closing before confirmation returns deposited books through the normal menu lifecycle. Confirmation is a single server-thread transaction: each eligible book yields `min(10, 1 + level + floor(success/10))`, Destroy Rate is ignored, outputs aggregate by rarity, the deposited books are consumed once, Dust is inserted into player inventory with normal safe overflow behavior, and `minecraft:entity.chicken.egg` plays once. Empty or replayed confirmation produces nothing and no success sound.
+
+Cosmic Dust is one typed, versioned, stackable Sugar-presented item carrying a `CosmicEnchantmentTier`. Simple, Unique, Elite, Ultimate, Legendary, and Mastery variants use their canonical rarity names and colors. Primary drag/drop onto an examined Cosmic Book enters the existing server-authoritative item-application path; unrelated targets and empty slots retain vanilla behavior. Matching Dust adds one flat Success percentage point per unit, bulk-consuming only the useful amount. Ordinary books cap at 100%, Mastery caps at exactly 50%, and wrong-rarity or capped interactions consume nothing. The application replaces only the typed book Success Rate field, preserving enchantment ID, level, Destroy Rate, schema version, custom presentation, and all other stack components.
+
+Permission-gated development support is available at `/cosmic tinkerer dust give <player> <tier> [count]`; the established exact Cosmic Book command remains `/cosmic enchant book give <player> <enchantment-id> <level> <success> <destroy>`.
 
 ## 3. Current Real Enchantments
 
@@ -620,7 +628,7 @@ The final post-Orb capacity is no longer unresolved for current target classes: 
 
 ## 16. Current Next Milestone
 
-**Next milestone after Step 7A acceptance: Tinkerer / Cosmic Dust.**
+**Next milestone after Step 7B acceptance: Enchantment Expansion I.**
 
 Current intended sequence:
 
@@ -642,6 +650,12 @@ The ordinary-enchantment expansion may ultimately require two or three bounded p
 Preserve unrelated dirty changes. Never change pinned versions as a side effect of gameplay work. Prefer service-level rules and typed data over one-off event logic, and keep client-only classes isolated from dedicated-server loading.
 
 ## 18. Verification Snapshot
+
+For the Step 7B candidate:
+
+- `gradlew.bat cleanTest test build` passes all 396 JUnit tests across 110 suites with 0 failures, errors, or skips. New coverage pins salvage formula boundaries/capping, all-six-rarity examined-book eligibility, rarity aggregation, exactly-once confirmation/replay behavior, flat and bulk same-rarity application, ordinary/Mastery caps, stale/wrong-rarity rejection, book-data preservation, typed stackable Dust, and Sugar/tint model resources.
+- Dedicated-server and fresh-client smoke verification complete without relevant registry, menu, command, component-codec, model, tint-source, resource, or common-side classloading errors. Main resources decode/load successfully and `git diff --check` reports no whitespace errors beyond normal Windows line-ending notices.
+- The user manually verified and accepted the complete Step 7B Tinkerer and Cosmic Dust loop, including examined-book eligibility, salvage output, all rarity-specific Dust types, bulk same-rarity Success improvement, ordinary/Mastery caps, menu return behavior, and overflow safety.
 
 For the Step 7A candidate:
 

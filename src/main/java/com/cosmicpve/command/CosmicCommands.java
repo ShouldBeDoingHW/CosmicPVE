@@ -23,6 +23,7 @@ public final class CosmicCommands {
     public static void register(RegisterCommandsEvent event) {
         EconomyCommands.registerPublic(event);
         MaskLimitCommands.register(event);
+        TinkererCommands.registerPublic(event);
         var combat = Commands.literal("combat")
                 .then(Commands.literal("trace")
                         .then(Commands.literal("on").executes(context -> setTrace(context.getSource(), true)))
@@ -84,6 +85,7 @@ public final class CosmicCommands {
                 .then(SpaceChestCommands.create())
                 .then(TrialCommands.create())
                 .then(ConquestCommands.create())
+                .then(TinkererCommands.create())
                 .then(CombatStackCommands.create())
                 .then(MaskCommands.create()));
 

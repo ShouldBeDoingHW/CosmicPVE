@@ -3,6 +3,7 @@ package com.cosmicpve.registry;
 import com.cosmicpve.CosmicPVE;
 import com.cosmicpve.spacechest.SpaceChestMenu;
 import com.cosmicpve.trial.TrialDecisionMenu;
+import com.cosmicpve.tinkerer.TinkererMenu;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.inventory.MenuType;
 import net.neoforged.bus.api.IEventBus;
@@ -16,6 +17,8 @@ public final class ModMenus {
             "space_chest", () -> IMenuTypeExtension.create(SpaceChestMenu::client));
     public static final DeferredHolder<MenuType<?>, MenuType<TrialDecisionMenu>> TRIAL_DECISION = MENUS.register(
             "trial_decision", () -> IMenuTypeExtension.create(TrialDecisionMenu::client));
+    public static final DeferredHolder<MenuType<?>, MenuType<TinkererMenu>> TINKERER = MENUS.register(
+            "tinkerer", () -> IMenuTypeExtension.create(TinkererMenu::client));
     private ModMenus() {}
     public static void register(IEventBus bus) { MENUS.register(bus); }
 }

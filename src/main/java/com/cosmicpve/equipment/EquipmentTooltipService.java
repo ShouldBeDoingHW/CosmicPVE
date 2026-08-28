@@ -48,6 +48,13 @@ public final class EquipmentTooltipService {
             CosmicEnchantmentSpecs.find(book.enchantmentId())
                     .ifPresent(spec -> event.getToolTip().addAll(CosmicBookLore.lines(book, spec)));
         }
+        var dust = stack.get(ModDataComponents.COSMIC_DUST.get());
+        if (dust != null) {
+            event.getToolTip().add(Component.translatable("tooltip.cosmicpve.cosmic_dust.effect")
+                    .withColor(dust.tier().tooltipColor()));
+            event.getToolTip().add(Component.translatable("tooltip.cosmicpve.cosmic_dust.instruction")
+                    .withStyle(net.minecraft.ChatFormatting.GRAY));
+        }
         if (stack.is(com.cosmicpve.registry.ModItems.UNEXAMINED_ENCHANTMENT_BOOK.get())
                 && stack.has(ModDataComponents.UNEXAMINED_BOOK.get())) {
             event.getToolTip().addAll(

@@ -36,6 +36,7 @@ public final class CosmicPVEClient {
     private static void registerMenuScreens(RegisterMenuScreensEvent event) {
         event.register(com.cosmicpve.registry.ModMenus.SPACE_CHEST.get(), SpaceChestScreen::new);
         event.register(com.cosmicpve.registry.ModMenus.TRIAL_DECISION.get(), TrialDecisionScreen::new);
+        event.register(com.cosmicpve.registry.ModMenus.TINKERER.get(), TinkererScreen::new);
     }
 
     private static void registerEntityRenderers(EntityRenderersEvent.RegisterRenderers event) {
@@ -48,5 +49,6 @@ public final class CosmicPVEClient {
     private static void registerItemTints(RegisterColorHandlersEvent.ItemTintSources event) {
         event.register(CosmicPVE.id("armor_set"), ArmorSetItemTintSource.MAP_CODEC);
         event.register(CosmicPVE.id("cosmic_book"), CosmicBookItemTintSource.MAP_CODEC);
+        event.register(CosmicPVE.id("cosmic_dust"), CosmicDustItemTintSource.MAP_CODEC);
     }
 }
