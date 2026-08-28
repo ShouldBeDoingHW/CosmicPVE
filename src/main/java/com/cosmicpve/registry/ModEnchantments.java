@@ -37,6 +37,11 @@ public final class ModEnchantments {
     public static final ResourceKey<Enchantment> GEARS = createKey("gears");
     public static final ResourceKey<Enchantment> PERMAFROST = createKey("permafrost");
     public static final ResourceKey<Enchantment> MORTAL_COIL = createKey("mortal_coil");
+    public static final ResourceKey<Enchantment> SELF_DESTRUCT = createKey("self_destruct");
+    public static final ResourceKey<Enchantment> PHOENIX = createKey("phoenix");
+    public static final ResourceKey<Enchantment> DIVINE_IMMOLATION = createKey("divine_immolation");
+    public static final ResourceKey<Enchantment> VIRUS = createKey("virus");
+    public static final ResourceKey<Enchantment> DEVOUR = createKey("devour");
 
     private ModEnchantments() {}
 

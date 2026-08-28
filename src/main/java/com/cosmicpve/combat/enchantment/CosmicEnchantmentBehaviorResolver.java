@@ -3,11 +3,13 @@ package com.cosmicpve.combat.enchantment;
 import com.cosmicpve.CosmicPVE;
 import com.cosmicpve.combat.action.ChildCombatActionService;
 import com.cosmicpve.combat.cooldown.CooldownScope;
+import com.cosmicpve.combat.cooldown.CooldownService;
 import com.cosmicpve.combat.proc.ChildProcEligibility;
 import com.cosmicpve.combat.proc.ProcCandidate;
 import com.cosmicpve.combat.proc.ProcCandidateResolver;
 import com.cosmicpve.combat.proc.ProcEvent;
 import com.cosmicpve.combat.proc.ProcHook;
+import com.cosmicpve.combat.proc.ProcEngine;
 import com.cosmicpve.combat.proc.ProcProvenance;
 import com.cosmicpve.combat.proc.ProcSourceKind;
 import com.cosmicpve.combat.stack.BleedRuntimeService;
@@ -30,21 +32,25 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
     public static final Identifier CACTUS_ONCE_KEY = CosmicPVE.id("cactus_once_per_damage");
     public static final Identifier PERMAFROST_ONCE_KEY = CosmicPVE.id("permafrost_once_per_damage");
     public static final Identifier MORTAL_COIL_ONCE_KEY = CosmicPVE.id("mortal_coil_once_per_damage");
+    public static final Identifier SELF_DESTRUCT_ONCE_KEY = CosmicPVE.id("self_destruct_once_per_damage");
 
     private final ChildCombatActionService childActions;
     private final CombatStackService stacks;
     private final BleedRuntimeService bleedRuntime;
     private final ArmorSetImmunityResolver immunities;
+    private final CooldownService cooldowns;
 
     public CosmicEnchantmentBehaviorResolver(
             ChildCombatActionService childActions,
             CombatStackService stacks,
             BleedRuntimeService bleedRuntime,
-            ArmorSetImmunityResolver immunities) {
+            ArmorSetImmunityResolver immunities,
+            CooldownService cooldowns) {
         this.childActions = childActions;
         this.stacks = stacks;
         this.bleedRuntime = bleedRuntime;
         this.immunities = immunities;
+        this.cooldowns = cooldowns;
     }
 
     @Override
@@ -57,9 +63,11 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
             addPummel(event, result);
             addBlessed(event, result);
             addTrap(event, result);
+            addDivineImmolation(event, result);
         } else if (event.hook() == ProcHook.ON_PROJECTILE_HIT) {
             addLightning(event, result);
             addVenom(event, result);
+            addVirus(event, result);
         } else if (event.hook() == ProcHook.ON_DAMAGE_TAKEN) {
             addAngelic(event, result);
             addEnderShift(event, result);
@@ -67,8 +75,72 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
             addCactus(event, result);
             addPermafrost(event, result);
             addMortalCoil(event, result);
+            addSelfDestruct(event, result);
+        } else if (event.hook() == ProcHook.ON_PRE_DEATH) {
+            addPhoenix(event, result);
+        } else if (event.hook() == ProcHook.ON_PRE_DAMAGE_CALCULATION) {
+            addDevour(event, result);
         }
         return List.copyOf(result);
+    }
+
+    private void addDivineImmolation(ProcEvent event, List<ProcCandidate> result) {
+        int level = Math.min(4, event.effectiveEnchantments().level(ModEnchantments.DIVINE_IMMOLATION.identifier()));
+        if (level <= 0 || event.attacker() == null) return;
+        result.add(candidate(ModEnchantments.DIVINE_IMMOLATION.identifier(), ProcHook.ON_VALID_HIT,
+                DivineImmolationBehavior.chance(level), Optional.of(DivineImmolationBehavior.COOLDOWN_KEY),
+                DivineImmolationBehavior.COOLDOWN_TICKS, Optional.empty(),
+                ChildProcEligibility.LIMITED_OFFENSIVE_REROLL,
+                activation -> DivineImmolationBehavior.activate(activation, childActions, cooldowns),
+                provenance(event, ModEnchantments.DIVINE_IMMOLATION.identifier()),
+                meleeCondition(CosmicPVE.id("divine_immolation_melee_hit"))));
+    }
+
+    private void addVirus(ProcEvent event, List<ProcCandidate> result) {
+        int level = Math.min(3, event.effectiveEnchantments().level(ModEnchantments.VIRUS.identifier()));
+        if (level <= 0 || event.target() == null || event.target().isDeadOrDying()
+                || !event.target().hasEffect(net.minecraft.world.effect.MobEffects.POISON)) return;
+        result.add(deterministicCandidate(ModEnchantments.VIRUS.identifier(), ProcHook.ON_PROJECTILE_HIT,
+                1.0, Optional.empty(), 0L, Optional.empty(), ChildProcEligibility.ROOT_ONLY,
+                activation -> VirusBehavior.activate(activation, level, childActions),
+                provenance(event, ModEnchantments.VIRUS.identifier()),
+                condition(CosmicPVE.id("virus_poisoned_projectile_target"), procEvent ->
+                        procEvent.combatResult().map(resultHit -> resultHit.context().category()
+                                        == com.cosmicpve.combat.api.AttackCategory.PROJECTILE).orElse(false))));
+    }
+
+    private void addSelfDestruct(ProcEvent event, List<ProcCandidate> result) {
+        int level = Math.min(3, event.effectiveEnchantments().level(ModEnchantments.SELF_DESTRUCT.identifier()));
+        if (level <= 0 || event.target() == null) return;
+        result.add(deterministicCandidate(ModEnchantments.SELF_DESTRUCT.identifier(), ProcHook.ON_DAMAGE_TAKEN,
+                1.0, Optional.of(ModEnchantments.SELF_DESTRUCT.identifier()), SelfDestructBehavior.COOLDOWN_TICKS,
+                Optional.of(SELF_DESTRUCT_ONCE_KEY), ChildProcEligibility.LIMITED_DEFENSIVE_REACTION,
+                activation -> SelfDestructBehavior.activate(activation.event().target()),
+                provenance(event, ModEnchantments.SELF_DESTRUCT.identifier()),
+                condition(CosmicPVE.id("self_destruct_low_health"), procEvent ->
+                        ordinaryAttack(procEvent) && procEvent.target() != null
+                                && SelfDestructBehavior.belowThreshold(
+                                        procEvent.target().getHealth(), procEvent.target().getMaxHealth()))));
+    }
+
+    private void addPhoenix(ProcEvent event, List<ProcCandidate> result) {
+        int level = Math.min(3, event.effectiveEnchantments().level(ModEnchantments.PHOENIX.identifier()));
+        if (level <= 0 || event.target() == null || event.attacker() == null) return;
+        result.add(deterministicCandidate(ModEnchantments.PHOENIX.identifier(), ProcHook.ON_PRE_DEATH,
+                1.0, Optional.of(PhoenixBehavior.COOLDOWN_KEY), PhoenixBehavior.COOLDOWN_TICKS,
+                Optional.empty(), ChildProcEligibility.ROOT_ONLY,
+                activation -> PhoenixBehavior.activate(activation.event().target()),
+                provenance(event, ModEnchantments.PHOENIX.identifier())));
+    }
+
+    private void addDevour(ProcEvent event, List<ProcCandidate> result) {
+        int level = Math.min(4, event.effectiveEnchantments().level(ModEnchantments.DEVOUR.identifier()));
+        if (level <= 0) return;
+        result.add(candidate(ModEnchantments.DEVOUR.identifier(), ProcHook.ON_PRE_DAMAGE_CALCULATION,
+                DevourBehavior.PROC_CHANCE, Optional.empty(), 0L, Optional.empty(), ChildProcEligibility.ROOT_ONLY,
+                activation -> {}, provenance(event, ModEnchantments.DEVOUR.identifier()),
+                condition(CosmicPVE.id("devour_hunger_and_melee"), procEvent ->
+                        procEvent.combatResult().map(DevourBehavior::eligible).orElse(false))));
     }
 
     private void addBlessed(ProcEvent event, List<ProcCandidate> result) {
@@ -313,6 +385,23 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
         return new ProcCandidate(
                 id, hook, chance, cooldown, cooldownTicks, CooldownScope.EPHEMERAL_COMBAT, Optional.empty(),
                 List.of(), List.of(conditions), onceKey, childEligibility, id, action, provenance);
+    }
+
+    private static ProcCandidate deterministicCandidate(
+            Identifier id,
+            ProcHook hook,
+            double chance,
+            Optional<Identifier> cooldown,
+            long cooldownTicks,
+            Optional<Identifier> onceKey,
+            ChildProcEligibility childEligibility,
+            com.cosmicpve.combat.proc.ProcAction action,
+            ProcProvenance provenance,
+            com.cosmicpve.combat.proc.ProcCondition... conditions) {
+        return new ProcCandidate(
+                id, hook, chance, cooldown, cooldownTicks, CooldownScope.EPHEMERAL_COMBAT, Optional.empty(),
+                List.of(), List.of(conditions), onceKey, childEligibility,
+                java.util.Set.of(ProcEngine.DETERMINISTIC_CLASSIFICATION), id, action, provenance);
     }
 
     private static ProcProvenance provenance(ProcEvent event, Identifier enchantmentId) {

@@ -73,6 +73,20 @@ public final class ProcEventService {
                 context.excludedProcEffectIds(), Optional.of(result)));
     }
 
+    /** Pre-calculation seam for effects, such as Devour, that alter their qualifying parent hit. */
+    public ProcDispatchResult onPreDamageCalculation(CombatResult provisional) {
+        var context = provisional.context();
+        if (context.attacker() == null || !(context.target().level() instanceof ServerLevel level)) {
+            throw new IllegalArgumentException("Pre-damage proc dispatch requires a server-side living attacker");
+        }
+        return dispatch(create(
+                ProcHook.ON_PRE_DAMAGE_CALCULATION, context.attacker(), context.attacker(), context.target(),
+                context.attackSequenceId(), context.parentSequenceId(), context.recursionPolicy(),
+                context.attributedPlayerId().or(() -> tracePlayer(context.target())),
+                context.effectiveEnchantments(), eventRandom(level), context.excludedProcEffectIds(),
+                Optional.of(provisional)));
+    }
+
     public ProcDispatchResult dispatchRoot(
             ProcHook hook,
             LivingEntity owner,

@@ -337,7 +337,7 @@ class CosmicEnchantmentBehaviorTest {
         var stacks = new CombatStackService(new CosmicContentRepository());
         var armorSets = new com.cosmicpve.equipment.armor.ArmorSetResolver(new CosmicContentRepository());
         return new CosmicEnchantmentBehaviorResolver(childActions, stacks, new BleedRuntimeService(childActions),
-                new com.cosmicpve.equipment.armor.ArmorSetImmunityResolver(armorSets));
+                new com.cosmicpve.equipment.armor.ArmorSetImmunityResolver(armorSets), new CooldownService());
     }
 
     private static CombatContext context(EffectiveEnchantments enchantments) {

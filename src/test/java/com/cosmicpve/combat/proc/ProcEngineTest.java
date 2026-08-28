@@ -32,6 +32,27 @@ class ProcEngineTest {
     }
 
     @Test
+    void explicitlyDeterministicCandidateConsumesNoRandomValue() {
+        var random = new CountingRandom(0.99);
+        var activations = new AtomicInteger();
+        var id = CosmicPVE.id("test/deterministic");
+        var candidate = new ProcCandidate(
+                id, ProcHook.ON_VALID_HIT, 1.0, Optional.empty(), 0L,
+                CooldownScope.EPHEMERAL_COMBAT, Optional.empty(), List.of(), List.of(), Optional.empty(),
+                ChildProcEligibility.ROOT_ONLY, Set.of(ProcEngine.DETERMINISTIC_CLASSIFICATION), id,
+                ignored -> activations.incrementAndGet(),
+                new ProcProvenance(ProcSourceKind.DEVELOPMENT, CosmicPVE.id("test/fixture")));
+
+        var result = engine().evaluate(
+                event(40, UUID.randomUUID(), 0, RecursionPolicy.NORMAL, random, List.of(1.0), Set.of()),
+                List.of(candidate));
+
+        assertEquals(ProcEvaluationStatus.ACTIVATED, result.evaluations().getFirst().status());
+        assertEquals(1, activations.get());
+        assertEquals(0, random.calls());
+    }
+
+    @Test
     void chanceMultiplierIsAppliedCentrally() {
         var result = engine().evaluate(
                 event(2, UUID.randomUUID(), 0, RecursionPolicy.NORMAL, new CountingRandom(0.011), List.of(1.2), Set.of()),

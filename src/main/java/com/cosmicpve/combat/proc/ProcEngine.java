@@ -11,6 +11,8 @@ import net.minecraft.resources.Identifier;
 
 /** Performs every gameplay proc decision once on the logical server. */
 public final class ProcEngine {
+    public static final Identifier DETERMINISTIC_CLASSIFICATION =
+            Identifier.fromNamespaceAndPath("cosmicpve", "deterministic");
     private final CooldownService cooldowns;
     private final ProcTraceService traces;
 
@@ -60,7 +62,8 @@ public final class ProcEngine {
             return skipped(candidate, multiplier, finalChance, ProcEvaluationStatus.COOLDOWN_BLOCKED, false);
         }
 
-        double roll = event.random().nextDouble();
+        double roll = candidate.classifications().contains(DETERMINISTIC_CLASSIFICATION)
+                ? 0.0 : event.random().nextDouble();
         if (!(roll >= 0.0 && roll < 1.0)) {
             throw new IllegalStateException("Proc random sources must return values in [0, 1)");
         }

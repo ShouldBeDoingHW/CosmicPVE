@@ -69,12 +69,22 @@ public final class CosmicEnchantmentSpecs {
             ModEnchantments.PERMAFROST.identifier(), 6, CosmicEnchantmentTier.MASTERY, "chestplate");
     public static final CosmicEnchantmentSpec MORTAL_COIL = new CosmicEnchantmentSpec(
             ModEnchantments.MORTAL_COIL.identifier(), 2, CosmicEnchantmentTier.MASTERY, "helmet");
+    public static final CosmicEnchantmentSpec SELF_DESTRUCT = new CosmicEnchantmentSpec(
+            ModEnchantments.SELF_DESTRUCT.identifier(), 3, CosmicEnchantmentTier.UNIQUE, "leggings");
+    public static final CosmicEnchantmentSpec PHOENIX = new CosmicEnchantmentSpec(
+            ModEnchantments.PHOENIX.identifier(), 3, CosmicEnchantmentTier.MASTERY, "boots");
+    public static final CosmicEnchantmentSpec DIVINE_IMMOLATION = new CosmicEnchantmentSpec(
+            ModEnchantments.DIVINE_IMMOLATION.identifier(), 4, CosmicEnchantmentTier.MASTERY, "sword");
+    public static final CosmicEnchantmentSpec VIRUS = new CosmicEnchantmentSpec(
+            ModEnchantments.VIRUS.identifier(), 3, CosmicEnchantmentTier.UNIQUE, "bow_or_crossbow");
+    public static final CosmicEnchantmentSpec DEVOUR = new CosmicEnchantmentSpec(
+            ModEnchantments.DEVOUR.identifier(), 4, CosmicEnchantmentTier.LEGENDARY, "axe");
 
     public static final List<CosmicEnchantmentSpec> ALL =
             List.of(EXECUTE, ANGELIC, LIGHTNING, ENDER_SHIFT, DOUBLESTRIKE, BLEED, LUCK, POISON, PUMMEL,
                     GREATSWORD, INSANITY, VENOM, AEGIS, EAGLE_EYE, RAGE, MOLTEN, NUTRITION, GLOWING,
                     OBSIDIANSHIELD, OXYGENATE, ARMORED, DEATH_PACT, AUTO_SMELT, EXPERIENCE, BLESSED, IMPLANTS, TRAP, CACTUS,
-                    GEARS, PERMAFROST, MORTAL_COIL);
+                    GEARS, PERMAFROST, MORTAL_COIL, SELF_DESTRUCT, PHOENIX, DIVINE_IMMOLATION, VIRUS, DEVOUR);
 
     private CosmicEnchantmentSpecs() {}
 

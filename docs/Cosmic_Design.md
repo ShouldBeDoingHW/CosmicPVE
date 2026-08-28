@@ -317,7 +317,7 @@ Heroic Abandoned Spaceship Lootbag:
 | Auto Smelt | 1 | Pickaxe | Ultimate | Automatically smelts drops. |
 | Bleed | 6 | Axe | Ultimate   | 1.5% chance per level on a valid damaging hit to apply one Bleed stack for 5 seconds. Each entity can have up to 10 Bleed stacks. Every stack has its own independent 5-second lifetime; applying a new stack does not refresh older stacks. Each active stack reduces movement speed by 1% while it remains active and deals 1 true damage every 1.5 seconds. |
 | Death Pact | 5 | Chestplate | Mastery | Deal (7.5 \- level)% less outgoing damage and take (1 \+ level)% less incoming damage. |
-| Divine Immolation | 4 | Sword | Mastery | 3% chance per level to proc on hit. On proc, set yourself on fire for 5 seconds and deal \+10% damage. 30 second cooldown. |
+| Divine Immolation | 4 | Sword | Mastery | 3% chance per level on a valid damaging hit. On proc, set yourself on fire for 5 seconds, take exactly 2 HP standard Cosmic true damage, and gain +10% ordinary outgoing damage for 5 seconds. 30-second cooldown. |
 | Eagle Eye | 6 | Bow/Crossbow | Ultimate | Deal (3% x level) more damage to targets that are 18 blocks away or further. |
 | Ender Shift | 3 | Helmet | Unique | After a committed hit leaves you below 25% of max health, gain Speed I and Regeneration I for (3 × level) seconds. 30-second cooldown. Being below 25% after the hit is sufficient; the hit does not need to cross the threshold from above. |
 | Execute | 5 | Sword | Elite | Deal (2% x level) more damage against targets that are below 50% HP. |
@@ -334,17 +334,17 @@ Heroic Abandoned Spaceship Lootbag:
 | Nutrition | 3 | Leggings | Unique | Eating a piece of food restores \+1 hunger and \+0.25 saturation per level. |
 | Obsidianshield | 2 | Leggings | Ultimate | Reduces fire-category damage by 25% per level: 25% at level I and 50% at level II. |
 | Oxygenate | 2 | Pickaxe | Simple | After breaking a block while underwater, refills 1 air bubble per level. |
-| Phoenix | 4 | Boots | Mastery | When an otherwise ordinary lethal hit would kill you, survive at 40% HP and make your next hit deal (10% × level) more damage. 90-second cooldown. Phoenix does not prevent environmental/encounter execution deaths. |
+| Phoenix | 3 | Boots | Mastery | When an otherwise ordinary combat hit would kill you, survive at exactly 40% of maximum HP. 90-second cooldown. Phoenix does not prevent environmental/encounter execution deaths. |
 | Poison | 3 | Sword | Unique | (7% × level) chance to give Poison I for 3 seconds to the target. |
 | Pummel | 3 | Axe | Elite | (3% × level) chance to give Slowness II to the target for 3 seconds. |
 | Rage | 6 | Sword/Axe | Legendary | Deal (5 \+ level)% more damage to enemies that have damaged you three times or more in the last (4 \+ level) seconds. |
 | Self Destruct | 3 | Leggings | Unique | When below 15% HP, summon 4 lit TNT that you are immune to. 60 second cooldown. |
 | Venom | 3 | Bow/Crossbow | Elite | (15% x level) chance to give poison 1 for 3 seconds to target. |
-| Virus | 3 | Bow/Crossbow | Unique | If target is poisoned, deals 0.25 true damage per level of enchant.  |
+| Virus | 3 | Bow/Crossbow | Unique | A valid projectile hit against a poisoned target deterministically deals 0.4 HP standard Cosmic true damage per level and heals the projectile owner for exactly 1 HP. |
 | Doublestrike | 3 | Sword | Legendary | (1% × level) chance on a valid hit to make a linked second hit for 75% of the parent's ordinary attack damage. The child hit may reroll other eligible offensive on-hit enchantments, but Doublestrike cannot trigger itself recursively. Separate true-damage packets from the parent are not automatically duplicated. |
 | Undead Ruse | 10 | Any Armor (only highest lvl counts, no stacking)  | Elite | (Level/2) percent chance to spawn an ally Undead Corpse when hit. Maximum corpse count is 1 at levels 1-4, 2 at levels 5-9, and 3 at level 10\. Allies despawn after 45 seconds. |
 | Cactus | 2 | Leggings | Elite | (3% x level) chance to deal 1.5 true damage to your attacker when hit. |
-| Devour | 4 | Axe | Legendary | 5% chance on a valid damaging hit, provided the attacker has at least 1 hunger available, to consume exactly 1 hunger and make that hit deal (level x 5%) more damage while healing the attacker for 2 HP. On proc, play the normal eating sound for approximately 0.5 seconds. |
+| Devour | 4 | Axe | Legendary | 5% chance on a valid damaging hit, provided the attacker has at least 1 hunger available, to consume exactly 1 hunger and make that hit deal (level x 5%) more ordinary damage while healing the attacker for exactly 1 HP. On proc, play the normal eating sound for approximately 0.5 seconds. |
 | Obliterate | 3 | All Weapons | Simple | If your current health is below 20%,  you have a 10% chance to deal (3 x level) blocks of knockback with your hit.  |
 | Blessed | 4 | Axe | Ultimate | A (level x 2%) chance to be blessed each time you hit an enemy. When blessed, a random negative effect or stack on you is removed, such as a bleed stack or the weakness potion effect. |
 | Trap | 3 | Sword | Elite | A 4% chance every time you hit an enemy to give them slowness 5 for (1 \+ (0.25 x level)) seconds.  |

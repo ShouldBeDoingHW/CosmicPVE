@@ -1,0 +1,11 @@
+{
+  "anvil_cost": 4,
+  "description": {"translate": "enchantment.cosmicpve.self_destruct"},
+  "effects": {},
+  "max_cost": {"base": 1, "per_level_above_first": 0},
+  "max_level": 3,
+  "min_cost": {"base": 1, "per_level_above_first": 0},
+  "slots": ["legs"],
+  "supported_items": "#cosmicpve:enchantable/leggings",
+  "weight": 1
+}

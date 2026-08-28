@@ -30,6 +30,8 @@ import com.cosmicpve.combat.enchantment.NutritionFoodService;
 import com.cosmicpve.combat.enchantment.DeathPactBehavior;
 import com.cosmicpve.combat.enchantment.ObsidianshieldBehavior;
 import com.cosmicpve.combat.enchantment.PermafrostBehavior;
+import com.cosmicpve.combat.enchantment.DivineImmolationBehavior;
+import com.cosmicpve.combat.enchantment.SelfDestructEventBridge;
 import com.cosmicpve.combat.cooldown.CooldownService;
 import com.cosmicpve.combat.proc.ProcCandidateSourceRegistry;
 import com.cosmicpve.combat.proc.ProcEngine;
@@ -85,7 +87,8 @@ public final class CosmicCombat {
     private static final WeaponSkinCombatResolver WEAPON_SKIN_COMBAT =
             new WeaponSkinCombatResolver(WEAPON_SKINS, STACKS, CHILD_ACTIONS);
     private static final CosmicEnchantmentBehaviorResolver ENCHANTMENT_BEHAVIORS =
-            new CosmicEnchantmentBehaviorResolver(CHILD_ACTIONS, STACKS, BLEED_RUNTIME, ARMOR_SET_IMMUNITIES);
+            new CosmicEnchantmentBehaviorResolver(
+                    CHILD_ACTIONS, STACKS, BLEED_RUNTIME, ARMOR_SET_IMMUNITIES, COOLDOWNS);
     private static final NutritionFoodService NUTRITION = new NutritionFoodService(ENCHANTMENTS);
     private static final ExecutionService EXECUTIONS = new ExecutionService(SEQUENCES, TRACES);
     private static final CombatEventBridge EVENTS =
@@ -97,6 +100,7 @@ public final class CosmicCombat {
     private static final MaskResolver MASKS = new MaskResolver(CosmicContent.repository());
     private static final MaskCombatResolver MASK_COMBAT = new MaskCombatResolver(MASKS);
     private static final MaskRuntimeEventBridge MASK_EVENTS = new MaskRuntimeEventBridge(MASKS, PROC_EVENTS);
+    private static final SelfDestructEventBridge SELF_DESTRUCT_EVENTS = new SelfDestructEventBridge();
 
     private CosmicCombat() {}
 
@@ -112,6 +116,7 @@ public final class CosmicCombat {
         OUTGOING.register(WEAPON_SKIN_COMBAT);
         OUTGOING.register(deathPact);
         OUTGOING.register(permafrost);
+        OUTGOING.register(new DivineImmolationBehavior(COOLDOWNS));
         OUTGOING.register(MASK_COMBAT);
         INCOMING.register(ARMOR_SET_COMBAT);
         INCOMING.register(WEAPON_SKIN_COMBAT);
@@ -125,6 +130,7 @@ public final class CosmicCombat {
         PROC_SOURCES.register(ENCHANTMENT_BEHAVIORS);
         PROC_SOURCES.register(WEAPON_SKIN_COMBAT);
         PROC_SOURCES.register(MASK_COMBAT);
+        NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, SELF_DESTRUCT_EVENTS::onIncomingDamage);
         NeoForge.EVENT_BUS.addListener(EVENTS::onIncomingDamage);
         NeoForge.EVENT_BUS.addListener(EVENTS::onDamageAccepted);
         NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, MASK_EVENTS::onTargeted);
@@ -145,6 +151,7 @@ public final class CosmicCombat {
         NeoForge.EVENT_BUS.addListener(MASK_EVENTS::onPlayerTick);
         NeoForge.EVENT_BUS.addListener(MASK_EVENTS::onEffectApplicable);
         NeoForge.EVENT_BUS.addListener(RECENT_COMBAT_MEMORY_EVENTS::onServerTick);
+        NeoForge.EVENT_BUS.addListener(SELF_DESTRUCT_EVENTS::onExplosion);
     }
 
     public static CombatTraceService traces() {

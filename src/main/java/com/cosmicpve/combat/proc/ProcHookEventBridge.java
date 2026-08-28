@@ -30,7 +30,8 @@ public final class ProcHookEventBridge {
                 || executions.isExecuting(event.getEntity())) {
             return;
         }
-        var result = events.dispatchRoot(ProcHook.ON_PRE_DEATH, event.getEntity(), null, event.getEntity());
+        LivingEntity attacker = event.getSource().getEntity() instanceof LivingEntity living ? living : null;
+        var result = events.dispatchRoot(ProcHook.ON_PRE_DEATH, event.getEntity(), attacker, event.getEntity());
         if (result.activationCount() > 0 && event.getEntity().getHealth() > 0.0F) {
             event.setCanceled(true);
         }

@@ -1,8 +1,8 @@
 # CosmicPVE Development Handoff
 
-Current verified and accepted gameplay baseline: Step 7C. The user manually verified and accepted the canonical enchantment balance baseline plus Gears, Permafrost, and Mortal Coil.
+Current verified and accepted gameplay baseline: Step 7D. Its accepted source, resources, tests, and documentation are ready for the single closure commit required before Step 7E begins.
 
-Repository state: Steps 6A–7C are implemented, automated/runtime verified, and manually accepted. The root `assets` source-art folder and root `trial rooms` structure-development folder remain deliberately untracked and unrelated.
+Repository state: Steps 6A–7D are implemented, automated/runtime verified, and manually accepted. The root `assets` source-art folder and root `trial rooms` structure-development folder remain deliberately untracked and unrelated.
 
 Last handoff update: 2026-08-28
 
@@ -322,6 +322,16 @@ Implemented Legendary boots enchantment `cosmicpve:gears` III at +5% movement sp
 
 The approved canonical balance baseline is active: Bleed is 1.5% per level; Death Pact outgoing is `-(7.5 - level)%` and incoming is `-(1 + level)%`; Auto Smelt is Ultimate; Experience is Unique; Molten is 3% per highest equipped level; Obsidianshield II now reduces fire-category damage by 25% per level without maintaining Fire Resistance; Poison is Unique at 7% per level; Pummel is 3% per level with Slowness II for 3 seconds; Rage gives `(5 + level)%` within a `(4 + level)`-second three-hit window; and Doublestrike children use 75% of parent ordinary damage. Rarity changes flow through generic Unexamined Books, lore, Dust, Black Scroll, Transmog, and capacity behavior because the canonical specs are the single metadata source.
 
+### Step 7D — IMPLEMENTED; AUTOMATED/RUNTIME VERIFIED; MANUALLY VERIFIED / ACCEPTED
+
+Implemented Unique leggings enchantment `cosmicpve:self_destruct` III. A committed ordinary hit that leaves the living wearer below 15% health triggers once per 1,200-tick cooldown and creates four owner-attributed vanilla lit TNT exactly one block north, south, east, and west. Only those tagged TNT grant their owner damage immunity, and their detonation clears the affected-block list without changing gamerules or suppressing damage to other entities.
+
+Implemented Mastery boots enchantment `cosmicpve:phoenix` III through the existing pre-death/death-prevention hook. An ordinary lethal combat death with a meaningful living attacker is canceled when Phoenix is ready, health becomes exactly 40% of current maximum, and the 1,800-tick cooldown begins. The terminal `ExecutionService` bypass remains first-class, and unattributed environmental deaths do not qualify. Phoenix has no obsolete next-hit bonus and no level-dependent survival scaling.
+
+Implemented Mastery sword enchantment `cosmicpve:divine_immolation` IV at 3% per level with a 600-tick cooldown. Activation ignites the wielder for five seconds, delivers a separate 2-HP standard Cosmic true self-damage child with `NO_PROCS`, and maintains one non-stacking +10% ordinary outgoing contribution for 100 ticks. Implemented deterministic Unique bow/crossbow enchantment `cosmicpve:virus` III: a committed projectile hit against a target that was already poisoned deals 0.4 HP standard Cosmic true damage per level and, after accepted child delivery, heals the credited living shooter for exactly 1 HP. Virus consumes no RNG.
+
+Implemented Legendary axe enchantment `cosmicpve:devour` IV through a dedicated pre-calculation proc hook so its 5% Luck-eligible roll can add 5% ordinary parent-hit damage per level in the shared additive bucket. A zero-hunger player is filtered before rolling. Hunger, the exact 1-HP heal, and the normal eating sound commit once only after positive red-health loss; absorption-only/canceled/rejected hits do not consume hunger or heal, and Doublestrike children cannot reroll Devour.
+
 ## 3. Current Real Enchantments
 
 These are registered through Minecraft's enchantment infrastructure, use actual enchantment data on the item, and are not present in normal enchanting-table, librarian, random-loot, random-equipment, or mob-equipment acquisition pools.
@@ -361,10 +371,15 @@ These are registered through Minecraft's enchantment infrastructure, use actual 
 | `cosmicpve:gears` | III | Boots | Legendary | While equipped, adds 5% movement speed per level through one stable transient modifier. |
 | `cosmicpve:permafrost` | VI | Chestplate | Mastery | On committed ordinary damage taken, has 2.5% per level to add one 60-second independent Permafrost stack to the attacker. Any stack applies one binary +2% incoming/-2% outgoing penalty; reaching `10 - level` clears all stacks and deals 6 HP standard Cosmic true damage. Yeti is immune. |
 | `cosmicpve:mortal_coil` | II | Helmet | Mastery | On committed ordinary damage taken, has 3% per level to grant 4 absorption HP for 100 ticks/5 seconds. |
+| `cosmicpve:self_destruct` | III | Leggings | Unique | A committed ordinary hit leaving the wearer below 15% health summons four owner-safe, terrain-safe lit TNT at the cardinal adjacent blocks. Cooldown is 1,200 ticks. |
+| `cosmicpve:phoenix` | III | Boots | Mastery | Prevents an otherwise ordinary lethal combat death, restores exactly 40% maximum health, and starts a 1,800-tick cooldown. Execution and unattributed environmental deaths bypass it. |
+| `cosmicpve:divine_immolation` | IV | Sword | Mastery | On committed melee damage, has 3% per level to ignite and deal 2 HP standard true self-damage, then grant one +10% ordinary outgoing bonus for 100 ticks. Cooldown is 600 ticks. |
+| `cosmicpve:virus` | III | Bow/crossbow | Unique | A committed projectile hit against an already poisoned living target deterministically deals 0.4 HP standard Cosmic true damage per level and heals the shooter for exactly 1 HP after accepted delivery. |
+| `cosmicpve:devour` | IV | Axe | Legendary | A 5% Luck-eligible parent-hit proc consumes exactly one hunger after committed red-health damage, adds 5% ordinary parent damage per level, heals exactly 1 HP, and plays the normal eating sound. Zero hunger filters before RNG. |
 
 ### DESIGNED BUT NOT IMPLEMENTED
 
-The design also names Divine Immolation, Hero Killer, Phoenix, Self Destruct, and Virus. None currently has a registered real enchantment or runtime behavior. There are exactly 31 implemented real Cosmic enchantments; Death Pact, Permafrost, and Mortal Coil are the implemented Mastery enchantments. Do not add behavior assumptions beyond `Cosmic_Design.md`.
+The design also names Hero Killer, Undead Ruse, Obliterate, Soul Tether, Dodge, Leadership, and other later enchantments. None currently has a registered real enchantment or runtime behavior. There are exactly 36 implemented real Cosmic enchantments; Death Pact, Permafrost, Mortal Coil, Phoenix, and Divine Immolation are the implemented Mastery enchantments. Do not add behavior assumptions beyond `Cosmic_Design.md`.
 
 ## 4. Critical Combat Semantics
 
@@ -637,11 +652,11 @@ The final post-Orb capacity is no longer unresolved for current target classes: 
 
 ## 16. Current Next Milestone
 
-**Next milestone after Step 7C acceptance: Enchantment Expansion II.**
+**Next milestone: Step 7E — Enchantment Expansion III.**
 
 Current intended sequence:
 
-Step 7A Conquest Chests → Step 7B Tinkerer / Cosmic Dust → Step 7C canonical balance baseline, Gears, Permafrost, and Mortal Coil → Enchantment Expansion II → Enchantment Expansion III → Fallen Heroes / G-Kit procurement redesign → V-Kits and M-Kit reconsideration → Heroic Enchantments → later major Dungeon, Invasion, economy, and world work.
+Step 7A Conquest Chests → Step 7B Tinkerer / Cosmic Dust → Step 7C canonical balance baseline, Gears, Permafrost, and Mortal Coil → Step 7D Self Destruct, Phoenix, Divine Immolation, Virus, and Devour → Enchantment Expansion III → Fallen Heroes / G-Kit procurement redesign → V-Kits and M-Kit reconsideration → Heroic Enchantments → later major Dungeon, Invasion, economy, and world work.
 
 The ordinary-enchantment expansion remains split across bounded patches. Step 7C is the explicit instruction that made the current canonical Design Doc enchantment-table values implementation-authoritative; later design edits still require their own explicit implementation milestone.
 
@@ -659,6 +674,12 @@ The ordinary-enchantment expansion remains split across bounded patches. Step 7C
 Preserve unrelated dirty changes. Never change pinned versions as a side effect of gameplay work. Prefer service-level rules and typed data over one-off event logic, and keep client-only classes isolated from dedicated-server loading.
 
 ## 18. Verification Snapshot
+
+For the Step 7D candidate:
+
+- `gradlew.bat cleanTest test build` passes all 410 JUnit tests across 112 suites with 0 failures or errors. Focused coverage pins Self Destruct's strict threshold/cardinal TNT/cooldown, Phoenix's exact 40% restoration and cooldown, Divine Immolation's chances/cooldown/fire/true self-damage/buff, Virus's per-level damage and exact 1-HP heal, Devour's fixed chance/hunger/heal/shared outgoing contribution, deterministic no-RNG candidates, tier integration, Black Scroll rules, and the 36-spec registry.
+- All 186 main JSON resources parse successfully. Dedicated-server startup publishes the complete CosmicPVE content snapshot and reaches `Done`; fresh-client startup completes resource reload, OpenAL/SoundEngine initialization, and all texture atlases without relevant registry, datapack, localization, resource, or common/client classloading errors. The server smoke caught and corrected Phoenix's initial invalid custom boots tag by using Minecraft's established `#minecraft:enchantable/foot_armor` tag.
+- `git diff --check` reports no Step 7D whitespace errors when the separately maintained canonical Design Doc is excluded; that Design Doc retains its pre-existing Markdown trailing spaces. The user manually verified and accepted all five Step 7D enchantments and their interactions.
 
 For the Step 7C candidate:
 

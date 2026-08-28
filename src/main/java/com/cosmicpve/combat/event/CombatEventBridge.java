@@ -30,6 +30,8 @@ import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import com.cosmicpve.registry.ModDamageTypes;
 import com.cosmicpve.registry.ModEnchantments;
 import java.util.Set;
+import com.cosmicpve.combat.enchantment.DevourBehavior;
+import com.cosmicpve.combat.pipeline.OutgoingDamageContribution;
 
 /** Thin NeoForge adapter; all damage arithmetic remains in {@link CombatEngine}. */
 public final class CombatEventBridge {
@@ -44,9 +46,9 @@ public final class CombatEventBridge {
     private final PreDefenseBoundsContributor preDefenseBounds;
     private final RecentCombatMemoryService recentCombatMemory;
     private final WeaponSkinResolver weaponSkins;
-    private final Map<DamageContainer, CombatResult> incomingCandidates =
+    private final Map<DamageContainer, PendingCombat> incomingCandidates =
             Collections.synchronizedMap(new WeakHashMap<>());
-    private final ThreadLocal<Deque<CombatResult>> acceptedDamageStack =
+    private final ThreadLocal<Deque<PendingCombat>> acceptedDamageStack =
             ThreadLocal.withInitial(ArrayDeque::new);
 
     public CombatEventBridge(
@@ -75,7 +77,7 @@ public final class CombatEventBridge {
     }
 
     public void onIncomingDamage(LivingIncomingDamageEvent event) {
-        if (event.getEntity().level().isClientSide()) {
+        if (event.isCanceled() || event.getEntity().level().isClientSide()) {
             return;
         }
 
@@ -105,14 +107,33 @@ public final class CombatEventBridge {
                 RecursionPolicy.NORMAL,
                 Set.of());
         var unchanged = CombatCalculationRequest.unchanged(event.getAmount());
+        var resolvedOutgoing = outgoingContributors.resolve(context);
         var request = new CombatCalculationRequest(
                 unchanged.baseOrdinaryDamage(), unchanged.additiveOutgoingBonus(),
                 unchanged.separateOutgoingMultipliers(), preDefenseBounds.resolvePreDefenseBounds(context),
                 unchanged.incomingMultipliers(), unchanged.finalOrdinaryBounds(), unchanged.trueDamagePackets(),
-                outgoingContributors.resolve(context), incomingContributors.resolveIncoming(context));
+                resolvedOutgoing, incomingContributors.resolveIncoming(context));
         CombatResult provisional = engine.calculate(context, request);
+        boolean devourActivated = false;
+        int devourLevel = Math.min(4, context.effectiveEnchantments().level(ModEnchantments.DEVOUR.identifier()));
+        if (devourLevel > 0 && context.attacker() != null) {
+            var preDamage = procEvents.onPreDamageCalculation(provisional);
+            devourActivated = preDamage.evaluations().stream().anyMatch(evaluation ->
+                    evaluation.candidateId().equals(ModEnchantments.DEVOUR.identifier()) && evaluation.activated());
+            if (devourActivated) {
+                var withDevour = new java.util.ArrayList<>(resolvedOutgoing);
+                withDevour.add(new OutgoingDamageContribution(
+                        ModEnchantments.DEVOUR.identifier(), DevourBehavior.damageBonus(devourLevel)));
+                request = new CombatCalculationRequest(
+                        unchanged.baseOrdinaryDamage(), unchanged.additiveOutgoingBonus(),
+                        unchanged.separateOutgoingMultipliers(), request.preDefenseBounds(),
+                        unchanged.incomingMultipliers(), unchanged.finalOrdinaryBounds(), unchanged.trueDamagePackets(),
+                        withDevour, request.incomingContributions());
+                provisional = engine.calculate(context, request);
+            }
+        }
         event.setAmount((float) Math.min(Float.MAX_VALUE, provisional.breakdown().finalOrdinaryDamage()));
-        incomingCandidates.put(event.getContainer(), provisional);
+        incomingCandidates.put(event.getContainer(), new PendingCombat(provisional, devourActivated));
     }
 
     private void handleScopedDamage(LivingIncomingDamageEvent event, CombatDeliveryScope.State scoped) {
@@ -155,11 +176,11 @@ public final class CombatEventBridge {
                     unchanged.finalOrdinaryBounds(), List.of(), List.of(), incomingContributors.resolveIncoming(context)));
             event.setAmount((float) Math.min(Float.MAX_VALUE, provisional.breakdown().finalOrdinaryDamage()));
         }
-        incomingCandidates.put(event.getContainer(), provisional);
+        incomingCandidates.put(event.getContainer(), new PendingCombat(provisional, false));
     }
 
     public void onDamageAccepted(LivingDamageEvent.Pre event) {
-        CombatResult result = incomingCandidates.remove(event.getContainer());
+        PendingCombat result = incomingCandidates.remove(event.getContainer());
         if (event.getNewDamage() <= 0.0F) return;
         if (result != null) {
             acceptedDamageStack.get().push(result);
@@ -167,14 +188,15 @@ public final class CombatEventBridge {
     }
 
     public void onDamageCommitted(LivingDamageEvent.Post event) {
-        Deque<CombatResult> stack = acceptedDamageStack.get();
-        CombatResult provisional = stack.poll();
+        Deque<PendingCombat> stack = acceptedDamageStack.get();
+        PendingCombat pending = stack.poll();
         if (stack.isEmpty()) {
             acceptedDamageStack.remove();
         }
-        if (provisional == null) {
+        if (pending == null) {
             return;
         }
+        CombatResult provisional = pending.result();
         if (provisional.context().target() != event.getEntity()
                 || provisional.context().damageSource() != event.getSource()) {
             CosmicPVE.LOGGER.warn("Discarding mismatched combat trace for sequence {}", provisional.context().attackSequenceId());
@@ -185,6 +207,12 @@ public final class CombatEventBridge {
         traces.recordCommitted(committed);
         var server = event.getEntity().level().getServer();
         if (server != null) recentCombatMemory.recordCommitted(committed, server.getTickCount());
+        if (pending.devourActivated() && committed.isCommittedDamagingHit()
+                && committed.context().attacker() instanceof net.minecraft.world.entity.player.Player player) {
+            DevourBehavior.commit(player);
+        }
         procEvents.onCommittedDamage(committed);
     }
+
+    private record PendingCombat(CombatResult result, boolean devourActivated) {}
 }
