@@ -8,10 +8,9 @@ import com.cosmicpve.combat.pipeline.OutgoingDamageContributor;
 import com.cosmicpve.registry.ModEnchantments;
 import java.util.List;
 
-/** Deterministic +5% against a target that recently damaged this attacker three times. */
+/** Deterministic level-scaled bonus against a target that recently damaged this attacker three times. */
 public final class RageBehavior implements OutgoingDamageContributor {
     public static final int REQUIRED_HITS = 3;
-    public static final double BONUS = 0.05;
     private final RecentCombatMemoryService memory;
 
     public RageBehavior(RecentCombatMemoryService memory) {
@@ -26,6 +25,10 @@ public final class RageBehavior implements OutgoingDamageContributor {
         return level > 0 && recentHits >= REQUIRED_HITS;
     }
 
+    public static double bonus(int level) {
+        return level <= 0 ? 0.0 : (5.0 + level) / 100.0;
+    }
+
     @Override
     public List<OutgoingDamageContribution> resolve(CombatContext context) {
         if (context.channel() != DamageChannel.ORDINARY || context.attacker() == null || context.target() == null) {
@@ -36,7 +39,7 @@ public final class RageBehavior implements OutgoingDamageContributor {
         long tick = context.attacker().level().getServer().getTickCount();
         int hits = memory.count(context.target().getUUID(), context.attacker().getUUID(), tick, windowTicks(level));
         return active(level, hits)
-                ? List.of(new OutgoingDamageContribution(ModEnchantments.RAGE.identifier(), BONUS))
+                ? List.of(new OutgoingDamageContribution(ModEnchantments.RAGE.identifier(), bonus(level)))
                 : List.of();
     }
 }

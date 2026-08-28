@@ -15,7 +15,7 @@ public final class BleedBehavior {
     private BleedBehavior() {}
 
     public static double chance(int level) {
-        return 0.01 * level;
+        return 0.015 * level;
     }
 
     public static boolean isEligibleMelee(ProcEvent event) {

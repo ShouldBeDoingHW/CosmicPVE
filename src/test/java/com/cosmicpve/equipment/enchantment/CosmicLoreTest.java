@@ -43,6 +43,7 @@ class CosmicLoreTest {
         assertEquals("tooltip.cosmicpve.applicability.leggings", key(CosmicEnchantmentSpecs.NUTRITION.applicability()));
         assertEquals("tooltip.cosmicpve.applicability.boots_or_leggings", key(CosmicEnchantmentSpecs.LUCK.applicability()));
         assertEquals("tooltip.cosmicpve.applicability.pickaxe", key(CosmicEnchantmentSpecs.OXYGENATE.applicability()));
+        assertEquals("tooltip.cosmicpve.applicability.boots", key(CosmicEnchantmentSpecs.GEARS.applicability()));
         assertTrue(CosmicEnchantmentSpecs.ALL.stream().allMatch(spec -> !spec.description().getString().isBlank()));
     }
 

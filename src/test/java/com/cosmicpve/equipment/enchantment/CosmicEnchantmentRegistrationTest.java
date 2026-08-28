@@ -34,7 +34,7 @@ class CosmicEnchantmentRegistrationTest {
                 Map.entry("molten", 4),
                 Map.entry("nutrition", 3),
                 Map.entry("glowing", 1),
-                Map.entry("obsidianshield", 1),
+                Map.entry("obsidianshield", 2),
                 Map.entry("oxygenate", 2),
                 Map.entry("armored", 4),
                 Map.entry("death_pact", 5),
@@ -43,7 +43,10 @@ class CosmicEnchantmentRegistrationTest {
                 Map.entry("blessed", 4),
                 Map.entry("implants", 3),
                 Map.entry("trap", 3),
-                Map.entry("cactus", 2));
+                Map.entry("cactus", 2),
+                Map.entry("gears", 3),
+                Map.entry("permafrost", 6),
+                Map.entry("mortal_coil", 2));
         for (var entry : expected.entrySet()) {
             var resource = getClass().getClassLoader()
                     .getResourceAsStream("data/cosmicpve/enchantment/" + entry.getKey() + ".json");
@@ -78,7 +81,7 @@ class CosmicEnchantmentRegistrationTest {
                 }
             }
         }
-        assertEquals(28, CosmicEnchantmentSpecs.ALL.size());
+        assertEquals(31, CosmicEnchantmentSpecs.ALL.size());
         assertEquals(CosmicEnchantmentTier.ELITE, CosmicEnchantmentSpecs.EXECUTE.tier());
         assertEquals(CosmicEnchantmentTier.ULTIMATE, CosmicEnchantmentSpecs.ANGELIC.tier());
         assertEquals(CosmicEnchantmentTier.SIMPLE, CosmicEnchantmentSpecs.LIGHTNING.tier());
@@ -86,7 +89,7 @@ class CosmicEnchantmentRegistrationTest {
         assertEquals(CosmicEnchantmentTier.LEGENDARY, CosmicEnchantmentSpecs.DOUBLESTRIKE.tier());
         assertEquals(CosmicEnchantmentTier.ULTIMATE, CosmicEnchantmentSpecs.BLEED.tier());
         assertEquals(CosmicEnchantmentTier.ULTIMATE, CosmicEnchantmentSpecs.LUCK.tier());
-        assertEquals(CosmicEnchantmentTier.ELITE, CosmicEnchantmentSpecs.POISON.tier());
+        assertEquals(CosmicEnchantmentTier.UNIQUE, CosmicEnchantmentSpecs.POISON.tier());
         assertEquals(CosmicEnchantmentTier.ELITE, CosmicEnchantmentSpecs.PUMMEL.tier());
         assertEquals(CosmicEnchantmentTier.ELITE, CosmicEnchantmentSpecs.GREATSWORD.tier());
         assertEquals(CosmicEnchantmentTier.LEGENDARY, CosmicEnchantmentSpecs.INSANITY.tier());
@@ -106,8 +109,8 @@ class CosmicEnchantmentRegistrationTest {
         assertEquals(CosmicEnchantmentTier.LEGENDARY, CosmicEnchantmentSpecs.ARMORED.tier());
         assertEquals(CosmicEnchantmentTier.MASTERY, CosmicEnchantmentSpecs.DEATH_PACT.tier());
         assertFalse(CosmicEnchantmentSpecs.DEATH_PACT.tier().extractableByBlackScroll());
-        assertEquals(CosmicEnchantmentTier.SIMPLE, CosmicEnchantmentSpecs.AUTO_SMELT.tier());
-        assertEquals(CosmicEnchantmentTier.SIMPLE, CosmicEnchantmentSpecs.EXPERIENCE.tier());
+        assertEquals(CosmicEnchantmentTier.ULTIMATE, CosmicEnchantmentSpecs.AUTO_SMELT.tier());
+        assertEquals(CosmicEnchantmentTier.UNIQUE, CosmicEnchantmentSpecs.EXPERIENCE.tier());
         assertEquals("pickaxe", CosmicEnchantmentSpecs.AUTO_SMELT.equipmentApplicability());
         assertEquals("pickaxe", CosmicEnchantmentSpecs.EXPERIENCE.equipmentApplicability());
         assertEquals(CosmicEnchantmentTier.ULTIMATE, CosmicEnchantmentSpecs.BLESSED.tier());
@@ -122,6 +125,14 @@ class CosmicEnchantmentRegistrationTest {
         assertEquals("leggings", CosmicEnchantmentSpecs.CACTUS.equipmentApplicability());
         assertEquals(2, CosmicEnchantmentSpecs.CACTUS.maxLevel());
         assertTrue(CosmicEnchantmentSpecs.CACTUS.tier().extractableByBlackScroll());
+        assertEquals(CosmicEnchantmentTier.LEGENDARY, CosmicEnchantmentSpecs.GEARS.tier());
+        assertEquals("boots", CosmicEnchantmentSpecs.GEARS.equipmentApplicability());
+        assertEquals(CosmicEnchantmentTier.MASTERY, CosmicEnchantmentSpecs.PERMAFROST.tier());
+        assertEquals("chestplate", CosmicEnchantmentSpecs.PERMAFROST.equipmentApplicability());
+        assertFalse(CosmicEnchantmentSpecs.PERMAFROST.tier().extractableByBlackScroll());
+        assertEquals(CosmicEnchantmentTier.MASTERY, CosmicEnchantmentSpecs.MORTAL_COIL.tier());
+        assertEquals("helmet", CosmicEnchantmentSpecs.MORTAL_COIL.equipmentApplicability());
+        assertFalse(CosmicEnchantmentSpecs.MORTAL_COIL.tier().extractableByBlackScroll());
     }
 
     @Test

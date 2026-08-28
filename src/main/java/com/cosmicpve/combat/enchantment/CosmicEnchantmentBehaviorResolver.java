@@ -14,6 +14,7 @@ import com.cosmicpve.combat.stack.BleedRuntimeService;
 import com.cosmicpve.combat.stack.CombatStackService;
 import com.cosmicpve.combat.stack.StackApplication;
 import com.cosmicpve.equipment.enchantment.EnchantmentSourceKind;
+import com.cosmicpve.equipment.armor.ArmorSetImmunityResolver;
 import com.cosmicpve.registry.ModEnchantments;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,18 +28,23 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
     public static final Identifier ENDER_SHIFT_COOLDOWN = CosmicPVE.id("ender_shift");
     public static final Identifier MOLTEN_ONCE_KEY = CosmicPVE.id("molten_once_per_damage");
     public static final Identifier CACTUS_ONCE_KEY = CosmicPVE.id("cactus_once_per_damage");
+    public static final Identifier PERMAFROST_ONCE_KEY = CosmicPVE.id("permafrost_once_per_damage");
+    public static final Identifier MORTAL_COIL_ONCE_KEY = CosmicPVE.id("mortal_coil_once_per_damage");
 
     private final ChildCombatActionService childActions;
     private final CombatStackService stacks;
     private final BleedRuntimeService bleedRuntime;
+    private final ArmorSetImmunityResolver immunities;
 
     public CosmicEnchantmentBehaviorResolver(
             ChildCombatActionService childActions,
             CombatStackService stacks,
-            BleedRuntimeService bleedRuntime) {
+            BleedRuntimeService bleedRuntime,
+            ArmorSetImmunityResolver immunities) {
         this.childActions = childActions;
         this.stacks = stacks;
         this.bleedRuntime = bleedRuntime;
+        this.immunities = immunities;
     }
 
     @Override
@@ -59,6 +65,8 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
             addEnderShift(event, result);
             addMolten(event, result);
             addCactus(event, result);
+            addPermafrost(event, result);
+            addMortalCoil(event, result);
         }
         return List.copyOf(result);
     }
@@ -258,6 +266,37 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
                     if (attacker != null && parent != null && attacker != activation.event().target() && !attacker.isDeadOrDying())
                         childActions.deliverTrue(parent.context(), attacker, CactusBehavior.packet(), CactusBehavior.RECURSION_POLICY);
                 }, new ProcProvenance(ProcSourceKind.ACTUAL_ENCHANTMENT, CosmicPVE.id("actual_leggings"))));
+    }
+
+    private void addPermafrost(ProcEvent event, List<ProcCandidate> result) {
+        if (event.target() == null || event.attacker() == null || event.attacker() == event.target()
+                || event.attacker().isDeadOrDying() || immunities.isImmune(event.attacker(), PermafrostBehavior.STACK_ID))
+            return;
+        int level = Math.min(6, event.effectiveEnchantments().level(ModEnchantments.PERMAFROST.identifier()));
+        if (level <= 0) return;
+        result.add(candidate(ModEnchantments.PERMAFROST.identifier(), ProcHook.ON_DAMAGE_TAKEN,
+                PermafrostBehavior.chance(level), Optional.empty(), 0L, Optional.of(PERMAFROST_ONCE_KEY),
+                ChildProcEligibility.LIMITED_DEFENSIVE_REACTION,
+                activation -> PermafrostBehavior.activate(activation.event(), level, stacks, childActions),
+                provenance(event, ModEnchantments.PERMAFROST.identifier()),
+                condition(CosmicPVE.id("permafrost_ordinary_attack"), CosmicEnchantmentBehaviorResolver::ordinaryAttack)));
+    }
+
+    private void addMortalCoil(ProcEvent event, List<ProcCandidate> result) {
+        int level = Math.min(2, event.effectiveEnchantments().level(ModEnchantments.MORTAL_COIL.identifier()));
+        if (level <= 0 || event.target() == null) return;
+        result.add(candidate(ModEnchantments.MORTAL_COIL.identifier(), ProcHook.ON_DAMAGE_TAKEN,
+                MortalCoilBehavior.chance(level), Optional.empty(), 0L, Optional.of(MORTAL_COIL_ONCE_KEY),
+                ChildProcEligibility.LIMITED_DEFENSIVE_REACTION,
+                activation -> MortalCoilBehavior.activate(activation.event()),
+                provenance(event, ModEnchantments.MORTAL_COIL.identifier()),
+                condition(CosmicPVE.id("mortal_coil_ordinary_attack"), CosmicEnchantmentBehaviorResolver::ordinaryAttack)));
+    }
+
+    private static boolean ordinaryAttack(ProcEvent event) {
+        return event.attacker() != null && event.combatResult()
+                .map(result -> result.context().channel() == com.cosmicpve.combat.api.DamageChannel.ORDINARY)
+                .orElse(false);
     }
 
     private static ProcCandidate candidate(

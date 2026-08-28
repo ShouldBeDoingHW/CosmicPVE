@@ -22,7 +22,7 @@ public final class CosmicEnchantmentSpecs {
     public static final CosmicEnchantmentSpec LUCK = new CosmicEnchantmentSpec(
             ModEnchantments.LUCK.identifier(), 10, CosmicEnchantmentTier.ULTIMATE, "boots_or_leggings");
     public static final CosmicEnchantmentSpec POISON = new CosmicEnchantmentSpec(
-            ModEnchantments.POISON.identifier(), 3, CosmicEnchantmentTier.ELITE, "sword");
+            ModEnchantments.POISON.identifier(), 3, CosmicEnchantmentTier.UNIQUE, "sword");
     public static final CosmicEnchantmentSpec PUMMEL = new CosmicEnchantmentSpec(
             ModEnchantments.PUMMEL.identifier(), 3, CosmicEnchantmentTier.ELITE, "axe");
     public static final CosmicEnchantmentSpec GREATSWORD = new CosmicEnchantmentSpec(
@@ -44,7 +44,7 @@ public final class CosmicEnchantmentSpecs {
     public static final CosmicEnchantmentSpec GLOWING = new CosmicEnchantmentSpec(
             ModEnchantments.GLOWING.identifier(), 1, CosmicEnchantmentTier.SIMPLE, "helmet");
     public static final CosmicEnchantmentSpec OBSIDIANSHIELD = new CosmicEnchantmentSpec(
-            ModEnchantments.OBSIDIANSHIELD.identifier(), 1, CosmicEnchantmentTier.ULTIMATE, "leggings");
+            ModEnchantments.OBSIDIANSHIELD.identifier(), 2, CosmicEnchantmentTier.ULTIMATE, "leggings");
     public static final CosmicEnchantmentSpec OXYGENATE = new CosmicEnchantmentSpec(
             ModEnchantments.OXYGENATE.identifier(), 2, CosmicEnchantmentTier.SIMPLE, "pickaxe");
     public static final CosmicEnchantmentSpec ARMORED = new CosmicEnchantmentSpec(
@@ -52,9 +52,9 @@ public final class CosmicEnchantmentSpecs {
     public static final CosmicEnchantmentSpec DEATH_PACT = new CosmicEnchantmentSpec(
             ModEnchantments.DEATH_PACT.identifier(), 5, CosmicEnchantmentTier.MASTERY, "chestplate");
     public static final CosmicEnchantmentSpec AUTO_SMELT = new CosmicEnchantmentSpec(
-            ModEnchantments.AUTO_SMELT.identifier(), 1, CosmicEnchantmentTier.SIMPLE, "pickaxe");
+            ModEnchantments.AUTO_SMELT.identifier(), 1, CosmicEnchantmentTier.ULTIMATE, "pickaxe");
     public static final CosmicEnchantmentSpec EXPERIENCE = new CosmicEnchantmentSpec(
-            ModEnchantments.EXPERIENCE.identifier(), 3, CosmicEnchantmentTier.SIMPLE, "pickaxe");
+            ModEnchantments.EXPERIENCE.identifier(), 3, CosmicEnchantmentTier.UNIQUE, "pickaxe");
     public static final CosmicEnchantmentSpec BLESSED = new CosmicEnchantmentSpec(
             ModEnchantments.BLESSED.identifier(), 4, CosmicEnchantmentTier.ULTIMATE, "axe");
     public static final CosmicEnchantmentSpec IMPLANTS = new CosmicEnchantmentSpec(
@@ -63,11 +63,18 @@ public final class CosmicEnchantmentSpecs {
             ModEnchantments.TRAP.identifier(), 3, CosmicEnchantmentTier.ELITE, "sword");
     public static final CosmicEnchantmentSpec CACTUS = new CosmicEnchantmentSpec(
             ModEnchantments.CACTUS.identifier(), 2, CosmicEnchantmentTier.ELITE, "leggings");
+    public static final CosmicEnchantmentSpec GEARS = new CosmicEnchantmentSpec(
+            ModEnchantments.GEARS.identifier(), 3, CosmicEnchantmentTier.LEGENDARY, "boots");
+    public static final CosmicEnchantmentSpec PERMAFROST = new CosmicEnchantmentSpec(
+            ModEnchantments.PERMAFROST.identifier(), 6, CosmicEnchantmentTier.MASTERY, "chestplate");
+    public static final CosmicEnchantmentSpec MORTAL_COIL = new CosmicEnchantmentSpec(
+            ModEnchantments.MORTAL_COIL.identifier(), 2, CosmicEnchantmentTier.MASTERY, "helmet");
 
     public static final List<CosmicEnchantmentSpec> ALL =
             List.of(EXECUTE, ANGELIC, LIGHTNING, ENDER_SHIFT, DOUBLESTRIKE, BLEED, LUCK, POISON, PUMMEL,
                     GREATSWORD, INSANITY, VENOM, AEGIS, EAGLE_EYE, RAGE, MOLTEN, NUTRITION, GLOWING,
-                    OBSIDIANSHIELD, OXYGENATE, ARMORED, DEATH_PACT, AUTO_SMELT, EXPERIENCE, BLESSED, IMPLANTS, TRAP, CACTUS);
+                    OBSIDIANSHIELD, OXYGENATE, ARMORED, DEATH_PACT, AUTO_SMELT, EXPERIENCE, BLESSED, IMPLANTS, TRAP, CACTUS,
+                    GEARS, PERMAFROST, MORTAL_COIL);
 
     private CosmicEnchantmentSpecs() {}
 

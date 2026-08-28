@@ -34,6 +34,9 @@ public final class ModEnchantments {
     public static final ResourceKey<Enchantment> IMPLANTS = createKey("implants");
     public static final ResourceKey<Enchantment> TRAP = createKey("trap");
     public static final ResourceKey<Enchantment> CACTUS = createKey("cactus");
+    public static final ResourceKey<Enchantment> GEARS = createKey("gears");
+    public static final ResourceKey<Enchantment> PERMAFROST = createKey("permafrost");
+    public static final ResourceKey<Enchantment> MORTAL_COIL = createKey("mortal_coil");
 
     private ModEnchantments() {}
 

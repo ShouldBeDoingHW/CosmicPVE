@@ -29,13 +29,34 @@ class UnexaminedBookOpeningServiceTest {
         }
     }
 
-    @Test void masteryNowRevealsDeathPactAtAValidLevelAndRestrictedRates() {
-        var result = service.roll(CosmicEnchantmentTier.MASTERY, CosmicEnchantmentSpecs.ALL,
-                RandomSource.create(1L), null).orElseThrow();
-        assertEquals(CosmicEnchantmentSpecs.DEATH_PACT, result.enchantment());
-        assertTrue(result.level() >= 1 && result.level() <= 5);
-        assertTrue(result.rates().successRate() <= 49);
-        assertTrue(result.rates().destroyRate() >= 51);
+    @Test void masteryRevealsOnlyCurrentMasterySpecsAtValidLevelsAndRestrictedRates() {
+        var mastery = List.of(CosmicEnchantmentSpecs.DEATH_PACT, CosmicEnchantmentSpecs.PERMAFROST,
+                CosmicEnchantmentSpecs.MORTAL_COIL);
+        var seen = new java.util.HashSet<CosmicEnchantmentSpec>();
+        var random = RandomSource.create(1L);
+        for (int i = 0; i < 200; i++) {
+            var result = service.roll(CosmicEnchantmentTier.MASTERY, CosmicEnchantmentSpecs.ALL,
+                    random, null).orElseThrow();
+            assertTrue(mastery.contains(result.enchantment()));
+            seen.add(result.enchantment());
+            assertTrue(result.level() >= 1 && result.level() <= result.enchantment().maxLevel());
+            assertTrue(result.rates().successRate() <= 49);
+            assertTrue(result.rates().destroyRate() >= 51);
+        }
+        assertEquals(new java.util.HashSet<>(mastery), seen);
+    }
+
+    @Test void changedRaritiesUseOnlyTheirCanonicalBookPools() {
+        assertEquals(CosmicEnchantmentTier.ULTIMATE, CosmicEnchantmentSpecs.AUTO_SMELT.tier());
+        assertEquals(CosmicEnchantmentTier.UNIQUE, CosmicEnchantmentSpecs.EXPERIENCE.tier());
+        assertEquals(CosmicEnchantmentTier.UNIQUE, CosmicEnchantmentSpecs.POISON.tier());
+        assertTrue(CosmicEnchantmentSpecs.ALL.stream()
+                .filter(spec -> spec.tier() == CosmicEnchantmentTier.SIMPLE)
+                .noneMatch(spec -> spec == CosmicEnchantmentSpecs.AUTO_SMELT
+                        || spec == CosmicEnchantmentSpecs.EXPERIENCE));
+        assertTrue(CosmicEnchantmentSpecs.ALL.stream()
+                .filter(spec -> spec.tier() == CosmicEnchantmentTier.ELITE)
+                .noneMatch(spec -> spec == CosmicEnchantmentSpecs.POISON));
     }
 
     @Test void revealedBookUsesTheExistingActualCosmicBookComponentPath() {

@@ -25,7 +25,7 @@ public final class MoltenBehavior {
     }
 
     public static double chance(int effectiveLevel) {
-        return Math.min(1.0, 0.02 * Math.max(0, effectiveLevel));
+        return Math.min(1.0, 0.03 * Math.max(0, effectiveLevel));
     }
 
     /** One plan represents one candidate and therefore one roll for a committed hit. */

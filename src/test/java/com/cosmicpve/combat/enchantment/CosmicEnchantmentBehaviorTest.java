@@ -69,27 +69,27 @@ class CosmicEnchantmentBehaviorTest {
     }
 
     @Test
-    void moltenUsesHighestArmorLevelForExactlyOneTwoPercentPerLevelPlan() {
-        assertEquals(0.02, MoltenBehavior.chance(1), 1.0E-12);
-        assertEquals(0.04, MoltenBehavior.chance(2), 1.0E-12);
-        assertEquals(0.06, MoltenBehavior.chance(3), 1.0E-12);
-        assertEquals(0.08, MoltenBehavior.chance(4), 1.0E-12);
+    void moltenUsesHighestArmorLevelForExactlyOneThreePercentPerLevelPlan() {
+        assertEquals(0.03, MoltenBehavior.chance(1), 1.0E-12);
+        assertEquals(0.06, MoltenBehavior.chance(2), 1.0E-12);
+        assertEquals(0.09, MoltenBehavior.chance(3), 1.0E-12);
+        assertEquals(0.12, MoltenBehavior.chance(4), 1.0E-12);
 
         var onePiece = MoltenBehavior.planForLevels(0, 4, 0, 0).orElseThrow();
         var fourPieces = MoltenBehavior.planForLevels(4, 4, 4, 4).orElseThrow();
         var mixed = MoltenBehavior.planForLevels(2, 3, 0, 1).orElseThrow();
         assertEquals(4, onePiece.effectiveLevel());
-        assertEquals(0.08, onePiece.chance(), 1.0E-12);
+        assertEquals(0.12, onePiece.chance(), 1.0E-12);
         assertEquals(onePiece, fourPieces);
         assertEquals(3, mixed.effectiveLevel());
-        assertEquals(0.06, mixed.chance(), 1.0E-12);
+        assertEquals(0.09, mixed.chance(), 1.0E-12);
         assertTrue(MoltenBehavior.planForLevels(0, 0, 0, 0).isEmpty());
         assertEquals(3.0F, MoltenBehavior.FIRE_SECONDS);
 
         // Intentional regression guard: Angelic sums armor while Molten selects one highest level.
         assertEquals(16, AngelicBehavior.aggregateLevels(4, 4, 4, 4));
         assertEquals(4, MoltenBehavior.aggregateHighest(4, 4, 4, 4));
-        assertEquals(0.096, com.cosmicpve.combat.proc.ProcChance.calculate(
+        assertEquals(0.144, com.cosmicpve.combat.proc.ProcChance.calculate(
                 MoltenBehavior.chance(4), List.of(LuckBehavior.chanceMultiplier(20))), 1.0E-12);
     }
 
@@ -140,7 +140,7 @@ class CosmicEnchantmentBehaviorTest {
                         10.0, 0.0, List.of(), com.cosmicpve.combat.api.DamageBounds.UNBOUNDED,
                         List.of(), com.cosmicpve.combat.api.DamageBounds.UNBOUNDED,
                         List.of(TrueDamagePacket.standard(CosmicPVE.id("separate_true"), 8.0))));
-        assertEquals(5.0, DoublestrikeBehavior.childOrdinaryDamage(parent), 1.0E-12);
+        assertEquals(7.5, DoublestrikeBehavior.childOrdinaryDamage(parent), 1.0E-12);
 
         var child = parent.context().child(
                 null, DamageChannel.ORDINARY, RecursionPolicy.LIMITED_OFFENSIVE_REROLL,
@@ -170,8 +170,8 @@ class CosmicEnchantmentBehaviorTest {
 
     @Test
     void bleedUsesIndependentThirtyTickSchedulesStandardTrueDamageAndMovementPenalty() {
-        assertEquals(0.01, BleedBehavior.chance(1), 1.0E-12);
-        assertEquals(0.06, BleedBehavior.chance(6), 1.0E-12);
+        assertEquals(0.015, BleedBehavior.chance(1), 1.0E-12);
+        assertEquals(0.09, BleedBehavior.chance(6), 1.0E-12);
         assertFalse(BleedBehavior.isTickDue(10, 110, 39));
         assertTrue(BleedBehavior.isTickDue(10, 110, 40));
         assertTrue(BleedBehavior.isTickDue(10, 110, 70));
@@ -197,12 +197,12 @@ class CosmicEnchantmentBehaviorTest {
 
     @Test
     void newOffensiveEnchantmentsHavePinnedChancesEffectsAndLimitedChildEligibility() {
-        assertEquals(0.15, PoisonBehavior.chance(3), 1.0E-12);
+        assertEquals(0.21, PoisonBehavior.chance(3), 1.0E-12);
         assertEquals(60, PoisonBehavior.DURATION_TICKS);
         assertEquals(0, PoisonBehavior.AMPLIFIER);
-        assertEquals(0.06, PummelBehavior.chance(3), 1.0E-12);
-        assertEquals(50, PummelBehavior.DURATION_TICKS);
-        assertEquals(2, PummelBehavior.AMPLIFIER);
+        assertEquals(0.09, PummelBehavior.chance(3), 1.0E-12);
+        assertEquals(60, PummelBehavior.DURATION_TICKS);
+        assertEquals(1, PummelBehavior.AMPLIFIER);
 
         var grants = List.of(
                 new ActualEnchantmentGrant(ModEnchantments.BLEED.identifier(), 6, CosmicPVE.id("actual_axe")),
@@ -335,7 +335,9 @@ class CosmicEnchantmentBehaviorTest {
     private static CosmicEnchantmentBehaviorResolver behaviorResolver() {
         var childActions = new ChildCombatActionService(new AttackSequenceService(), new TrueDamageDeliveryService());
         var stacks = new CombatStackService(new CosmicContentRepository());
-        return new CosmicEnchantmentBehaviorResolver(childActions, stacks, new BleedRuntimeService(childActions));
+        var armorSets = new com.cosmicpve.equipment.armor.ArmorSetResolver(new CosmicContentRepository());
+        return new CosmicEnchantmentBehaviorResolver(childActions, stacks, new BleedRuntimeService(childActions),
+                new com.cosmicpve.equipment.armor.ArmorSetImmunityResolver(armorSets));
     }
 
     private static CombatContext context(EffectiveEnchantments enchantments) {

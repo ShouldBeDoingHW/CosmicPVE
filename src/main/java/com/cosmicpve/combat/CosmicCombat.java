@@ -28,6 +28,8 @@ import com.cosmicpve.combat.enchantment.EagleEyeBehavior;
 import com.cosmicpve.combat.enchantment.RageBehavior;
 import com.cosmicpve.combat.enchantment.NutritionFoodService;
 import com.cosmicpve.combat.enchantment.DeathPactBehavior;
+import com.cosmicpve.combat.enchantment.ObsidianshieldBehavior;
+import com.cosmicpve.combat.enchantment.PermafrostBehavior;
 import com.cosmicpve.combat.cooldown.CooldownService;
 import com.cosmicpve.combat.proc.ProcCandidateSourceRegistry;
 import com.cosmicpve.combat.proc.ProcEngine;
@@ -83,7 +85,7 @@ public final class CosmicCombat {
     private static final WeaponSkinCombatResolver WEAPON_SKIN_COMBAT =
             new WeaponSkinCombatResolver(WEAPON_SKINS, STACKS, CHILD_ACTIONS);
     private static final CosmicEnchantmentBehaviorResolver ENCHANTMENT_BEHAVIORS =
-            new CosmicEnchantmentBehaviorResolver(CHILD_ACTIONS, STACKS, BLEED_RUNTIME);
+            new CosmicEnchantmentBehaviorResolver(CHILD_ACTIONS, STACKS, BLEED_RUNTIME, ARMOR_SET_IMMUNITIES);
     private static final NutritionFoodService NUTRITION = new NutritionFoodService(ENCHANTMENTS);
     private static final ExecutionService EXECUTIONS = new ExecutionService(SEQUENCES, TRACES);
     private static final CombatEventBridge EVENTS =
@@ -100,6 +102,7 @@ public final class CosmicCombat {
 
     public static void register() {
         var deathPact = new DeathPactBehavior(ENCHANTMENTS);
+        var permafrost = new PermafrostBehavior(STACKS);
         OUTGOING.register(new ExecuteBehavior());
         OUTGOING.register(new GreatswordBehavior());
         OUTGOING.register(new InsanityBehavior());
@@ -108,10 +111,13 @@ public final class CosmicCombat {
         OUTGOING.register(ARMOR_SET_COMBAT);
         OUTGOING.register(WEAPON_SKIN_COMBAT);
         OUTGOING.register(deathPact);
+        OUTGOING.register(permafrost);
         OUTGOING.register(MASK_COMBAT);
         INCOMING.register(ARMOR_SET_COMBAT);
         INCOMING.register(WEAPON_SKIN_COMBAT);
         INCOMING.register(deathPact);
+        INCOMING.register(new ObsidianshieldBehavior(ENCHANTMENTS));
+        INCOMING.register(permafrost);
         INCOMING.register(MASK_COMBAT);
         PRE_DEFENSE_BOUNDS.register(new AegisBehavior(ENCHANTMENTS));
         PROC_MODIFIERS.register(new LuckBehavior());

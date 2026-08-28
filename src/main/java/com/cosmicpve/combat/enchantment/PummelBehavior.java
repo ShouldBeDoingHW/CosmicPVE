@@ -6,13 +6,13 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 
 public final class PummelBehavior {
-    public static final int DURATION_TICKS = 50;
-    public static final int AMPLIFIER = 2;
+    public static final int DURATION_TICKS = 60;
+    public static final int AMPLIFIER = 1;
 
     private PummelBehavior() {}
 
     public static double chance(int level) {
-        return 0.02 * level;
+        return 0.03 * level;
     }
 
     public static void activate(ProcEvent event) {

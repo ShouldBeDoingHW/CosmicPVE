@@ -14,9 +14,9 @@ public final class DoublestrikeBehavior {
         return Math.min(1.0, 0.01 * Math.max(0, level));
     }
 
-    /** Halves the parent's final ordinary amount before vanilla target mitigation and before separate true packets. */
+    /** Uses 75% of the parent's final ordinary amount before vanilla target mitigation and before separate true packets. */
     public static double childOrdinaryDamage(CombatResult parent) {
-        return parent.breakdown().finalOrdinaryDamage() * 0.5;
+        return parent.breakdown().finalOrdinaryDamage() * 0.75;
     }
 
     public static void activate(CombatResult parent, ChildCombatActionService childActions) {

@@ -8,7 +8,7 @@
 | Engineer | \-20% inc, \+15% movement speed | Invasions |
 | Yeti | \+10% out, \-10% inc, immune to freeze, frozen, permafrost, ice aspect. | Trials |
 | Ancient | \+7.5% out, \-7.5% inc, doubled when under 50% health. | Ancient City/Crafting |
-| Ranger | \+20% bow/crossbow damage, \+20% movement speed. | Trials |
+| Ranger | \+20% bow/crossbow damage, \+10% movement speed. | Trials |
 | Dragonslayer | \+15% Outgoing, immunity to poison and fire/lava damage.  | Primal Dragon Boss |
 
 Specific Armorset procurement information:
@@ -48,12 +48,29 @@ Transmog Scrolls use a Paper presentation and affect tooltip presentation only. 
 
 For destructive item-application systems, the standard feedback language is: successful application plays the vanilla level-up sound; a failed application plays the passive lava sound; and the anvil-breaking sound is added only when the target item is actually destroyed.
 
-Unexamined Enchantment Books  
+# Unexamined Enchantment Books
+
 An Unexamined Enchantment Book is associated with one Cosmic enchantment rarity. Right-clicking it opens the book: a firework is launched into the air and the Unexamined Book is converted into one random actual Cosmic Enchantment Book from that same rarity at a random valid level for the selected enchantment.
 
 For example, an Unexamined Mastery Enchantment Book may reveal Phoenix at any valid Phoenix level, Permafrost at any valid Permafrost level, or any other eligible Mastery enchantment and valid level.
 
 The revealed book receives independently generated Success Rate and Destroy Rate values. Its base rolls follow the normal rules for its rarity, including the special Mastery ranges. The generation of these values must be data-driven and expose a reusable modifier path so future custom blocks, upgrades, temporary buffs, debuffs, or other systems may favorably or negatively influence the rates of books opened while the modifier is active. For example, a future custom block could grant \+3 percentage points to the Success Rate of Unexamined Books opened during a five-minute effect window. Exact modifier stacking and clamping are defined by the effect providing the modifier rather than hard-coded into the Unexamined Book item.
+
+# Reward-Table Book Rule
+
+Unless a reward explicitly says otherwise, a loot or reward-table entry named “\[rarity\] Enchantment Book” means an Unexamined Enchantment Book of that rarity.
+
+# Tinkerer and Cosmic Dust
+
+The Tinkerer is opened with \`/tinkerer\`. It salvages examined Cosmic Enchantment Books into rarity-specific Cosmic Dust. Each Dust item may increase the Success Rate of books from its own rarity only; for example, Unique Dust can affect only Unique books. Mastery Dust exists and follows the same rarity-locking rule.
+
+Each salvaged book yields: 1 base Dust \+ the book's enchantment level \+ floor(Success Rate / 10), capped at 10 Dust total. Example: an 80% Success Rate Molten IV book calculates as 1 \+ 4 \+ 8 \= 13 Unique Dust, but awards the 10-Dust cap.
+
+Each matching Dust increases a book's Success Rate by exactly 1 percentage point. Ordinary books may be improved up to 100% Success Rate. Mastery books may be improved up to 50% Success Rate. Dust does not change Destroy Rate.
+
+Cosmic Dust uses a Sugar base texture with a rarity tint following the same rarity-color presentation used by Cosmic Enchantment Books.
+
+The \`/tinkerer\` interface is a chest-style GUI. Slot 1 contains a Red Stained Glass Pane used as the salvage/confirm control. Players place eligible books into the remaining GUI slots by normal click or shift-click. Clicking the red pane consumes all eligible books currently placed in the Tinkerer, immediately gives the resulting Dust to the player, and plays the vanilla egg-laying sound. Only Cosmic Enchantment Books that already have a Success Rate are eligible for this salvage formula; Unexamined Books are not salvageable by this system.
 
 # Conquest Chests
 
@@ -67,11 +84,11 @@ Loot when broken:
 
 | Loot Item | Weight | Quantity |
 | :---- | :---- | :---- |
-| Simple Enchantment Book | 15 | 2 |
-| Unique Enchantment Book | 15 | 2 |
-| Elite Enchantment Book | 12 | 2 |
-| Ultimate Enchantment Book | 12 | 1 |
-| Legendary Enchantment Book | 8 | 1 |
+| Unexamined Simple Enchantment Book | 15 | 2 |
+| Unexamined Unique Enchantment Book | 15 | 2 |
+| Unexamined Elite Enchantment Book | 12 | 2 |
+| Unexamined Ultimate Enchantment Book | 12 | 1 |
+| Unexamined Legendary Enchantment Book | 8 | 1 |
 | Random Boss Spawn Egg | 5 | 1 |
 | Trial Portal | 10 | 1 |
 | Trial Portal | 5 | 2 |
@@ -92,7 +109,7 @@ In addition to the random loot, each conquest chest gives a guaranteed banknote 
 
 # Project Scope
 
-This mod is primarily designed for singleplayer or small cooperative worlds of 2-4 players. Balance is primarily PVE-focused. Players explore a custom survival world and obtain Cosmic-style gear through normal survival, custom structures, bosses, Invasions, Dungeons, and Trials.
+This mod is primarily designed for singleplayer or small cooperative worlds of 2-4 players. Balance is primarily PVE-focused. Players explore a survival world and obtain Cosmic-style gear through normal survival, custom structures, bosses, Invasions, Dungeons, and Trials.
 
 The three major repeatable activities should have distinct identities rather than forming one linear difficulty ladder. Trials are the most accessible and have a very high mastery ceiling, but are punishing while players learn them. Dungeons require costly keys, have a high mastery ceiling, and should provide very strong average loot when successfully completed. Invasions are medium-access scheduled events with a lower mastery ceiling but strong baseline preparation requirements and extraordinary reward potential.
 
@@ -153,7 +170,8 @@ The intended supported party size is 1-4 players. Encounter data should support 
 
 Development builds should include debug commands/tools for giving specific enchant books, applying enchantments and armor sets, inspecting custom item data, modifying cooldowns, entering test instances, and resetting instance state so normal progression never needs to be replayed during testing.
 
-Armor Progression  
+# Armor Progression
+
 Iron armor is the highest normal player armor tier in CosmicPVE. Diamond Armor and Netherite Armor cannot be crafted. Diamond and Netherite weapons and tools are not restricted by this rule.
 
 Diamond Armor results in generated loot tables, including End City loot and other applicable vanilla loot sources, are removed. Whenever one of these removed Diamond Armor loot results would otherwise be generated, it is replaced by one Unexamined Enchantment Book: 65% chance of  Unexamined Simple and 35% for an Unexamined Unique.
@@ -178,7 +196,7 @@ Random 50% Armor Set Crystal
 2-5 Trial Portal  
 Random Tier 3 Trial Trinket  
 Snowglobe OR Milk and Cookies custom block  
-3-4x Legendary Enchantment Book  
+3-4x Unexamined Legendary Enchantment Book  
 35% Permafrost Mastery Enchantment Book  
 Ornamental Carnage Sword Skin OR Icicle Hatchet Axe Skin
 
@@ -209,7 +227,7 @@ Jumbo Popsicle Sword Skin OR Spiked Baseball Bat Axe Skin
 
 1 Extraordinary item:
 
-Super Kit Refresher  
+Super Kit Refresher — PENDING M-KIT REDESIGN  
 Memory Chest  
 Secret Weapon Cache  
 Maxed out Trial Portal
@@ -220,9 +238,11 @@ Sand Castle: Each Sand Castle that you’ve placed gives you a \+1% chance to ga
 
 # Current Issues
 
-Creeper Spawner spawning issue — UNRESOLVED:
+## RESOLVED — TRIAL ROOM DROPPED ENTITIES
 
-Cosmic Creeper Spawner items preserve minecraft:creeper in vanilla SpawnData and placement diagnostics show the expected vanilla spawner configuration, but manual testing has still not produced Creepers from placed Creeper Spawners under apparently valid conditions. Other tested spawner types are not currently known to share the issue. Treat Creeper Spawner runtime spawning as unresolved and circle back later; do not block current Space Chest acceptance or Trial implementation on it. 
+Trial 1.0 previously allowed room-generated drops such as ladders or pressure plates to leak into the Decision Box or later rooms.
+
+Resolved behavior: Trial teardown performs a bounded outgoing-room item purge after block removal so temporary room drops cannot leak forward.
 
 # Dungeons
 
@@ -294,34 +314,34 @@ Heroic Abandoned Spaceship Lootbag:
 | :---- | :---- | :---- | :---- | :---- |
 | Angelic | 5 | Any Armor | Ultimate | Gives a 1% × level chance to heal 0.5 heart (1 HP) after a committed damaging event. Angelic levels across equipped armor pieces are summed into one proc chance, and the heal can occur at most once per damage event. |
 | Armored | 4 | Any Armor | Legendary | Each level is equal to half a level of protection. |
-| Auto Smelt | 1 | Pickaxe | Simple | Automatically smelts drops. |
-| Bleed | 6 | Axe | Ultimate   | 1% chance per level on a valid damaging hit to apply one Bleed stack for 5 seconds. Each entity can have up to 10 Bleed stacks. Every stack has its own independent 5-second lifetime; applying a new stack does not refresh older stacks. Each active stack reduces movement speed by 1% while it remains active and deals 1 true damage every 1.5 seconds. |
-| Death Pact | 5 | Chestplate | Mastery | Deal 3% less damage but take (2% x level) less damage. |
+| Auto Smelt | 1 | Pickaxe | Ultimate | Automatically smelts drops. |
+| Bleed | 6 | Axe | Ultimate   | 1.5% chance per level on a valid damaging hit to apply one Bleed stack for 5 seconds. Each entity can have up to 10 Bleed stacks. Every stack has its own independent 5-second lifetime; applying a new stack does not refresh older stacks. Each active stack reduces movement speed by 1% while it remains active and deals 1 true damage every 1.5 seconds. |
+| Death Pact | 5 | Chestplate | Mastery | Deal (7.5 \- level)% less outgoing damage and take (1 \+ level)% less incoming damage. |
 | Divine Immolation | 4 | Sword | Mastery | 3% chance per level to proc on hit. On proc, set yourself on fire for 5 seconds and deal \+10% damage. 30 second cooldown. |
 | Eagle Eye | 6 | Bow/Crossbow | Ultimate | Deal (3% x level) more damage to targets that are 18 blocks away or further. |
 | Ender Shift | 3 | Helmet | Unique | After a committed hit leaves you below 25% of max health, gain Speed I and Regeneration I for (3 × level) seconds. 30-second cooldown. Being below 25% after the hit is sufficient; the hit does not need to cross the threshold from above. |
 | Execute | 5 | Sword | Elite | Deal (2% x level) more damage against targets that are below 50% HP. |
-| Experience | 3 | Pickaxe | Simple | Each level adds \+50% XP from breaking blocks. At level III, block XP is 250% of the vanilla amount (2.5× total). |
-| Gears | 3 | Boots | Legendary | Gives \+10% movement speed per level. |
+| Experience | 3 | Pickaxe | Unique | Each level adds \+50% XP from breaking blocks. At level III, block XP is 250% of the vanilla amount (2.5× total). |
+| Gears | 3 | Boots | Legendary | Gives \+5% movement speed per level. |
 | Glowing | 1 | Helmet | Simple | Gives perm night vision |
 | Greatsword | 4 | Sword | Elite | Deal (5% x level) more damage to enemies that are 2.5 blocks away or further. |
 | Hero Killer | 3 | Axe | Mastery | Deal 3% per level more damage to enemies that have an active armor set bonus. |
 | Insanity | 8 | Axe | Legendary | Deal 1% more damage per missing heart, up to a max of (2% x level) |
 | Lightning | 4 | Bow/Crossbow | Simple | 5% chance per level on a committed projectile hit to strike visual lightning on the target and deal exactly 2 HP of standard Cosmic true damage. The visual lightning itself does not deal additional vanilla lightning damage. |
 | Luck | 10 | Boots/Leggings | Ultimate | Increases eligible Cosmic enchantment proc chances by 1% relative per total Luck level across equipped Luck pieces. For example, 20 total Luck levels multiply a 1% proc chance by 1.20, producing a 1.2% final chance; Luck does not add flat percentage points. |
-| Molten | 4 | Any Armor | Unique | 2% x level chance of setting your attacker on fire for 3 seconds when hit. |
-| Mortal Coil | 3 | Helmet | Mastery | 2% chance to proc on hit. On proc gain 2 full hearts of absorption and your next attack does (5% x level) more damage. |
+| Molten | 4 | Any Armor | Unique | 3% × level chance of setting your attacker on fire for 3 seconds when hit. |
+| Mortal Coil | 2 | Helmet | Mastery | When hit by an otherwise valid damaging attack, gain a (3% × level) chance to receive 2 full hearts of absorption for 5 seconds. |
 | Nutrition | 3 | Leggings | Unique | Eating a piece of food restores \+1 hunger and \+0.25 saturation per level. |
-| Obsidianshield | 1 | Leggings | Ultimate | Gives perm fire resistance. |
+| Obsidianshield | 2 | Leggings | Ultimate | Reduces fire-category damage by 25% per level: 25% at level I and 50% at level II. |
 | Oxygenate | 2 | Pickaxe | Simple | After breaking a block while underwater, refills 1 air bubble per level. |
 | Phoenix | 4 | Boots | Mastery | When an otherwise ordinary lethal hit would kill you, survive at 40% HP and make your next hit deal (10% × level) more damage. 90-second cooldown. Phoenix does not prevent environmental/encounter execution deaths. |
-| Poison | 3 | Sword | Elite | (5% x level) chance to give poison 1 for 3 seconds to target. |
-| Pummel | 3 | Axe | Elite | (2% x level) chance to give slowness 3 to your target for 2.5 seconds. |
-| Rage | 6 | Sword/Axe | Legendary | Deal 5% more damage to enemies that have damaged you three times or more in the last (4 \+ level) seconds. |
+| Poison | 3 | Sword | Unique | (7% × level) chance to give Poison I for 3 seconds to the target. |
+| Pummel | 3 | Axe | Elite | (3% × level) chance to give Slowness II to the target for 3 seconds. |
+| Rage | 6 | Sword/Axe | Legendary | Deal (5 \+ level)% more damage to enemies that have damaged you three times or more in the last (4 \+ level) seconds. |
 | Self Destruct | 3 | Leggings | Unique | When below 15% HP, summon 4 lit TNT that you are immune to. 60 second cooldown. |
 | Venom | 3 | Bow/Crossbow | Elite | (15% x level) chance to give poison 1 for 3 seconds to target. |
 | Virus | 3 | Bow/Crossbow | Unique | If target is poisoned, deals 0.25 true damage per level of enchant.  |
-| Doublestrike | 3 | Sword | Legendary | (1% × level) chance on a valid hit to make a linked second hit for 50% of the parent's ordinary attack damage. The child hit may reroll other eligible offensive on-hit enchantments, but Doublestrike cannot trigger itself recursively. Separate true-damage packets from the parent are not automatically duplicated. |
+| Doublestrike | 3 | Sword | Legendary | (1% × level) chance on a valid hit to make a linked second hit for 75% of the parent's ordinary attack damage. The child hit may reroll other eligible offensive on-hit enchantments, but Doublestrike cannot trigger itself recursively. Separate true-damage packets from the parent are not automatically duplicated. |
 | Undead Ruse | 10 | Any Armor (only highest lvl counts, no stacking)  | Elite | (Level/2) percent chance to spawn an ally Undead Corpse when hit. Maximum corpse count is 1 at levels 1-4, 2 at levels 5-9, and 3 at level 10\. Allies despawn after 45 seconds. |
 | Cactus | 2 | Leggings | Elite | (3% x level) chance to deal 1.5 true damage to your attacker when hit. |
 | Devour | 4 | Axe | Legendary | 5% chance on a valid damaging hit, provided the attacker has at least 1 hunger available, to consume exactly 1 hunger and make that hit deal (level x 5%) more damage while healing the attacker for 2 HP. On proc, play the normal eating sound for approximately 0.5 seconds. |
@@ -334,52 +354,23 @@ Heroic Abandoned Spaceship Lootbag:
 | Permafrost | 6 | Chestplate | Mastery | When the wearer is hit, they have a (level x 2.5%) chance to give one Permafrost stack to the attacker. Permafrost is a NEGATIVE stack. Having one or more Permafrost stacks applies one binary penalty of \+2% incoming damage and \-2% outgoing damage; the penalty does not scale per stack. If an entity reaches (10 \- level) Permafrost stacks from this effect, all of its Permafrost stacks are removed and it takes exactly 6 HP of standard Cosmic true damage. Individual stacks expire after 60 seconds. An entity with the active Yeti armor-set bonus is immune to receiving Permafrost stacks. |
 | Leadership | 10 | Chestplate/Leggings | Legendary | All of your active owned allies deal level% more damage with attacks. Owned allies include summoned entities such as Undead Ruse Corpses, tamed mobs, and other summoned/owned entities whose owner can be determined; human party members are not owned allies. Having this enchantment on multiple pieces of armor stacks the effect up to \+20%. |
 
+## Current Balance Baseline
+
+# The enchantment table above is the canonical balance baseline for implementation and testing. Earlier Balance Candidate values are retired; future changes should edit this table directly rather than maintaining a second competing list.
+
+# 
+
+# Heroic Enchantments
+
+Heroic Enchantments are upgraded forms of existing Cosmic enchantments. A Heroic Enchantment replaces its younger counterpart rather than stacking with it; the base and Heroic versions cannot coexist as separate effects on the same item. The table below is the design workspace for locking each Heroic version's exact level cap, valid item type, and upgraded effect.
+
+| Name | Replaces | Max Level | Goes On | Effect |
+| :---- | :---- | :---- | :---- | :---- |
+| Deep Bleed | Bleed | TBD | TBD | TBD |
+| Mighty Cactus | Cactus | TBD | TBD | TBD |
+| Paladin Armored | Armored | TBD | TBD | TBD |
+
 # Balance Candidate
-
-**Poison:**  
-Rarity: Elite \-\> Unique  
-Proc Chance: 5% \-\> 7% per level
-
-**Pummel:**  
-Proc Chance: 2 \-\> 3% per level  
-Slowness Duration: 2.5 \-\> 3 seconds  
-Slowness Strength: Slowness III \-\> Slowness II
-
-**Rage:**  
-Bonus Damage: 5% \-\> 5% \+ level (Rage 3 would give 8% bonus damage)
-
-**Auto Smelt:**  
-Rarity: Simple \-\> Ultimate
-
-**Experience:**  
-Rarity: Simple \-\> Unique
-
-**Mortal Coil:**  
-Max Level: 3 \-\> 2  
-Goes On: Sword/Axe \-\> Helmet  
-Procs On: Outgoing hit \-\> Incoming Hit  
-Proc Chance: 2% \-\> 3% x level  
-Absorption Duration: Unspecified \-\> 5 seconds
-
-**Molten:**  
-Proc Chance: 2% x level \-\> 3% x level
-
-**Gears:**  
-Movement Speed Bonus: 10% x level \-\> 5% x level
-
-**Doublestrike:**  
-Child Attack Base Damage: 50% of Parent Attack \-\> 75% of Parent Attack
-
-**Obsidianshield:**  
-Max Level: I \-\> II  
-Effect: Permanent Fire Resistance \- \> 25/50% reduction to Fire based damage such as Lava, Burning, touching Blazes, future mobs/bosses (this can be made data-driven). 
-
-**Death Pact:**  
-Outgoing Damage Reduction: 3% \-\> (7.5 \- level)%  
-Incoming Damage Reduction: (level x 2%) \-\> (1 \+ level)%
-
-**Bleed:**  
-Proc Chance: 1% per level \-\> 1.5% per level
 
 # Invasions
 
@@ -415,11 +406,11 @@ Default Loot Table:
 | 90% blackscroll | 15 | 1 |
 | 100% blackscroll | 15 | 1 |
 | Enderman Spawner | 10 | 1 |
-| Gkit Unlock Item | 7 | 1 |
+| Random G-Kit Fallen Hero | 7 | 1 |
 | Heroic Crystal | 10 | 1 |
 | 60% Weapon Enchantment Orb | 10 | 1 |
 | 60% Armor Enchantment Orb | 10 | 1 |
-| Mastery Enchantment Book | 9 | 1 |
+| Unexamined Mastery Enchantment Book | 9 | 1 |
 | Repair Scroll | 20 | 2 |
 | Repair Scroll | 20 | 1 |
 | Wither Skeleton Spawner | 5 | 1 |
@@ -441,11 +432,11 @@ Advanced Loot Table:
 | 75% Engineer Crystal | 5 | 1 |
 | 80% Armor Enchantment Orb | 8 | 1 |
 | Memory Chest | 10 | 1 |
-| Mastery Enchantment Book | 16 | 1 |
-| Mkit Unlock Item | 6 | 1 |
+| Unexamined Mastery Enchantment Book | 16 | 1 |
+| M-Kit Unlock Item — PENDING REDESIGN | 6 | 1 |
 | Skip 2 Rooms Trial Trinket | 7 | 1 |
 | Skip 3 Rooms Trial Trinket | 4 | 1 |
-| Super Kit Refresher | 8 | 1 |
+| Super Kit Refresher — PENDING M-KIT REDESIGN | 8 | 1 |
 | Trial Portal | 10 | 2 |
 | Trial Portal | 10 | 3 |
 | 80% Weapon Enchantment Orb | 8 | 1 |
@@ -464,23 +455,33 @@ Invasion Implementation and Edge Cases
 
 # Kits
 
-Kits are not a routine part of this game. Instead, you unlock the kit. However, instead of using a persistent time gated cooldown, kits are refreshed by “Refresh Crystals” which allow you to claim all unlocked kits of the corresponding type once.
+# Kits
 
-G-kit:
+# General Rules
 
-Standing for God Kits, these kits contain either a netherite weapon or an iron armor piece (non heroic) that has 3-5 custom enchantments on it.
+Kits are permanent unlocks rather than routine timed-cooldown rewards. Where a kit uses a Refresh Crystal, claiming the kit consumes its current claim availability until the appropriate refresher restores it.
 
-Kit Variants. Unlock items are all a Diamond.
+# G-Kits
 
-Gladiator, Viking, Paladin, Butcher, Grandmaster.
+G-Kits (“God Kits”) provide either a Netherite weapon or an Iron armor piece with 3–5 Cosmic enchantments. G-Kit gear is non-Heroic by default.
 
-M-Kit:
+Current G-Kits: Gladiator, Viking, Paladin, Butcher, and Grandmaster. Their unlock items use a Diamond presentation. G-Kit Unlock Gems are obtained through the corresponding Fallen Hero system.
 
-Standing for Mastery Kits. These powerful kits contain 1 piece of already heroic armor but no weapons. Each piece of armor has exactly 3 custom enchantments. On top of this, each time you claim your M-Kit, you receive a mastery enchantment book for free.
+# V-Kits
 
-Kit variants and unlock item textures:
+V-Kits are evolving kits with levels I–X. Higher V-Kit levels provide more and stronger Cosmic enchantments. Each V-Kit has two possible equipment types:  
+• Phoenix — Boots / Sword  
+• Troll — Helmet / Leggings  
+• Judgement — Chestplate / Axe  
+• Slayer — Pickaxe / Bow
 
-Death Knight (purple dye), Necromancer (green dye), and Ghost (blue dye). 
+A V-Kit is unlocked through its corresponding Fallen Hero and begins at level I. After unlock, each additional matching V-Kit Gem raises that V-Kit by exactly one level, up to level X. Matching Gems are the only way to level a V-Kit.
+
+When a V-Kit is claimed, its reward is rolled from that kit's two listed equipment types according to the V-Kit reward-generation rules for its current level.
+
+# M-Kits — Pending Redesign
+
+M-Kits are pending redesign and are not currently authoritative for implementation. The previous Death Knight, Necromancer, and Ghost M-Kit design is legacy reference only until a replacement design is approved.
 
 # Masks / Skins
 
@@ -488,19 +489,19 @@ Death Knight (purple dye), Necromancer (green dye), and Ghost (blue dye).
 
 # Masks
 
-Masks are an additional customization and buildcraft layer. Most masks are found individually. Inside an anvil, players may combine single masks into double, and a double \+ single mask into a triple. No multi mask may contain more than 3 masks at this time, though this should be a variable that can be changed up or down.
+Masks are an additional customization and buildcraft layer. Most masks are found individually and may be combined in an anvil. \`/masklimit\` sets the maximum size of newly created Multi-Masks from 2–5 (default 3). Existing 1–5-mask items remain valid regardless of the current limit; the limit applies only to new anvil combinations.
 
-Masks should attach to or be associated with the player's helmet rather than replacing the armor-set helmet slot. A Multi-Mask provides the effects of all masks contained within it. For rendering, Multi-Masks use a black box with a question mark on the front. The contained masks still provide their effects without requiring the visuals to be physically layered on the player's face.
+Masks attach to the player's helmet without replacing the underlying item or armor-set identity. Any attached mask visually hides the helmet model. A single mask renders its assigned player-head texture; a Multi-Mask with 2–5 contained masks renders the shared Multi-Mask player-head texture. All contained masks still provide their effects.
 
 ### **Masks — Implementation-facing decisions**
 
 * Masks attach to helmets using the same application/removal interaction as Skins.  
 * Underlying helmet item, stats, enchantments, and armor-set identity remain unchanged.  
-* A helmet may carry **up to 5 masks technically**.  
-* Normal player-facing combination/progression is capped at **3 masks** unless future content explicitly overrides this.  
+* Mask data supports 1–5 contained masks.  
+* New anvil combinations may contain up to the current \`/masklimit\` value (2–5, default 3). Lowering the limit never invalidates an existing larger Multi-Mask.  
 * A mask with 1 contained mask renders using that mask’s assigned player-head texture.  
 * A mask with 2 or more contained masks renders using the shared **Multi-Mask** player-head texture.  
-* Tooltips dynamically list every contained mask and its effect.  
+* Loose Mask and Multi-Mask item tooltips list each contained mask and its effect description. Once attached to a helmet, mask effects are omitted and identity appears on one non-wrapping \`ATTACHED:\` line.  
 * Mask effects derive from the actual contained masks, not from Multi-Mask tier/type.
 
 | Name | Effect | Hex Color | Base 64 Data | Flavor/Information Text |
@@ -513,7 +514,7 @@ Masks should attach to or be associated with the player's helmet rather than rep
 | Scarecrow | Passively restores 1 hunger and 0.5 saturation every 8 seconds. | \#66550F | eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvOTY4NTgxM2FiNDQxZTI4ZWQ3MzA3NjFiY2UxYmI2ZmQ4OTNkZjg1ZDdkNTNmMmNiNjgzZDkwNzE2YWNhOTM2OSJ9fX0= | Passively Restores Hunger and Saturation\! |
 | Zeus | Immune to lightning strike effects such as Nature’s Wrath and Lightning. | \#175753 | eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNmM1ZjgxY2I1NDk3NDRkMGQxZTM1NDAxYTgyMTBjYTczOGJhNDQ1YmNiODU0ODFhNzhmMmQ4ZGRjOTRlZDAwMyJ9fX0= | Gives Full Immunity to Lightning Based Damage\! |
 | Turkey | \+2 percentage points to Dodge Chance, using the same Dodge roll whether or not the Dodge enchantment is present. | \#BAAD00 | eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYjRlM2IyNzZmZWI1NWI2MmU2MzNhZTZlNDE0ZTVlMjk3NTRjOWNkZGQ4YWU5MjVmYzM3ZWUyNTRjODRiNTQxIn19fQ== | Gain \+2% Dodge Chance\! |
-| Dragon | \+2% damage. Immune to fire and poison damage. | \#FFF24D | eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZjhhYTNjNTNlNDY3NTIzYzZjM2Q4MzNiYmJlZTM3YTY2ZmMxNGYzMDUzMGYzOWE2YTljMDQ1N2ZmZTgwNWMyNSJ9fX0= | Deal \+2% Outgoing Damage and Become Immune to Fire and Lava Damage\! |
+| Dragon | \+2% outgoing damage. Immune to fire-category damage, including lava, and poison damage. | \#FFF24D | eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZjhhYTNjNTNlNDY3NTIzYzZjM2Q4MzNiYmJlZTM3YTY2ZmMxNGYzMDUzMGYzOWE2YTljMDQ1N2ZmZTgwNWMyNSJ9fX0= | Deal \+2% Outgoing Damage and Become Immune to Fire, Lava, and Poison Damage\! |
 | Multi Mask | N/A | N/A | eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNjM4YzUzZTY2ZjI4Y2YyYzdmYjE1MjNjOWU1ZGUxYWUwY2Y0ZDdhMWZhZjU1M2U3NTI0OTRhOGQ2ZDJlMzIifX19 | N/A |
 
 # Weapon Skins
@@ -550,17 +551,17 @@ Repair Scroll \- can be applied to any item to refill durability up to maximum. 
 
 Heroic Crystal \- Can be applied one time maximum to dungeon portals, pickaxes and shovels, and armor. When applied to armor, it turns the model into leather and gives \+250 maximum durability. Pickaxes and shovels turn to a gold texture and gain \+250 maximum durability. If an eligible item is already damaged when the crystal is applied, both its current durability and maximum durability increase by 250\. When applied to dungeon portals, it turns them into their Heroic variants. Item texture is an amethyst shard.
 
-Kit Refreshers- Consume to renew all of your available kits, allowing you to claim them.Comes in “Mkit”, “Gkit”, or “Super” variants, which allow you to refresh your GKits, Mkits, or both respectively. Item texture is the item quartz. 
+Kit Refreshers — Consumable items that restore claim availability for supported kit families. The G-Kit Refresher renews G-Kits. M-Kit refresh behavior is pending redesign, and any Super Refresher behavior that depends on M-Kits is likewise pending until that redesign is approved. Base texture: Quartz.
 
 Dungeon Key Ring \- Item that once right clicked drops 1 of each type of dungeon key into the player’s inventory. Cannot be opened if there isn’t inventory space. 
 
 Conquest Chest Flare \- spawns a conquest chest in a valid spawn location within \+/- 100 blocks in either direction from the player’s current location. Uses a redstone torch base model. Description text and name text is \#BF0000. 
 
-Mask Splicer \- Uses \#450000 for it’s name and standard yellow color for item lore text. One time drag n drop item that separates a 2–5-power Multi-Mask into each individual mask and drops it into your inventory or on the ground if there is no space. 
+Mask Splicer — Uses \#450000 for its name and the standard yellow lore color. One-use drag-and-drop item that separates a loose 2–5-mask Multi-Mask into its ordered component single Masks. Returned masks enter the inventory first; overflow drops safely at the player. The Splicer never combines masks and cannot operate directly on a mask still attached to a helmet.
 
 # Mobs
 
-**SPACE PIRATES**
+# SPACE PIRATES
 
 There are two variants of space pirates, and everything will be formatted for Space Pirates in (variant 1/variant 2\) fashion. If an aspect of the mob is laid out and only 1 concrete detail is mentioned, it is shared between the two variants.
 
@@ -580,7 +581,7 @@ Custom attacks/abilities: N/A
 
 Speed: 0.35
 
-**Primal Dragon**
+# Primal Dragon
 
 The Primal Dragon is a spawnable boss that players can fight for loot and a challenge. Most specifically, to obtain the Dragonslayer set. Each kill of the primal dragon has a 50-50 chance of giving 1 ultimate or legendary space chest to all players that dealt 10% of the bosses health or more. On top of this, the player that dealt the most damage gets a guaranteed 75% dragonslayer crystal.
 
@@ -606,7 +607,7 @@ The eligible player who dealt the greatest total attributed damage additionally 
 
 The Primal dragon egg is crafted using a regular dragon egg and 4 eyes of ender \+ 4 end crystals (end crystals are in the corners, dragon egg in center). Regular dragon eggs can now be crafted via egg in center surrounded by 8 obsidian. 
 
-**Undead Corpse**
+# Undead Corpse
 
 Undead corpses are standard mobs that can appear in a variety of instances but are primarily tied to the Undead Ruse enchantment. They are naturally hostile to the player, but can be summoned as a friend/ally. 
 
@@ -626,6 +627,18 @@ Custom attacks/abilities: N/A
 
 Speed: 0.4  
 Drops: Nothing by default. 
+
+# Fallen Heroes
+
+Fallen Heroes are summonable kit bosses whose summon items are dropped by selected activities. Each Fallen Hero is tied to a specific G-Kit or V-Kit.
+
+When summoned, the Fallen Hero spawns wearing the strongest possible version of that kit's gear. The boss uses that maxed gear for the fight; this does not mean its dropped equipment reward is maxed.
+
+Killing a Fallen Hero produces exactly one of two equally likely outcomes:  
+• 50% — the corresponding kit Unlock/Progression Gem.  
+• 50% — one random piece from that kit's normal loot pool, rolled normally rather than as a maxed version.
+
+For G-Kits, the Gem unlocks the corresponding kit. For V-Kits, the first matching Gem unlocks the V-Kit at level I and additional matching Gems are used to raise its V-Kit level according to the V-Kit rules.
 
 # Money and Economy
 
@@ -717,9 +730,9 @@ Abandoned Spaceship keys cost 1m base, and increase by 10k for each Abandoned Sp
 
 # Space Chests
 
-Space Chests are medium/minor loot bags that contain useful though tame loot to help the player advance through the world. Space Chests are mainly dropped via bosses, though there are alternative methods of obtaining. There are also Memory Chests, a variant of Space Chests that contain a single drop of potentially immense value. 
+Space Chests are mid-tier loot containers that provide useful progression rewards. Bosses are their primary source, though other acquisition methods exist. Memory Chests are a separate high-variance variant that award one potentially extremely valuable item.
 
-Space Chests come in 3 main rarities: Ultimate, Legendary, and Mastery. Each variant contains 5 items of loot from their respective loot table. Non memory chests have their name formatted in the color that corresponds to that rarity. Memory chests use a rainbow gradient as follows:
+Standard Space Chests have three rarities: Ultimate, Legendary, and Mastery. Each awards 5 independent loot results from its respective table. Standard chest names use their rarity color; Memory Chest names use the rainbow gradient below:
 
 | Letter | Hex Code |
 | :---- | :---- |
@@ -730,15 +743,15 @@ Space Chests come in 3 main rarities: Ultimate, Legendary, and Mastery. Each var
 | R | 0FB0BF |
 | Y | 0FBF3E |
 
-Space Chests use a default chest texture. Memory chests use an ender chest texture. Right clicking the Space Chest will open a menu to select your 5 loot items. Memory chests have no menu and simply pop in your hand into whatever you roll.
+Standard Space Chests use a chest texture and open a 27-slot selection menu. Memory Chests use an Ender Chest texture and have no selection menu; right-clicking immediately resolves their single reward.
 
-Ultimate Space Chest Loot:
+## Ultimate Space Chest Loot:
 
 | Loot Item | Weight | Quantity |
 | :---- | :---- | :---- |
-| Ultimate Enchantment Book | 10 | 1 |
-| Legendary Enchantment Book | 5 | 1 |
-| Elite Enchantment Book | 10 | 2 |
+| Unexamined Ultimate Enchantment Book | 10 | 1 |
+| Unexamined Legendary Enchantment Book | 5 | 1 |
+| Unexamined Elite Enchantment Book | 10 | 2 |
 | 50% Blackscroll | 10 | 1 |
 | Pig Spawner | 4 | 1 |
 | Sheep Spawner | 4 | 1 |
@@ -749,12 +762,12 @@ Ultimate Space Chest Loot:
 | 50k Banknote | 10 | 1 |
 | 75k Banknote | 5 | 1 |
 
-Legendary space chest loot: 
+## Legendary Space Chest Loot:
 
 | Loot Item | Weight | Quantity |
 | :---- | :---- | :---- |
-| Ultimate Enchantment Book | 10 | 2 |
-| Legendary Enchantment Book | 10 | 1 |
+| Unexamined Ultimate Enchantment Book | 10 | 2 |
+| Unexamined Legendary Enchantment Book | 10 | 1 |
 | White Scroll | 10 | 1 |
 | 50% Blackscroll | 10 | 1 |
 | 75% Blackscroll | 8 | 1 |
@@ -768,13 +781,13 @@ Legendary space chest loot:
 | 50% Armor Orb | 8 | 1 |
 | 50% Weapon Orb | 8 | 1 |
 
-Mastery Space Chest Loot: 
+## Mastery Space Chest Loot:
 
 | Loot Item | Weight | Quantity |
 | :---- | :---- | :---- |
-| Ultimate Enchantment Book | 10 | 2 |
-| Legendary Enchantment Book | 10 | 2 |
-| Mastery Enchantment Book | 10 | 1 |
+| Unexamined Ultimate Enchantment Book | 10 | 2 |
+| Unexamined Legendary Enchantment Book | 10 | 2 |
+| Unexamined Mastery Enchantment Book | 10 | 1 |
 | 60% Blackscroll | 10 | 1 |
 | 80% Blackscroll | 8 | 1 |
 | Blaze Spawner | 4 | 1 |
@@ -787,7 +800,7 @@ Mastery Space Chest Loot:
 | 75% Weapon Orb | 8 | 1 |
 | 75% Armor Orb | 8 | 1 |
 
-Memory Chest Loot Table:
+## Memory Chest Loot Table:
 
 | Loot Item | Weight | Quantity |
 | :---- | :---- | :---- |
@@ -803,25 +816,28 @@ Memory Chest Loot Table:
 | Winter Cosmic Crate Left Half | 4 | 1 |
 | Winter Cosmic Crate Right Half | 4 | 1 |
 
-The animation for non memory space chests works as follows:
+## Standard Space Chest opening flow:
 
-An inventory filled with 27 glass panes is opened. The color of the glass panes is either Yellow, Orange, or Red based on the rarity of the chest being opened. The player can click on 5 of these panes, turning them white. They cannot click the same pane twice. Each click plays the leather armor equip sound. Once 5 panes have turned white, the rest of the colored panes are revealed from left to right, top to bottom, over the span of 4 seconds to show the loot they did not earn, and then the egg being laid sound is played, and everything disappears from the menu except for the 5 white panes. The player can then click on each pane to reveal one of the pieces of loot from the loot table. Duplicates are allowed. If the player closes the menu before reaching 5 white panes, the chest is returned to them, if they have turned 5 panes white when the close, regardless of where the animation is, exiting out will simply give them the loot. If they do not have inventory space, the loot is dropped on the ground.
+1\. Open a 27-slot menu filled with rarity-colored glass panes: Yellow for Ultimate, Orange for Legendary, and Red for Mastery.  
+2\. The player selects 5 distinct panes. Each selected pane turns white and plays the leather-armor equip sound.  
+3\. After the fifth selection, the remaining panes reveal the unearned loot from left to right, top to bottom over 4 seconds. Then play the egg-laying sound and remove everything except the 5 selected white panes.  
+4\. Clicking each selected pane reveals one independently rolled loot result. Duplicates are allowed.  
+5\. Closing before selecting 5 panes returns the Space Chest. Closing after all 5 selections grants the 5 earned rewards immediately, regardless of animation progress.  
+6\. Rewards enter the inventory first; overflow drops safely on the ground.
 
 # Trials
 
-Trials are a spawnable instance that players can take part in using Trial Portals (eyes of ender). No inventory is persisted from the outside, and items you use in one room do not come with you into future rooms.
+Trials are instanced gauntlets entered through Trial Portals (Eyes of Ender). Outside inventory is safely snapshotted before entry, and room-specific items do not carry between rooms.
 
-Each trial is comprised of a series of rooms, with all or nothing stakes and ever increasing prizes. Each trial by default starts on Room 1 with 10 minutes on the clock. Players can spawn a 2x1 portal anywhere in the overworld to begin their Trial. Between 1 and 4 players can join, and will be sent to the “Decision Box” room for 30 seconds while people join.
+A Trial is a timed series of rooms with escalating rewards and all-or-nothing stakes. By default it begins on Room 1 with 10 minutes remaining. A 2×1 portal may be placed in the Overworld; 1–4 players can join and initially spend 30 seconds in the Decision Box.
 
-Once players have joined, the trial begins. There are three kinds of rooms in Trials. Apprentice, Hardcore, and Demonic. Players will work together to beat rooms, 1 at a time. Dying or running out of time causes you to teleport out of the trial to where the portal was placed, and no loot is earned.
+Trials contain Apprentice, Hardcore, and Demonic rooms. The active party clears one room at a time. Individual death removes that player; if the shared timer expires, all remaining players fail. Failed players return to the portal without the shared pot except for rewards salvaged by Insurance.
 
 The timer is paused in the Decision Box. Each time players successfully complete a room, the active party is sent to the Decision Box for the normal 30-second decision period and each player is shown an individual chest-style Deal interface displaying the current shared Trial pot.
 
-The Deal interface uses a 3-row, 27-slot chest-style GUI. On the top row, the 4 leftmost slots are Green Stained Glass Panes named “DEAL” in \#55FF55 green. Clicking any of these accepts the deal for that player: they receive a copy of the current pot, leave the Trial permanently, and cannot return to that Trial run. The 4 rightmost slots are Red Stained Glass Panes named “NO DEAL” in red. Clicking any of these declines the deal for that player; they remain in the Trial and continue to the next room with any other players who also declined.
+Each player uses the Decision Box GUI defined later in this tab. DEAL gives that player a copy of the current shared pot and removes them from the run; NO DEAL keeps them in the Trial.
 
-The current accumulated loot is displayed beginning in row 2 from left to right. Each individual loot result occupies its own slot. Duplicate rewards do not stack together and must appear as separate entries. If all 9 slots in row 2 are occupied, additional pot items continue into row 3 from left to right. The ordering of already-earned loot is persistent: once an item has been assigned a pot-display position, later room completions append new loot after the existing entries rather than re-sorting or moving prior rewards.
-
-Every GUI slot not currently occupied by a DEAL pane, NO DEAL pane, or accumulated loot item is filled with a White Stained Glass Pane named “???” in \#FFFFFF white. The unused center slot of the top row therefore also uses this placeholder.
+Pot entries preserve acquisition order and duplicates remain separate. The detailed GUI section below defines slot layout and pagination.
 
 The deal can only accumulate loot, not shrink. After each Apprentice room completion, 1 new loot item is added to the deal and 30 seconds are added to the clock. Hardcore and Demonic room timing changes are described below. 
 
@@ -849,20 +865,20 @@ Time bonus: Adds 1, 3, or 5 minutes to the Trial’s initial duration.
 
 Insurance: Randomly salvages 1, 2, or 3, loot items from the accumulated pot should the player die or run out of time in their trial.
 
-Apprentice Room Loot Pool:
+## Apprentice Room Loot Pool:
 
 | Loot Item | Weight | Quantity |
 | :---- | :---- | :---- |
 | \+1 Minute Trial Trinket | 8 | 1 |
-| Elite Enchantment Book | 14 | 1 |
-| Unique Enchantment Book | 18 | 1 |
+| Unexamined Elite Enchantment Book | 14 | 1 |
+| Unexamined Unique Enchantment Book | 18 | 1 |
 | 50% Blackscroll | 10 | 1 |
 | Sheep Spawner | 5 | 1 |
 | Cow Spawner | 5 | 1 |
-| Ultimate Enchantment Book | 10 | 1 |
-| Legendary Enchantment Book | 6 | 1 |
+| Unexamined Ultimate Enchantment Book | 10 | 1 |
+| Unexamined Legendary Enchantment Book | 6 | 1 |
 | Repair Scroll | 10 | 1 |
-| Simple Enchantment Book | 30 | 2 |
+| Unexamined Simple Enchantment Book | 30 | 2 |
 | Transmog Scroll | 12 | 2 |
 | \+1 Insurance Trial Trinket | 8 | 1 |
 | Skip 1 Room Trial Trinket | 8 | 1 |
@@ -870,7 +886,7 @@ Apprentice Room Loot Pool:
 | Zombie Spawner | 5 | 1 |
 | Ultimate Space Chest | 7 | 1 |
 
-Hardcore Room Loot Pool:
+## Hardcore Room Loot Pool:
 
 | Loot Item | Weight | Quantity |
 | :---- | :---- | :---- |
@@ -879,12 +895,12 @@ Hardcore Room Loot Pool:
 | Armor Enchantment Orb | 8 | 1 |
 | Blaze Spawner | 10 | 1 |
 | Creeper Spawner | 10 | 1 |
-| Legendary Enchantment Book | 10 | 1 |
-| Legendary Enchantment Book | 3 | 2 |
+| Unexamined Legendary Enchantment Book | 10 | 1 |
+| Unexamined Legendary Enchantment Book | 3 | 2 |
 | Skip 1 Room Trial Trinket | 12 | 1 |
 | Skip 2 Room Trial Trinket | 6 | 1 |
-| Ultimate Enchantment Book | 10 | 1 |
-| Ultimate Enchantment Book | 5 | 2 |
+| Unexamined Ultimate Enchantment Book | 10 | 1 |
+| Unexamined Ultimate Enchantment Book | 5 | 2 |
 | Weapon Enchantment Orb | 8 | 1 |
 | Whitescroll | 15 | 1 |
 | Random Boss Spawn Egg | 8 | 1 |
@@ -896,14 +912,14 @@ Hardcore Room Loot Pool:
 | Mask Splicer | 7 | 1 |
 | Legendary Space Chest | 8 | 1 |
 
-Demonic Room Loot Pool:
+## Demonic Room Loot Pool:
 
 | Heroic Crystal | 12 | 1 |
 | :---- | :---- | :---- |
 | 75% Yeti Crystal | 6 | 1 |
 | 75% Ranger Crystal | 6 | 1 |
 | Conquest Chest Flare | 10 | 1 |
-| Mkit Unlock | 4 | 1 |
+| M-Kit Unlock — PENDING REDESIGN | 4 | 1 |
 | Iron Golem Spawner | 10 | 2 |
 | Witch Spawner | 10 | 2 |
 | Blaze Spawner | 10 | 2 |
@@ -912,15 +928,16 @@ Demonic Room Loot Pool:
 | Skip 3 Rooms Trial Trinket | 5 | 1 |
 | \+3 Insurance Trial Trinket | 5 | 1 |
 | Random Boss Spawn Egg | 8 | 1 |
-| Mkit Refresher | 6 | 1 |
-| Mastery Enchantment Book | 12 | 1 |
+| M-Kit Refresher — PENDING REDESIGN | 6 | 1 |
+| Unexamined Mastery Enchantment Book | 12 | 1 |
 | Random Double Mask | 10 | 1 |
 | Heroic Abandoned Spaceship Dungeon Portal | 4 | 1 |
 | Abandoned Spaceship Dungeon Portal | 10 | 1 |
 | Memory Chest | 3 | 1 |
 | Mastery Space Chest | 6 | 1 |
 
-Trial Edge Cases and Multiplayer Rules  
+## Trial Edge Cases and Multiplayer Rules
+
 \- Trial inventories are normalized by the room system. Before entry, each player's full outside inventory, armor, offhand, and required persistent player state are safely snapshotted. Trial-room items are cleared between rooms and do not carry into later rooms. The outside snapshot is restored when the player leaves the Trial.  
 \- In multiplayer, the Trial pot is shared while players remain together, but each player makes an individual cash-out decision in the Decision Box. A player who accepts the deal receives a copy of the current pot and leaves permanently; remaining players may continue.  
 \- If an individual player dies, that player is removed from the Trial and receives no pot loot except anything salvaged by their Insurance Trinket. Other surviving players may continue.  
@@ -1037,7 +1054,7 @@ When a player enters the Decision Box, a **27-slot chest-style GUI** opens to pr
 
 # Rooms
 
-***Circuit Circus — Apprentice Room***
+## Circuit Circus — Apprentice Room
 
 Players spawn at the room’s standalone emerald-block marker. The room contains 8 fixed placeholder pillar locations. At the beginning of each run, these are randomized into exactly two 2×1 Redstone Block pillars, two 2×1 Gold Block pillars, two 2×1 Emerald Block pillars, and two 2×1 Diamond Block pillars.
 
@@ -1060,7 +1077,7 @@ When the lever is successfully activated, Circuit Circus immediately completes a
 
 Room-specific temporary equipment and building materials are cleared when the player leaves the room.
 
-***Zero-G — Hardcore Room***
+## Zero-G — Hardcore Room
 
 Zero-G is a vertical movement room built around controlled Shulker levitation. Players spawn in the water at the standalone Emerald Block marker at the bottom of the shaft. The room contains 10 pressure-plate platforms distributed vertically throughout the shaft. Eight fixed encounter Shulkers fire at the players and provide the Levitation used to navigate the room.
 
@@ -1078,7 +1095,7 @@ Once all 10 pressure plates have been activated, Zero-G immediately completes an
 
 Room-specific armor, consumables, Ender Pearls, and other temporary inventory are cleared through the normal Trial-room inventory transition when the party leaves Zero-G.
 
-***Fire Colony — Hardcore Room***
+## Fire Colony — Hardcore Room
 
 Fire Colony is a narrow vertical traversal maze built around Lava, Fire, Soul Fire, ladders, confined passages, and difficult platforming. The room is presented as a cross-section of a burning subterranean colony enclosed behind red stained glass.
 
@@ -1094,7 +1111,7 @@ The objective is to navigate through the colony's tunnels, ladders, platforms, F
 
 The room environment is protected against permanent mutation. Its hazards continue to affect players normally, but fire spread, structural burning, unintended lava propagation, and other environmental changes must not alter the intended room layout.
 
-***Raiding Rainbow — Apprentice Room***
+## Raiding Rainbow — Apprentice Room
 
 Raiding Rainbow is a party-wide trial-and-error sequence room built around eight color-coded Zombies.
 
@@ -1106,7 +1123,7 @@ Red, Orange, Yellow, Lime, Green, Cyan, Light Blue, and Blue.
 
 Each color appears exactly once. The Zombies retain normal basic movement and may wander around the arena and attack players, but they are not intended to present meaningful combat danger. They are encounter targets and do not drop equipment, Wool, normal Zombie loot, or XP.
 
-At the beginning of each room attempt, the server generates a random permutation of all eight colors. **The sequence is hidden from the players and remains unchanged for the entire room attempt.**
+At the beginning of each room attempt, the server sets the required sequence length from the party size at room entry: 5 colors for 1 player, 6 for 2 players, 7 for 3 players, and all 8 for 4 players. It then selects that many distinct colors from the eight available colors and randomizes their order. Colors not selected for the sequence remain present as decoys. The hidden sequence remains unchanged for the entire room attempt.
 
 The party must discover and complete this sequence through trial and error. Sequence progress is shared across the party.
 
@@ -1114,11 +1131,11 @@ When a player kills the currently correct Zombie, the kill is accepted and the p
 
 Example:
 
-`Green was correct! 1/8!`
+`Example: Green was correct! 1/5! (solo run)`
 
 The correctly killed Zombie remains dead while the party continues attempting the sequence.
 
-If any player kills a Zombie whose color is not currently correct, the attempt immediately resets. All remaining room Zombies are despawned and a fresh set of all eight color-coded Zombies respawns at the original Gold Block locations. Party sequence progress returns to 0/8, but **the hidden randomized sequence does not change**.
+If any player kills a Zombie whose color is not currently correct, the attempt immediately resets. All remaining room Zombies are despawned and a fresh set of all eight color-coded Zombies respawns at the original Gold Block locations. Party sequence progress returns to 0/\[required sequence length\], but the hidden randomized sequence does not change.
 
 When this occurs, all party members receive:
 
@@ -1126,13 +1143,13 @@ When this occurs, all party members receive:
 
 Players are expected to use the information learned from previous successful kills to progressively discover the complete sequence.
 
-When the eighth Zombie is killed in the correct position, **Raiding Rainbow immediately completes** and the entire active party transitions directly to the Decision Box under the normal Trial-room completion rules.
+When the party kills the final required Zombie in the hidden sequence, Raiding Rainbow immediately completes and the entire active party transitions directly to the Decision Box under the normal Trial-room completion rules.
 
-Each player spawns into the room with an unbreaking 3 wooden sword, 16 cooked porkchop, and 2 enderpearls. 
+Each player enters the room with full Netherite Armor with Unbreaking III, a Wooden Sword with Unbreaking III, and 16 Cooked Porkchops. No Ender Pearls are provided.
 
 All Raiding Rainbow Zombies and associated temporary encounter state are cleared during the transition.
 
-***Hidden Graveyard — Demonic Room***
+## Hidden Graveyard — Demonic Room
 
 Hidden Graveyard is a three-wave combat room built around escalating Undead Corpse waves, searching for randomized Trial Keys, and intentionally allowing players to overlap waves in exchange for faster completion.
 
@@ -1387,7 +1404,7 @@ Only one active key chest may exist at a time.
 
 Once a valid key has triggered its wave, that key cannot trigger the wave again.
 
-***Bomb Squad — Hardcore Room***
+## Bomb Squad — Hardcore Room
 
 Bomb Squad is a destructive exploration room consisting of a **6×6 grid of rooms**. Each individual room is approximately **8×8 blocks**, with neighboring rooms separated by shared walls containing designated destructible Stone sections.
 
@@ -1497,7 +1514,7 @@ No exit portal, final lever, or additional extraction phase is used.
 
 All Bomb Squad Creepers, Creeper Spawn Eggs, temporary equipment, active exit state, and other room-specific state are cleaned up during the transition. The room's destructible walls are restored before the structure is reused.
 
-### ***Deadeye***
+## Deadeye
 
 **Type:** Trial Room  
  **Difficulty:** Demonic  
@@ -1518,7 +1535,7 @@ The room is intended to test aim, composure, and parkour execution. Falling is a
 * Each target reveals the next themed parkour subsection.  
 * The player progresses through all revealed sections in order.  
 * Reaching the final platform and flicking the **lever** completes the room.  
-* On completion, the room is considered cleared and the party is teleported to the decision box under the newer trial flow rules.
+* On completion, the active party transitions immediately to the Decision Box under the normal Trial completion rules.
 
 ---
 
@@ -1532,10 +1549,10 @@ Each target block is surrounded by the primary material of the parkour section i
   * Related blocks: **diamond blocks, prismarine walls, ladders**  
 * **Gold section target** → reveals the **gold-themed section**  
   * Related blocks: **gold blocks, bamboo trapdoors, fences**  
-* **Resin Brick section target** → reveals the **resin section**  
-  * Related blocks: **resin bricks, resin brick walls**  
-* **Purpur section target** → reveals the **purpur section**  
-  * Related blocks: **purpur blocks / platforms, purpur slabs**  
+* **Resin section target → reveals the resin section and the Purpur West/East transition**  
+  * Related blocks: resin bricks, resin brick walls, purpur blocks/platforms, purpur slabs  
+*   
+  *   
 * **Crimson/Hyphae section target** → reveals the **crimson-themed section**  
   * Related blocks: **crimson hyphae / warped-crimson themed blocks, crimson fences**
 
@@ -1567,24 +1584,17 @@ The player spawns with:
 
 If a participating player falls below the room's fail threshold, that player alone is immediately executed and removed from the Trial. The room continues for any surviving party members.
 
-**Recommended implementation:**  
- Use a **Y-level fail check** rather than direct tinted-glass contact detection.
+**The tinted-glass floor is visual only; the actual failure condition uses a Y-level threshold.**
 
 #### **Suggested rule**
 
 * Record the Y-level of the emerald spawn block.  
 * If a player’s Y-value drops to 10 or more below spawn Y, that player is immediately executed and removed from the Trial; surviving party members continue the room.
 
-This is probably the cleanest implementation.
-
-**Why this is better than tinted-glass contact detection:**
-
-* simpler,  
-* fewer edge cases,  
-* less block-contact weirdness,  
-* easier for Codex to implement consistently.
-
-The tinted glass floor still works well visually as the “death void,” but the **Y-threshold** is the better actual fail logic.
+*   
+*   
+*   
+* 
 
 ---
 
@@ -1622,3 +1632,8 @@ Codex should:
 * The lever is the only completion trigger.  
 * Falling is instant failure for that player only; surviving party members continue.  
 * This is a **precision room**, not a combat room.
+
+# Proposed Changes
+
+**Raiding Rainbow:**  
+Colors in sequence: 8 \-\> 5 \+ 1 per additional player past 1 (solo \= 5, duo \= 6, ect)

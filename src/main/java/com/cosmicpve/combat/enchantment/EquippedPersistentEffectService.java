@@ -18,7 +18,6 @@ import java.util.function.Function;
 /** Owns short hidden leases only when CosmicPVE created the effect. */
 public final class EquippedPersistentEffectService {
     static final int GLOWING_LEASE_TICKS = 600;
-    static final int OBSIDIANSHIELD_LEASE_TICKS = 60;
     static final int GLOWING_REFRESH_AT = 300;
     static final int DEFAULT_REFRESH_AT = 20;
     private final EffectiveEnchantmentsResolver enchantments;
@@ -42,8 +41,7 @@ public final class EquippedPersistentEffectService {
         if (entity.level().isClientSide()) return;
         apply(entity, EquipmentSlot.HEAD, ModEnchantments.GLOWING.identifier(),
                 MobEffects.NIGHT_VISION, GLOWING_LEASE_TICKS, GLOWING_REFRESH_AT);
-        apply(entity, EquipmentSlot.LEGS, ModEnchantments.OBSIDIANSHIELD.identifier(),
-                MobEffects.FIRE_RESISTANCE, OBSIDIANSHIELD_LEASE_TICKS, DEFAULT_REFRESH_AT);
+        GearsBehavior.reconcile(entity);
         tickImplants(entity);
     }
 

@@ -37,14 +37,16 @@ class RecentCombatMemoryServiceTest {
         assertEquals(3, service.count(zombieA, player, 120, RageBehavior.windowTicks(6)));
         assertEquals(3, service.count(zombieA, player, 120, RageBehavior.windowTicks(6)));
         service.record(zombieA, player, 121);
-        assertEquals(RageBehavior.BONUS, RageBehavior.active(6, service.count(zombieA, player, 121, 200))
-                ? RageBehavior.BONUS : 0.0);
+        assertEquals(RageBehavior.bonus(6), RageBehavior.active(6, service.count(zombieA, player, 121, 200))
+                ? RageBehavior.bonus(6) : 0.0);
     }
 
     @Test
     void levelWindowsUseInclusiveRollingServerTicksAndCleanupDropsStaleRelationships() {
         assertEquals(100, RageBehavior.windowTicks(1));
         assertEquals(200, RageBehavior.windowTicks(6));
+        assertEquals(0.06, RageBehavior.bonus(1), 1e-12);
+        assertEquals(0.11, RageBehavior.bonus(6), 1e-12);
         var service = new RecentCombatMemoryService(200);
         var source = UUID.randomUUID();
         var target = UUID.randomUUID();

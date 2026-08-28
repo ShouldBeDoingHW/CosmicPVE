@@ -5,12 +5,16 @@ import com.cosmicpve.equipment.enchantment.CosmicEnchantmentSpecs;
 import org.junit.jupiter.api.Test;
 
 class DeathPactBehaviorTest {
-    @Test void outgoingIsAlwaysMinusThreePercentAndIncomingScalesByLevel() {
-        assertEquals(-0.03, DeathPactBehavior.OUTGOING_BONUS);
+    @Test void outgoingAndIncomingUseCanonicalLevelFormulas() {
+        assertEquals(0.0, DeathPactBehavior.outgoingBonus(0));
         assertEquals(1.0, DeathPactBehavior.incomingMultiplier(0));
-        for (int level = 1; level <= 5; level++)
-            assertEquals(1.0 - 0.02 * level, DeathPactBehavior.incomingMultiplier(level), 1e-12);
-        assertEquals(0.81, DeathPactBehavior.incomingMultiplier(5) * 0.90, 1e-12);
+        for (int level = 1; level <= 5; level++) {
+            assertEquals(-(0.075 - 0.01 * level), DeathPactBehavior.outgoingBonus(level), 1e-12);
+            assertEquals(1.0 - (0.01 + 0.01 * level), DeathPactBehavior.incomingMultiplier(level), 1e-12);
+        }
+        assertEquals(-0.065, DeathPactBehavior.outgoingBonus(1), 1e-12);
+        assertEquals(-0.025, DeathPactBehavior.outgoingBonus(5), 1e-12);
+        assertEquals(0.846, DeathPactBehavior.incomingMultiplier(5) * 0.90, 1e-12);
     }
     @Test void masteryRulesAndBlackScrollExclusionAreInheritedFromTier() {
         var spec = CosmicEnchantmentSpecs.DEATH_PACT;

@@ -1,10 +1,10 @@
 # CosmicPVE Development Handoff
 
-Current verified and accepted gameplay baseline: Step 7B (Tinkerer / Cosmic Dust). Its accepted source, resources, tests, and handoff state are closed together in the Step 7B gameplay commit.
+Current verified and accepted gameplay baseline: Step 7C. The user manually verified and accepted the canonical enchantment balance baseline plus Gears, Permafrost, and Mortal Coil.
 
-Repository state: Steps 6A–7B are implemented, automated/runtime verified, and manually accepted. The root `assets` source-art folder and root `trial rooms` structure-development folder remain deliberately untracked and unrelated.
+Repository state: Steps 6A–7C are implemented, automated/runtime verified, and manually accepted. The root `assets` source-art folder and root `trial rooms` structure-development folder remain deliberately untracked and unrelated.
 
-Last handoff update: 2026-08-27
+Last handoff update: 2026-08-28
 
 Pinned environment:
 
@@ -256,7 +256,7 @@ Trial Portals now present concise creation guidance followed by a bold warm-gold
 
 The participant HUD is a fixed 120-pixel-wide card anchored flush to the right GUI edge and vertically centered. It presents the immutable possessive owner heading, `Tier (1/3)` / `(2/3)` / `(3/3)` with the established phase colors, separate `Room (#N)` and room-name lines, and `Time Left` with `Xm YYs`. Long content ellipsizes inside the stable width. Room ordinal/name remain lifecycle-cached, and the existing owner/phase/room change suppression plus displayed-second timer suppression are unchanged.
 
-Normal Ultimate, Legendary, and Mastery Space Chests now play `minecraft:item.armor.equip_netherite` exactly once for each newly selected valid pane. Rejected/repeated selections, committed rewards, reveal/close behavior, and Memory Chests are unchanged. The Design Doc's `Enchantments → Balance Candidates` material remains prospective, entirely unimplemented, and is not implementation-authoritative without a future explicit balance-patch instruction.
+Normal Ultimate, Legendary, and Mastery Space Chests now play `minecraft:item.armor.equip_netherite` exactly once for each newly selected valid pane. Rejected/repeated selections, committed rewards, reveal/close behavior, and Memory Chests are unchanged. The earlier `Enchantments → Balance Candidates` staging material was prospective at this milestone; Step 7C later explicitly authorized the canonical Design Doc enchantment table as the implemented balance baseline.
 
 ### Step 6T — IMPLEMENTED; AUTOMATED/RUNTIME VERIFIED; MANUALLY VERIFIED / ACCEPTED
 
@@ -316,6 +316,12 @@ Cosmic Dust is one typed, versioned, stackable Sugar-presented item carrying a `
 
 Permission-gated development support is available at `/cosmic tinkerer dust give <player> <tier> [count]`; the established exact Cosmic Book command remains `/cosmic enchant book give <player> <enchantment-id> <level> <success> <destroy>`.
 
+### Step 7C — IMPLEMENTED; AUTOMATED/RUNTIME VERIFIED; MANUALLY VERIFIED / ACCEPTED
+
+Implemented Legendary boots enchantment `cosmicpve:gears` III at +5% movement speed per level through one stable transient equipped modifier. The modifier is reconciled for players and other LivingEntities, updates on equipment changes, and is removed when the boots are removed. Implemented Mastery chestplate enchantment `cosmicpve:permafrost` VI through the generalized independent CombatStack system: 2.5% per level defensive proc chance, 60-second independent negative stacks, one binary +2% incoming/-2% outgoing ordinary-damage penalty while any stack exists, threshold `10 - level`, full stack clear, and a 6-HP standard Cosmic true-damage burst. Active Yeti set immunity filters Permafrost before RNG. Implemented the newly canonical Mastery helmet enchantment `cosmicpve:mortal_coil` II: a 3% per level committed ordinary-damage defensive proc grants two full absorption hearts for five seconds, with legacy over-level data clamped to II behavior.
+
+The approved canonical balance baseline is active: Bleed is 1.5% per level; Death Pact outgoing is `-(7.5 - level)%` and incoming is `-(1 + level)%`; Auto Smelt is Ultimate; Experience is Unique; Molten is 3% per highest equipped level; Obsidianshield II now reduces fire-category damage by 25% per level without maintaining Fire Resistance; Poison is Unique at 7% per level; Pummel is 3% per level with Slowness II for 3 seconds; Rage gives `(5 + level)%` within a `(4 + level)`-second three-hit window; and Doublestrike children use 75% of parent ordinary damage. Rarity changes flow through generic Unexamined Books, lore, Dust, Black Scroll, Transmog, and capacity behavior because the canonical specs are the single metadata source.
+
 ## 3. Current Real Enchantments
 
 These are registered through Minecraft's enchantment infrastructure, use actual enchantment data on the item, and are not present in normal enchanting-table, librarian, random-loot, random-equipment, or mob-equipment acquisition pools.
@@ -328,34 +334,37 @@ These are registered through Minecraft's enchantment infrastructure, use actual 
 | `cosmicpve:angelic` | V | Any armor | Ultimate | On committed damage taken, has 1% per total equipped Angelic level to heal 1 HP. Levels across armor pieces aggregate into one roll and at most one heal per damage event. |
 | `cosmicpve:lightning` | IV | Bow/crossbow | Simple | On a committed projectile hit, has 5% per level to create a visual-only lightning bolt and deliver exactly 2 HP standard Cosmic true damage with `NO_PROCS`. |
 | `cosmicpve:ender_shift` | III | Helmet | Unique | After committed damage leaves the wearer alive and strictly below 25% health, grants Speed I and Regeneration I for 3 seconds per level. Base cooldown is 600 ticks/30 seconds. |
-| `cosmicpve:doublestrike` | III | Sword | Legendary | On a committed hit, has 1% per level to deliver a linked child strike for 50% of the parent's finalized ordinary pre-vanilla-mitigation damage. It cannot reroll itself; eligible peer offensive procs may reroll. |
-| `cosmicpve:bleed` | VI | Axe | Ultimate | On committed melee damage, has 1% per level to add one independently timed Bleed stack. See the canonical stack rules below. |
+| `cosmicpve:doublestrike` | III | Sword | Legendary | On a committed hit, has 1% per level to deliver a linked child strike for 75% of the parent's finalized ordinary pre-vanilla-mitigation damage. It cannot reroll itself; eligible peer offensive procs may reroll. |
+| `cosmicpve:bleed` | VI | Axe | Ultimate | On committed melee damage, has 1.5% per level to add one independently timed Bleed stack. See the canonical stack rules below. |
 | `cosmicpve:luck` | X | Boots/leggings | Ultimate | Each total equipped level multiplies eligible proc chances by 1.01 relative to base. Levels on boots and leggings add. |
-| `cosmicpve:poison` | III | Sword | Elite | On committed melee damage, has 5% per level to apply Poison I for 60 ticks/3 seconds. |
-| `cosmicpve:pummel` | III | Axe | Elite | On committed melee damage, has 2% per level to apply Slowness III for 50 ticks/2.5 seconds. |
+| `cosmicpve:poison` | III | Sword | Unique | On committed melee damage, has 7% per level to apply Poison I for 60 ticks/3 seconds. |
+| `cosmicpve:pummel` | III | Axe | Elite | On committed melee damage, has 3% per level to apply Slowness II for 60 ticks/3 seconds. |
 | `cosmicpve:greatsword` | IV | Sword | Elite | At an inclusive attacker-to-target entity distance of 2.5 blocks or farther, adds 5% ordinary outgoing damage per level in the shared additive bucket. |
 | `cosmicpve:insanity` | VIII | Axe | Legendary | Adds 1% ordinary outgoing damage per missing heart, including fractional hearts, capped at 2% per level in the shared additive bucket. |
 | `cosmicpve:venom` | III | Bow/crossbow | Elite | On a committed positive red-health projectile hit, has 15% per level to apply Poison I for 60 ticks/3 seconds through the shared proc system. |
 | `cosmicpve:aegis` | VI | Chestplate | Legendary | Caps the outgoing-finalized ordinary attack component at `14 - level` HP in the pre-defense bounds stage. Aegis VI caps at 8 HP; later incoming/vanilla mitigation still applies, while true damage and execution bypass it. |
 | `cosmicpve:eagle_eye` | VI | Bow/crossbow | Ultimate | At an inclusive attacker-to-target entity distance of 18 blocks or farther, adds 3% ordinary outgoing damage per level in the shared additive bucket. |
-| `cosmicpve:rage` | VI | Sword/axe | Legendary | Adds exactly 5% ordinary outgoing damage when this exact target damaged the attacker at least three committed positive-red-health times within the rolling `(4 + level)`-second window. History is not consumed. |
-| `cosmicpve:molten` | IV | Any armor | Unique | On committed positive-red-health damage taken, has 2% per highest equipped Molten level to ignite the responsible living attacker for 3 seconds. Multiple pieces produce one candidate using the highest level, not summed levels. |
+| `cosmicpve:rage` | VI | Sword/axe | Legendary | Adds `(5 + level)%` ordinary outgoing damage when this exact target damaged the attacker at least three committed positive-red-health times within the rolling `(4 + level)`-second window. History is not consumed. |
+| `cosmicpve:molten` | IV | Any armor | Unique | On committed positive-red-health damage taken, has 3% per highest equipped Molten level to ignite the responsible living attacker for 3 seconds. Multiple pieces produce one candidate using the highest level, not summed levels. |
 | `cosmicpve:nutrition` | III | Leggings | Unique | Once a food item is fully consumed, adds +1 hunger and +0.25 saturation per level through vanilla bounded food state. It is deterministic and does not use Luck or RNG. |
 | `cosmicpve:glowing` | I | Helmet | Simple | Maintains subtle Night Vision while actively equipped without deleting externally supplied Night Vision. |
-| `cosmicpve:obsidianshield` | I | Leggings | Ultimate | Maintains subtle Fire Resistance while actively equipped without deleting externally supplied Fire Resistance. |
+| `cosmicpve:obsidianshield` | II | Leggings | Ultimate | Reduces ordinary fire-category damage by 25% per level without granting the vanilla Fire Resistance effect. |
 | `cosmicpve:oxygenate` | II | Pickaxe | Simple | After a completed underwater block break with the enchanted pickaxe, restores one displayed air bubble (30 internal air units) per level, clamped to normal maximum air. Deterministic; does not use Luck or RNG. |
 | `cosmicpve:armored` | IV | Any armor | Legendary | Adds one-half vanilla Protection-equivalent point per level through Minecraft's native protection effect, aggregating across equipped pieces and sharing vanilla Protection's normal cap. |
-| `cosmicpve:death_pact` | V | Chestplate | Mastery | Adds -3% ordinary outgoing damage at every level and a separate `1 - 0.02 × level` ordinary incoming multiplier. True damage and execution bypass the ordinary pipeline. |
-| `cosmicpve:auto_smelt` | I | Pickaxe | Simple | Converts each finalized block-drop stack through one ordinary smelting recipe, preserving the vanilla-generated quantity and awarding no furnace XP. |
-| `cosmicpve:experience` | III | Pickaxe | Simple | Multiplies finalized player block-break XP by `1 + 0.5 × level` and floors the integral result. Other XP sources are unaffected. |
+| `cosmicpve:death_pact` | V | Chestplate | Mastery | Reduces outgoing ordinary damage by `(7.5 - level)%` and incoming ordinary damage by `(1 + level)%`. True damage and execution bypass the ordinary pipeline. |
+| `cosmicpve:auto_smelt` | I | Pickaxe | Ultimate | Converts each finalized block-drop stack through one ordinary smelting recipe, preserving the vanilla-generated quantity and awarding no furnace XP. |
+| `cosmicpve:experience` | III | Pickaxe | Unique | Multiplies finalized player block-break XP by `1 + 0.5 × level` and floors the integral result. Other XP sources are unaffected. |
 | `cosmicpve:blessed` | IV | Axe | Ultimate | On a committed melee hit, has 2% per level to uniformly remove either one eligible negative Cosmic stack instance or one entire harmful vanilla effect from the attacker. Luck modifies the chance relatively. |
 | `cosmicpve:implants` | III | Helmet | Ultimate | While continuously equipped, heals exactly 1 HP every 85/70/55 ticks at levels I/II/III, without overhealing or catch-up bursts. |
 | `cosmicpve:trap` | III | Sword | Elite | Each committed positive-health-loss melee hit has a flat 4% Luck-modified chance to apply Slowness V for 25/30/35 ticks. Eligible Doublestrike child hits may reroll it. |
 | `cosmicpve:cactus` | II | Leggings | Elite | A committed damaging hit has 3% per level, modified relatively by Luck, to retaliate against the attributed living attacker for exactly 1.5 HP standard Cosmic true damage through a non-proccing child. |
+| `cosmicpve:gears` | III | Boots | Legendary | While equipped, adds 5% movement speed per level through one stable transient modifier. |
+| `cosmicpve:permafrost` | VI | Chestplate | Mastery | On committed ordinary damage taken, has 2.5% per level to add one 60-second independent Permafrost stack to the attacker. Any stack applies one binary +2% incoming/-2% outgoing penalty; reaching `10 - level` clears all stacks and deals 6 HP standard Cosmic true damage. Yeti is immune. |
+| `cosmicpve:mortal_coil` | II | Helmet | Mastery | On committed ordinary damage taken, has 3% per level to grant 4 absorption HP for 100 ticks/5 seconds. |
 
 ### DESIGNED BUT NOT IMPLEMENTED
 
-The design also names Divine Immolation, Gears, Hero Killer, Mortal Coil, Phoenix, Self Destruct, and Virus. None currently has a registered real enchantment or runtime behavior. There are exactly 28 implemented real Cosmic enchantments; Death Pact is currently the sole implemented Mastery enchantment. Do not add behavior assumptions beyond `Cosmic_Design.md`.
+The design also names Divine Immolation, Hero Killer, Phoenix, Self Destruct, and Virus. None currently has a registered real enchantment or runtime behavior. There are exactly 31 implemented real Cosmic enchantments; Death Pact, Permafrost, and Mortal Coil are the implemented Mastery enchantments. Do not add behavior assumptions beyond `Cosmic_Design.md`.
 
 ## 4. Critical Combat Semantics
 
@@ -389,7 +398,7 @@ Environmental or encounter execution is not a large damage value. `ExecutionServ
 
 ### Doublestrike
 
-Doublestrike takes 50% of the parent's `finalOrdinaryDamage`: the ordinary value after Cosmic outgoing/incoming calculation but before vanilla target mitigation. It does not automatically copy separately delivered Lightning, Bleed, or other true-damage packets. It creates a unique child sequence linked to the parent with `LIMITED_OFFENSIVE_REROLL`, explicitly excludes Doublestrike, and uses a narrowly validated internal damage type that bypasses only the hurt cooldown created by its parent. Other attacks do not gain this bypass. Eligible peer offensive effects such as Bleed, Poison, and Pummel may reroll on the child.
+Doublestrike takes 75% of the parent's `finalOrdinaryDamage`: the ordinary value after Cosmic outgoing/incoming calculation but before vanilla target mitigation. It does not automatically copy separately delivered Lightning, Bleed, or other true-damage packets. It creates a unique child sequence linked to the parent with `LIMITED_OFFENSIVE_REROLL`, explicitly excludes Doublestrike, and uses a narrowly validated internal damage type that bypasses only the hurt cooldown created by its parent. Other attacks do not gain this bypass. Eligible peer offensive effects such as Bleed, Poison, and Pummel may reroll on the child.
 
 ## 5. Proc and Cooldown Rules
 
@@ -540,7 +549,7 @@ This Invasion rule is activity-specific and must not change the global `keepInve
 
 The following remain future content or infrastructure:
 
-- all enchantments beyond the 22 listed above; Death Pact is the sole implemented Mastery enchantment
+- Divine Immolation, Hero Killer, Phoenix, Self Destruct, Virus, and other enchantments not present in the current implemented table; current Mastery implementations are Death Pact, Permafrost, and Mortal Coil
 - Space Pirate natural spawning, Conquest Chest spawning/rewards, and Abandoned Spaceship encounters; only the reusable entities and canonical generated combat equipment exist
 - Dimensional Traveler, Engineer, Ranger, Yjiki, and Dragonslayer armor sets
 - masks and Multi-Masks
@@ -628,13 +637,13 @@ The final post-Orb capacity is no longer unresolved for current target classes: 
 
 ## 16. Current Next Milestone
 
-**Next milestone after Step 7B acceptance: Enchantment Expansion I.**
+**Next milestone after Step 7C acceptance: Enchantment Expansion II.**
 
 Current intended sequence:
 
-Step 7A Conquest Chests → Tinkerer / Cosmic Dust → Enchantment Expansion I → Enchantment Expansion II → Enchantment Expansion III plus explicitly approved enchantment balance changes → Fallen Heroes / G-Kit procurement redesign → V-Kits and M-Kit reconsideration → Heroic Enchantments → later major Dungeon, Invasion, economy, and world work.
+Step 7A Conquest Chests → Step 7B Tinkerer / Cosmic Dust → Step 7C canonical balance baseline, Gears, Permafrost, and Mortal Coil → Enchantment Expansion II → Enchantment Expansion III → Fallen Heroes / G-Kit procurement redesign → V-Kits and M-Kit reconsideration → Heroic Enchantments → later major Dungeon, Invasion, economy, and world work.
 
-The ordinary-enchantment expansion may ultimately require two or three bounded patches. The Design Doc's Balance Candidates remain prospective and are not implementation-authoritative without an explicit future balance-patch instruction.
+The ordinary-enchantment expansion remains split across bounded patches. Step 7C is the explicit instruction that made the current canonical Design Doc enchantment-table values implementation-authoritative; later design edits still require their own explicit implementation milestone.
 
 ## 17. Development Workflow
 
@@ -650,6 +659,12 @@ The ordinary-enchantment expansion may ultimately require two or three bounded p
 Preserve unrelated dirty changes. Never change pinned versions as a side effect of gameplay work. Prefer service-level rules and typed data over one-off event logic, and keep client-only classes isolated from dedicated-server loading.
 
 ## 18. Verification Snapshot
+
+For the Step 7C candidate:
+
+- `gradlew.bat cleanTest test build` passes all 403 JUnit tests across 111 suites with 0 failures, errors, or skips. New and updated coverage pins Gears' 5/10/15% stable modifier, Permafrost chance/threshold/binary penalties/independent 1,200-tick definition/6-HP standard true packet/Yeti immunity metadata, Mortal Coil's two-level 3% scaling and five-second two-heart absorption, every authorized balance formula, changed rarity pools, max levels, localization, and 31-spec registration.
+- Dedicated-server and fresh-client smoke verification complete without relevant enchantment-registry, datapack, stack-definition, component, resource, localization, or common/client-side classloading errors. `git diff --check` reports no Step 7C whitespace errors; the separately user-updated canonical Design Doc retains its pre-existing Markdown trailing spaces.
+- The user manually verified and accepted Step 7C. Its source, resources, tests, canonical Design Doc synchronization, and handoff closure are committed before Step 7D begins.
 
 For the Step 7B candidate:
 

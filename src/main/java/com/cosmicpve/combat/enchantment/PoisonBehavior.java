@@ -12,7 +12,7 @@ public final class PoisonBehavior {
     private PoisonBehavior() {}
 
     public static double chance(int level) {
-        return 0.05 * level;
+        return 0.07 * level;
     }
 
     public static void activate(ProcEvent event) {
