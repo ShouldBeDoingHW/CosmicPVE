@@ -300,4 +300,8 @@
   ,"message.cosmicpve.mask_splicer.invalid":"That is not a valid Multi-Mask."
   ,"message.cosmicpve.mask_splicer.single_mask":"Mask Splicers only separate Multi-Masks."
   ,"entity.cosmicpve.undead_corpse":"Undead Corpse"
+  ,"block.cosmicpve.conquest_chest":"Conquest Chest"
+  ,"item.cosmicpve.conquest_chest_flare":"Conquest Chest Flare"
+  ,"tooltip.cosmicpve.conquest_flare.description":"Summons a Conquest Chest at a valid nearby surface."
+  ,"tooltip.cosmicpve.conquest_flare.use":"Right-click to launch."
 }

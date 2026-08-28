@@ -1,0 +1,18 @@
+{
+  "entries": [
+    {"weight":15,"minimum_quantity":2,"maximum_quantity":2,"reward":{"type":"unexamined_book","rarity":"simple"}},
+    {"weight":15,"minimum_quantity":2,"maximum_quantity":2,"reward":{"type":"unexamined_book","rarity":"unique"}},
+    {"weight":12,"minimum_quantity":2,"maximum_quantity":2,"reward":{"type":"unexamined_book","rarity":"elite"}},
+    {"weight":12,"reward":{"type":"unexamined_book","rarity":"ultimate"}},
+    {"weight":8,"reward":{"type":"unexamined_book","rarity":"legendary"}},
+    {"weight":10,"reward":{"type":"static_item","item":"cosmicpve:trial_portal"}},
+    {"weight":5,"minimum_quantity":2,"maximum_quantity":2,"reward":{"type":"static_item","item":"cosmicpve:trial_portal"}},
+    {"weight":10,"reward":{"type":"static_item","item":"cosmicpve:transmog_scroll"}},
+    {"weight":9,"reward":{"type":"static_item","item":"cosmicpve:white_scroll"}},
+    {"weight":10,"reward":{"type":"black_scroll","success_rate":50}},
+    {"weight":6,"reward":{"type":"black_scroll","success_rate":65}},
+    {"weight":10,"reward":{"type":"static_item","item":"cosmicpve:repair_scroll"}},
+    {"weight":8,"reward":{"type":"space_chest","rarity":"legendary"}},
+    {"weight":10,"reward":{"type":"space_chest","rarity":"ultimate"}}
+  ]
+}

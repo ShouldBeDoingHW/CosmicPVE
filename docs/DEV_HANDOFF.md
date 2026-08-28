@@ -1,10 +1,10 @@
 # CosmicPVE Development Handoff
 
-Current verified and accepted gameplay baseline: Step 6V. Its closure commit is the commit containing this handoff; use `git log -1` for the immutable hash.
+Current verified and accepted gameplay baseline: Step 7A (Conquest Chest world events, including corrective passes 7A.1 and 7A.2). Its accepted source, resources, tests, and handoff state are closed together in the Step 7A gameplay commit.
 
-Repository state: Steps 6A–6V are implemented, automated/runtime verified, and manually accepted. The root `assets` source-art folder and root `trial rooms` structure-development folder remain deliberately untracked and unrelated.
+Repository state: Steps 6A–7A are implemented, automated/runtime verified, and manually accepted. The root `assets` source-art folder and root `trial rooms` structure-development folder remain deliberately untracked and unrelated.
 
-Last handoff update: 2026-08-25
+Last handoff update: 2026-08-27
 
 Pinned environment:
 
@@ -291,6 +291,22 @@ The authored structures contain four actual target blocks across the Design Doc'
 Falling to or below the cached threshold invokes the existing terminal environmental execution path rather than damage. Armor, absorption, ordinary mitigation, Phoenix-style prevention, and normal procs are bypassed; normal individual Trial death/Insurance handling removes only that participant and survivors continue. The active-room hot path is one cached integer comparison per online Deadeye participant per tick, with no structure scans or metadata discovery.
 
 Trial 1.0 production registration is now three Apprentice rooms (Circuit Circus, Raiding Rainbow, Cold Snap), three Hardcore rooms (Fire Colony, Zero-G, Bomb Squad), and two Demonic rooms (Hidden Graveyard, Deadeye). The accepted Demonic mixed-pool selection, declining appearance weights, no-consecutive-repeat rule, Snow Globe modifier seam, Skip behavior, Decision/pot semantics, persistence, and snapshot restoration remain unchanged. Room teardown now performs a second ItemEntity-only purge inside the outgoing room AABB after block removal, closing the generic ladder/pressure-plate/support-drop leak without scanning the dimension or touching outside-world items.
+
+### Step 7A — IMPLEMENTED; AUTOMATED/RUNTIME VERIFIED; MANUALLY VERIFIED / ACCEPTED
+
+Conquest Chests are persistent Overworld events managed independently by stable UUID. A low-frequency scheduler records each handled seventh Minecraft day before attempting one natural spawn, preventing restart/time-skip duplication without allowing Flare events to consume the natural schedule. Natural placement uses 32 bounded attempts with independent X/Z coordinates from -5000 through +5000, the surface heightmap, a sturdy dry floor, an empty chest position, at least two air-adjacent faces, and rejection of overlapping 20×20 event regions. Multiple non-overlapping natural and Flare events may coexist.
+
+The event block is a real non-dropping Chest block with vanilla Chest rendering, 80 hardness, an explicit `minecraft:mineable/pickaxe` tag, required-correct-tool semantics, and unchanged 1,200 blast resistance. Its Survival break path starts with Minecraft's actual pickaxe speed, Efficiency attribute, effects, and harvest check, then compresses acceleration above the ordinary Iron Pickaxe baseline so the accepted bands can coexist: the real-level test observes 20.05 seconds with unenchanted Iron and 10.05 seconds with Netherite Efficiency V. Active event bounds deny ordinary survival breaking except the discovered Conquest Chest, placement, item-on-block mutation, explosions, pistons, fluids, LivingEntity block destruction, and mob griefing without changing global gamerules; creative development bypass remains available. NeoForge does not expose a single complete cancellable hook for every scheduled vanilla fire mutation, so fire protection uses the available scoped mutation hooks rather than a global fire gamerule. Event ownership/protection disappears on completion, expiration, or administrative removal.
+
+The first valid interaction prepares and awakens exactly 3–5 of the existing canonical Space Pirate variants in bounded valid nearby positions, persists the once-only ambush receipt before entity insertion, and rejects discovery/mining when fewer than three guards can be placed. These are persistent world mobs with their existing zero-equipment-drop policy; surviving Pirates deliberately remain after the chest event ends rather than being silently despawned. Natural events announce coordinates globally, repeat a persisted remaining-time reminder every five minutes while untouched, and expire without loot after 30 minutes only if never interacted with. A stackable Redstone-Torch-presented Conquest Chest Flare (`#BF0000`) performs the same bounded surface/overlap validation within ±100 X/Z, consumes exactly one only after success, does not announce globally, and has no invented unattended expiry.
+
+Mining a discovered chest commits completion once, makes exactly three independent rolls from the reloadable `cosmicpve:conquest` reward table, and adds one guaranteed Banknote from $100,000 through $1,000,000 inclusive in exact $10,000 increments. Concrete resolved stacks and the recipient are persisted before safe inventory/overflow delivery, with recovery for committed pending delivery. The supported production table retains the authored weights for Unexamined Simple/Unique/Elite/Ultimate/Legendary Books, Trial Portals, Transmog Scroll, White Scroll, 50%/65% Black Scrolls, Repair Scroll, and Legendary/Ultimate Space Chests. Random Boss Spawn Egg and Gkit Refresher rows are omitted without substitution because those reward primitives remain unimplemented.
+
+Permission-gated tooling supports natural/local Flare event creation, listing, UUID inspection, administrative expiration, and Flare delivery. Runtime work is bounded: scheduling/expiry/reminders/recovery run every 100 ticks, placement retries are capped, active-event collections remain naturally small, Pirate search is a fixed nearby grid, and protection checks use cached event bounds rather than terrain/entity scans.
+
+The first Step 7A candidate passed unit/build and startup checks but failed its core manual test: every shared command/Flare creation path reached block placement, where inherited `ChestBlock.newBlockEntity` constructed a vanilla `minecraft:chest` block entity for the custom `cosmicpve:conquest_chest` state. Minecraft rejected that mismatched block-entity state, so no usable chest could be created. `ConquestChestBlock` now explicitly constructs `ConquestChestBlockEntity`; the final placement transaction immediately verifies the block and custom block entity before publishing SavedData, and rolls the block back if persistence fails. Surface resolution now performs bounded chunk access, accepts ordinary replaceable dry surface vegetation, and retains sturdy/dry/exposure/overlap validation. `/cosmic conquest spawn-here` provides deterministic nearest-surface diagnosis through the same production creation transaction; `list`/`inspect` expose live block and block-entity consistency.
+
+Registered NeoForge real-level GameTests now cover an ordinary flat/replaceable surface, buried/lava/occupied rejection, no ghost event, physical block plus custom block entity plus persisted event, first interaction with 3–5 physical Space Pirates, exactly-once reward completion including the guaranteed Banknote, actual server Flare success/one-item consumption and failure/zero consumption, all three registered admin creation routes, and the real Survival mining calculation with loaded tags and Efficiency attributes. These regressions exist specifically because the original pure unit/startup suite could not detect invalid runtime block-entity or tool-tag behavior.
 
 ## 3. Current Real Enchantments
 
@@ -604,9 +620,13 @@ The final post-Orb capacity is no longer unresolved for current target classes: 
 
 ## 16. Current Next Milestone
 
-**Next milestone: Step 7A — Conquest Chests.**
+**Next milestone after Step 7A acceptance: Tinkerer / Cosmic Dust.**
 
-Trial 1.0 is complete. Step 7A should implement the bounded Conquest Chest Overworld event without folding in Tinkerer/Cosmic Dust, enchantment expansion/balance patches, Fallen Heroes, G-/V-/M-Kit redesigns, Heroic Enchantments, Dungeons, Invasions, Memory Chests, Cosmic Crates, or world-generation work.
+Current intended sequence:
+
+Step 7A Conquest Chests → Tinkerer / Cosmic Dust → Enchantment Expansion I → Enchantment Expansion II → Enchantment Expansion III plus explicitly approved enchantment balance changes → Fallen Heroes / G-Kit procurement redesign → V-Kits and M-Kit reconsideration → Heroic Enchantments → later major Dungeon, Invasion, economy, and world work.
+
+The ordinary-enchantment expansion may ultimately require two or three bounded patches. The Design Doc's Balance Candidates remain prospective and are not implementation-authoritative without an explicit future balance-patch instruction.
 
 ## 17. Development Workflow
 
@@ -622,6 +642,14 @@ Trial 1.0 is complete. Step 7A should implement the bounded Conquest Chest Overw
 Preserve unrelated dirty changes. Never change pinned versions as a side effect of gameplay work. Prefer service-level rules and typed data over one-off event logic, and keep client-only classes isolated from dedicated-server loading.
 
 ## 18. Verification Snapshot
+
+For the Step 7A candidate:
+
+- `gradlew.bat cleanTest test build` passes all 387 JUnit tests across 109 suites with 0 failures, errors, or skips. `runGameTestServer` passes all three required NeoForge GameTests. The Conquest tests exercise a real `ServerLevel`: physical block/custom-block-entity creation, persisted event identity, ordinary/replaceable surface acceptance, buried/lava/occupied rejection with no ghost event, 3–5 physical Pirates on first interaction, generated completion rewards including the Banknote, actual Flare success/failure consumption, deterministic/NATURAL/FLARE admin command routes with `list`/`inspect` consistency, and real Survival mining progress. The mining test confirms the pickaxe tag, correct-tool path, Iron speed 6, Efficiency V's +26 attribute, and records Iron at 401 ticks / 20.05 seconds and Netherite Efficiency V at 201 ticks / 10.05 seconds.
+- All 175 main-resource JSON files decode successfully, including the additive Conquest pickaxe tag. Dedicated-server/GameTest startup loads 1,462 recipes, atomically publishes eight reward tables including `cosmicpve:conquest`, preserves progression controls, and reaches the running test server without relevant registry, block-entity, reward, command, SavedData, tag, or common-side classloading errors.
+- The final controlled real-level run recorded `/cosmic conquest spawn-here` at `12394093 -40 2456504`, NATURAL admin creation at `12394176 -60 2456529`, and FLARE admin creation at `12394167 -60 2456404`. Each matching `list`/`inspect` call reported a loaded chunk, `cosmicpve:conquest_chest`, `expectedBlock=true`, and `ConquestChestBlockEntity`; the same run separately exercised the actual Flare item and the interaction/Pirate/reward/cleanup lifecycle.
+- Fresh client startup completes resource reload, OpenAL initialization, and block/item/chest atlas construction with the Conquest Chest renderer and Flare model present and without relevant missing-model, missing-texture, malformed-resource, or sided-loading errors. `git diff --check` reports no whitespace errors, only normal Windows line-ending notices. Pinned versions, mod ID, and package remain unchanged.
+- The user manually verified and accepted the complete Step 7A candidate, including the corrected physical/custom block-entity placement, bounded surface handling, Flare flow, Pirate ambush, rewards, persistence/recovery, protection, and final real-tool mining behavior. The accepted Step 7A source, resources, tests, and handoff state are closed together before Step 7B begins.
 
 For the manually accepted Step 6V implementation:
 

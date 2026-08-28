@@ -83,6 +83,7 @@ public final class CosmicCommands {
                 .then(RewardCommands.create())
                 .then(SpaceChestCommands.create())
                 .then(TrialCommands.create())
+                .then(ConquestCommands.create())
                 .then(CombatStackCommands.create())
                 .then(MaskCommands.create()));
 

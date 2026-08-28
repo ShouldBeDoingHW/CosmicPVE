@@ -8,6 +8,8 @@ import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import com.cosmicpve.registry.ModEntities;
+import com.cosmicpve.registry.ModBlockEntities;
+import net.minecraft.client.renderer.blockentity.ChestRenderer;
 import com.cosmicpve.client.entity.SpacePirateVariant1Renderer;
 import com.cosmicpve.client.entity.SpacePirateVariant2Renderer;
 import com.cosmicpve.client.entity.UndeadCorpseRenderer;
@@ -40,6 +42,7 @@ public final class CosmicPVEClient {
         event.registerEntityRenderer(ModEntities.SPACE_PIRATE_VARIANT_1.get(), SpacePirateVariant1Renderer::new);
         event.registerEntityRenderer(ModEntities.SPACE_PIRATE_VARIANT_2.get(), SpacePirateVariant2Renderer::new);
         event.registerEntityRenderer(ModEntities.UNDEAD_CORPSE.get(), UndeadCorpseRenderer::new);
+        event.registerBlockEntityRenderer(ModBlockEntities.CONQUEST_CHEST.get(), ChestRenderer::new);
     }
 
     private static void registerItemTints(RegisterColorHandlersEvent.ItemTintSources event) {

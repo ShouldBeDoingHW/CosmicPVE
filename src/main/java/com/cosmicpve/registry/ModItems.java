@@ -21,6 +21,7 @@ import com.cosmicpve.data.component.TrialTrinketData;
 import com.cosmicpve.data.component.TrialTrinketType;
 import com.cosmicpve.equipment.mask.MaskItem;
 import com.cosmicpve.equipment.mask.MaskSplicerItem;
+import com.cosmicpve.conquest.ConquestFlareItem;
 
 public final class ModItems {
     private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(CosmicPVE.MOD_ID);
@@ -78,6 +79,9 @@ public final class ModItems {
 
     public static final DeferredItem<TrialPortalItem> TRIAL_PORTAL = ITEMS.registerItem(
             "trial_portal", TrialPortalItem::new, properties -> properties.stacksTo(64));
+
+    public static final DeferredItem<ConquestFlareItem> CONQUEST_CHEST_FLARE = ITEMS.registerItem(
+            "conquest_chest_flare", ConquestFlareItem::new, properties -> properties.stacksTo(64));
 
     public static final DeferredItem<MaskItem> MASK = ITEMS.registerItem(
             "mask", MaskItem::new, properties -> properties.stacksTo(1));

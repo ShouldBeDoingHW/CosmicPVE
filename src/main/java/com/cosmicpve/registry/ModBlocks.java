@@ -2,6 +2,8 @@ package com.cosmicpve.registry;
 
 import com.cosmicpve.CosmicPVE;
 import com.cosmicpve.trial.portal.TrialGatewayBlock;
+import com.cosmicpve.conquest.ConquestChestBlock;
+import net.minecraft.world.level.block.Blocks;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -12,6 +14,12 @@ public final class ModBlocks {
             "trial_gateway", TrialGatewayBlock::new,
             properties -> properties.noCollision().noOcclusion().strength(-1.0F, 3_600_000.0F)
                     .lightLevel(state -> 11));
+    public static final DeferredBlock<ConquestChestBlock> CONQUEST_CHEST = BLOCKS.registerBlock(
+            "conquest_chest", ConquestChestBlock::new,
+            properties -> properties.ofFullCopy(Blocks.CHEST)
+                    .requiresCorrectToolForDrops()
+                    .strength(ConquestChestBlock.DESTROY_TIME, ConquestChestBlock.EXPLOSION_RESISTANCE)
+                    .noLootTable());
     private ModBlocks() {}
     public static void register(IEventBus modBus) { BLOCKS.register(modBus); }
 }
