@@ -13,17 +13,30 @@ import net.minecraft.world.item.ItemStack;
 /** The single owner of full four-piece identity resolution for players and mobs. */
 public final class ArmorSetResolver {
     private final CosmicContentRepository content;
+    private final ArmorSetSuppressionService suppression;
 
     public ArmorSetResolver(CosmicContentRepository content) {
+        this(content, new ArmorSetSuppressionService());
+    }
+
+    public ArmorSetResolver(CosmicContentRepository content, ArmorSetSuppressionService suppression) {
         this.content = content;
+        this.suppression = suppression;
     }
 
     public Optional<ArmorSetDefinition> resolve(LivingEntity entity) {
+        return suppression.isSuppressed(entity) ? Optional.empty() : resolvePotential(entity);
+    }
+
+    /** Resolves equipment identity without applying temporary activation suppression. */
+    public Optional<ArmorSetDefinition> resolvePotential(LivingEntity entity) {
         return resolveIdentity(List.of(
                 entity.getItemBySlot(EquipmentSlot.HEAD), entity.getItemBySlot(EquipmentSlot.CHEST),
                 entity.getItemBySlot(EquipmentSlot.LEGS), entity.getItemBySlot(EquipmentSlot.FEET)))
                 .flatMap(content::findArmorSetDefinition);
     }
+
+    public boolean isSuppressed(LivingEntity entity) { return suppression.isSuppressed(entity); }
 
     public static Optional<Identifier> resolveIdentity(List<ItemStack> pieces) {
         if (pieces.size() != 4) return Optional.empty();

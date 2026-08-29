@@ -56,7 +56,12 @@ class CosmicEnchantmentRegistrationTest {
                 Map.entry("obliterate", 3),
                 Map.entry("soul_tether", 3),
                 Map.entry("dodge", 5),
-                Map.entry("leadership", 10));
+                Map.entry("leadership", 10),
+                Map.entry("hero_killer", 3),
+                Map.entry("soul_siphon", 4),
+                Map.entry("blackout", 4),
+                Map.entry("ender_walker", 5),
+                Map.entry("voodoo", 6));
         for (var entry : expected.entrySet()) {
             var resource = getClass().getClassLoader()
                     .getResourceAsStream("data/cosmicpve/enchantment/" + entry.getKey() + ".json");
@@ -94,7 +99,7 @@ class CosmicEnchantmentRegistrationTest {
                 }
             }
         }
-        assertEquals(41, CosmicEnchantmentSpecs.ALL.size());
+        assertEquals(46, CosmicEnchantmentSpecs.ALL.size());
         assertEquals(CosmicEnchantmentTier.ELITE, CosmicEnchantmentSpecs.EXECUTE.tier());
         assertEquals(CosmicEnchantmentTier.ULTIMATE, CosmicEnchantmentSpecs.ANGELIC.tier());
         assertEquals(CosmicEnchantmentTier.SIMPLE, CosmicEnchantmentSpecs.LIGHTNING.tier());

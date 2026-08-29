@@ -89,13 +89,24 @@ public final class CosmicEnchantmentSpecs {
             ModEnchantments.DODGE.identifier(), 5, CosmicEnchantmentTier.ULTIMATE, "boots");
     public static final CosmicEnchantmentSpec LEADERSHIP = new CosmicEnchantmentSpec(
             ModEnchantments.LEADERSHIP.identifier(), 10, CosmicEnchantmentTier.LEGENDARY, "chestplate_or_leggings");
+    public static final CosmicEnchantmentSpec HERO_KILLER = new CosmicEnchantmentSpec(
+            ModEnchantments.HERO_KILLER.identifier(), 3, CosmicEnchantmentTier.MASTERY, "axe");
+    public static final CosmicEnchantmentSpec SOUL_SIPHON = new CosmicEnchantmentSpec(
+            ModEnchantments.SOUL_SIPHON.identifier(), 4, CosmicEnchantmentTier.MASTERY, "all_weapons");
+    public static final CosmicEnchantmentSpec BLACKOUT = new CosmicEnchantmentSpec(
+            ModEnchantments.BLACKOUT.identifier(), 4, CosmicEnchantmentTier.MASTERY, "sword");
+    public static final CosmicEnchantmentSpec ENDER_WALKER = new CosmicEnchantmentSpec(
+            ModEnchantments.ENDER_WALKER.identifier(), 5, CosmicEnchantmentTier.ULTIMATE, "boots");
+    public static final CosmicEnchantmentSpec VOODOO = new CosmicEnchantmentSpec(
+            ModEnchantments.VOODOO.identifier(), 6, CosmicEnchantmentTier.ELITE, "helmet");
 
     public static final List<CosmicEnchantmentSpec> ALL =
             List.of(EXECUTE, ANGELIC, LIGHTNING, ENDER_SHIFT, DOUBLESTRIKE, BLEED, LUCK, POISON, PUMMEL,
                     GREATSWORD, INSANITY, VENOM, AEGIS, EAGLE_EYE, RAGE, MOLTEN, NUTRITION, GLOWING,
                     OBSIDIANSHIELD, OXYGENATE, ARMORED, DEATH_PACT, AUTO_SMELT, EXPERIENCE, BLESSED, IMPLANTS, TRAP, CACTUS,
                     GEARS, PERMAFROST, MORTAL_COIL, SELF_DESTRUCT, PHOENIX, DIVINE_IMMOLATION, VIRUS, DEVOUR,
-                    UNDEAD_RUSE, OBLITERATE, SOUL_TETHER, DODGE, LEADERSHIP);
+                    UNDEAD_RUSE, OBLITERATE, SOUL_TETHER, DODGE, LEADERSHIP,
+                    HERO_KILLER, SOUL_SIPHON, BLACKOUT, ENDER_WALKER, VOODOO);
 
     private CosmicEnchantmentSpecs() {}
 

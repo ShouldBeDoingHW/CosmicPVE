@@ -72,7 +72,10 @@ public final class CosmicCombat {
     private static final RecentCombatMemoryService RECENT_COMBAT_MEMORY = new RecentCombatMemoryService(200L);
     private static final RecentCombatMemoryEventBridge RECENT_COMBAT_MEMORY_EVENTS =
             new RecentCombatMemoryEventBridge(RECENT_COMBAT_MEMORY);
-    private static final ArmorSetResolver ARMOR_SETS = new ArmorSetResolver(CosmicContent.repository());
+    private static final com.cosmicpve.equipment.armor.ArmorSetSuppressionService ARMOR_SET_SUPPRESSION =
+            new com.cosmicpve.equipment.armor.ArmorSetSuppressionService();
+    private static final ArmorSetResolver ARMOR_SETS =
+            new ArmorSetResolver(CosmicContent.repository(), ARMOR_SET_SUPPRESSION);
     private static final ArmorSetCombatContributor ARMOR_SET_COMBAT = new ArmorSetCombatContributor(ARMOR_SETS);
     private static final ArmorSetImmunityResolver ARMOR_SET_IMMUNITIES = new ArmorSetImmunityResolver(ARMOR_SETS);
     private static final ArmorSetEventBridge ARMOR_SET_EVENTS = new ArmorSetEventBridge(ARMOR_SET_IMMUNITIES);
@@ -90,7 +93,8 @@ public final class CosmicCombat {
             new com.cosmicpve.combat.enchantment.SoulTetherService();
     private static final CosmicEnchantmentBehaviorResolver ENCHANTMENT_BEHAVIORS =
             new CosmicEnchantmentBehaviorResolver(
-                    CHILD_ACTIONS, STACKS, BLEED_RUNTIME, ARMOR_SET_IMMUNITIES, COOLDOWNS, SOUL_TETHERS);
+                    CHILD_ACTIONS, STACKS, BLEED_RUNTIME, ARMOR_SET_IMMUNITIES, COOLDOWNS, SOUL_TETHERS,
+                    ARMOR_SETS, ARMOR_SET_SUPPRESSION);
     private static final NutritionFoodService NUTRITION = new NutritionFoodService(ENCHANTMENTS);
     private static final ExecutionService EXECUTIONS = new ExecutionService(SEQUENCES, TRACES);
     private static final CombatEventBridge EVENTS =
@@ -123,12 +127,15 @@ public final class CosmicCombat {
         OUTGOING.register(new DivineImmolationBehavior(COOLDOWNS));
         OUTGOING.register(SOUL_TETHERS);
         OUTGOING.register(new com.cosmicpve.combat.enchantment.LeadershipBehavior());
+        OUTGOING.register(new com.cosmicpve.combat.enchantment.HeroKillerBehavior(ARMOR_SETS));
+        OUTGOING.register(new com.cosmicpve.combat.enchantment.VoodooBehavior(STACKS));
         OUTGOING.register(MASK_COMBAT);
         INCOMING.register(ARMOR_SET_COMBAT);
         INCOMING.register(WEAPON_SKIN_COMBAT);
         INCOMING.register(deathPact);
         INCOMING.register(new ObsidianshieldBehavior(ENCHANTMENTS));
         INCOMING.register(permafrost);
+        INCOMING.register(new com.cosmicpve.combat.enchantment.EnderWalkerBehavior());
         INCOMING.register(MASK_COMBAT);
         PRE_DEFENSE_BOUNDS.register(new AegisBehavior(ENCHANTMENTS));
         PROC_MODIFIERS.register(new LuckBehavior());
@@ -205,6 +212,9 @@ public final class CosmicCombat {
     }
 
     public static ArmorSetResolver armorSets() { return ARMOR_SETS; }
+    public static com.cosmicpve.equipment.armor.ArmorSetSuppressionService armorSetSuppression() {
+        return ARMOR_SET_SUPPRESSION;
+    }
     public static ArmorSetImmunityResolver armorSetImmunities() { return ARMOR_SET_IMMUNITIES; }
     public static RecentCombatMemoryService recentCombatMemory() { return RECENT_COMBAT_MEMORY; }
     public static WeaponSkinResolver weaponSkins() { return WEAPON_SKINS; }

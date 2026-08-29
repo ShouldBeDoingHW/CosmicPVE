@@ -1,8 +1,8 @@
 # CosmicPVE Development Handoff
 
-Current verified and accepted gameplay baseline: Step 7E. Its accepted source, resources, tests, and documentation are ready for the single closure commit required before Step 7F begins.
+Current accepted baseline: Step 7F. Hero Killer III, Soul Siphon IV, Blackout IV, Ender Walker V, and Voodoo VI are implemented, automated/runtime verified, and manually verified/accepted; the ordinary Enchantments 1.0 content pool contains exactly 46 real enchantments.
 
-Repository state: Steps 6A–7E are implemented, automated/runtime verified, and manually accepted. The root `assets` source-art folder and root `trial rooms` structure-development folder remain deliberately untracked and unrelated.
+Repository state: Steps 6A–7F are implemented, automated/runtime verified, and manually accepted. The root `assets` source-art folder and root `trial rooms` structure-development folder remain deliberately untracked and unrelated.
 
 Last handoff update: 2026-08-28
 
@@ -342,6 +342,14 @@ Implemented Simple all-weapons `cosmicpve:obliterate` III as a fixed 10% Luck-el
 
 Implemented Ultimate boots `cosmicpve:dodge` V at 0.5% per level at the accepted pre-health-loss damage boundary. Turkey Mask contributes +2 flat percentage points to the same single candidate before centralized relative Luck multiplication. Activation sets the pending ordinary health loss to zero; no committed hit is produced, so the attacker's committed offensive proc chain and committed-damage defensive effects do not run. Turkey without Dodge retains its accepted 2% behavior.
 
+### Step 7F — IMPLEMENTED; AUTOMATED/RUNTIME VERIFIED; MANUALLY VERIFIED / ACCEPTED
+
+Implemented Mastery axe `cosmicpve:hero_killer` III as a 3%-per-level shared ordinary outgoing contribution that qualifies only when the central armor-set resolver reports an active target set. Implemented Mastery any-weapon `cosmicpve:soul_siphon` IV at the committed positive-red-health boundary: any qualifying hit whose resulting target health is below 50% heals exactly 1 HP and starts its per-wielder `(7 - level)`-second cooldown. This intentionally does not require a strict above-to-below threshold crossing.
+
+Implemented one ephemeral armor-set suppression service used directly by the authoritative resolver. Mastery sword `cosmicpve:blackout` IV has a centralized Luck-modified 2%-per-level chance to replace/refresh suppression for 1–4 seconds without mutating equipment identity. While suppressed, ordinary armor-set combat bonuses, proc modifiers, immunities, and Hero Killer eligibility all resolve inactive; the intact set resumes automatically after expiry.
+
+Implemented Ultimate boots `cosmicpve:ender_walker` V as a 10%-per-level incoming reduction only for Minecraft's Wither damage type and NeoForge's dedicated Poison damage type. It does not reduce Wither Skeleton melee, Wither Skull damage, generic magic, or standard Cosmic true packets. Implemented Elite helmet `cosmicpve:voodoo` VI as a Luck-eligible offensive 1%-per-level proc using the generalized `INDEPENDENT` negative-stack policy: each of at most five stacks expires after its own 200 ticks and contributes -3% to the affected entity's shared ordinary outgoing bucket, capped at -15%.
+
 ## 3. Current Real Enchantments
 
 These are registered through Minecraft's enchantment infrastructure, use actual enchantment data on the item, and are not present in normal enchanting-table, librarian, random-loot, random-equipment, or mob-equipment acquisition pools.
@@ -391,10 +399,15 @@ These are registered through Minecraft's enchantment infrastructure, use actual 
 | `cosmicpve:soul_tether` | III | Axe | Mastery | Committed melee hits have a 10% Luck-modified chance to apply an owner-specific 6/7/8-second tether with a 600-tick cooldown. The target is slowed 20% and takes +5% ordinary damage per current distance block from that tether owner only. |
 | `cosmicpve:dodge` | V | Boots | Ultimate | An otherwise valid ordinary incoming hit has 0.5% per level to be rejected before health loss and committed proc dispatch. Turkey adds +2 flat percentage points to the same Luck-modified roll. |
 | `cosmicpve:leadership` | X | Chestplate/leggings | Legendary | Current equipped levels sum to at most 20; reliably owned allies gain that percentage in their ordinary outgoing bucket at attack time. |
+| `cosmicpve:hero_killer` | III | Axe | Mastery | Deals 3% more ordinary damage per level against targets whose armor-set bonus is currently active. |
+| `cosmicpve:soul_siphon` | IV | Any weapon | Mastery | A committed hit that leaves its target below half health heals exactly 1 HP, with a `(7 - level)`-second cooldown. |
+| `cosmicpve:blackout` | IV | Sword | Mastery | Has 2% chance per level to suppress the target's active armor-set bonus for one second per level. |
+| `cosmicpve:ender_walker` | V | Boots | Ultimate | Reduces Poison- and Wither-effect damage by 10% per level without removing either status effect. |
+| `cosmicpve:voodoo` | VI | Helmet | Elite | Hits have 1% chance per level to add an independently expiring ten-second stack; each stack reduces ordinary outgoing damage by 3%, capped at five stacks. |
 
 ### DESIGNED BUT NOT IMPLEMENTED
 
-The design also names Hero Killer and other later enchantments. They have no registered real enchantment or runtime behavior. There are exactly 41 implemented real Cosmic enchantments; Death Pact, Permafrost, Mortal Coil, Phoenix, Divine Immolation, and Soul Tether are the implemented Mastery enchantments. Do not add behavior assumptions beyond `Cosmic_Design.md`.
+The ordinary Cosmic enchantment pool is content-complete for the current Enchantments 1.0 cycle at exactly 46 implemented real enchantments. Death Pact, Permafrost, Mortal Coil, Phoenix, Divine Immolation, Soul Tether, Hero Killer, Soul Siphon, and Blackout are the implemented Mastery enchantments. Heroic enchantments and the final Enchantments 1.0 balance pass remain separate future work; do not add behavior assumptions beyond `Cosmic_Design.md`.
 
 ## 4. Critical Combat Semantics
 
@@ -667,11 +680,11 @@ The final post-Orb capacity is no longer unresolved for current target classes: 
 
 ## 16. Current Next Milestone
 
-**Next milestone: Step 7F — Enchantments 1.0 Content Completion.**
+**Immediate next action: Step 7G — Trials 1.1 Content + Balance.**
 
 Current intended sequence:
 
-Step 7A Conquest Chests → Step 7B Tinkerer / Cosmic Dust → Step 7C canonical balance baseline, Gears, Permafrost, and Mortal Coil → Step 7D Self Destruct, Phoenix, Divine Immolation, Virus, and Devour → Step 7E Undead Ruse, Obliterate, Soul Tether, Dodge, and Leadership → Fallen Heroes / G-Kit procurement redesign → V-Kits and M-Kit reconsideration → Heroic Enchantments → later major Dungeon, Invasion, economy, and world work.
+Step 7A Conquest Chests → Step 7B Tinkerer / Cosmic Dust → Step 7C canonical balance baseline, Gears, Permafrost, and Mortal Coil → Step 7D Self Destruct, Phoenix, Divine Immolation, Virus, and Devour → Step 7E Undead Ruse, Obliterate, Soul Tether, Dodge, and Leadership → Step 7F Hero Killer, Soul Siphon, Blackout, Ender Walker, and Voodoo → final Enchantments 1.0 balance pass when explicitly authorized → Fallen Heroes / G-Kit procurement redesign → V-Kits and M-Kit reconsideration → Heroic Enchantments → later major Dungeon, Invasion, economy, and world work.
 
 The ordinary-enchantment expansion remains split across bounded patches. Step 7C is the explicit instruction that made the current canonical Design Doc enchantment-table values implementation-authoritative; later design edits still require their own explicit implementation milestone.
 
@@ -689,6 +702,14 @@ The ordinary-enchantment expansion remains split across bounded patches. Step 7C
 Preserve unrelated dirty changes. Never change pinned versions as a side effect of gameplay work. Prefer service-level rules and typed data over one-off event logic, and keep client-only classes isolated from dedicated-server loading.
 
 ## 18. Verification Snapshot
+
+For the Step 7F candidate:
+
+- `gradlew.bat cleanTest test build` passes all 423 JUnit tests across 114 suites with 0 failures, errors, or skips. New and updated coverage pins the five specifications and 46-enchantment registry; Hero Killer's 3/6/9% ordinary contribution and Mastery axe metadata; Soul Siphon's literal below-half rule and 6/5/4/3-second cooldown; Blackout's 2/4/6/8% chance and 1/2/3/4-second suppression; Ender Walker's 10–50% multiplier and Ultimate boots metadata; Voodoo's 1–6% chance, five-stack cap, independent 200-tick definition, and -3% per-stack ordinary outgoing penalty; rarity pools; and Black Scroll eligibility/exclusion.
+- NeoForge `runGameTestServer` completes all three required GameTests successfully.
+- All 199 main-resource JSON files parse successfully. Dedicated-server startup atomically publishes the content snapshot including nine stack definitions and reaches `Done`; fresh-client startup completes resource reload, OpenAL/SoundEngine initialization, and every texture atlas without relevant registry, datapack, stack-definition, localization, resource, or common/client classloading errors.
+- Runtime loading decodes all five new enchantment definitions and `cosmicpve:voodoo`. `git diff --check` reports no whitespace errors beyond normal Windows line-ending notices.
+- The user manually verified and accepted Hero Killer, Soul Siphon, Blackout, Ender Walker, Voodoo, and their cross-system behavior. Step 7F is closed before Trials 1.1 begins.
 
 For the Step 7E candidate:
 

@@ -41,6 +41,8 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
     private final ArmorSetImmunityResolver immunities;
     private final CooldownService cooldowns;
     private final SoulTetherService soulTethers;
+    private final com.cosmicpve.equipment.armor.ArmorSetResolver armorSets;
+    private final com.cosmicpve.equipment.armor.ArmorSetSuppressionService armorSetSuppression;
 
     public CosmicEnchantmentBehaviorResolver(
             ChildCombatActionService childActions,
@@ -48,19 +50,23 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
             BleedRuntimeService bleedRuntime,
             ArmorSetImmunityResolver immunities,
             CooldownService cooldowns,
-            SoulTetherService soulTethers) {
+            SoulTetherService soulTethers,
+            com.cosmicpve.equipment.armor.ArmorSetResolver armorSets,
+            com.cosmicpve.equipment.armor.ArmorSetSuppressionService armorSetSuppression) {
         this.childActions = childActions;
         this.stacks = stacks;
         this.bleedRuntime = bleedRuntime;
         this.immunities = immunities;
         this.cooldowns = cooldowns;
         this.soulTethers = soulTethers;
+        this.armorSets = armorSets;
+        this.armorSetSuppression = armorSetSuppression;
     }
 
     public CosmicEnchantmentBehaviorResolver(
             ChildCombatActionService childActions, CombatStackService stacks, BleedRuntimeService bleedRuntime,
             ArmorSetImmunityResolver immunities, CooldownService cooldowns) {
-        this(childActions, stacks, bleedRuntime, immunities, cooldowns, new SoulTetherService());
+        this(childActions, stacks, bleedRuntime, immunities, cooldowns, new SoulTetherService(), null, null);
     }
 
     @Override
@@ -76,6 +82,9 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
             addDivineImmolation(event, result);
             addObliterate(event, result);
             addSoulTether(event, result);
+            addSoulSiphon(event, result);
+            addBlackout(event, result);
+            addVoodoo(event, result);
         } else if (event.hook() == ProcHook.ON_PROJECTILE_HIT) {
             addLightning(event, result);
             addVenom(event, result);
@@ -95,6 +104,46 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
             addDevour(event, result);
         }
         return List.copyOf(result);
+    }
+
+    private void addSoulSiphon(ProcEvent event, List<ProcCandidate> result) {
+        int level = Math.min(4, event.effectiveEnchantments().level(ModEnchantments.SOUL_SIPHON.identifier()));
+        if (level <= 0 || event.attacker() == null || event.target() == null) return;
+        result.add(deterministicCandidate(ModEnchantments.SOUL_SIPHON.identifier(), ProcHook.ON_VALID_HIT,
+                1.0, Optional.of(ModEnchantments.SOUL_SIPHON.identifier()), SoulSiphonBehavior.cooldownTicks(level),
+                Optional.empty(), ChildProcEligibility.LIMITED_OFFENSIVE_REROLL,
+                activation -> SoulSiphonBehavior.activate(activation.event().attacker()),
+                provenance(event, ModEnchantments.SOUL_SIPHON.identifier()),
+                condition(CosmicPVE.id("soul_siphon_below_half"), procEvent -> procEvent.target() != null
+                        && SoulSiphonBehavior.targetBelowHalf(procEvent.target()) && ordinaryAttack(procEvent))));
+    }
+
+    private void addBlackout(ProcEvent event, List<ProcCandidate> result) {
+        int level = Math.min(4, event.effectiveEnchantments().level(ModEnchantments.BLACKOUT.identifier()));
+        if (level <= 0 || event.target() == null || armorSets == null || armorSetSuppression == null
+                || armorSets.resolve(event.target()).isEmpty()) return;
+        result.add(candidate(ModEnchantments.BLACKOUT.identifier(), ProcHook.ON_VALID_HIT,
+                BlackoutBehavior.chance(level), Optional.empty(), 0L, Optional.empty(),
+                ChildProcEligibility.LIMITED_OFFENSIVE_REROLL,
+                activation -> BlackoutBehavior.activate(armorSetSuppression, activation.event().target(), level,
+                        activation.event().serverTick()), provenance(event, ModEnchantments.BLACKOUT.identifier()),
+                condition(CosmicPVE.id("blackout_active_armor_set"), procEvent -> procEvent.target() != null
+                        && armorSets.resolve(procEvent.target()).isPresent() && ordinaryAttack(procEvent))));
+    }
+
+    private void addVoodoo(ProcEvent event, List<ProcCandidate> result) {
+        if (event.attacker() == null || event.target() == null) return;
+        int level = Math.min(6, EnchantmentLevels.onStack(
+                event.attacker().getItemBySlot(EquipmentSlot.HEAD), ModEnchantments.VOODOO));
+        if (level <= 0) return;
+        result.add(candidate(ModEnchantments.VOODOO.identifier(), ProcHook.ON_VALID_HIT,
+                VoodooBehavior.chance(level), Optional.empty(), 0L, Optional.empty(),
+                ChildProcEligibility.LIMITED_OFFENSIVE_REROLL,
+                activation -> stacks.addStack(activation.event().target(), VoodooBehavior.STACK_ID, 1,
+                        StackApplication.ephemeral(Optional.of(activation.event().attacker().getUUID()),
+                                activation.event().tracePlayerId()), activation.event().serverTick()),
+                new ProcProvenance(ProcSourceKind.ACTUAL_ENCHANTMENT, CosmicPVE.id("actual_helmet")),
+                condition(CosmicPVE.id("voodoo_ordinary_hit"), CosmicEnchantmentBehaviorResolver::ordinaryAttack)));
     }
 
     private void addUndeadRuse(ProcEvent event, List<ProcCandidate> result) {
