@@ -1,10 +1,10 @@
 # CosmicPVE Development Handoff
 
-Current accepted baseline: Step 7F. Hero Killer III, Soul Siphon IV, Blackout IV, Ender Walker V, and Voodoo VI are implemented, automated/runtime verified, and manually verified/accepted; the ordinary Enchantments 1.0 content pool contains exactly 46 real enchantments.
+Current accepted baseline: Step 7G/7G.1. Trials 1.1 and its corrective/presentation pass are implemented, automated/runtime verified, and manually verified/accepted. The ordinary Enchantments 1.0 content pool remains exactly 46 real enchantments.
 
-Repository state: Steps 6A–7F are implemented, automated/runtime verified, and manually accepted. The root `assets` source-art folder and root `trial rooms` structure-development folder remain deliberately untracked and unrelated.
+Repository state: Steps 6A–7G.1 are implemented, automated/runtime verified, and manually accepted. The root `assets` source-art folder and root `trial rooms` structure-development folder remain deliberately untracked and unrelated.
 
-Last handoff update: 2026-08-28
+Last handoff update: 2026-08-29
 
 Pinned environment:
 
@@ -350,6 +350,20 @@ Implemented one ephemeral armor-set suppression service used directly by the aut
 
 Implemented Ultimate boots `cosmicpve:ender_walker` V as a 10%-per-level incoming reduction only for Minecraft's Wither damage type and NeoForge's dedicated Poison damage type. It does not reduce Wither Skeleton melee, Wither Skull damage, generic magic, or standard Cosmic true packets. Implemented Elite helmet `cosmicpve:voodoo` VI as a Luck-eligible offensive 1%-per-level proc using the generalized `INDEPENDENT` negative-stack policy: each of at most five stacks expires after its own 200 ticks and contributes -3% to the affected entity's shared ordinary outgoing bucket, capped at -15%.
 
+### Step 7G/7G.1 — IMPLEMENTED; AUTOMATED/RUNTIME VERIFIED; MANUALLY VERIFIED/ACCEPTED
+
+Implemented production Hardcore room Haze and Seek from its tracked `35×15×33` structure. The room resolves one Emerald spawn marker, nine Gold objective candidates, and one Diamond exit marker. A frozen room-entry party size selects 3/4/5/6 distinct Iron pressure plates for 1/2/3/4 players. Only participating players satisfy the shared objectives. Each newly activated plate disappears without a drop, plays one targeted party-wide Wither-spawn cue, and sends the exact remaining-count message in bold italic `#1B4F2C`; the final message directs players to the exit. Active play runs one synchronized five-second Blindness II / ten-second clear cycle with ownership-safe cleanup and one targeted Beacon activate/deactivate cue at each real phase transition. The exact temporary loadout is Diamond Boots with Gears I, Iron Leggings with Nutrition III, and 32 Pumpkin Pies. The final plate creates one room-owned 2×1 gateway; the room completes only when a surviving participant subsequently enters it.
+
+Implemented production Demonic room Warzone Giants as tracked West/East `26×17×36` pieces composed along X. Its six-color wool floor is indexed once per attempt. A frozen room-entry party size creates 3/4/5/6 distinct Zombie-based Giants selected without replacement from Leather, Gold, Chainmail, Iron, Diamond, and Netherite tiers. Giants are six-times scale, have 100 HP, hidden-particle Strength II for 30 minutes, and no innate armor/toughness/attack bonus; they use full tier armor with independent Protection I–IV and carry tier axes with the canonical real Cosmic enchantments. Initial placement refreshes and validates the actual scale-six collision geometry against present floor, solid geometry, participants, and other Giants. A narrow in-wall damage hook rejects suffocation and uses the same validated recovery path, supplemented by a ten-tick active-Giant solid-collision check. Only the weakest surviving spawned tier accepts damage; locked hits are canceled before committed-damage/proc dispatch. The exact player build uses the real Yeti set, Lover/Santa/Purge Multi-Mask, White Scroll/Transmog metadata, canonical armor enchantments, and a real Maui's Hook Iron Sword. Maui's Hook was already implemented and required no dependency work.
+
+Warzone's bounded floor cycle is ten seconds normal, five seconds warning naming two distinct safe colors, then three seconds with the four unsafe colors absent before exact restoration. The pre-indexed per-color maps are mutated without rescanning the structure. Floor removal sends three targeted Warped Forest mood cues at 0/5/10 ticks. Falling participants are terminally removed at six blocks below indexed floor Y. Giants falling three blocks below floor Y or intersecting solid arena geometry move to a collision-safe currently present safe-color coordinate with health, tier, equipment, and vulnerability state preserved. Cleanup restores every indexed floor state, removes remaining Giants, cancels pending sound state, and clears room state/loadouts.
+
+Deadeye now treats its four target blocks as permanently visible trigger coordinates that cannot enter any hidden reveal group. The Resin target restores only its authored Resin path and West-side Purpur transition; the East Purpur parkour remains hidden until the separately visible Purpur target is struck, at which point the Purpur/Crimson continuation is restored. Diamond, Gold, final lever, and West/East composition remain unchanged.
+
+All nine Trial Trinket item names retain their canonical Skip/Time/Insurance family colors and are now bold; mechanics and applied-portal modifier presentation are unchanged.
+
+Trials 1.1 balance now uses exactly six of Raiding Rainbow's eight authored color platforms per attempt, preserving the same selected colors/platforms and hidden order across wrong resets. Hidden Graveyard snapshots entry party size and independently rolls each grave for a second Corpse at `20% × (partySize - 1)` while retaining the three-kill key threshold and completing only after every actually spawned Corpse dies. Zero-G is now Apprentice and its helmet additionally carries Implants III plus the real attached Lover Mask. The one-time Hardcore and Demonic phase-entry bonuses are each 2,400 ticks/two minutes; completion and Time Trinket awards are unchanged. Current pools are Apprentice four rooms, Hardcore three rooms, and Demonic ten rooms.
+
 ## 3. Current Real Enchantments
 
 These are registered through Minecraft's enchantment infrastructure, use actual enchantment data on the item, and are not present in normal enchanting-table, librarian, random-loot, random-equipment, or mob-equipment acquisition pools.
@@ -658,7 +672,7 @@ The following are confirmed in current source and permission-gated under `/cosmi
 - `/cosmic trial debug status|complete-room|continue|exit|abort`
 - `/cosmic trial debug timer set|add|remove <seconds>`
 - `/cosmic trial debug progress set <0..8>`
-- `/cosmic trial debug force-room <raiding_rainbow|circuit_circus|cold_snap|fire_colony|zero_g|bomb_squad|hidden_graveyard|deadeye>`
+- `/cosmic trial debug force-room <raiding_rainbow|circuit_circus|cold_snap|zero_g|fire_colony|bomb_squad|haze_seek|hidden_graveyard|deadeye|warzone_giants>`
 - `/cosmic trial debug restore <player>`
 - `/feed`, `/heal`, and `/restore` are separate permission-gated development convenience commands.
 
@@ -680,11 +694,11 @@ The final post-Orb capacity is no longer unresolved for current target classes: 
 
 ## 16. Current Next Milestone
 
-**Immediate next action: Step 7G — Trials 1.1 Content + Balance.**
+**Immediate next action: Step 8A — Armor Sets 1.0 + Mystery Spawners.**
 
 Current intended sequence:
 
-Step 7A Conquest Chests → Step 7B Tinkerer / Cosmic Dust → Step 7C canonical balance baseline, Gears, Permafrost, and Mortal Coil → Step 7D Self Destruct, Phoenix, Divine Immolation, Virus, and Devour → Step 7E Undead Ruse, Obliterate, Soul Tether, Dodge, and Leadership → Step 7F Hero Killer, Soul Siphon, Blackout, Ender Walker, and Voodoo → final Enchantments 1.0 balance pass when explicitly authorized → Fallen Heroes / G-Kit procurement redesign → V-Kits and M-Kit reconsideration → Heroic Enchantments → later major Dungeon, Invasion, economy, and world work.
+Step 8A is the authorized next bounded milestone: complete all eight canonical normal armor sets and their shared movement/category/cooldown/Omni foundations, then add the three Mystery Spawner reward items. Space Chest rebalance, Gear Tinkering, Personal Vaults, Heroic Enchantments, and Dungeon #1 remain deferred.
 
 The ordinary-enchantment expansion remains split across bounded patches. Step 7C is the explicit instruction that made the current canonical Design Doc enchantment-table values implementation-authoritative; later design edits still require their own explicit implementation milestone.
 
@@ -702,6 +716,13 @@ The ordinary-enchantment expansion remains split across bounded patches. Step 7C
 Preserve unrelated dirty changes. Never change pinned versions as a side effect of gameplay work. Prefer service-level rules and typed data over one-off event logic, and keep client-only classes isolated from dedicated-server loading.
 
 ## 18. Verification Snapshot
+
+For the accepted Step 7G/7G.1 closure:
+
+- `gradlew.bat cleanTest test build` passes all 432 JUnit tests across 116 suites with 0 failures, errors, or skips. Focused coverage pins both imported structures and composition, all four Deadeye targets outside hidden data, Resin/Purpur reveal separation, Haze party scaling/timings/exact formatted feedback and sound identities, Warzone party scaling/tier uniqueness/weakest-tier gate, two-safe/four-removed hazard semantics, three-pulse schedule, Strength II configuration, six-color Rainbow behavior, Hidden Graveyard party formula, room-pool distribution, Zero-G helmet additions, bold item/Trial Trinket presentation, and the two-minute phase-entry bonuses.
+- NeoForge `runGameTestServer` completes all three required GameTests successfully. Dedicated-server startup loads 1,462 recipes, atomically publishes 12 Trial rooms, and reaches `Done` without relevant codec, structure, datapack, entity, registry, or common-side classloading errors. Fresh-client startup completes resource reload, OpenAL initialization, and texture-atlas construction without relevant resource or sided-loading failures; the development machine's existing OpenGL debug-context `id=1167` messages remain unrelated to CosmicPVE resources.
+- All 201 tracked main-resource JSON files parse successfully. The tracked runtime resources contain Haze and Seek plus both Warzone Giants structure halves; the original root `trial rooms/` files remain untouched and untracked. `git diff --check` reports no whitespace errors beyond normal Windows line-ending notices. Pinned versions, identifiers, and the 46-enchantment registry remain unchanged.
+- Step 7G plus the Step 7G.1 correction is manually verified/accepted and ready for its closure commit. The user explicitly excluded approximate Leather/Iron/Netherite runtime damage measurement from this pass; Strength II is the only Giant offensive change.
 
 For the Step 7F candidate:
 

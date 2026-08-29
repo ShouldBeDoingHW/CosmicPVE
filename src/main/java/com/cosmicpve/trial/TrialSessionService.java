@@ -21,6 +21,8 @@ import com.cosmicpve.trial.room.ColdSnapService;
 import com.cosmicpve.trial.room.BombSquadService;
 import com.cosmicpve.trial.room.HiddenGraveyardService;
 import com.cosmicpve.trial.room.DeadeyeService;
+import com.cosmicpve.trial.room.HazeAndSeekService;
+import com.cosmicpve.trial.room.WarzoneGiantsService;
 import com.cosmicpve.combat.CosmicCombat;
 import com.cosmicpve.combat.execution.ExecutionCause;
 import com.cosmicpve.entity.undeadcorpse.UndeadCorpseEntity;
@@ -66,18 +68,21 @@ public final class TrialSessionService {
     public static final Identifier BOMB_SQUAD = CosmicPVE.id("trial/bomb_squad");
     public static final Identifier HIDDEN_GRAVEYARD = CosmicPVE.id("trial/hidden_graveyard");
     public static final Identifier DEADEYE = CosmicPVE.id("trial/deadeye");
+    public static final Identifier HAZE_AND_SEEK = CosmicPVE.id("trial/haze_seek");
+    public static final Identifier WARZONE_GIANTS = CosmicPVE.id("trial/warzone_giants");
     public static final Identifier APPRENTICE_REWARDS = CosmicPVE.id("trial/apprentice");
     public static final Identifier HARDCORE_REWARDS = CosmicPVE.id("trial/hardcore_development");
     public static final Identifier DEMONIC_REWARDS = CosmicPVE.id("trial/demonic_development");
-    private static final List<Identifier> APPRENTICE_ROOMS = List.of(CIRCUIT_CIRCUS, RAIDING_RAINBOW, COLD_SNAP);
-    private static final List<Identifier> HARDCORE_ROOMS = List.of(FIRE_COLONY, ZERO_G, BOMB_SQUAD);
+    private static final List<Identifier> APPRENTICE_ROOMS = List.of(CIRCUIT_CIRCUS, RAIDING_RAINBOW, COLD_SNAP, ZERO_G);
+    private static final List<Identifier> HARDCORE_ROOMS = List.of(FIRE_COLONY, BOMB_SQUAD, HAZE_AND_SEEK);
     private static final List<Identifier> DEMONIC_ROOMS = java.util.stream.Stream.of(
-            APPRENTICE_ROOMS.stream(), HARDCORE_ROOMS.stream(), java.util.stream.Stream.of(HIDDEN_GRAVEYARD, DEADEYE))
+            APPRENTICE_ROOMS.stream(), HARDCORE_ROOMS.stream(), java.util.stream.Stream.of(HIDDEN_GRAVEYARD, DEADEYE, WARZONE_GIANTS))
             .flatMap(java.util.function.Function.identity()).toList();
     static final int APPRENTICE_REWARD_TIME = 600;
     static final int HARDCORE_REWARD_TIME = 300;
-    static final int PHASE_ENTRY_BONUS = 3_600;
+    static final int PHASE_ENTRY_BONUS = 2_400;
     private static final ExecutionCause DEADEYE_FALL = new ExecutionCause(CosmicPVE.id("trial_deadeye_fall"));
+    private static final ExecutionCause WARZONE_FALL = new ExecutionCause(CosmicPVE.id("trial_warzone_fall"));
 
     private final TrialSessionRepository repository;
     private final TrialInventoryTransactionService inventories;
@@ -96,6 +101,8 @@ public final class TrialSessionService {
     private final BombSquadService bombSquad = new BombSquadService();
     private final HiddenGraveyardService hiddenGraveyard = new HiddenGraveyardService();
     private final DeadeyeService deadeye = new DeadeyeService();
+    private final HazeAndSeekService haze = new HazeAndSeekService();
+    private final WarzoneGiantsService warzone = new WarzoneGiantsService();
     private final TrialTimerDisplayService timerDisplay = new TrialTimerDisplayService();
     private final TrialCelebrationService celebrations = new TrialCelebrationService();
     private final TrialDecisionEntryService decisionEntries = new TrialDecisionEntryService();
@@ -186,6 +193,27 @@ public final class TrialSessionService {
                 if (maintenanceTick && HIDDEN_GRAVEYARD.equals(room)) hiddenGraveyard.tick(level, session);
                 if (maintenanceTick && FIRE_COLONY.equals(room)) fireColony.tick(level, session);
                 TrialSession current = session;
+                if (HAZE_AND_SEEK.equals(room)) {
+                    var result = haze.tick(level, session);
+                    current = session.withProgress(session.progress().withEncounter(result.encounter()));
+                    if (result.complete()) { repository.publish(server, current); completeProductionRoom(server); return; }
+                }
+                if (WARZONE_GIANTS.equals(room)) {
+                    var result = warzone.tick(level, session);
+                    if (result.warningCountdown() > 0 && result.warningColors().size() == 2)
+                        forOnline(server, session, player -> titles.warzoneWarning(player,
+                                result.warningColors().get(0), result.warningColors().get(1), result.warningCountdown()));
+                    if (result.hazardSound()) forOnline(server, session, player -> TrialTitleService.playForPlayer(
+                            player, net.minecraft.sounds.SoundEvents.AMBIENT_WARPED_FOREST_MOOD.value(), 2.0F, 1.0F));
+                    current = session.withProgress(session.progress().withEncounter(result.encounter()));
+                    repository.publishVolatile(server, current);
+                    for (UUID fallen : result.fallenPlayers()) {
+                        ServerPlayer player = server.getPlayerList().getPlayer(fallen);
+                        if (player != null) CosmicCombat.executions().execute(player, WARZONE_FALL, null, null);
+                    }
+                    current = active(server).orElse(null);
+                    if (current == null || current.currentRoom().filter(WARZONE_GIANTS::equals).isEmpty()) return;
+                }
                 if (DEADEYE.equals(room)) {
                     current = tickDeadeyeFalls(server, session);
                     if (current == null) return;
@@ -247,6 +275,8 @@ public final class TrialSessionService {
                 rainbow.activate(server.getLevel(TrialRuntime.INSTANCE_DIMENSION), active, roomBounds(active));
             if (active.currentRoom().filter(ZERO_G::equals).isPresent())
                 zeroG.activate(server.getLevel(TrialRuntime.INSTANCE_DIMENSION), active);
+            if (active.currentRoom().filter(HAZE_AND_SEEK::equals).isPresent())
+                haze.activate(server.getLevel(TrialRuntime.INSTANCE_DIMENSION), active);
         } else publishTick(server, session.withStateTicks(next));
     }
 
@@ -431,6 +461,8 @@ public final class TrialSessionService {
         }
         else if (room.equals(DEADEYE)) encounter = deadeye.initialize(
                 level, session, ROOM_ORIGIN, participantSpawn.below(), placed.bounds());
+        else if (room.equals(HAZE_AND_SEEK)) encounter = haze.initialize(level, session, placed.bounds(), net.minecraft.util.RandomSource.create());
+        else if (room.equals(WARZONE_GIANTS)) encounter = warzone.initialize(level, session, placed.bounds(), net.minecraft.util.RandomSource.create());
         else { fireColony.initialize(level, session, placed.bounds()); encounter = TrialEncounterState.EMPTY; }
         roomSpawns.put(session.sessionId(), participantSpawn);
         TrialProgress progress = session.progress().beginRoom(room, encounter);
@@ -447,6 +479,8 @@ public final class TrialSessionService {
             else if (room.equals(COLD_SNAP)) loadouts.applyColdSnap(player);
             else if (room.equals(BOMB_SQUAD)) loadouts.applyBombSquad(player);
             else if (room.equals(DEADEYE)) loadouts.applyDeadeye(player);
+            else if (room.equals(HAZE_AND_SEEK)) loadouts.applyHazeAndSeek(player);
+            else if (room.equals(WARZONE_GIANTS)) loadouts.applyWarzoneGiants(player);
             else loadouts.applyHiddenGraveyard(player);
             teleport(player, roomSpawns.get(session.sessionId()));
         });
@@ -461,7 +495,7 @@ public final class TrialSessionService {
         if (result.color() == null) return;
         if (!result.correct()) broadcast(level.getServer(), session, "You killed a zombie in the wrong order!");
         else broadcast(level.getServer(), session, result.color().display() + " was correct! "
-                + result.nextState().sequenceProgress() + "/8!");
+                + result.nextState().sequenceProgress() + "/6!");
         TrialSession next = session.withProgress(session.progress().withEncounter(result.nextState()));
         repository.publish(level.getServer(), next);
         if (result.complete()) completeProductionRoom(level.getServer());
@@ -477,6 +511,30 @@ public final class TrialSessionService {
         TrialSession next = session.withProgress(session.progress().withEncounter(result.encounter()));
         repository.publish(level.getServer(), next);
         if (result.complete()) completeProductionRoom(level.getServer());
+    }
+
+    public void onWarzoneGiantDeath(Zombie zombie) {
+        if (!(zombie.level() instanceof ServerLevel level) || !WarzoneGiantsService.encounterGiant(zombie)) return;
+        TrialSession session = active(level.getServer()).orElse(null);
+        if (session == null || session.state() != TrialLifecycleState.ROOM_ACTIVE
+                || session.currentRoom().filter(WARZONE_GIANTS::equals).isEmpty()) return;
+        var result = warzone.onDeath(zombie);
+        if (result.accepted() && result.complete()) completeProductionRoom(level.getServer());
+    }
+
+    public boolean allowsWarzoneGiantDamage(Zombie zombie) {
+        if (!WarzoneGiantsService.encounterGiant(zombie)) return true;
+        TrialSession session = active(zombie.level().getServer()).orElse(null);
+        return session != null && session.state() == TrialLifecycleState.ROOM_ACTIVE
+                && session.currentRoom().filter(WARZONE_GIANTS::equals).isPresent() && warzone.damageAllowed(zombie);
+    }
+
+    public boolean recoverWarzoneGiantFromSuffocation(Zombie zombie) {
+        if (!(zombie.level() instanceof ServerLevel level) || !WarzoneGiantsService.encounterGiant(zombie)) return false;
+        TrialSession session = active(level.getServer()).orElse(null);
+        return session != null && session.state() == TrialLifecycleState.ROOM_ACTIVE
+                && session.currentRoom().filter(WARZONE_GIANTS::equals).isPresent()
+                && warzone.recoverFromSuffocation(level, session, zombie);
     }
 
     public boolean onCircuitTarget(ServerPlayer player, BlockPos target) {
@@ -665,6 +723,8 @@ public final class TrialSessionService {
                 + DeadeyeService.SECTION_COUNT + " fallY=" + threshold
                 + " participants=" + session.participants().size();
     }
+    public String hazeStatus(UUID sessionId) { return haze.status(sessionId); }
+    public String warzoneStatus(UUID sessionId) { return warzone.status(sessionId); }
     public String productionPoolStatus(TrialSession session) {
         return roomPool(session.progress().phase()).stream()
                 .map(room -> room.getPath().substring(room.getPath().lastIndexOf('/') + 1) + "=" + selection.weight(session, room))
@@ -740,6 +800,7 @@ public final class TrialSessionService {
     public void onDisconnect(ServerPlayer player) {
         celebrations.cancel(player.getUUID());
         active(player.level().getServer()).filter(session -> session.activeParticipant(player.getUUID())).ifPresent(session -> {
+            if (session.currentRoom().filter(HAZE_AND_SEEK::equals).isPresent()) haze.removeParticipant(player, session.sessionId());
             timerDisplay.hide(player);
             TrialSession next = session.removeParticipant(player.getUUID());
             if (next.participants().isEmpty()) cleanupAndClose(player.level().getServer(), next); else repository.publish(player.level().getServer(), next);
@@ -754,6 +815,7 @@ public final class TrialSessionService {
     }
     public void onDeath(ServerPlayer player) {
         active(player.level().getServer()).filter(session -> session.activeParticipant(player.getUUID())).ifPresent(session -> {
+            if (session.currentRoom().filter(HAZE_AND_SEEK::equals).isPresent()) haze.removeParticipant(player, session.sessionId());
             int level = session.progress().portalModifiers().insuranceLevel();
             if (level > 0 && !prepareInsurance(player, session, net.minecraft.util.RandomSource.create()))
                 CosmicPVE.LOGGER.error("Could not durably prepare insured Trial recovery for {}", player.getUUID());
@@ -792,9 +854,9 @@ public final class TrialSessionService {
         if (session == null || session.state() != TrialLifecycleState.DECISION)
             return TrialOperationResult.rejected("Force-room requires an active Decision Box.");
         if (!APPRENTICE_ROOMS.contains(room) && !HARDCORE_ROOMS.contains(room)
-                && !room.equals(HIDDEN_GRAVEYARD) && !room.equals(DEADEYE))
+                && !room.equals(HIDDEN_GRAVEYARD) && !room.equals(DEADEYE) && !room.equals(WARZONE_GIANTS))
             return TrialOperationResult.rejected("Unknown production Trial room: " + room);
-        TrialPhase phase = room.equals(HIDDEN_GRAVEYARD) || room.equals(DEADEYE) ? TrialPhase.DEMONIC
+        TrialPhase phase = room.equals(HIDDEN_GRAVEYARD) || room.equals(DEADEYE) || room.equals(WARZONE_GIANTS) ? TrialPhase.DEMONIC
                 : HARDCORE_ROOMS.contains(room) ? TrialPhase.HARDCORE : TrialPhase.APPRENTICE;
         TrialSession prepared = session.withProgress(session.progress().debugEnterPhase(phase));
         beginRoom(server, prepared, room);
@@ -820,6 +882,8 @@ public final class TrialSessionService {
             if (session.currentRoom().filter(BOMB_SQUAD::equals).isPresent()) bombSquad.cleanup(instance, session.sessionId());
             if (session.currentRoom().filter(HIDDEN_GRAVEYARD::equals).isPresent()) hiddenGraveyard.cleanup(instance, session.sessionId());
             if (session.currentRoom().filter(DEADEYE::equals).isPresent()) deadeye.cleanup(session.sessionId());
+            if (session.currentRoom().filter(HAZE_AND_SEEK::equals).isPresent()) haze.cleanup(instance, session);
+            if (session.currentRoom().filter(WARZONE_GIANTS::equals).isPresent()) warzone.cleanup(instance, session.sessionId());
             fireColony.cleanup(session.sessionId()); coldSnap.cleanup(session.sessionId());
             session.protectedBounds().forEach(bounds -> structures.cleanup(instance, bounds));
         }
@@ -832,6 +896,8 @@ public final class TrialSessionService {
         if (session.currentRoom().filter(BOMB_SQUAD::equals).isPresent()) bombSquad.cleanup(level, session.sessionId());
         if (session.currentRoom().filter(HIDDEN_GRAVEYARD::equals).isPresent()) hiddenGraveyard.cleanup(level, session.sessionId());
         if (session.currentRoom().filter(DEADEYE::equals).isPresent()) deadeye.cleanup(session.sessionId());
+        if (session.currentRoom().filter(HAZE_AND_SEEK::equals).isPresent()) haze.cleanup(level, session);
+        if (session.currentRoom().filter(WARZONE_GIANTS::equals).isPresent()) warzone.cleanup(level, session.sessionId());
         InstanceBounds decision = InstanceBounds.from(CosmicContent.repository().requireTrialRoom(DECISION_ROOM).bounds().at(DECISION_ORIGIN));
         session.protectedBounds().stream().filter(bounds -> !bounds.equals(decision)).forEach(bounds -> structures.cleanup(level, bounds));
     }

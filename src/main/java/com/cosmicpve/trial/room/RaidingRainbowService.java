@@ -22,14 +22,19 @@ public final class RaidingRainbowService {
 
     public TrialEncounterState initialize(ServerLevel level, TrialSession session, InstanceBounds bounds, RandomSource random) {
         var sequence = RaidingRainbowLogic.shuffled(random);
+        var platforms = new ArrayList<Integer>();
+        for (int i = 0; i < 8; i++) platforms.add(i);
+        for (int i = platforms.size() - 1; i > 0; i--) java.util.Collections.swap(platforms, i, random.nextInt(i + 1));
+        platforms = new ArrayList<>(platforms.subList(0, RaidingRainbowLogic.ACTIVE_COLORS));
+        platforms.sort(Integer::compareTo);
         return new TrialEncounterState(sequence.stream().map(RainbowColor::serialized).toList(), 0,
-                List.of(), List.of(), List.of());
+                platforms.stream().map(index -> "platform=" + index).toList(), List.of(), List.of());
     }
 
     public KillResult killed(ServerLevel level, TrialSession session, Zombie zombie, InstanceBounds bounds) {
         RainbowColor killed = color(zombie);
         var encounter = session.progress().encounter();
-        if (killed == null || encounter.hiddenSequence().size() != RainbowColor.values().length)
+        if (killed == null || encounter.hiddenSequence().size() != RaidingRainbowLogic.ACTIVE_COLORS)
             return KillResult.ignored(encounter);
         var sequence = encounter.hiddenSequence().stream().map(RainbowColor::parse).toList();
         var step = RaidingRainbowLogic.evaluate(sequence, encounter.sequenceProgress(), killed);
@@ -37,10 +42,10 @@ public final class RaidingRainbowService {
             clearZombies(level, bounds);
             spawnFullSet(level, session, bounds);
             return new KillResult(false, false, killed, new TrialEncounterState(encounter.hiddenSequence(), 0,
-                    List.of(), List.of(), List.of()));
+                    encounter.pillarMaterials(), List.of(), List.of()));
         }
         return new KillResult(true, step.complete(), killed,
-                new TrialEncounterState(encounter.hiddenSequence(), step.progress(), List.of(), List.of(), List.of()));
+                new TrialEncounterState(encounter.hiddenSequence(), step.progress(), encounter.pillarMaterials(), List.of(), List.of()));
     }
 
     public void spawnFullSet(ServerLevel level, TrialSession session, InstanceBounds bounds) {
@@ -49,9 +54,14 @@ public final class RaidingRainbowService {
             if (level.getBlockState(pos).is(Blocks.GOLD_BLOCK)) spawns.add(pos.immutable());
         spawns.sort(BlockPos::compareTo);
         if (spawns.size() != 8) throw new IllegalStateException("Raiding Rainbow requires eight Gold spawn blocks, found " + spawns.size());
-        for (int index = 0; index < RainbowColor.values().length; index++) {
-            RainbowColor color = RainbowColor.values()[index];
-            BlockPos pos = spawns.get(index);
+        var encounter = session.progress().encounter();
+        var colors = encounter.hiddenSequence().stream().map(RainbowColor::parse).toList();
+        var platforms = encounter.pillarMaterials().stream().map(value -> Integer.parseInt(value.substring("platform=".length()))).toList();
+        if (colors.size() != RaidingRainbowLogic.ACTIVE_COLORS || platforms.size() != RaidingRainbowLogic.ACTIVE_COLORS)
+            throw new IllegalStateException("Raiding Rainbow requires six persisted colors and platforms");
+        for (int index = 0; index < RaidingRainbowLogic.ACTIVE_COLORS; index++) {
+            RainbowColor color = colors.get(index);
+            BlockPos pos = spawns.get(platforms.get(index));
             Zombie zombie = createZombie(level, session, color, pos);
             if (!level.addFreshEntity(zombie)) throw new IllegalStateException(
                     "Server rejected fresh Raiding Rainbow Zombie " + color.serialized() + " / " + zombie.getUUID());

@@ -38,6 +38,8 @@ class BlackScrollExtractionTest {
         var malformed = com.google.gson.JsonParser.parseString("{\"returned_success_rate\":101}");
         assertTrue(BlackScrollData.CODEC.parse(JsonOps.INSTANCE, malformed).error().isPresent());
         assertEquals(1, BlackScrollItem.MAX_STACK_SIZE);
+        assertTrue(new ItemStack(ModItems.BLACK_SCROLL.get()).getHoverName().getStyle().isBold());
+        assertTrue(scroll(50).getHoverName().getStyle().isBold());
     }
 
     @Test

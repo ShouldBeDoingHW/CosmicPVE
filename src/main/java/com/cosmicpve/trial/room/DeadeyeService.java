@@ -22,7 +22,7 @@ public final class DeadeyeService {
     public static final BlockPos WEST_SPAWN_MARKER = new BlockPos(2, 16, 21);
     public static final BlockPos FINAL_LEVER_LOCAL = new BlockPos(EAST_OFFSET_X + 27, 23, 21);
 
-    public enum Section { DIAMOND, GOLD, RESIN_PURPUR, CRIMSON }
+    public enum Section { DIAMOND, GOLD, RESIN_TRANSITION, PURPUR_CRIMSON }
 
     private static final List<BlockPos> TARGETS = List.of(
             new BlockPos(11, 20, 3),
@@ -106,18 +106,22 @@ public final class DeadeyeService {
         groups.put(Section.GOLD, positions(
                 16,13,11, 16,13,14, 16,13,17, 17,15,20, 20,16,20, 20,16,24,
                 16,14,17, 20,15,28, 22,15,31, 16,15,17));
-        var resinPurpur = new ArrayList<BlockPos>(positions(
+        groups.put(Section.RESIN_TRANSITION, positions(
                 29,15,31, 31,16,33, 33,17,30, 33,17,34, 35,17,19, 35,17,23, 35,17,27,
                 35,21,19, 35,21,23, 25,15,31, 35,18,19, 35,18,23, 35,19,19, 35,19,23,
                 35,20,19, 35,20,23, 36,17,16, 36,18,13, 37,18,10, 40,19,10,
                 40,20,2, 40,21,2, 40,22,2));
-        resinPurpur.addAll(offsetX(positions(1,19,10, 3,19,13, 0,20,3, 6,20,14,
-                0,21,3, 9,21,14, 0,22,3), EAST_OFFSET_X));
-        groups.put(Section.RESIN_PURPUR, List.copyOf(resinPurpur));
-        groups.put(Section.CRIMSON, offsetX(positions(
+        var purpurCrimson = new ArrayList<>(offsetX(positions(
+                1,19,10, 3,19,13, 0,20,3, 6,20,14, 0,21,3, 9,21,14, 0,22,3), EAST_OFFSET_X));
+        purpurCrimson.addAll(offsetX(positions(
                 13,22,18, 15,23,20, 17,24,22, 17,24,26, 21,24,27,
                 12,21,15, 24,23,26), EAST_OFFSET_X));
-        return Map.copyOf(groups);
+        groups.put(Section.PURPUR_CRIMSON, List.copyOf(purpurCrimson));
+        Map<Section, List<BlockPos>> result = Map.copyOf(groups);
+        for (var entry : result.entrySet()) for (BlockPos position : entry.getValue())
+            if (TARGETS.contains(position)) throw new IllegalStateException(
+                    "Deadeye target must remain visible: " + position + " in " + entry.getKey());
+        return result;
     }
 
     private static List<BlockPos> positions(int... coordinates) {

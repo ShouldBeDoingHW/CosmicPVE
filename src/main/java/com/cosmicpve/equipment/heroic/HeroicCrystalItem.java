@@ -10,6 +10,7 @@ import net.minecraft.world.item.ItemStack;
 public final class HeroicCrystalItem extends Item {
     public static final int MAX_STACK_SIZE = 1;
     public static final int NAME_COLOR = 0xAA00AA;
+    public static final boolean FORCE_GLINT = true;
 
     public HeroicCrystalItem(Properties properties) {
         super(properties);
@@ -17,7 +18,13 @@ public final class HeroicCrystalItem extends Item {
 
     @Override
     public Component getName(ItemStack stack) {
-        return super.getName(stack).copy().withColor(NAME_COLOR);
+        return super.getName(stack).copy()
+                .withStyle(style -> style.withColor(NAME_COLOR).withBold(true));
+    }
+
+    @Override
+    public boolean isFoil(ItemStack stack) {
+        return FORCE_GLINT;
     }
 
     public static List<Component> lore() {

@@ -1,6 +1,6 @@
 {
   "display_name": "Zero-G",
-  "category": "hardcore",
+  "category": "apprentice",
   "pieces": [{"structure": "cosmicpve:trial/zero_g"}],
   "spawn_marker": "emerald_block",
   "spawn_marker_position": [10, 0, 10],

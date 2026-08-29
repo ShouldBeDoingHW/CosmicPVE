@@ -79,7 +79,7 @@ public final class TrialCommands {
                                                 ctx.getSource().getServer(), IntegerArgumentType.getInteger(ctx, "count")))))))
                         .then(Commands.literal("force-room").then(Commands.argument("room", StringArgumentType.word())
                                 .suggests((ctx, builder) -> net.minecraft.commands.SharedSuggestionProvider.suggest(
-                                        new String[]{"raiding_rainbow","circuit_circus","cold_snap","fire_colony","zero_g","bomb_squad","hidden_graveyard","deadeye"}, builder))
+                                        new String[]{"raiding_rainbow","circuit_circus","cold_snap","zero_g","fire_colony","bomb_squad","haze_seek","hidden_graveyard","deadeye","warzone_giants"}, builder))
                                 .executes(ctx -> forceRoom(ctx.getSource(), StringArgumentType.getString(ctx, "room")))))
                         .then(Commands.literal("timer")
                                 .then(Commands.literal("set").then(Commands.argument("seconds", IntegerArgumentType.integer(0))
@@ -178,6 +178,10 @@ public final class TrialCommands {
         if (session.currentRoom().filter(com.cosmicpve.trial.TrialSessionService.DEADEYE::equals).isPresent())
             source.sendSuccess(() -> Component.literal("  "
                     + TrialRuntime.sessions().deadeyeStatus(session)), false);
+        if (session.currentRoom().filter(com.cosmicpve.trial.TrialSessionService.HAZE_AND_SEEK::equals).isPresent())
+            source.sendSuccess(() -> Component.literal("  " + TrialRuntime.sessions().hazeStatus(session.sessionId())), false);
+        if (session.currentRoom().filter(com.cosmicpve.trial.TrialSessionService.WARZONE_GIANTS::equals).isPresent())
+            source.sendSuccess(() -> Component.literal("  " + TrialRuntime.sessions().warzoneStatus(session.sessionId())), false);
         for (var id : session.participants()) {
             var player = source.getServer().getPlayerList().getPlayer(id);
             String snapshot = player == null ? "offline/preserved" : String.valueOf(player.getExistingDataOrNull(ModAttachments.TRIAL_PLAYER_STATE));

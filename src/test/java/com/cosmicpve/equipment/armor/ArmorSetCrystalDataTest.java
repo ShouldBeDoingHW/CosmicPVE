@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.cosmicpve.data.component.*;
 import java.util.List;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.ItemStack;
 import org.junit.jupiter.api.Test;
 
 class ArmorSetCrystalDataTest {
@@ -25,6 +26,14 @@ class ArmorSetCrystalDataTest {
         assertTrue(ArmorCrystalApplicationService.rollSucceeds(50, () -> { calls.incrementAndGet(); return 50; }));
         assertEquals(1, calls.get());
         assertFalse(ArmorCrystalApplicationService.rollSucceeds(50, () -> 51));
+    }
+    @Test void crystalNamesAreBoldWithOrWithoutResolvedIdentity() {
+        var crystal = new ItemStack(com.cosmicpve.registry.ModItems.ARMOR_SET_CRYSTAL.get());
+        assertTrue(crystal.getHoverName().getStyle().isBold());
+        crystal.set(com.cosmicpve.registry.ModDataComponents.ARMOR_SET_CRYSTAL.get(),
+                new ArmorSetCrystalData(1, identity(), 75));
+        assertTrue(crystal.getHoverName().getStyle().isBold());
+        assertEquals(identity().color(), crystal.getHoverName().getStyle().getColor().getValue());
     }
     @Test void staleTargetIsRejectedBeforeMutationOrRoll() {
         var expected = new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.STONE);

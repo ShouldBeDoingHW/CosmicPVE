@@ -27,6 +27,8 @@ class HeroicApplicationServiceTest {
     @Test void crystalUsesCanonicalPurpleNameAndYellowBodyLore() {
         var crystal = new ItemStack(ModItems.HEROIC_CRYSTAL.get());
         assertEquals(HeroicCrystalItem.NAME_COLOR, crystal.getHoverName().getStyle().getColor().getValue());
+        assertTrue(crystal.getHoverName().getStyle().isBold());
+        assertTrue(crystal.hasFoil());
         assertEquals(2, HeroicCrystalItem.lore().size());
         HeroicCrystalItem.lore().forEach(line -> assertEquals(
                 net.minecraft.ChatFormatting.YELLOW.getColor(), line.getStyle().getColor().getValue()));

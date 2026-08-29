@@ -55,6 +55,14 @@ class HiddenGraveyardLogicTest {
         assertEquals(1,three.aegisMinimum()); assertEquals(6,three.aegisMaximum());
     }
 
+    @Test void graveDoubleChanceUsesFixedRoomEntryPartySizeFormula() {
+        assertEquals(0.0D, HiddenGraveyardService.doubleCorpseChance(1));
+        assertEquals(0.2D, HiddenGraveyardService.doubleCorpseChance(2));
+        assertEquals(0.4D, HiddenGraveyardService.doubleCorpseChance(3));
+        assertEquals(0.6D, HiddenGraveyardService.doubleCorpseChance(4), 1.0E-9D);
+        assertThrows(IllegalArgumentException.class, () -> HiddenGraveyardService.doubleCorpseChance(0));
+    }
+
     @Test void temporaryPlayerLoadoutConstantsMatchCanonicalRoomDesign() {
         assertEquals(4,TrialRoomLoadoutService.HIDDEN_GRAVEYARD_PROTECTION);
         assertEquals(3,TrialRoomLoadoutService.HIDDEN_GRAVEYARD_UNBREAKING);

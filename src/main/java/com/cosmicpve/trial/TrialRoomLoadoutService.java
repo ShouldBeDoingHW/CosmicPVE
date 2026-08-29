@@ -14,12 +14,23 @@ import net.minecraft.world.item.component.DyedItemColor;
 import com.cosmicpve.registry.ModEnchantments;
 import com.cosmicpve.registry.ModDataComponents;
 import com.cosmicpve.data.component.CustomEnchantMetadata;
+import com.cosmicpve.CosmicPVE;
+import com.cosmicpve.content.CosmicContent;
+import com.cosmicpve.data.component.ArmorSetIdentity;
+import com.cosmicpve.equipment.armor.ArmorSetIds;
+import com.cosmicpve.equipment.mask.MaskItemFactory;
+import com.cosmicpve.equipment.skin.WeaponSkinApplicationService;
+import com.cosmicpve.equipment.skin.WeaponSkinDefinitions;
+import com.cosmicpve.equipment.skin.WeaponSkinItemFactory;
+import java.util.List;
 
 public final class TrialRoomLoadoutService {
     public static final int FIRE_COLONY_ARMOR_COLOR = 0xFF0000;
     public static final int ZERO_G_PROTECTION_LEVEL = 4;
     public static final int ZERO_G_ANGELIC_LEVEL = 5;
     public static final int ZERO_G_UNBREAKING_LEVEL = 3;
+    public static final int ZERO_G_IMPLANTS_LEVEL = 3;
+    public static final net.minecraft.resources.Identifier ZERO_G_MASK_ID = CosmicPVE.id("lover");
     public static final int ZERO_G_GOLDEN_APPLES = 2;
     public static final int ZERO_G_MILK_BUCKETS = 3;
     public static final int RAIDING_RAINBOW_UNBREAKING_LEVEL = 3;
@@ -45,6 +56,7 @@ public final class TrialRoomLoadoutService {
     public static final int DEADEYE_NUTRITION = 3;
     public static final int DEADEYE_LIGHTNING = 4;
     public static final int DEADEYE_EAGLE_EYE = 5;
+    public static final int HAZE_PUMPKIN_PIES = 32;
     public static final java.util.List<net.minecraft.world.item.Item> RAIDING_RAINBOW_ARMOR = java.util.List.of(
             Items.NETHERITE_HELMET, Items.NETHERITE_CHESTPLATE, Items.NETHERITE_LEGGINGS, Items.NETHERITE_BOOTS);
     private final TrialInventoryTransactionService inventories;
@@ -99,6 +111,85 @@ public final class TrialRoomLoadoutService {
         player.getInventory().setItem(2, new ItemStack(Items.MILK_BUCKET));
         player.getInventory().setItem(3, new ItemStack(Items.MILK_BUCKET));
         player.getInventory().setSelectedSlot(0);
+    }
+    public void applyHazeAndSeek(ServerPlayer player) {
+        clear(player);
+        var registry = player.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
+        ItemStack leggings = new ItemStack(Items.IRON_LEGGINGS);
+        EnchantmentHelper.updateEnchantments(leggings, mutable -> mutable.set(registry.getOrThrow(ModEnchantments.NUTRITION), 3));
+        player.setItemSlot(EquipmentSlot.LEGS, leggings);
+        ItemStack boots = new ItemStack(Items.DIAMOND_BOOTS);
+        EnchantmentHelper.updateEnchantments(boots, mutable -> mutable.set(registry.getOrThrow(ModEnchantments.GEARS), 1));
+        player.setItemSlot(EquipmentSlot.FEET, boots);
+        player.getInventory().setItem(0, new ItemStack(Items.PUMPKIN_PIE, HAZE_PUMPKIN_PIES));
+        player.getInventory().setSelectedSlot(0);
+    }
+    public void applyWarzoneGiants(ServerPlayer player) {
+        clear(player);
+        var registry = player.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
+        ItemStack helmet = warzoneArmor(Items.IRON_HELMET, EquipmentSlot.HEAD, registry);
+        ItemStack masks = MaskItemFactory.create(List.of(CosmicPVE.id("lover"), CosmicPVE.id("santa"), CosmicPVE.id("purge")));
+        helmet.set(ModDataComponents.MASK_LOADOUT.get(), masks.get(ModDataComponents.MASK_ITEM.get()));
+        player.setItemSlot(EquipmentSlot.HEAD, helmet);
+        player.setItemSlot(EquipmentSlot.CHEST, warzoneArmor(Items.IRON_CHESTPLATE, EquipmentSlot.CHEST, registry));
+        player.setItemSlot(EquipmentSlot.LEGS, warzoneArmor(Items.IRON_LEGGINGS, EquipmentSlot.LEGS, registry));
+        player.setItemSlot(EquipmentSlot.FEET, warzoneArmor(Items.IRON_BOOTS, EquipmentSlot.FEET, registry));
+
+        ItemStack sword = new ItemStack(Items.IRON_SWORD);
+        EnchantmentHelper.updateEnchantments(sword, mutable -> {
+            mutable.set(registry.getOrThrow(Enchantments.SHARPNESS), 5);
+            mutable.set(registry.getOrThrow(ModEnchantments.RAGE), 6);
+            mutable.set(registry.getOrThrow(ModEnchantments.DOUBLESTRIKE), 3);
+            mutable.set(registry.getOrThrow(ModEnchantments.EXECUTE), 5);
+            mutable.set(registry.getOrThrow(ModEnchantments.TRAP), 3);
+            mutable.set(registry.getOrThrow(ModEnchantments.POISON), 3);
+        });
+        applyProtectedTransmog(sword);
+        ItemStack skin = WeaponSkinItemFactory.create(WeaponSkinDefinitions.MAUIS_HOOK);
+        var outcome = new WeaponSkinApplicationService().apply(skin, sword, skin, sword);
+        if (outcome != WeaponSkinApplicationService.ApplyOutcome.SUCCESS)
+            throw new IllegalStateException("Could not attach Maui's Hook to Warzone sword: " + outcome);
+        player.getInventory().setItem(0, sword);
+        player.getInventory().setItem(1, new ItemStack(Items.ENDER_PEARL, 2));
+        player.getInventory().setItem(8, new ItemStack(Items.COOKED_PORKCHOP, 16));
+        player.getInventory().setSelectedSlot(0);
+    }
+
+    private static ItemStack warzoneArmor(net.minecraft.world.item.Item item, EquipmentSlot slot,
+            net.minecraft.core.Registry<net.minecraft.world.item.enchantment.Enchantment> registry) {
+        ItemStack stack = new ItemStack(item);
+        EnchantmentHelper.updateEnchantments(stack, mutable -> {
+            mutable.set(registry.getOrThrow(Enchantments.PROTECTION), 4);
+            mutable.set(registry.getOrThrow(Enchantments.UNBREAKING), 3);
+            if (slot == EquipmentSlot.HEAD) {
+                mutable.set(registry.getOrThrow(ModEnchantments.IMPLANTS), 3);
+                mutable.set(registry.getOrThrow(ModEnchantments.ENDER_SHIFT), 3);
+                mutable.set(registry.getOrThrow(ModEnchantments.GLOWING), 1);
+            } else if (slot == EquipmentSlot.CHEST) {
+                mutable.set(registry.getOrThrow(ModEnchantments.PERMAFROST), 6);
+                mutable.set(registry.getOrThrow(ModEnchantments.ARMORED), 4);
+                mutable.set(registry.getOrThrow(ModEnchantments.MOLTEN), 4);
+            } else if (slot == EquipmentSlot.LEGS) {
+                mutable.set(registry.getOrThrow(ModEnchantments.LUCK), 10);
+                mutable.set(registry.getOrThrow(ModEnchantments.CACTUS), 2);
+                mutable.set(registry.getOrThrow(ModEnchantments.NUTRITION), 3);
+                mutable.set(registry.getOrThrow(ModEnchantments.SELF_DESTRUCT), 3);
+            } else if (slot == EquipmentSlot.FEET) {
+                mutable.set(registry.getOrThrow(ModEnchantments.GEARS), 3);
+                mutable.set(registry.getOrThrow(ModEnchantments.DODGE), 5);
+                mutable.set(registry.getOrThrow(ModEnchantments.UNDEAD_RUSE), 10);
+                mutable.set(registry.getOrThrow(ModEnchantments.LUCK), 10);
+            }
+        });
+        stack.set(ModDataComponents.ARMOR_SET_ID.get(), ArmorSetIdentity.from(
+                CosmicContent.repository().requireArmorSetDefinition(ArmorSetIds.YETI)));
+        applyProtectedTransmog(stack);
+        return stack;
+    }
+
+    private static void applyProtectedTransmog(ItemStack stack) {
+        stack.set(ModDataComponents.CUSTOM_ENCHANT_META.get(), CustomEnchantMetadata.DEFAULT
+                .withWhiteScrollProtected(true).withTransmogSorted(true));
     }
     public void applyColdSnap(ServerPlayer player) {
         clear(player);
@@ -186,7 +277,12 @@ public final class TrialRoomLoadoutService {
             mutable.set(registry.getOrThrow(Enchantments.PROTECTION), ZERO_G_PROTECTION_LEVEL);
             mutable.set(registry.getOrThrow(Enchantments.UNBREAKING), ZERO_G_UNBREAKING_LEVEL);
             mutable.set(registry.getOrThrow(ModEnchantments.ANGELIC), ZERO_G_ANGELIC_LEVEL);
+            if (slot == EquipmentSlot.HEAD) mutable.set(registry.getOrThrow(ModEnchantments.IMPLANTS), ZERO_G_IMPLANTS_LEVEL);
         });
+        if (slot == EquipmentSlot.HEAD) {
+            ItemStack mask = MaskItemFactory.create(ZERO_G_MASK_ID);
+            stack.set(ModDataComponents.MASK_LOADOUT.get(), mask.get(ModDataComponents.MASK_ITEM.get()));
+        }
         player.setItemSlot(slot, stack);
     }
     private static void equipUnbreaking(ServerPlayer player, EquipmentSlot slot, net.minecraft.world.item.Item item,

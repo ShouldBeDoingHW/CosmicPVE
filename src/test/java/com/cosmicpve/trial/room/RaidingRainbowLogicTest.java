@@ -9,14 +9,14 @@ class RaidingRainbowLogicTest {
     @Test void sequenceIsSeededUniqueAndWrongKillPreservesIt() {
         var first=RaidingRainbowLogic.shuffled(RandomSource.create(77));
         var second=RaidingRainbowLogic.shuffled(RandomSource.create(77));
-        assertEquals(first,second); assertEquals(8,new HashSet<>(first).size());
+        assertEquals(first,second); assertEquals(6,new HashSet<>(first).size());
         var wrong=RaidingRainbowLogic.evaluate(first,0,first.get(1));
         assertFalse(wrong.correct()); assertEquals(0,wrong.progress());
         assertEquals(first,first);
     }
-    @Test void eightCorrectKillsCompleteOnlyOnTheLast() {
+    @Test void sixCorrectKillsCompleteOnlyOnTheLast() {
         var sequence=RaidingRainbowLogic.shuffled(RandomSource.create(3));
-        for(int i=0;i<8;i++) { var result=RaidingRainbowLogic.evaluate(sequence,i,sequence.get(i)); assertEquals(i==7,result.complete()); }
+        for(int i=0;i<6;i++) { var result=RaidingRainbowLogic.evaluate(sequence,i,sequence.get(i)); assertEquals(i==5,result.complete()); }
     }
     @Test void canonicalInitialAndResetSpawnProfileIsAlwaysAnActiveDamageableZombie() {
         var profile=RaidingRainbowService.ACTIVE_ZOMBIE;

@@ -29,7 +29,7 @@ class TrialProgressTest {
         assertEquals(4, progress.completedRooms());
         assertEquals(TrialPhase.HARDCORE, progress.phase());
         assertTrue(progress.hardcoreBonusApplied());
-        assertEquals(4_200,TrialSessionService.completionTimeBonus(beforeBoundary,progress));
+        assertEquals(3_000,TrialSessionService.completionTimeBonus(beforeBoundary,progress));
         assertEquals(300,TrialSessionService.completionTimeBonus(progress,
                 progress.completeRoom(List.of(new ItemStack(Items.POTATO)))));
         assertEquals(5, progress.completeRoom(List.of(new ItemStack(Items.POTATO))).completedRooms());
@@ -42,7 +42,7 @@ class TrialProgressTest {
         assertEquals(7,progress.completedRooms()); assertEquals(TrialPhase.HARDCORE,progress.phase());
         var before=progress; var after=progress.completeRoom(List.of(new ItemStack(Items.POTATO)));
         assertEquals(8,after.completedRooms()); assertEquals(TrialPhase.DEMONIC,after.phase());
-        assertTrue(after.demonicBonusApplied()); assertEquals(3_900,TrialSessionService.completionTimeBonus(before,after));
+        assertTrue(after.demonicBonusApplied()); assertEquals(2_700,TrialSessionService.completionTimeBonus(before,after));
         assertEquals(0,TrialSessionService.completionTimeBonus(after,
                 after.completeRoom(List.of(new ItemStack(Items.BEETROOT)))));
     }
@@ -73,6 +73,6 @@ class TrialProgressTest {
         assertEquals(3,progress.pot().stream().map(TrialPotEntry::acquisitionId).distinct().count());
         var completed=progress.completeRoom(List.of(new ItemStack(Items.CARROT)));
         assertEquals(4,completed.completedRooms()); assertEquals(TrialPhase.HARDCORE,completed.phase());
-        assertEquals(4_200,TrialSessionService.completionTimeBonus(progress,completed));
+        assertEquals(3_000,TrialSessionService.completionTimeBonus(progress,completed));
     }
 }

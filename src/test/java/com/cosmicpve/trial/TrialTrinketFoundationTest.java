@@ -95,6 +95,7 @@ class TrialTrinketFoundationTest {
             int value = type == TrialTrinketType.TIME ? 5 : 3;
             var stack = TrialTrinkets.create(type, value, 1);
             assertEquals(type.presentationColor(), stack.getHoverName().getStyle().getColor().getValue());
+            assertTrue(stack.getHoverName().getStyle().isBold());
             assertEquals(value, stack.get(ModDataComponents.TRIAL_TRINKET.get()).value());
         }
         var lines = com.cosmicpve.trial.portal.TrialPortalItem.modifierLines(
@@ -104,6 +105,9 @@ class TrialTrinketFoundationTest {
         assertEquals(0x2BC2B8, lines.get(0).getSiblings().getFirst().getStyle().getColor().getValue());
         assertEquals(0x0A5751, lines.get(2).getSiblings().getFirst().getStyle().getColor().getValue());
         assertEquals(0x0A5721, lines.get(4).getSiblings().getFirst().getStyle().getColor().getValue());
+        assertTrue(lines.get(0).getSiblings().getFirst().getStyle().isBold());
+        assertTrue(lines.get(2).getSiblings().getFirst().getStyle().isBold());
+        assertTrue(lines.get(4).getSiblings().getFirst().getStyle().isBold());
         assertEquals(0x777777, lines.get(1).getSiblings().getFirst().getStyle().getColor().getValue());
     }
 

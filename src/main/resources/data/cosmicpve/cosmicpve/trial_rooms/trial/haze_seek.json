@@ -1,0 +1,8 @@
+{
+  "display_name": "Haze and Seek",
+  "category": "hardcore",
+  "pieces": [{"structure": "cosmicpve:trial/haze_seek"}],
+  "spawn_marker": "emerald_block",
+  "spawn_marker_position": [32, 2, 2],
+  "bounds": {"min": [0, 0, 0], "max": [34, 14, 32]}
+}

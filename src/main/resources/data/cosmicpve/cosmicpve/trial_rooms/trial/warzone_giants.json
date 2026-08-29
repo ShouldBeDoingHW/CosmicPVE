@@ -1,0 +1,11 @@
+{
+  "display_name": "Warzone Giants",
+  "category": "demonic",
+  "pieces": [
+    {"structure": "cosmicpve:trial/warzone_giants_west"},
+    {"structure": "cosmicpve:trial/warzone_giants_east", "offset": [26, 0, 0]}
+  ],
+  "spawn_marker": "emerald_block",
+  "spawn_marker_position": [2, 1, 2],
+  "bounds": {"min": [0, 0, 0], "max": [51, 16, 35]}
+}

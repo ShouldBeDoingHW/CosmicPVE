@@ -68,7 +68,8 @@ public final class HiddenGraveyardService {
             InstanceBounds bounds, RandomSource random) {
         UUID attemptId = UUID.randomUUID();
         var attempt = new Attempt(session.sessionId(), attemptId, bounds, origin, random,
-                new int[WAVE_COUNT], new HashMap<>(), new LinkedHashSet<>(), 1, 0, null, null);
+                new int[WAVE_COUNT], new HashMap<>(), new LinkedHashSet<>(), 1, 0, null, null,
+                session.participants().size());
         attempts.put(session.sessionId(), attempt);
         applyPaleGardenBiome(level, bounds);
         issueKeyChest(level, attempt, 1);
@@ -119,16 +120,36 @@ public final class HiddenGraveyardService {
         for (List<BlockPos> grave : graves) {
             BlockPos spawn = graveSpawn(attempt.origin(), grave);
             for (BlockPos local : grave) level.setBlock(attempt.origin().offset(local), Blocks.AIR.defaultBlockState(), 3);
-            UndeadCorpseEntity corpse = ModEntities.UNDEAD_CORPSE.get().create(level, EntitySpawnReason.EVENT);
-            if (corpse == null) throw new IllegalStateException("Could not create Undead Corpse");
-            corpse.setPos(spawn.getX() + 0.5D, spawn.getY(), spawn.getZ() + 0.5D);
-            UndeadCorpseEquipmentService.equipBase(corpse, level.registryAccess(), attempt.random());
-            equipWave(corpse, level, wave, attempt.random());
-            corpse.markTrialEncounter(session.sessionId(), attempt.attemptId(), wave);
-            corpse.setHealth((float)UndeadCorpseEntity.MAX_HEALTH);
-            if (!level.addFreshEntity(corpse)) throw new IllegalStateException("Server rejected Hidden Graveyard corpse");
-            attempt.corpses().put(corpse.getUUID(), wave);
+            spawnCorpse(level, session, attempt, wave, spawn);
+            if (attempt.random().nextDouble() < doubleCorpseChance(attempt.partySize()))
+                spawnCorpse(level, session, attempt, wave, nearbySpawn(level, spawn));
         }
+    }
+
+    private static void spawnCorpse(ServerLevel level, TrialSession session, Attempt attempt, int wave, BlockPos spawn) {
+        UndeadCorpseEntity corpse = ModEntities.UNDEAD_CORPSE.get().create(level, EntitySpawnReason.EVENT);
+        if (corpse == null) throw new IllegalStateException("Could not create Undead Corpse");
+        corpse.setPos(spawn.getX() + 0.5D, spawn.getY(), spawn.getZ() + 0.5D);
+        UndeadCorpseEquipmentService.equipBase(corpse, level.registryAccess(), attempt.random());
+        equipWave(corpse, level, wave, attempt.random());
+        corpse.markTrialEncounter(session.sessionId(), attempt.attemptId(), wave);
+        corpse.setHealth((float)UndeadCorpseEntity.MAX_HEALTH);
+        if (!level.addFreshEntity(corpse)) throw new IllegalStateException("Server rejected Hidden Graveyard corpse");
+        attempt.corpses().put(corpse.getUUID(), wave);
+    }
+
+    private static BlockPos nearbySpawn(ServerLevel level, BlockPos primary) {
+        for (var direction : net.minecraft.core.Direction.Plane.HORIZONTAL) {
+            BlockPos candidate = primary.relative(direction);
+            if (level.getBlockState(candidate).getCollisionShape(level, candidate).isEmpty()
+                    && level.getBlockState(candidate.above()).getCollisionShape(level, candidate.above()).isEmpty()) return candidate;
+        }
+        return primary.above();
+    }
+
+    public static double doubleCorpseChance(int partySize) {
+        if (partySize < 1 || partySize > 4) throw new IllegalArgumentException("party size must be 1-4");
+        return 0.2D * (partySize - 1);
     }
 
     private static void equipWave(UndeadCorpseEntity corpse, ServerLevel level, int wave, RandomSource random) {
@@ -331,17 +352,19 @@ public final class HiddenGraveyardService {
         private final UUID sessionId, attemptId; private final InstanceBounds bounds; private final BlockPos origin;
         private final RandomSource random; private final int[] kills; private final Map<UUID,Integer> corpses;
         private final Set<BlockPos> usedChestMarkers; private int expectedKey, wave; private BlockPos activeChest;
-        private BlockState chestReplacement;
+        private BlockState chestReplacement; private final int partySize;
         Attempt(UUID sessionId, UUID attemptId, InstanceBounds bounds, BlockPos origin, RandomSource random, int[] kills,
                 Map<UUID,Integer> corpses, Set<BlockPos> usedChestMarkers, int expectedKey, int wave, BlockPos activeChest,
-                BlockState chestReplacement) { this.sessionId=sessionId; this.attemptId=attemptId; this.bounds=bounds;
+                BlockState chestReplacement, int partySize) { this.sessionId=sessionId; this.attemptId=attemptId; this.bounds=bounds;
             this.origin=origin; this.random=random; this.kills=kills; this.corpses=corpses; this.usedChestMarkers=usedChestMarkers;
-            this.expectedKey=expectedKey; this.wave=wave; this.activeChest=activeChest; this.chestReplacement=chestReplacement; }
+            this.expectedKey=expectedKey; this.wave=wave; this.activeChest=activeChest; this.chestReplacement=chestReplacement;
+            this.partySize=partySize; }
         public UUID sessionId(){return sessionId;} public UUID attemptId(){return attemptId;} public InstanceBounds bounds(){return bounds;}
         public BlockPos origin(){return origin;} public RandomSource random(){return random;} public int[] kills(){return kills;}
         public Map<UUID,Integer> corpses(){return corpses;} public Set<BlockPos> usedChestMarkers(){return usedChestMarkers;}
         public int expectedKey(){return expectedKey;} void expectedKey(int value){expectedKey=value;} public int wave(){return wave;}
         void wave(int value){wave=value;} public BlockPos activeChest(){return activeChest;} void activeChest(BlockPos value){activeChest=value;}
         BlockState chestReplacement(){return chestReplacement;} void chestReplacement(BlockState value){chestReplacement=value;}
+        int partySize(){return partySize;}
     }
 }

@@ -23,6 +23,8 @@ class TrialResourceTest {
         assertRoom("trial/bomb_squad",1,44,20,44);
         assertRoom("trial/hidden_graveyard",1,39,17,42);
         assertRoom("trial/deadeye",2,70,30,42);
+        assertRoom("trial/haze_seek",1,34,14,32);
+        assertRoom("trial/warzone_giants",2,51,16,35);
     }
     @Test void importedStructuresAreValidAndContainOneEmeraldSpawnMarker() throws Exception {
         assertStructure("decision_box",47,28,47);
@@ -36,6 +38,9 @@ class TrialResourceTest {
         assertStructure("hidden_graveyard",40,18,43,1);
         assertStructure("deadeye_west",41,31,43,1);
         assertStructure("deadeye_east",30,31,43,0);
+        assertStructure("haze_seek",35,15,33,1);
+        assertStructure("warzone_giants_west",26,17,36,1);
+        assertStructure("warzone_giants_east",26,17,36,0);
         assertStructureEntities("zero_g",8,"minecraft:shulker");
     }
     @Test void deadeyeDefinitionIsDemonicAndComposesWestThenEast() throws Exception {

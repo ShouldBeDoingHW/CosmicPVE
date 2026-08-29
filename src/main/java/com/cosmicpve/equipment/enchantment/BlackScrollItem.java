@@ -13,7 +13,8 @@ public final class BlackScrollItem extends Item {
     @Override
     public Component getName(ItemStack stack) {
         var data = stack.get(ModDataComponents.BLACK_SCROLL.get());
-        return data == null ? super.getName(stack)
+        Component name = data == null ? super.getName(stack)
                 : Component.translatable("item.cosmicpve.black_scroll.rated", data.returnedSuccessRate());
+        return name.copy().withStyle(style -> style.withBold(true));
     }
 }

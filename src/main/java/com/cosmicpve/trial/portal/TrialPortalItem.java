@@ -87,7 +87,8 @@ public final class TrialPortalItem extends Item {
     }
 
     private static void addModifier(List<Component> lines, Component name, int color, Component description) {
-        lines.add(Component.literal("✖ ").withColor(0xFFAA00).append(name.copy().withColor(color)));
+        lines.add(Component.literal("✖ ").withColor(0xFFAA00)
+                .append(name.copy().withStyle(style -> style.withColor(color).withBold(true))));
         lines.add(Component.literal("  ").append(description.copy().withColor(0x777777)));
     }
 

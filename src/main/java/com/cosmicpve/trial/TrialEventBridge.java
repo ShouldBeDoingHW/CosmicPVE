@@ -17,6 +17,8 @@ import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 import net.minecraft.world.phys.BlockHitResult;
 import net.neoforged.neoforge.event.level.BlockEvent;
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.minecraft.world.damagesource.DamageTypes;
 
 public final class TrialEventBridge {
     public void onServerStarted(ServerStartedEvent event) { TrialRuntime.sessions().recoverInterrupted(event.getServer()); }
@@ -33,12 +35,15 @@ public final class TrialEventBridge {
     public void onDeath(LivingDeathEvent event) {
         if (event.isCanceled()) return;
         if (event.getEntity() instanceof Zombie zombie) TrialRuntime.sessions().onRainbowZombieDeath(zombie);
+        if (event.getEntity() instanceof Zombie zombie) TrialRuntime.sessions().onWarzoneGiantDeath(zombie);
         if (event.getEntity() instanceof UndeadCorpseEntity corpse) TrialRuntime.sessions().onUndeadCorpseDeath(corpse);
         if (event.getEntity() instanceof ServerPlayer player) TrialRuntime.sessions().onDeath(player);
     }
     public void onDrops(LivingDropsEvent event) {
         if (event.getEntity() instanceof Zombie zombie
                 && com.cosmicpve.trial.room.RaidingRainbowService.encounterZombie(zombie)) event.getDrops().clear();
+        if (event.getEntity() instanceof Zombie zombie
+                && com.cosmicpve.trial.room.WarzoneGiantsService.encounterGiant(zombie)) event.getDrops().clear();
         if (event.getEntity() instanceof Shulker shulker
                 && com.cosmicpve.trial.room.ZeroGService.encounterShulker(shulker)) event.getDrops().clear();
         if (event.getEntity() instanceof Creeper creeper
@@ -48,6 +53,8 @@ public final class TrialEventBridge {
     public void onExperience(LivingExperienceDropEvent event) {
         if (event.getEntity() instanceof Zombie zombie
                 && com.cosmicpve.trial.room.RaidingRainbowService.encounterZombie(zombie)) event.setDroppedExperience(0);
+        if (event.getEntity() instanceof Zombie zombie
+                && com.cosmicpve.trial.room.WarzoneGiantsService.encounterGiant(zombie)) event.setDroppedExperience(0);
         if (event.getEntity() instanceof Shulker shulker
                 && com.cosmicpve.trial.room.ZeroGService.encounterShulker(shulker)) event.setDroppedExperience(0);
         if (event.getEntity() instanceof Creeper creeper
@@ -81,5 +88,13 @@ public final class TrialEventBridge {
                 && event.getEntity() instanceof Creeper creeper
                 && com.cosmicpve.trial.room.BombSquadService.encounterCreeper(creeper)
                 && !TrialRuntime.sessions().onBombSquadCreeperJoin(level, creeper)) event.setCanceled(true);
+    }
+    public void onIncomingDamage(LivingIncomingDamageEvent event) {
+        if (!(event.getEntity() instanceof Zombie zombie)
+                || !com.cosmicpve.trial.room.WarzoneGiantsService.encounterGiant(zombie)) return;
+        if (event.getSource().is(DamageTypes.IN_WALL)) {
+            TrialRuntime.sessions().recoverWarzoneGiantFromSuffocation(zombie);
+            event.setCanceled(true);
+        } else if (!TrialRuntime.sessions().allowsWarzoneGiantDamage(zombie)) event.setCanceled(true);
     }
 }

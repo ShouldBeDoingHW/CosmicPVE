@@ -9,6 +9,7 @@ import com.cosmicpve.equipment.armor.ArmorSetCrystalItem;
 import com.cosmicpve.equipment.enchantment.CosmicEnchantmentBookItem;
 import com.cosmicpve.equipment.enchantment.EnchantmentOrbItem;
 import com.cosmicpve.equipment.enchantment.BlackScrollItem;
+import com.cosmicpve.equipment.enchantment.WhiteScrollItem;
 import com.cosmicpve.equipment.skin.WeaponSkinItem;
 import com.cosmicpve.equipment.heroic.HeroicCrystalItem;
 import com.cosmicpve.equipment.enchantment.UnexaminedEnchantmentBookItem;
@@ -44,8 +45,8 @@ public final class ModItems {
     public static final DeferredItem<UnexaminedEnchantmentBookItem> UNEXAMINED_ENCHANTMENT_BOOK = ITEMS.registerItem(
             "unexamined_enchantment_book", UnexaminedEnchantmentBookItem::new, properties -> properties.stacksTo(64));
 
-    public static final DeferredItem<Item> WHITE_SCROLL = ITEMS.registerSimpleItem(
-            "white_scroll", properties -> properties.stacksTo(64));
+    public static final DeferredItem<WhiteScrollItem> WHITE_SCROLL = ITEMS.registerItem(
+            "white_scroll", WhiteScrollItem::new, properties -> properties.stacksTo(64));
 
     public static final DeferredItem<Item> TRANSMOG_SCROLL = ITEMS.registerSimpleItem(
             "transmog_scroll", properties -> properties.stacksTo(64));

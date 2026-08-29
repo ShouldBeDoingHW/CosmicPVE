@@ -15,7 +15,8 @@ public final class TrialTrinketItem extends Item {
     public Component getName(ItemStack stack) {
         var data = stack.get(ModDataComponents.TRIAL_TRINKET.get());
         return data == null || !data.valid() ? super.getName(stack)
-                : super.getName(stack).copy().withColor(data.type().presentationColor());
+                : super.getName(stack).copy().withStyle(style -> style
+                        .withColor(data.type().presentationColor()).withBold(true));
     }
 
     @Override

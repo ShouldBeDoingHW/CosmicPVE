@@ -44,6 +44,14 @@ class DeadeyeStructureAuditTest {
                 assertTrue(allowed(section, state), section + " has unexpected " + state + " at " + pos);
             });
         });
+        DeadeyeService.targets().forEach(target -> DeadeyeService.revealGroups().forEach((section, positions) ->
+                assertFalse(positions.contains(target), section + " must not hide target " + target)));
+        assertTrue(DeadeyeService.revealGroups().get(DeadeyeService.Section.RESIN_TRANSITION)
+                .contains(new BlockPos(40, 22, 2)));
+        assertFalse(DeadeyeService.revealGroups().get(DeadeyeService.Section.RESIN_TRANSITION)
+                .contains(new BlockPos(42, 19, 10)));
+        assertTrue(DeadeyeService.revealGroups().get(DeadeyeService.Section.PURPUR_CRIMSON)
+                .contains(new BlockPos(42, 19, 10)));
     }
 
     private static boolean allowed(DeadeyeService.Section section, String block) {
@@ -52,11 +60,11 @@ class DeadeyeStructureAuditTest {
                     || block.equals("minecraft:prismarine_wall") || block.equals("minecraft:ladder");
             case GOLD -> block.equals("minecraft:gold_block") || block.equals("minecraft:bamboo_fence")
                     || block.equals("minecraft:bamboo_trapdoor");
-            case RESIN_PURPUR -> block.equals("minecraft:resin_bricks")
+            case RESIN_TRANSITION -> block.equals("minecraft:resin_bricks")
                     || block.equals("minecraft:resin_brick_wall") || block.equals("minecraft:purpur_block")
                     || block.equals("minecraft:purpur_slab");
-            case CRIMSON -> block.equals("minecraft:stripped_crimson_hyphae")
-                    || block.equals("minecraft:crimson_fence");
+            case PURPUR_CRIMSON -> block.equals("minecraft:purpur_block")
+                    || block.equals("minecraft:stripped_crimson_hyphae") || block.equals("minecraft:crimson_fence");
         };
     }
 

@@ -32,6 +32,16 @@ public final class TrialTitleService {
         if (!newPresentation(player, "room_started")) return;
         playForPlayer(player, roomStartSound());
     }
+    public void warzoneWarning(ServerPlayer player,
+            com.cosmicpve.trial.room.WarzoneGiantsService.FloorColor first,
+            com.cosmicpve.trial.room.WarzoneGiantsService.FloorColor second, int seconds) {
+        if (!newPresentation(player, "warzone:" + first.serialized + ":" + second.serialized + ":" + seconds)) return;
+        Component title = first.label().copy().append(Component.literal(" + ").withStyle(style -> style.withBold(true)))
+                .append(second.label());
+        Component subtitle = Component.literal(Integer.toString(seconds)).withStyle(style -> style.withBold(true).withColor(0xFFFFFF));
+        send(player, title, subtitle, 0, 25, 0);
+        playForPlayer(player, countdownSound());
+    }
     private boolean newPresentation(ServerPlayer player, String token) {
         return acceptPresentation(player.getUUID(), token);
     }
@@ -53,9 +63,12 @@ public final class TrialTitleService {
     static net.minecraft.sounds.SoundEvent roomStartSound() { return SoundEvents.ENDER_DRAGON_GROWL; }
     public void debugCountdownSound(ServerPlayer player) { playForPlayer(player, countdownSound()); }
     public void debugRoomStartSound(ServerPlayer player) { playForPlayer(player, roomStartSound()); }
-    static void playForPlayer(ServerPlayer player, SoundEvent sound) {
+    public static void playForPlayer(ServerPlayer player, SoundEvent sound) {
+        playForPlayer(player, sound, 1.0F, 1.0F);
+    }
+    public static void playForPlayer(ServerPlayer player, SoundEvent sound, float volume, float pitch) {
         player.connection.send(new ClientboundSoundPacket(BuiltInRegistries.SOUND_EVENT.wrapAsHolder(sound),
-                SoundSource.PLAYERS, player.getX(), player.getY(), player.getZ(), 1.0F, 1.0F,
+                SoundSource.PLAYERS, player.getX(), player.getY(), player.getZ(), volume, pitch,
                 player.getRandom().nextLong()));
     }
     private static void send(ServerPlayer player, Component title, Component subtitle, int fadeIn, int stay, int fadeOut) {
