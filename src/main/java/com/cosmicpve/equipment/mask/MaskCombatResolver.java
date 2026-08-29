@@ -8,20 +8,12 @@ import com.cosmicpve.combat.pipeline.IncomingDamageContribution;
 import com.cosmicpve.combat.pipeline.IncomingDamageContributor;
 import com.cosmicpve.combat.pipeline.OutgoingDamageContribution;
 import com.cosmicpve.combat.pipeline.OutgoingDamageContributor;
-import com.cosmicpve.combat.proc.ChildProcEligibility;
-import com.cosmicpve.combat.proc.ProcCandidate;
-import com.cosmicpve.combat.proc.ProcCandidateResolver;
-import com.cosmicpve.combat.proc.ProcEvent;
-import com.cosmicpve.combat.proc.ProcHook;
-import com.cosmicpve.combat.proc.ProcProvenance;
-import com.cosmicpve.combat.proc.ProcSourceKind;
 import com.cosmicpve.content.definition.mask.MaskBehavior;
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 import net.minecraft.tags.DamageTypeTags;
 
-public final class MaskCombatResolver implements OutgoingDamageContributor, IncomingDamageContributor, ProcCandidateResolver {
+public final class MaskCombatResolver implements OutgoingDamageContributor, IncomingDamageContributor {
+    /** Legacy diagnostic ID retained for compatibility; Turkey now contributes to Dodge's single roll. */
     public static final net.minecraft.resources.Identifier TURKEY_DODGE = CosmicPVE.id("turkey_mask_dodge");
     private final MaskResolver masks;
     public MaskCombatResolver(MaskResolver masks) { this.masks = masks; }
@@ -49,12 +41,4 @@ public final class MaskCombatResolver implements OutgoingDamageContributor, Inco
                 ? List.of(new IncomingDamageContribution(CosmicPVE.id("party_mask"), .99)) : List.of();
     }
 
-    @Override public List<ProcCandidate> resolve(ProcEvent event) {
-        if (event.hook() != ProcHook.ON_TARGETED || event.target() == null
-                || masks.resolve(event.target()).stream().noneMatch(d -> d.behavior() == MaskBehavior.TURKEY)) return List.of();
-        return List.of(new ProcCandidate(TURKEY_DODGE, ProcHook.ON_TARGETED, .02, Optional.empty(), 0,
-                CooldownScope.EPHEMERAL_COMBAT, Optional.empty(), List.of(), List.of(), Optional.of(TURKEY_DODGE),
-                ChildProcEligibility.LIMITED_DEFENSIVE_REACTION, Set.of(), TURKEY_DODGE, ignored -> {},
-                new ProcProvenance(ProcSourceKind.ARMOR_SET, CosmicPVE.id("turkey_mask"))));
-    }
 }

@@ -86,20 +86,24 @@ public final class CosmicCombat {
     private static final WeaponSkinResolver WEAPON_SKINS = new WeaponSkinResolver();
     private static final WeaponSkinCombatResolver WEAPON_SKIN_COMBAT =
             new WeaponSkinCombatResolver(WEAPON_SKINS, STACKS, CHILD_ACTIONS);
+    private static final com.cosmicpve.combat.enchantment.SoulTetherService SOUL_TETHERS =
+            new com.cosmicpve.combat.enchantment.SoulTetherService();
     private static final CosmicEnchantmentBehaviorResolver ENCHANTMENT_BEHAVIORS =
             new CosmicEnchantmentBehaviorResolver(
-                    CHILD_ACTIONS, STACKS, BLEED_RUNTIME, ARMOR_SET_IMMUNITIES, COOLDOWNS);
+                    CHILD_ACTIONS, STACKS, BLEED_RUNTIME, ARMOR_SET_IMMUNITIES, COOLDOWNS, SOUL_TETHERS);
     private static final NutritionFoodService NUTRITION = new NutritionFoodService(ENCHANTMENTS);
     private static final ExecutionService EXECUTIONS = new ExecutionService(SEQUENCES, TRACES);
     private static final CombatEventBridge EVENTS =
             new CombatEventBridge(ENGINE, ATTRIBUTION, SEQUENCES, TRACES, ENCHANTMENTS, PROC_EVENTS,
                     OUTGOING, INCOMING, PRE_DEFENSE_BOUNDS, RECENT_COMBAT_MEMORY, WEAPON_SKINS);
     private static final ProcHookEventBridge PROC_HOOKS =
-            new ProcHookEventBridge(PROC_EVENTS, EXECUTIONS, NUTRITION);
+            new ProcHookEventBridge(PROC_EVENTS, EXECUTIONS, NUTRITION, SOUL_TETHERS);
     private static final CombatStackEventBridge STACK_EVENTS = new CombatStackEventBridge(STACKS, BLEED_RUNTIME);
     private static final MaskResolver MASKS = new MaskResolver(CosmicContent.repository());
     private static final MaskCombatResolver MASK_COMBAT = new MaskCombatResolver(MASKS);
-    private static final MaskRuntimeEventBridge MASK_EVENTS = new MaskRuntimeEventBridge(MASKS, PROC_EVENTS);
+    private static final MaskRuntimeEventBridge MASK_EVENTS = new MaskRuntimeEventBridge(MASKS, PROC_EVENTS, ENCHANTMENTS);
+    private static final com.cosmicpve.combat.enchantment.DodgeProcResolver DODGE =
+            new com.cosmicpve.combat.enchantment.DodgeProcResolver(MASKS);
     private static final SelfDestructEventBridge SELF_DESTRUCT_EVENTS = new SelfDestructEventBridge();
 
     private CosmicCombat() {}
@@ -117,6 +121,8 @@ public final class CosmicCombat {
         OUTGOING.register(deathPact);
         OUTGOING.register(permafrost);
         OUTGOING.register(new DivineImmolationBehavior(COOLDOWNS));
+        OUTGOING.register(SOUL_TETHERS);
+        OUTGOING.register(new com.cosmicpve.combat.enchantment.LeadershipBehavior());
         OUTGOING.register(MASK_COMBAT);
         INCOMING.register(ARMOR_SET_COMBAT);
         INCOMING.register(WEAPON_SKIN_COMBAT);
@@ -129,7 +135,7 @@ public final class CosmicCombat {
         PROC_MODIFIERS.register(new ArmorSetProcModifierResolver(ARMOR_SETS));
         PROC_SOURCES.register(ENCHANTMENT_BEHAVIORS);
         PROC_SOURCES.register(WEAPON_SKIN_COMBAT);
-        PROC_SOURCES.register(MASK_COMBAT);
+        PROC_SOURCES.register(DODGE);
         NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, SELF_DESTRUCT_EVENTS::onIncomingDamage);
         NeoForge.EVENT_BUS.addListener(EVENTS::onIncomingDamage);
         NeoForge.EVENT_BUS.addListener(EVENTS::onDamageAccepted);

@@ -1,8 +1,8 @@
 # CosmicPVE Development Handoff
 
-Current verified and accepted gameplay baseline: Step 7D. Its accepted source, resources, tests, and documentation are ready for the single closure commit required before Step 7E begins.
+Current verified and accepted gameplay baseline: Step 7E. Its accepted source, resources, tests, and documentation are ready for the single closure commit required before Step 7F begins.
 
-Repository state: Steps 6A–7D are implemented, automated/runtime verified, and manually accepted. The root `assets` source-art folder and root `trial rooms` structure-development folder remain deliberately untracked and unrelated.
+Repository state: Steps 6A–7E are implemented, automated/runtime verified, and manually accepted. The root `assets` source-art folder and root `trial rooms` structure-development folder remain deliberately untracked and unrelated.
 
 Last handoff update: 2026-08-28
 
@@ -332,6 +332,16 @@ Implemented Mastery sword enchantment `cosmicpve:divine_immolation` IV at 3% per
 
 Implemented Legendary axe enchantment `cosmicpve:devour` IV through a dedicated pre-calculation proc hook so its 5% Luck-eligible roll can add 5% ordinary parent-hit damage per level in the shared additive bucket. A zero-hunger player is filtered before rolling. Hunger, the exact 1-HP heal, and the normal eating sound commit once only after positive red-health loss; absorption-only/canceled/rejected hits do not consume hunger or heal, and Doublestrike children cannot reroll Devour.
 
+### Step 7E — IMPLEMENTED; AUTOMATED/RUNTIME VERIFIED; MANUALLY VERIFIED / ACCEPTED
+
+Implemented Elite any-armor `cosmicpve:undead_ruse` X through one defensive committed-hit candidate using only the highest equipped level. Its Luck-modified chance is 0.5% per level and its bounded per-owner active cap is 1 at I–IV, 2 at V–IX, and 3 at X. It reuses the real `cosmicpve:undead_corpse`, canonical independently rolled equipment, and LivingEntity combat pipeline. Summoned Corpses persist a vanilla-compatible owner reference and independent 900-tick expiry, award no XP or loot, cannot target their owner or same-owner allies, and use narrow defend/assist-owner goals. Bounded owner-to-Corpse IDs provide cap accounting without world-wide tick scans.
+
+Implemented one reusable owned-ally resolver over vanilla `OwnableEntity`; it covers ordinary tameables and summoned Corpses while excluding players and arbitrary nearby mobs. Legendary chestplate/leggings `cosmicpve:leadership` X resolves the owning LivingEntity's current two eligible armor pieces when the ally attacks, sums them to a 20-level cap, and adds 1% per level only to the shared ordinary outgoing bucket.
+
+Implemented Simple all-weapons `cosmicpve:obliterate` III as a fixed 10% Luck-eligible committed-hit proc available only while the wielder/shooter is strictly below 20% maximum health. It adds no damage and applies real collision-respecting knockback tuned around the intended 3/6/9-block identity. Implemented Mastery axe `cosmicpve:soul_tether` III as a 10% Luck-eligible proc with a 600-tick cooldown and owner-specific 120/140/160-tick relationship. A tether supplies one stable -20% movement modifier while active and adds uncapped `5% × current distance` ordinary outgoing damage only to its creating owner; expiration/death/removal cleanup is folded into the existing shared LivingEntity tick bridge.
+
+Implemented Ultimate boots `cosmicpve:dodge` V at 0.5% per level at the accepted pre-health-loss damage boundary. Turkey Mask contributes +2 flat percentage points to the same single candidate before centralized relative Luck multiplication. Activation sets the pending ordinary health loss to zero; no committed hit is produced, so the attacker's committed offensive proc chain and committed-damage defensive effects do not run. Turkey without Dodge retains its accepted 2% behavior.
+
 ## 3. Current Real Enchantments
 
 These are registered through Minecraft's enchantment infrastructure, use actual enchantment data on the item, and are not present in normal enchanting-table, librarian, random-loot, random-equipment, or mob-equipment acquisition pools.
@@ -376,10 +386,15 @@ These are registered through Minecraft's enchantment infrastructure, use actual 
 | `cosmicpve:divine_immolation` | IV | Sword | Mastery | On committed melee damage, has 3% per level to ignite and deal 2 HP standard true self-damage, then grant one +10% ordinary outgoing bonus for 100 ticks. Cooldown is 600 ticks. |
 | `cosmicpve:virus` | III | Bow/crossbow | Unique | A committed projectile hit against an already poisoned living target deterministically deals 0.4 HP standard Cosmic true damage per level and heals the shooter for exactly 1 HP after accepted delivery. |
 | `cosmicpve:devour` | IV | Axe | Legendary | A 5% Luck-eligible parent-hit proc consumes exactly one hunger after committed red-health damage, adds 5% ordinary parent damage per level, heals exactly 1 HP, and plays the normal eating sound. Zero hunger filters before RNG. |
+| `cosmicpve:undead_ruse` | X | Any armor | Elite | On committed ordinary damage taken, has 0.5% per highest equipped level to summon an owned allied Undead Corpse for 900 ticks, capped at 1/2/3 active allies by level band. |
+| `cosmicpve:obliterate` | III | All weapons | Simple | While strictly below 20% health, committed hits have a fixed 10% Luck-modified chance to apply real level-scaled knockback without bonus damage. |
+| `cosmicpve:soul_tether` | III | Axe | Mastery | Committed melee hits have a 10% Luck-modified chance to apply an owner-specific 6/7/8-second tether with a 600-tick cooldown. The target is slowed 20% and takes +5% ordinary damage per current distance block from that tether owner only. |
+| `cosmicpve:dodge` | V | Boots | Ultimate | An otherwise valid ordinary incoming hit has 0.5% per level to be rejected before health loss and committed proc dispatch. Turkey adds +2 flat percentage points to the same Luck-modified roll. |
+| `cosmicpve:leadership` | X | Chestplate/leggings | Legendary | Current equipped levels sum to at most 20; reliably owned allies gain that percentage in their ordinary outgoing bucket at attack time. |
 
 ### DESIGNED BUT NOT IMPLEMENTED
 
-The design also names Hero Killer, Undead Ruse, Obliterate, Soul Tether, Dodge, Leadership, and other later enchantments. None currently has a registered real enchantment or runtime behavior. There are exactly 36 implemented real Cosmic enchantments; Death Pact, Permafrost, Mortal Coil, Phoenix, and Divine Immolation are the implemented Mastery enchantments. Do not add behavior assumptions beyond `Cosmic_Design.md`.
+The design also names Hero Killer and other later enchantments. They have no registered real enchantment or runtime behavior. There are exactly 41 implemented real Cosmic enchantments; Death Pact, Permafrost, Mortal Coil, Phoenix, Divine Immolation, and Soul Tether are the implemented Mastery enchantments. Do not add behavior assumptions beyond `Cosmic_Design.md`.
 
 ## 4. Critical Combat Semantics
 
@@ -652,11 +667,11 @@ The final post-Orb capacity is no longer unresolved for current target classes: 
 
 ## 16. Current Next Milestone
 
-**Next milestone: Step 7E — Enchantment Expansion III.**
+**Next milestone: Step 7F — Enchantments 1.0 Content Completion.**
 
 Current intended sequence:
 
-Step 7A Conquest Chests → Step 7B Tinkerer / Cosmic Dust → Step 7C canonical balance baseline, Gears, Permafrost, and Mortal Coil → Step 7D Self Destruct, Phoenix, Divine Immolation, Virus, and Devour → Enchantment Expansion III → Fallen Heroes / G-Kit procurement redesign → V-Kits and M-Kit reconsideration → Heroic Enchantments → later major Dungeon, Invasion, economy, and world work.
+Step 7A Conquest Chests → Step 7B Tinkerer / Cosmic Dust → Step 7C canonical balance baseline, Gears, Permafrost, and Mortal Coil → Step 7D Self Destruct, Phoenix, Divine Immolation, Virus, and Devour → Step 7E Undead Ruse, Obliterate, Soul Tether, Dodge, and Leadership → Fallen Heroes / G-Kit procurement redesign → V-Kits and M-Kit reconsideration → Heroic Enchantments → later major Dungeon, Invasion, economy, and world work.
 
 The ordinary-enchantment expansion remains split across bounded patches. Step 7C is the explicit instruction that made the current canonical Design Doc enchantment-table values implementation-authoritative; later design edits still require their own explicit implementation milestone.
 
@@ -674,6 +689,12 @@ The ordinary-enchantment expansion remains split across bounded patches. Step 7C
 Preserve unrelated dirty changes. Never change pinned versions as a side effect of gameplay work. Prefer service-level rules and typed data over one-off event logic, and keep client-only classes isolated from dedicated-server loading.
 
 ## 18. Verification Snapshot
+
+For the Step 7E candidate:
+
+- `gradlew.bat cleanTest test build` passes all 416 JUnit tests across 113 suites with 0 failures or errors. Focused and updated coverage pins the five specifications and 41-enchantment registry; Undead Ruse chance/caps/lifetime and canonical Corpse data; Obliterate's strict health threshold, fixed chance, and level-scaled knockback identity; Soul Tether's cooldown/durations/stable slow/continuous owner-specific distance scaling; Dodge's single Turkey-composed base chance and relative Luck calculation; Leadership aggregation/cap; rarity pools; and Mastery extraction restrictions.
+- Dedicated-server startup publishes the complete CosmicPVE content snapshot and reaches `Done`; fresh-client startup completes resource reload, OpenAL/SoundEngine initialization, and every texture atlas without relevant registry, datapack, localization, resource, or common/client classloading errors.
+- All new enchantment definitions and tags decode during runtime loading. `git diff --check` reports no whitespace errors beyond normal Windows line-ending notices. The user manually verified and accepted Undead Ruse, Obliterate, Soul Tether, Dodge, Leadership, their shared ownership behavior, and Turkey's single-roll Dodge integration.
 
 For the Step 7D candidate:
 

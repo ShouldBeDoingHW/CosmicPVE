@@ -33,24 +33,34 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
     public static final Identifier PERMAFROST_ONCE_KEY = CosmicPVE.id("permafrost_once_per_damage");
     public static final Identifier MORTAL_COIL_ONCE_KEY = CosmicPVE.id("mortal_coil_once_per_damage");
     public static final Identifier SELF_DESTRUCT_ONCE_KEY = CosmicPVE.id("self_destruct_once_per_damage");
+    public static final Identifier UNDEAD_RUSE_ONCE_KEY = CosmicPVE.id("undead_ruse_once_per_damage");
 
     private final ChildCombatActionService childActions;
     private final CombatStackService stacks;
     private final BleedRuntimeService bleedRuntime;
     private final ArmorSetImmunityResolver immunities;
     private final CooldownService cooldowns;
+    private final SoulTetherService soulTethers;
 
     public CosmicEnchantmentBehaviorResolver(
             ChildCombatActionService childActions,
             CombatStackService stacks,
             BleedRuntimeService bleedRuntime,
             ArmorSetImmunityResolver immunities,
-            CooldownService cooldowns) {
+            CooldownService cooldowns,
+            SoulTetherService soulTethers) {
         this.childActions = childActions;
         this.stacks = stacks;
         this.bleedRuntime = bleedRuntime;
         this.immunities = immunities;
         this.cooldowns = cooldowns;
+        this.soulTethers = soulTethers;
+    }
+
+    public CosmicEnchantmentBehaviorResolver(
+            ChildCombatActionService childActions, CombatStackService stacks, BleedRuntimeService bleedRuntime,
+            ArmorSetImmunityResolver immunities, CooldownService cooldowns) {
+        this(childActions, stacks, bleedRuntime, immunities, cooldowns, new SoulTetherService());
     }
 
     @Override
@@ -64,6 +74,8 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
             addBlessed(event, result);
             addTrap(event, result);
             addDivineImmolation(event, result);
+            addObliterate(event, result);
+            addSoulTether(event, result);
         } else if (event.hook() == ProcHook.ON_PROJECTILE_HIT) {
             addLightning(event, result);
             addVenom(event, result);
@@ -76,12 +88,47 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
             addPermafrost(event, result);
             addMortalCoil(event, result);
             addSelfDestruct(event, result);
+            addUndeadRuse(event, result);
         } else if (event.hook() == ProcHook.ON_PRE_DEATH) {
             addPhoenix(event, result);
         } else if (event.hook() == ProcHook.ON_PRE_DAMAGE_CALCULATION) {
             addDevour(event, result);
         }
         return List.copyOf(result);
+    }
+
+    private void addUndeadRuse(ProcEvent event, List<ProcCandidate> result) {
+        if (event.target() == null) return;
+        int level = UndeadRuseBehavior.equippedLevelHighest(event.target());
+        if (level <= 0 || UndeadRuseBehavior.activeCount(event.target()) >= UndeadRuseBehavior.cap(level)) return;
+        result.add(candidate(ModEnchantments.UNDEAD_RUSE.identifier(), ProcHook.ON_DAMAGE_TAKEN,
+                UndeadRuseBehavior.chance(level), Optional.empty(), 0L, Optional.of(UNDEAD_RUSE_ONCE_KEY),
+                ChildProcEligibility.LIMITED_DEFENSIVE_REACTION,
+                activation -> UndeadRuseBehavior.summon(activation.event().target(), level),
+                provenance(event, ModEnchantments.UNDEAD_RUSE.identifier()),
+                condition(CosmicPVE.id("undead_ruse_ordinary_attack"), CosmicEnchantmentBehaviorResolver::ordinaryAttack)));
+    }
+
+    private void addObliterate(ProcEvent event, List<ProcCandidate> result) {
+        int level = Math.min(3, event.effectiveEnchantments().level(ModEnchantments.OBLITERATE.identifier()));
+        if (level <= 0 || event.attacker() == null || event.target() == null) return;
+        result.add(candidate(ModEnchantments.OBLITERATE.identifier(), event.hook(), ObliterateBehavior.CHANCE,
+                Optional.empty(), 0L, Optional.empty(), ChildProcEligibility.LIMITED_OFFENSIVE_REROLL,
+                activation -> ObliterateBehavior.activate(activation.event().attacker(), activation.event().target(), level),
+                provenance(event, ModEnchantments.OBLITERATE.identifier()),
+                condition(CosmicPVE.id("obliterate_low_health"), procEvent -> procEvent.attacker() != null
+                        && ObliterateBehavior.belowThreshold(procEvent.attacker().getHealth(), procEvent.attacker().getMaxHealth()))));
+    }
+
+    private void addSoulTether(ProcEvent event, List<ProcCandidate> result) {
+        int level = Math.min(3, event.effectiveEnchantments().level(ModEnchantments.SOUL_TETHER.identifier()));
+        if (level <= 0 || event.attacker() == null || event.target() == null) return;
+        result.add(candidate(ModEnchantments.SOUL_TETHER.identifier(), ProcHook.ON_VALID_HIT, .10,
+                Optional.of(ModEnchantments.SOUL_TETHER.identifier()), 600L, Optional.empty(),
+                ChildProcEligibility.LIMITED_OFFENSIVE_REROLL,
+                activation -> soulTethers.apply(activation.event().attacker(), activation.event().target(), level,
+                        activation.event().serverTick()), provenance(event, ModEnchantments.SOUL_TETHER.identifier()),
+                meleeCondition(CosmicPVE.id("soul_tether_melee_hit"))));
     }
 
     private void addDivineImmolation(ProcEvent event, List<ProcCandidate> result) {

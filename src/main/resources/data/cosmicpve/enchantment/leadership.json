@@ -1,0 +1,11 @@
+{
+  "anvil_cost": 8,
+  "description": {"translate": "enchantment.cosmicpve.leadership"},
+  "effects": {},
+  "max_cost": {"base": 1, "per_level_above_first": 0},
+  "max_level": 10,
+  "min_cost": {"base": 1, "per_level_above_first": 0},
+  "slots": ["chest", "legs"],
+  "supported_items": "#cosmicpve:enchantable/chestplate_or_leggings",
+  "weight": 1
+}

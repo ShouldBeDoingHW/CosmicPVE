@@ -42,6 +42,11 @@ public final class ModEnchantments {
     public static final ResourceKey<Enchantment> DIVINE_IMMOLATION = createKey("divine_immolation");
     public static final ResourceKey<Enchantment> VIRUS = createKey("virus");
     public static final ResourceKey<Enchantment> DEVOUR = createKey("devour");
+    public static final ResourceKey<Enchantment> UNDEAD_RUSE = createKey("undead_ruse");
+    public static final ResourceKey<Enchantment> OBLITERATE = createKey("obliterate");
+    public static final ResourceKey<Enchantment> SOUL_TETHER = createKey("soul_tether");
+    public static final ResourceKey<Enchantment> DODGE = createKey("dodge");
+    public static final ResourceKey<Enchantment> LEADERSHIP = createKey("leadership");
 
     private ModEnchantments() {}
 

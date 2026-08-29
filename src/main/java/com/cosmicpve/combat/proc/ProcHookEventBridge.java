@@ -2,6 +2,7 @@ package com.cosmicpve.combat.proc;
 
 import com.cosmicpve.combat.execution.ExecutionService;
 import com.cosmicpve.combat.enchantment.NutritionFoodService;
+import com.cosmicpve.combat.enchantment.SoulTetherService;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
@@ -17,12 +18,15 @@ public final class ProcHookEventBridge {
     private final ProcEventService events;
     private final ExecutionService executions;
     private final NutritionFoodService nutrition;
+    private final SoulTetherService soulTethers;
 
     public ProcHookEventBridge(
-            ProcEventService events, ExecutionService executions, NutritionFoodService nutrition) {
+            ProcEventService events, ExecutionService executions, NutritionFoodService nutrition,
+            SoulTetherService soulTethers) {
         this.events = events;
         this.executions = executions;
         this.nutrition = nutrition;
+        this.soulTethers = soulTethers;
     }
 
     public void onPreDeath(LivingDeathEvent event) {
@@ -55,12 +59,17 @@ public final class ProcHookEventBridge {
     }
 
     public void onPlayerTick(PlayerTickEvent.Post event) {
+        if (!event.getEntity().level().isClientSide())
+            soulTethers.tick(event.getEntity(), event.getEntity().level().getServer().getTickCount());
         if (events.hasCandidateSources() && event.getEntity() instanceof ServerPlayer player) {
             events.dispatchRoot(ProcHook.PERIODIC_TICK, player, player, player);
         }
     }
 
     public void onEntityTick(EntityTickEvent.Post event) {
+        if (event.getEntity() instanceof LivingEntity living && !(living instanceof Player)
+                && !living.level().isClientSide())
+            soulTethers.tick(living, living.level().getServer().getTickCount());
         if (events.hasCandidateSources() && event.getEntity() instanceof LivingEntity living
                 && !(living instanceof Player) && !living.level().isClientSide()) {
             events.dispatchRoot(ProcHook.PERIODIC_TICK, living, living, living);

@@ -32,7 +32,7 @@ class UnexaminedBookOpeningServiceTest {
     @Test void masteryRevealsOnlyCurrentMasterySpecsAtValidLevelsAndRestrictedRates() {
         var mastery = List.of(CosmicEnchantmentSpecs.DEATH_PACT, CosmicEnchantmentSpecs.PERMAFROST,
                 CosmicEnchantmentSpecs.MORTAL_COIL, CosmicEnchantmentSpecs.PHOENIX,
-                CosmicEnchantmentSpecs.DIVINE_IMMOLATION);
+                CosmicEnchantmentSpecs.DIVINE_IMMOLATION, CosmicEnchantmentSpecs.SOUL_TETHER);
         var seen = new java.util.HashSet<CosmicEnchantmentSpec>();
         var random = RandomSource.create(1L);
         for (int i = 0; i < 200; i++) {

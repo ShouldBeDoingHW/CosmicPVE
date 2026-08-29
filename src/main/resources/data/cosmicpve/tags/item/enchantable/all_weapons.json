@@ -1,0 +1,7 @@
+{
+  "replace": false,
+  "values": [
+    "#cosmicpve:enchantable/sword_or_axe",
+    "#cosmicpve:enchantable/bow_or_crossbow"
+  ]
+}

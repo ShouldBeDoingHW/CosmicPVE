@@ -3,6 +3,8 @@ package com.cosmicpve.equipment.mask;
 import com.cosmicpve.CosmicPVE;
 import com.cosmicpve.combat.proc.ProcEventService;
 import com.cosmicpve.combat.proc.ProcHook;
+import com.cosmicpve.equipment.enchantment.EffectiveEnchantmentsResolver;
+import com.cosmicpve.registry.ModEnchantments;
 import com.cosmicpve.content.definition.mask.MaskBehavior;
 import java.util.Collections;
 import java.util.Map;
@@ -25,8 +27,11 @@ public final class MaskRuntimeEventBridge {
     public static final Identifier MOVEMENT_ID = CosmicPVE.id("mask_movement_speed");
     private final MaskResolver masks;
     private final ProcEventService procs;
+    private final EffectiveEnchantmentsResolver enchantments;
     private final Map<LivingEntity, Schedule> schedules = Collections.synchronizedMap(new WeakHashMap<>());
-    public MaskRuntimeEventBridge(MaskResolver masks, ProcEventService procs) { this.masks = masks; this.procs = procs; }
+    public MaskRuntimeEventBridge(MaskResolver masks, ProcEventService procs, EffectiveEnchantmentsResolver enchantments) {
+        this.masks = masks; this.procs = procs; this.enchantments = enchantments;
+    }
 
     public void onPlayerTick(PlayerTickEvent.Post event) { tick(event.getEntity()); }
     public void onEntityTick(EntityTickEvent.Post event) {
@@ -54,8 +59,13 @@ public final class MaskRuntimeEventBridge {
 
     public void onTargeted(LivingDamageEvent.Pre event) {
         if (event.getNewDamage() <= 0 || event.getEntity().level().isClientSide()
-                || masks.resolve(event.getEntity()).stream().noneMatch(d -> d.behavior() == MaskBehavior.TURKEY)) return;
+                || (masks.resolve(event.getEntity()).stream().noneMatch(d -> d.behavior() == MaskBehavior.TURKEY)
+                    && enchantments.resolve(event.getEntity(), java.util.List.of()).level(ModEnchantments.DODGE.identifier()) <= 0)) return;
+        var scoped = com.cosmicpve.combat.action.CombatDeliveryScope.current();
+        if (scoped.isPresent() && scoped.orElseThrow().context().channel()
+                != com.cosmicpve.combat.api.DamageChannel.ORDINARY) return;
         var attacker = event.getSource().getEntity() instanceof LivingEntity living ? living : null;
+        if (attacker == null) return;
         if (procs.dispatchRoot(ProcHook.ON_TARGETED, event.getEntity(), attacker, event.getEntity()).activationCount() > 0)
             event.setNewDamage(0.0F);
     }
