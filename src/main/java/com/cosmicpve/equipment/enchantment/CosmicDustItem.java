@@ -10,9 +10,9 @@ public final class CosmicDustItem extends Item {
 
     @Override public Component getName(ItemStack stack) {
         var data = stack.get(ModDataComponents.COSMIC_DUST.get());
-        if (data == null) return super.getName(stack);
+        if (data == null) return super.getName(stack).copy().withStyle(style -> style.withBold(true));
         return Component.translatable("item.cosmicpve.cosmic_dust.named",
                 Component.translatable("rarity.cosmicpve." + data.tier().serializedName()))
-                .withColor(data.tier().tooltipColor());
+                .withStyle(style -> style.withColor(data.tier().tooltipColor()).withBold(true));
     }
 }

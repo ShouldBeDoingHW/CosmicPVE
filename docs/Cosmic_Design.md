@@ -436,6 +436,7 @@ Heroic Abandoned Spaceship Lootbag:
 | Ender Walker | 5 | Boots | Ultimate | Reduce wither and poison based damage by 10% per tier.  |
 | Voodoo | 6 | Helmet | Elite | level% chance to give your opponent a Voodoo stack for 10s when hit. Voodoo stacks are negative and make your target deal 3% less damage per stack, up to a maximum of 15%.  |
 | Snare | 4 | Crossbow | Elite | (3 x level)% chance to snare your target for 1.25 seconds on hit, stopping all movement. |
+| Plague Carrier | 7 | Leggings | Unique | When hit below 25% HP, give your attacker (Poison 1 at levels 1-5, Poison 2 at levels 6 & 7\) for 2 \+ level seconds. 30 second cooldown.   |
 
 #
 
@@ -916,7 +917,11 @@ Abandoned Spaceship keys cost 1m base, and increase by 10k for each Abandoned Sp
 
 # Proposed Changes
 
-***All previously approved items from this workspace have been promoted into their canonical active-design tabs. This tab is intentionally cleared for future proposals.***
+***New Trial Rooms:***
+
+Color Crisis:
+
+Deep Sea Dive:
 
 # Space Chests
 

@@ -40,13 +40,14 @@ public final class ArmorSetResolver {
 
     public static Optional<Identifier> resolveIdentity(List<ItemStack> pieces) {
         if (pieces.size() != 4) return Optional.empty();
-        var identities = new java.util.ArrayList<Optional<Identifier>>(4);
+        var identities = new java.util.ArrayList<PieceIdentity>(4);
         for (ItemStack stack : pieces) {
             if (!isArmor(stack)) return Optional.empty();
             var identity = stack.get(ModDataComponents.ARMOR_SET_ID.get());
-            identities.add(identity == null ? Optional.empty() : Optional.of(identity.setId()));
+            identities.add(new PieceIdentity(identity == null ? Optional.empty() : Optional.of(identity.setId()),
+                    Boolean.TRUE.equals(stack.get(ModDataComponents.OMNI_ARMOR.get()))));
         }
-        return resolveIdentityIds(identities);
+        return resolvePieceIdentities(identities);
     }
 
     /** Pure identity seam used by resolution tests; armor eligibility is checked before this in production. */
@@ -55,6 +56,17 @@ public final class ArmorSetResolver {
         Identifier id = pieces.getFirst().orElseThrow();
         return pieces.stream().allMatch(piece -> piece.orElseThrow().equals(id)) ? Optional.of(id) : Optional.empty();
     }
+
+    public static Optional<Identifier> resolvePieceIdentities(List<PieceIdentity> pieces) {
+        if (pieces.size() != 4) return Optional.empty();
+        var anchors = pieces.stream().filter(piece -> !piece.omni()).toList();
+        if (anchors.size() < 2 || anchors.stream().anyMatch(piece -> piece.setId().isEmpty())) return Optional.empty();
+        Identifier id = anchors.getFirst().setId().orElseThrow();
+        return anchors.stream().allMatch(piece -> piece.setId().orElseThrow().equals(id))
+                ? Optional.of(id) : Optional.empty();
+    }
+
+    public record PieceIdentity(Optional<Identifier> setId, boolean omni) {}
 
     public static boolean isArmor(ItemStack stack) {
         var equippable = stack.get(net.minecraft.core.component.DataComponents.EQUIPPABLE);

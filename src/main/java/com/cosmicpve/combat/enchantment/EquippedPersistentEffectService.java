@@ -41,7 +41,6 @@ public final class EquippedPersistentEffectService {
         if (entity.level().isClientSide()) return;
         apply(entity, EquipmentSlot.HEAD, ModEnchantments.GLOWING.identifier(),
                 MobEffects.NIGHT_VISION, GLOWING_LEASE_TICKS, GLOWING_REFRESH_AT);
-        GearsBehavior.reconcile(entity);
         tickImplants(entity);
     }
 

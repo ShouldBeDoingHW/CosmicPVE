@@ -25,6 +25,8 @@ import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import com.cosmicpve.data.component.MysterySpawnerTier;
+import com.cosmicpve.reward.spawner.MysterySpawners;
 
 public final class RewardCommands {
     private static final RewardDeliveryService DELIVERY = new RewardDeliveryService();
@@ -70,6 +72,19 @@ public final class RewardCommands {
                                         IdentifierArgument.getId(context, "table"),
                                         IntegerArgumentType.getInteger(context, "count"))))))
                 .then(spawner)
+                .then(Commands.literal("mystery-spawner").then(Commands.literal("give")
+                        .then(Commands.argument("player", EntityArgument.player())
+                                .then(Commands.argument("tier", StringArgumentType.word())
+                                        .suggests((context, builder) -> SharedSuggestionProvider.suggest(
+                                                List.of("simple", "elite", "mastery"), builder))
+                                        .executes(context -> giveMysterySpawner(context.getSource(),
+                                                EntityArgument.getPlayer(context, "player"),
+                                                StringArgumentType.getString(context, "tier"), 1))
+                                        .then(Commands.argument("count", IntegerArgumentType.integer(1, 64))
+                                                .executes(context -> giveMysterySpawner(context.getSource(),
+                                                        EntityArgument.getPlayer(context, "player"),
+                                                        StringArgumentType.getString(context, "tier"),
+                                                        IntegerArgumentType.getInteger(context, "count"))))))))
                 .then(Commands.literal("book").then(Commands.literal("give")
                         .then(Commands.argument("player", EntityArgument.player())
                                 .then(Commands.argument("rarity", StringArgumentType.word())
@@ -100,6 +115,16 @@ public final class RewardCommands {
                                                                         IntegerArgumentType.getInteger(context, "minimum"),
                                                                         IntegerArgumentType.getInteger(context, "maximum"),
                                                                         StringArgumentType.getString(context, "levels"))))))))));
+    }
+
+    private static int giveMysterySpawner(net.minecraft.commands.CommandSourceStack source,
+            net.minecraft.server.level.ServerPlayer player, String tierName, int count) {
+        MysterySpawnerTier tier;
+        try { tier = MysterySpawnerTier.valueOf(tierName.toUpperCase(Locale.ROOT)); }
+        catch (IllegalArgumentException exception) { source.sendFailure(Component.literal("Unknown Mystery Spawner tier.")); return 0; }
+        DELIVERY.deliver(player, List.of(MysterySpawners.create(tier, count)));
+        source.sendSuccess(() -> Component.literal("Gave " + count + " Mystery " + tier + " Spawner(s)."), true);
+        return count;
     }
 
     private static int list(net.minecraft.commands.CommandSourceStack source) {

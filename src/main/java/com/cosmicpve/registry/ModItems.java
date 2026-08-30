@@ -24,6 +24,10 @@ import com.cosmicpve.equipment.mask.MaskItem;
 import com.cosmicpve.equipment.mask.MaskSplicerItem;
 import com.cosmicpve.conquest.ConquestFlareItem;
 import com.cosmicpve.equipment.enchantment.CosmicDustItem;
+import com.cosmicpve.reward.spawner.MysterySpawnerItem;
+import com.cosmicpve.data.component.MysterySpawnerData;
+import com.cosmicpve.data.component.MysterySpawnerTier;
+import com.cosmicpve.item.BoldNameItem;
 
 public final class ModItems {
     private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(CosmicPVE.MOD_ID);
@@ -48,8 +52,8 @@ public final class ModItems {
     public static final DeferredItem<WhiteScrollItem> WHITE_SCROLL = ITEMS.registerItem(
             "white_scroll", WhiteScrollItem::new, properties -> properties.stacksTo(64));
 
-    public static final DeferredItem<Item> TRANSMOG_SCROLL = ITEMS.registerSimpleItem(
-            "transmog_scroll", properties -> properties.stacksTo(64));
+    public static final DeferredItem<BoldNameItem> TRANSMOG_SCROLL = ITEMS.registerItem(
+            "transmog_scroll", BoldNameItem::new, properties -> properties.stacksTo(64));
 
     public static final DeferredItem<EnchantmentOrbItem> ARMOR_ENCHANTMENT_ORB = ITEMS.registerItem(
             "armor_enchantment_orb", EnchantmentOrbItem::new,
@@ -73,11 +77,18 @@ public final class ModItems {
     public static final DeferredItem<BanknoteItem> BANKNOTE = ITEMS.registerItem(
             "banknote", BanknoteItem::new, properties -> properties.stacksTo(1));
 
-    public static final DeferredItem<Item> REPAIR_SCROLL = ITEMS.registerSimpleItem(
-            "repair_scroll", properties -> properties.stacksTo(64));
+    public static final DeferredItem<BoldNameItem> REPAIR_SCROLL = ITEMS.registerItem(
+            "repair_scroll", BoldNameItem::new, properties -> properties.stacksTo(64));
 
     public static final DeferredItem<TypedMobSpawnerItem> MOB_SPAWNER = ITEMS.registerItem(
             "mob_spawner", TypedMobSpawnerItem::new, properties -> properties.stacksTo(64));
+
+    public static final DeferredItem<MysterySpawnerItem> MYSTERY_SIMPLE_SPAWNER = mysterySpawner(
+            "mystery_simple_spawner", MysterySpawnerTier.SIMPLE);
+    public static final DeferredItem<MysterySpawnerItem> MYSTERY_ELITE_SPAWNER = mysterySpawner(
+            "mystery_elite_spawner", MysterySpawnerTier.ELITE);
+    public static final DeferredItem<MysterySpawnerItem> MYSTERY_MASTERY_SPAWNER = mysterySpawner(
+            "mystery_mastery_spawner", MysterySpawnerTier.MASTERY);
 
     public static final DeferredItem<SpaceChestItem> SPACE_CHEST = ITEMS.registerItem(
             "space_chest", SpaceChestItem::new, properties -> properties.stacksTo(1));
@@ -106,6 +117,12 @@ public final class ModItems {
     private static DeferredItem<TrialTrinketItem> trinket(String name, TrialTrinketType type, int value) {
         return ITEMS.registerItem(name, TrialTrinketItem::new, properties -> properties.stacksTo(64)
                 .component(ModDataComponents.TRIAL_TRINKET.get(), new TrialTrinketData(type, value)));
+    }
+
+    private static DeferredItem<MysterySpawnerItem> mysterySpawner(String name, MysterySpawnerTier tier) {
+        return ITEMS.registerItem(name, MysterySpawnerItem::new, properties -> properties.stacksTo(64)
+                .component(ModDataComponents.MYSTERY_SPAWNER.get(),
+                        new MysterySpawnerData(MysterySpawnerData.CURRENT_DATA_VERSION, tier)));
     }
 
     private ModItems() {}

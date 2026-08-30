@@ -1,0 +1,11 @@
+{
+  "display_name": {"translate": "armor_set.cosmicpve.yjiki"},
+  "color": "#AA00AA",
+  "full_set_bonus": [
+    {"translate": "armor_set.cosmicpve.yjiki.bonus.outgoing"},
+    {"translate": "armor_set.cosmicpve.yjiki.bonus.incoming"},
+    {"translate": "armor_set.cosmicpve.yjiki.bonus.dungeon"}
+  ],
+  "additive_outgoing_bonus": 0.05,
+  "incoming_multiplier": 0.85
+}

@@ -1,0 +1,10 @@
+{
+  "display_name": {"translate": "armor_set.cosmicpve.engineer"},
+  "color": "#FFAA00",
+  "full_set_bonus": [
+    {"translate": "armor_set.cosmicpve.engineer.bonus.movement"},
+    {"translate": "armor_set.cosmicpve.engineer.bonus.health"}
+  ],
+  "additive_outgoing_bonus": 0.0,
+  "incoming_multiplier": 1.0
+}

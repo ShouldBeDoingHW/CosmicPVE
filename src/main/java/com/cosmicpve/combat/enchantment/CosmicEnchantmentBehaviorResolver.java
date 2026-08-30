@@ -478,9 +478,13 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
             com.cosmicpve.combat.proc.ProcAction action,
             ProcProvenance provenance,
             com.cosmicpve.combat.proc.ProcCondition... conditions) {
+        java.util.Set<Identifier> classifications = com.cosmicpve.equipment.enchantment.CosmicEnchantmentSpecs.find(id)
+                .filter(spec -> spec.tier() == com.cosmicpve.equipment.enchantment.CosmicEnchantmentTier.MASTERY)
+                .map(ignored -> java.util.Set.of(com.cosmicpve.equipment.armor.ArmorSetIds.MASTERY_PROC))
+                .orElseGet(java.util.Set::of);
         return new ProcCandidate(
                 id, hook, chance, cooldown, cooldownTicks, CooldownScope.EPHEMERAL_COMBAT, Optional.empty(),
-                List.of(), List.of(conditions), onceKey, childEligibility, id, action, provenance);
+                List.of(), List.of(conditions), onceKey, childEligibility, classifications, id, action, provenance);
     }
 
     private static ProcCandidate deterministicCandidate(

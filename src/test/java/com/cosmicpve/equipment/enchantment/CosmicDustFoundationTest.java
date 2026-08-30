@@ -77,6 +77,7 @@ class CosmicDustFoundationTest {
         ItemStack stack = CosmicDustService.dust(CosmicEnchantmentTier.UNIQUE, 64);
         assertEquals(64, stack.getMaxStackSize());
         assertEquals(CosmicEnchantmentTier.UNIQUE, stack.get(ModDataComponents.COSMIC_DUST.get()).tier());
+        assertTrue(stack.getHoverName().getStyle().isBold());
         try (var reader = new InputStreamReader(Objects.requireNonNull(getClass().getResourceAsStream(
                 "/assets/cosmicpve/models/item/cosmic_dust.json")))) {
             assertEquals("minecraft:item/sugar", JsonParser.parseReader(reader).getAsJsonObject()

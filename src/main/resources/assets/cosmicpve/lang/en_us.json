@@ -21,6 +21,23 @@
   "armor_set.cosmicpve.yeti.bonus.outgoing": "+10% outgoing damage",
   "armor_set.cosmicpve.yeti.bonus.incoming": "-10% incoming damage",
   "armor_set.cosmicpve.yeti.bonus.immunity": "Immune to freezing and ice effects",
+  "armor_set.cosmicpve.yjiki": "Yjiki",
+  "armor_set.cosmicpve.yjiki.bonus.outgoing": "+5% outgoing damage",
+  "armor_set.cosmicpve.yjiki.bonus.incoming": "-15% incoming damage",
+  "armor_set.cosmicpve.yjiki.bonus.dungeon": "Both bonuses double in Dungeons",
+  "armor_set.cosmicpve.dimensional_traveler": "Dimensional Traveler",
+  "armor_set.cosmicpve.dimensional_traveler.bonus.outgoing": "+7.5% outgoing damage",
+  "armor_set.cosmicpve.dimensional_traveler.bonus.movement": "+10% movement speed",
+  "armor_set.cosmicpve.dimensional_traveler.bonus.cooldown": "-20% Cosmic proc cooldown duration",
+  "armor_set.cosmicpve.engineer": "Engineer",
+  "armor_set.cosmicpve.engineer.bonus.movement": "+15% movement speed",
+  "armor_set.cosmicpve.engineer.bonus.health": "+4 maximum HP",
+  "armor_set.cosmicpve.ranger": "Ranger",
+  "armor_set.cosmicpve.ranger.bonus.projectile": "+20% bow/crossbow damage",
+  "armor_set.cosmicpve.ranger.bonus.movement": "+10% movement speed",
+  "armor_set.cosmicpve.dragonslayer": "Dragonslayer",
+  "armor_set.cosmicpve.dragonslayer.bonus.outgoing": "+10% outgoing damage",
+  "armor_set.cosmicpve.dragonslayer.bonus.reduction": "-75% Poison, Wither, and fire damage",
   "tooltip.cosmicpve.armor_set.identity": "%s Armor",
   "tooltip.cosmicpve.armor_set.full_bonus": "Full Set Bonus (4 pieces):",
   "tooltip.cosmicpve.crystal.success": "Success Rate: %s%%",
@@ -97,9 +114,9 @@
   ,"enchantment.cosmicpve.eagle_eye":"Eagle Eye"
   ,"enchantment.cosmicpve.rage":"Rage"
   ,"armor_set.cosmicpve.ancient":"Ancient"
-  ,"armor_set.cosmicpve.ancient.bonus.outgoing":"+7.5% outgoing damage"
-  ,"armor_set.cosmicpve.ancient.bonus.incoming":"-7.5% incoming damage"
-  ,"armor_set.cosmicpve.ancient.bonus.low_health":"Both bonuses double below 50% health"
+  ,"armor_set.cosmicpve.ancient.bonus.outgoing":"+5% outgoing damage"
+  ,"armor_set.cosmicpve.ancient.bonus.incoming":"-5% incoming damage"
+  ,"armor_set.cosmicpve.ancient.bonus.low_health":"Damage and knockback bonuses double below 50% health"
   ,"item.cosmicpve.weapon_skin":"Weapon Skin"
   ,"weapon_skin.cosmicpve.boosted_chainsaw":"Boosted Chainsaw"
   ,"weapon_skin.cosmicpve.mauis_hook":"Maui's Hook"
@@ -211,6 +228,10 @@
   ,"enchantment.cosmicpve.experience.description":"Increases experience gained from breaking blocks."
   ,"item.cosmicpve.mob_spawner":"Mob Spawner"
   ,"item.cosmicpve.mob_spawner.named":"%s Spawner"
+  ,"item.cosmicpve.mystery_spawner.simple":"Mystery Simple Spawner"
+  ,"item.cosmicpve.mystery_spawner.elite":"Mystery Elite Spawner"
+  ,"item.cosmicpve.mystery_spawner.mastery":"Mystery Mastery Spawner"
+  ,"tooltip.cosmicpve.mystery_spawner.open":"Right-click to reveal one Mob Spawner."
   ,"item.cosmicpve.space_chest":"Space Chest"
   ,"item.cosmicpve.space_chest.named":"%s Space Chest"
   ,"tooltip.cosmicpve.space_chest.purpose":"Select five rewards from a field of twenty-seven."

@@ -1,0 +1,10 @@
+{
+  "display_name": {"translate": "armor_set.cosmicpve.ranger"},
+  "color": "#55FF55",
+  "full_set_bonus": [
+    {"translate": "armor_set.cosmicpve.ranger.bonus.projectile"},
+    {"translate": "armor_set.cosmicpve.ranger.bonus.movement"}
+  ],
+  "additive_outgoing_bonus": 0.0,
+  "incoming_multiplier": 1.0
+}

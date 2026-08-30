@@ -76,9 +76,17 @@ public final class CosmicCombat {
             new com.cosmicpve.equipment.armor.ArmorSetSuppressionService();
     private static final ArmorSetResolver ARMOR_SETS =
             new ArmorSetResolver(CosmicContent.repository(), ARMOR_SET_SUPPRESSION);
-    private static final ArmorSetCombatContributor ARMOR_SET_COMBAT = new ArmorSetCombatContributor(ARMOR_SETS);
+    private static final com.cosmicpve.activity.ActivityContextService ACTIVITIES =
+            new com.cosmicpve.activity.ActivityContextService();
+    private static final ArmorSetCombatContributor ARMOR_SET_COMBAT =
+            new ArmorSetCombatContributor(ARMOR_SETS, ACTIVITIES);
     private static final ArmorSetImmunityResolver ARMOR_SET_IMMUNITIES = new ArmorSetImmunityResolver(ARMOR_SETS);
-    private static final ArmorSetEventBridge ARMOR_SET_EVENTS = new ArmorSetEventBridge(ARMOR_SET_IMMUNITIES);
+    private static final MaskResolver MASKS = new MaskResolver(CosmicContent.repository());
+    private static final com.cosmicpve.equipment.armor.CosmicMovementBonusService MOVEMENT =
+            new com.cosmicpve.equipment.armor.CosmicMovementBonusService(ARMOR_SETS, MASKS);
+    private static final ArmorSetEventBridge ARMOR_SET_EVENTS = new ArmorSetEventBridge(
+            ARMOR_SET_IMMUNITIES, ARMOR_SETS,
+            new com.cosmicpve.equipment.armor.ArmorSetAttributeService(ARMOR_SETS, MOVEMENT));
     private static final ProcEngine PROCS = new ProcEngine(COOLDOWNS, PROC_TRACES);
     private static final ProcEventService PROC_EVENTS =
             new ProcEventService(PROCS, PROC_SOURCES, SEQUENCES, ENCHANTMENTS, PROC_MODIFIERS);
@@ -103,7 +111,6 @@ public final class CosmicCombat {
     private static final ProcHookEventBridge PROC_HOOKS =
             new ProcHookEventBridge(PROC_EVENTS, EXECUTIONS, NUTRITION, SOUL_TETHERS);
     private static final CombatStackEventBridge STACK_EVENTS = new CombatStackEventBridge(STACKS, BLEED_RUNTIME);
-    private static final MaskResolver MASKS = new MaskResolver(CosmicContent.repository());
     private static final MaskCombatResolver MASK_COMBAT = new MaskCombatResolver(MASKS);
     private static final MaskRuntimeEventBridge MASK_EVENTS = new MaskRuntimeEventBridge(MASKS, PROC_EVENTS, ENCHANTMENTS);
     private static final com.cosmicpve.combat.enchantment.DodgeProcResolver DODGE =
@@ -133,9 +140,8 @@ public final class CosmicCombat {
         INCOMING.register(ARMOR_SET_COMBAT);
         INCOMING.register(WEAPON_SKIN_COMBAT);
         INCOMING.register(deathPact);
-        INCOMING.register(new ObsidianshieldBehavior(ENCHANTMENTS));
+        INCOMING.register(new com.cosmicpve.equipment.armor.CategoryDamageReductionBehavior(ARMOR_SETS, ENCHANTMENTS));
         INCOMING.register(permafrost);
-        INCOMING.register(new com.cosmicpve.combat.enchantment.EnderWalkerBehavior());
         INCOMING.register(MASK_COMBAT);
         PRE_DEFENSE_BOUNDS.register(new AegisBehavior(ENCHANTMENTS));
         PROC_MODIFIERS.register(new LuckBehavior());
@@ -158,6 +164,7 @@ public final class CosmicCombat {
         NeoForge.EVENT_BUS.addListener(STACK_EVENTS::onPlayerClone);
         NeoForge.EVENT_BUS.addListener(ARMOR_SET_EVENTS::onPlayerTick);
         NeoForge.EVENT_BUS.addListener(ARMOR_SET_EVENTS::onEntityTick);
+        NeoForge.EVENT_BUS.addListener(ARMOR_SET_EVENTS::onKnockback);
         NeoForge.EVENT_BUS.addListener(PERSISTENT_EFFECTS::onPlayerTick);
         NeoForge.EVENT_BUS.addListener(PERSISTENT_EFFECTS::onEntityTick);
         NeoForge.EVENT_BUS.addListener(MASK_EVENTS::onEntityTick);
@@ -212,6 +219,8 @@ public final class CosmicCombat {
     }
 
     public static ArmorSetResolver armorSets() { return ARMOR_SETS; }
+    public static com.cosmicpve.activity.ActivityContextService activities() { return ACTIVITIES; }
+    public static com.cosmicpve.equipment.armor.CosmicMovementBonusService movement() { return MOVEMENT; }
     public static com.cosmicpve.equipment.armor.ArmorSetSuppressionService armorSetSuppression() {
         return ARMOR_SET_SUPPRESSION;
     }

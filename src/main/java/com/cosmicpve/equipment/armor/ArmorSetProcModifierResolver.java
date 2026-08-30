@@ -11,7 +11,9 @@ public final class ArmorSetProcModifierResolver implements ProcModifierResolver 
 
     @Override public ProcModifiers resolve(LivingEntity owner) {
         return sets.resolve(owner)
-                .map(definition -> new ProcModifiers(List.of(1.0), List.of(1.0), definition.procChanceMultipliers()))
+                .map(definition -> new ProcModifiers(List.of(1.0),
+                        definition.id().equals(ArmorSetIds.DIMENSIONAL_TRAVELER) ? List.of(.8) : List.of(1.0),
+                        definition.procChanceMultipliers()))
                 .orElse(ProcModifiers.NONE);
     }
 }

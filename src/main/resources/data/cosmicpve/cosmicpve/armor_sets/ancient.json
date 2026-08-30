@@ -6,6 +6,6 @@
     {"translate": "armor_set.cosmicpve.ancient.bonus.incoming"},
     {"translate": "armor_set.cosmicpve.ancient.bonus.low_health"}
   ],
-  "additive_outgoing_bonus": 0.075,
-  "incoming_multiplier": 0.925
+  "additive_outgoing_bonus": 0.05,
+  "incoming_multiplier": 0.95
 }

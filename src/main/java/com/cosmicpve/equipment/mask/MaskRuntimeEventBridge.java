@@ -41,9 +41,7 @@ public final class MaskRuntimeEventBridge {
         if (entity.level().isClientSide()) return;
         var equipped = masks.resolve(entity);
         double health = equipped.stream().anyMatch(d -> d.behavior() == MaskBehavior.SANTA) ? 2.0 : 0.0;
-        double movement = equipped.stream().mapToDouble(d -> movementBonus(d.behavior())).sum();
         reconcile(entity, Attributes.MAX_HEALTH, MAX_HEALTH_ID, health, AttributeModifier.Operation.ADD_VALUE);
-        reconcile(entity, Attributes.MOVEMENT_SPEED, MOVEMENT_ID, movement, AttributeModifier.Operation.ADD_MULTIPLIED_BASE);
         boolean lover = equipped.stream().anyMatch(d -> d.behavior() == MaskBehavior.LOVER);
         boolean scarecrow = equipped.stream().anyMatch(d -> d.behavior() == MaskBehavior.SCARECROW) && entity instanceof Player;
         if (!lover && !scarecrow) { schedules.remove(entity); return; }

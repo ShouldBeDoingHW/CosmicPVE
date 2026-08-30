@@ -2,10 +2,12 @@ package com.cosmicpve.equipment.armor;
 
 /** Health-dependent values for the bespoke Ancient full-set behavior. */
 public final class AncientArmorSetBehavior {
-    public static final double NORMAL_OUTGOING = 0.075;
-    public static final double LOW_HEALTH_OUTGOING = 0.15;
-    public static final double NORMAL_INCOMING = 0.925;
-    public static final double LOW_HEALTH_INCOMING = 0.85;
+    public static final double NORMAL_OUTGOING = 0.05;
+    public static final double LOW_HEALTH_OUTGOING = 0.10;
+    public static final double NORMAL_INCOMING = 0.95;
+    public static final double LOW_HEALTH_INCOMING = 0.90;
+    public static final double NORMAL_KNOCKBACK_MULTIPLIER = 0.90;
+    public static final double LOW_HEALTH_KNOCKBACK_MULTIPLIER = 0.80;
 
     private AncientArmorSetBehavior() {}
 
@@ -20,5 +22,10 @@ public final class AncientArmorSetBehavior {
 
     public static double incoming(double currentHealth, double maximumHealth) {
         return isLowHealth(currentHealth, maximumHealth) ? LOW_HEALTH_INCOMING : NORMAL_INCOMING;
+    }
+
+    public static double knockback(double currentHealth, double maximumHealth) {
+        return isLowHealth(currentHealth, maximumHealth)
+                ? LOW_HEALTH_KNOCKBACK_MULTIPLIER : NORMAL_KNOCKBACK_MULTIPLIER;
     }
 }

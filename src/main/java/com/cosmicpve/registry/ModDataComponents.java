@@ -19,6 +19,8 @@ import com.cosmicpve.data.component.TrialPortalModifiers;
 import com.cosmicpve.data.component.MaskLoadout;
 import com.cosmicpve.data.component.HiddenGraveyardKeyData;
 import com.cosmicpve.data.component.CosmicDustData;
+import com.cosmicpve.data.component.MysterySpawnerData;
+import com.mojang.serialization.Codec;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -121,6 +123,13 @@ public final class ModDataComponents {
             COMPONENTS.registerComponentType("hidden_graveyard_key",
                     builder -> builder.persistent(HiddenGraveyardKeyData.CODEC)
                             .networkSynchronized(ByteBufCodecs.fromCodecWithRegistries(HiddenGraveyardKeyData.CODEC)).cacheEncoding());
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Boolean>> OMNI_ARMOR =
+            COMPONENTS.registerComponentType("omni_armor",
+                    builder -> builder.persistent(Codec.BOOL).networkSynchronized(ByteBufCodecs.BOOL).cacheEncoding());
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<MysterySpawnerData>> MYSTERY_SPAWNER =
+            COMPONENTS.registerComponentType("mystery_spawner",
+                    builder -> builder.persistent(MysterySpawnerData.CODEC)
+                            .networkSynchronized(ByteBufCodecs.fromCodecWithRegistries(MysterySpawnerData.CODEC)).cacheEncoding());
     private ModDataComponents() {}
 
     public static void register(IEventBus modBus) {

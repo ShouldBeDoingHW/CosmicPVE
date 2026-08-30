@@ -1,0 +1,11 @@
+{
+  "display_name": {"translate": "armor_set.cosmicpve.dimensional_traveler"},
+  "color": "#7D3F9E",
+  "full_set_bonus": [
+    {"translate": "armor_set.cosmicpve.dimensional_traveler.bonus.outgoing"},
+    {"translate": "armor_set.cosmicpve.dimensional_traveler.bonus.movement"},
+    {"translate": "armor_set.cosmicpve.dimensional_traveler.bonus.cooldown"}
+  ],
+  "additive_outgoing_bonus": 0.075,
+  "incoming_multiplier": 1.0
+}

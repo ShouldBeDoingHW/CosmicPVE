@@ -25,22 +25,24 @@ class ArmorSetCombatMathTest {
         assertFalse(AncientArmorSetBehavior.isLowHealth(11, 20));
         assertFalse(AncientArmorSetBehavior.isLowHealth(10, 20));
         assertTrue(AncientArmorSetBehavior.isLowHealth(9.999, 20));
-        assertEquals(.075, AncientArmorSetBehavior.outgoing(20, 20));
-        assertEquals(.075, AncientArmorSetBehavior.outgoing(10, 20));
-        assertEquals(.15, AncientArmorSetBehavior.outgoing(9, 20));
-        assertEquals(.925, AncientArmorSetBehavior.incoming(20, 20));
-        assertEquals(.925, AncientArmorSetBehavior.incoming(10, 20));
-        assertEquals(.85, AncientArmorSetBehavior.incoming(9, 20));
-        assertEquals(9.25, new CombatEngine().calculate(null, request(
+        assertEquals(.05, AncientArmorSetBehavior.outgoing(20, 20));
+        assertEquals(.05, AncientArmorSetBehavior.outgoing(10, 20));
+        assertEquals(.10, AncientArmorSetBehavior.outgoing(9, 20));
+        assertEquals(.95, AncientArmorSetBehavior.incoming(20, 20));
+        assertEquals(.95, AncientArmorSetBehavior.incoming(10, 20));
+        assertEquals(.90, AncientArmorSetBehavior.incoming(9, 20));
+        assertEquals(.90, AncientArmorSetBehavior.knockback(10, 20));
+        assertEquals(.80, AncientArmorSetBehavior.knockback(9, 20));
+        assertEquals(9.5, new CombatEngine().calculate(null, request(
                 new OutgoingDamageContribution(ArmorSetIds.ANCIENT, 0.0),
-                new IncomingDamageContribution(ArmorSetIds.ANCIENT, .925)))
+                new IncomingDamageContribution(ArmorSetIds.ANCIENT, .95)))
                 .breakdown().finalOrdinaryDamage(), 1e-9);
         var truePacket = com.cosmicpve.combat.api.TrueDamagePacket.standard(
                 com.cosmicpve.CosmicPVE.id("ancient_bypass"), 2.0);
         var separated = new CombatEngine().calculate(null, new CombatCalculationRequest(
                 10, 0, List.of(), DamageBounds.UNBOUNDED, List.of(), DamageBounds.UNBOUNDED,
-                List.of(truePacket), List.of(), List.of(new IncomingDamageContribution(ArmorSetIds.ANCIENT, .85))));
-        assertEquals(8.5, separated.breakdown().finalOrdinaryDamage(), 1e-9);
+                List.of(truePacket), List.of(), List.of(new IncomingDamageContribution(ArmorSetIds.ANCIENT, .90))));
+        assertEquals(9.0, separated.breakdown().finalOrdinaryDamage(), 1e-9);
         assertEquals(2.0, separated.totalQueuedTrueDamage(), 1e-9);
     }
 

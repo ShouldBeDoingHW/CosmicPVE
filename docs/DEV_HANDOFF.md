@@ -1,8 +1,8 @@
 # CosmicPVE Development Handoff
 
-Current accepted baseline: Step 7G/7G.1. Trials 1.1 and its corrective/presentation pass are implemented, automated/runtime verified, and manually verified/accepted. The ordinary Enchantments 1.0 content pool remains exactly 46 real enchantments.
+Current accepted baseline: Step 8A. Armor Sets 1.0, Omni resolution, shared armor-set modifier foundations, Mystery Spawners, and the final presentation follow-up are implemented, automated/runtime verified, and manually verified/accepted. The ordinary Enchantments 1.0 content pool remains exactly 46 real enchantments.
 
-Repository state: Steps 6A–7G.1 are implemented, automated/runtime verified, and manually accepted. The root `assets` source-art folder and root `trial rooms` structure-development folder remain deliberately untracked and unrelated.
+Repository state: Steps 6A–8A are implemented, automated/runtime verified, and manually accepted. Step 8A is ready for its closure commit. The root `assets` source-art folder remains deliberately untracked. The root `trial rooms` directory changes status in Step 8A.1 and becomes the tracked canonical source for Trial NBTs.
 
 Last handoff update: 2026-08-29
 
@@ -364,6 +364,16 @@ All nine Trial Trinket item names retain their canonical Skip/Time/Insurance fam
 
 Trials 1.1 balance now uses exactly six of Raiding Rainbow's eight authored color platforms per attempt, preserving the same selected colors/platforms and hidden order across wrong resets. Hidden Graveyard snapshots entry party size and independently rolls each grave for a second Corpse at `20% × (partySize - 1)` while retaining the three-kill key threshold and completing only after every actually spawned Corpse dies. Zero-G is now Apprentice and its helmet additionally carries Implants III plus the real attached Lover Mask. The one-time Hardcore and Demonic phase-entry bonuses are each 2,400 ticks/two minutes; completion and Time Trinket awards are unchanged. Current pools are Apprentice four rooms, Hardcore three rooms, and Demonic ten rooms.
 
+### Step 8A — IMPLEMENTED; AUTOMATED/RUNTIME VERIFIED; MANUALLY VERIFIED/ACCEPTED
+
+Armor Sets 1.0 now contains exactly eight normal sets: Phantom, Yeti, Ancient, Yjiki, Dimensional Traveler, Engineer, Ranger, and Dragonslayer. The authoritative full-set resolver supports Omni armor as a typed item component: at least two matching non-Omni anchor pieces are required, Omni pieces may fill the remaining slots, and mixed anchors, one anchor plus three Omni pieces, or four Omni pieces do not activate a set. Blackout suppression continues to disable all resolved set behavior without mutating item identity.
+
+The implementation audit found Phantom and Yeti already canonical, Ancient implemented with stale values, and Yjiki, Dimensional Traveler, Engineer, Ranger, and Dragonslayer missing. Ancient was reconciled in place; the five missing sets use the same definition repository, generic Armor Set Crystal, resolver, and combat/equipment services rather than parallel per-set item systems.
+
+Shared armor-set systems now own activity-aware damage, categorical reductions, cooldown-duration multipliers, stable movement-speed aggregation, and attribute reconciliation. Yjiki scales outgoing/incoming ordinary damage by authoritative activity context; Traveler reduces proc cooldown durations and contributes movement speed; Engineer contributes movement speed and maximum health; Ranger contributes movement speed and restricts its outgoing bonus to bow/crossbow projectiles; Dragonslayer contributes outgoing damage plus Poison/Wither/fire-category reduction. Ancient uses its corrected normal/low-health outgoing, incoming, and knockback values. Category reductions from armor sets and compatible enchantments add within their category and clamp at 100%. The current Cosmic movement sources are Gears, Reindeer Mask, Party Mask, Dimensional Traveler, Engineer, and Ranger; they aggregate centrally and clamp at +50% without per-tick modifier churn. Phantom's Mastery chance modifier now applies generically to real probabilistic Mastery procs while deterministic effects remain deterministic.
+
+Three stackable typed Mystery Spawner items are implemented for Simple, Elite, and Mastery pools. They use the vanilla Vault presentation, forced glint, bold rarity-colored names, uniform selection from their exact configured pools, and the existing typed Mob Spawner output factory. A valid server-side opening consumes exactly one item, safely delivers the resulting real Mob Spawner, and plays `minecraft:entity.experience_orb.pickup` in the Master sound category. Invalid typed data consumes nothing and produces no reward.
+
 ## 3. Current Real Enchantments
 
 These are registered through Minecraft's enchantment infrastructure, use actual enchantment data on the item, and are not present in normal enchanting-table, librarian, random-loot, random-equipment, or mob-equipment acquisition pools.
@@ -496,11 +506,16 @@ An entity has at most one active armor-set bonus. Head, chest, legs, and feet mu
 
 Implemented sets:
 
-- **Phantom** (`cosmicpve:phantom`, `#FF6969`): +25% additive ordinary outgoing damage, ×1.10 incoming damage, and a `×1.25` chance modifier for probabilistic Mastery procs. No real Mastery proc exists yet, so the final behavior is currently a tested integration seam.
+- **Phantom** (`cosmicpve:phantom`, `#FF6969`): +25% additive ordinary outgoing damage, ×1.10 incoming damage, and a `×1.25` chance modifier for probabilistic Mastery procs. Deterministic Mastery effects remain deterministic.
 - **Yeti** (`cosmicpve:yeti`, `#A3FFF5`): +10% additive ordinary outgoing damage, ×0.90 incoming damage, and immunity IDs for freeze, frozen, permafrost, and ice aspect. Current vanilla integration clears freezing for players and mobs wearing the full set; the custom named effects do not exist yet.
-- **Ancient** (`cosmicpve:ancient`, `#0A4A3D`): at or above exactly 50% health, +7.5% additive ordinary outgoing damage and ×0.925 ordinary incoming damage. Strictly below 50%, these become +15% and ×0.85. Outgoing reads attacker health at calculation; incoming reads target health before the current hit, so a threshold-crossing hit affects only later events. Standard true damage bypasses the set's ordinary reduction.
+- **Ancient** (`cosmicpve:ancient`, `#0A4A3D`): at or above exactly 50% health, +5% ordinary outgoing damage, ×0.95 ordinary incoming damage, and ×0.90 received knockback. Strictly below 50%, these become +10%, ×0.90, and ×0.80. Standard true damage bypasses ordinary reduction.
+- **Yjiki** (`cosmicpve:yjiki`): +5% ordinary outgoing and ×0.85 ordinary incoming damage normally; while the authoritative activity context is Dungeon, these become +10% and ×0.70.
+- **Dimensional Traveler** (`cosmicpve:dimensional_traveler`, `#7D3F9E`): +7.5% ordinary outgoing damage, +10% movement speed, and a `×0.80` duration multiplier for centrally managed proc cooldowns.
+- **Engineer** (`cosmicpve:engineer`): +15% movement speed and +4 maximum health through stable, reconciled entity attributes.
+- **Ranger** (`cosmicpve:ranger`): +10% movement speed and +20% ordinary outgoing damage only for bow/crossbow projectile attacks.
+- **Dragonslayer** (`cosmicpve:dragonslayer`, `#FFED0F`): +10% ordinary outgoing damage and 75% Poison, Wither, and fire-category damage reduction through the shared additive-within-category reduction bucket.
 
-There are exactly three implemented armor sets. Dimensional Traveler, Engineer, Ranger, and Yjiki are designed but not implemented. Do not infer set behavior merely because the design table names it.
+There are exactly eight implemented normal armor sets. A full set requires at least two matching non-Omni anchor pieces; Omni armor can fill the remaining slots. Mixed anchors, one anchor plus three Omni pieces, and four Omni pieces do not activate a set.
 
 ## 8. Item Application and Enchanting Economy
 
@@ -608,7 +623,6 @@ The following remain future content or infrastructure:
 
 - Divine Immolation, Hero Killer, Phoenix, Self Destruct, Virus, and other enchantments not present in the current implemented table; current Mastery implementations are Death Pact, Permafrost, and Mortal Coil
 - Space Pirate natural spawning, Conquest Chest spawning/rewards, and Abandoned Spaceship encounters; only the reusable entities and canonical generated combat equipment exist
-- Dimensional Traveler, Engineer, Ranger, Yjiki, and Dragonslayer armor sets
 - masks and Multi-Masks
 - Whisk Taker, Spinal Tap, Party Blade, and Doomsday Machete weapon skins. Boosted Chainsaw, Maui's Hook, and Stormbringer are implemented. The settled inventory UX is drag and left-click to apply; empty-cursor inventory right-click removes and returns the skin item. This supersedes older design text that reverses those gestures.
 - Feeding Frenzy and Hysteria runtime behavior
@@ -616,7 +630,7 @@ The following remain future content or infrastructure:
 - armor-set signature weapons
 - G-Kits, M-Kits, unlocks, and refreshers
 - Trials, Dungeons, Invasions, bosses, rooms, portals, keys, scaling runtime, protection, and recovery
-- loot generation, lootbags, production acquisition tables, spawners, and contribution rewards
+- additional lootbags, production acquisition tables, and contribution rewards; generic typed Mob Spawners and Mystery Spawner reward items are implemented
 - Space Chests and their reward prerequisites; Cosmic Crates, Memory Chests, Secret Weapon Caches, and seasonal utility blocks
 - final enchanting/loot GUIs; confirmation dialogs are not desired for ordinary deliberate item application
 
@@ -694,11 +708,11 @@ The final post-Orb capacity is no longer unresolved for current target classes: 
 
 ## 16. Current Next Milestone
 
-**Immediate next action: Step 8A — Armor Sets 1.0 + Mystery Spawners.**
+**Immediate next action: close Step 8A, then implement Step 8A.1 — Canonical Trial Structure Pipeline + Final Ordinary Enchantments.**
 
 Current intended sequence:
 
-Step 8A is the authorized next bounded milestone: complete all eight canonical normal armor sets and their shared movement/category/cooldown/Omni foundations, then add the three Mystery Spawner reward items. Space Chest rebalance, Gear Tinkering, Personal Vaults, Heroic Enchantments, and Dungeon #1 remain deferred.
+Step 8A is manually accepted and ready for closure. Step 8A.1 is the next bounded milestone: make project-root `trial rooms/` the tracked canonical Trial-structure source and implement Sniper V, Snare IV, and Plague Carrier VII. Space Chest rebalance, Gear Tinkering, Personal Vaults, Heroic Enchantments, and Dungeon #1 remain deferred.
 
 The ordinary-enchantment expansion remains split across bounded patches. Step 7C is the explicit instruction that made the current canonical Design Doc enchantment-table values implementation-authoritative; later design edits still require their own explicit implementation milestone.
 
@@ -717,12 +731,19 @@ Preserve unrelated dirty changes. Never change pinned versions as a side effect 
 
 ## 18. Verification Snapshot
 
+For the Step 8A candidate:
+
+- The original full `gradlew.bat cleanTest test build` verification passed, and the final presentation follow-up `gradlew.bat build` passes all 444 JUnit tests across 119 suites with 0 failures, errors, or skips. Coverage includes all eight armor-set definitions and final presentation colors, Omni anchor resolution, corrected Ancient values, category-reduction and movement-cap rules, bold Transmog Scroll/Repair Scroll/Cosmic Dust names, Mystery Spawner codecs/pools/presentation, exact output eligibility, atomic consumption, and the required Master-category pickup sound.
+- NeoForge `runGameTestServer` completes all three required GameTests. Dedicated-server startup reaches `Done` and atomically publishes all eight armor-set definitions. Fresh-client startup completes resource reload, SoundEngine/OpenAL initialization, and texture-atlas construction without relevant model, texture, registry, datapack, localization, or sided-classloading errors.
+- All 209 main-resource JSON files decode successfully. `git diff --check` reports no whitespace errors beyond normal Windows line-ending notices. Pinned versions and identifiers remain unchanged.
+- Step 8A is manually verified/accepted and ready for its closure commit. The root `assets/` remains untouched and untracked; `trial rooms/` becomes tracked canonical build input only in Step 8A.1.
+
 For the accepted Step 7G/7G.1 closure:
 
 - `gradlew.bat cleanTest test build` passes all 432 JUnit tests across 116 suites with 0 failures, errors, or skips. Focused coverage pins both imported structures and composition, all four Deadeye targets outside hidden data, Resin/Purpur reveal separation, Haze party scaling/timings/exact formatted feedback and sound identities, Warzone party scaling/tier uniqueness/weakest-tier gate, two-safe/four-removed hazard semantics, three-pulse schedule, Strength II configuration, six-color Rainbow behavior, Hidden Graveyard party formula, room-pool distribution, Zero-G helmet additions, bold item/Trial Trinket presentation, and the two-minute phase-entry bonuses.
 - NeoForge `runGameTestServer` completes all three required GameTests successfully. Dedicated-server startup loads 1,462 recipes, atomically publishes 12 Trial rooms, and reaches `Done` without relevant codec, structure, datapack, entity, registry, or common-side classloading errors. Fresh-client startup completes resource reload, OpenAL initialization, and texture-atlas construction without relevant resource or sided-loading failures; the development machine's existing OpenGL debug-context `id=1167` messages remain unrelated to CosmicPVE resources.
 - All 201 tracked main-resource JSON files parse successfully. The tracked runtime resources contain Haze and Seek plus both Warzone Giants structure halves; the original root `trial rooms/` files remain untouched and untracked. `git diff --check` reports no whitespace errors beyond normal Windows line-ending notices. Pinned versions, identifiers, and the 46-enchantment registry remain unchanged.
-- Step 7G plus the Step 7G.1 correction is manually verified/accepted and ready for its closure commit. The user explicitly excluded approximate Leather/Iron/Netherite runtime damage measurement from this pass; Strength II is the only Giant offensive change.
+- Step 7G plus the Step 7G.1 correction is manually verified/accepted and committed as `abaf93b48a11804eb602ff46946025a1ec2a02e8` (`Complete Trials 1.1 expansion`). The user explicitly excluded approximate Leather/Iron/Netherite runtime damage measurement from that pass; Strength II is the only Giant offensive change.
 
 For the Step 7F candidate:
 

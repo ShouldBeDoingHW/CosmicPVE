@@ -25,8 +25,17 @@ class BundledArmorSetDefinitionsTest {
 
         var ancient = load("ancient");
         assertEquals(0x0A4A3D, ancient.presentationColor());
-        assertEquals(.075, ancient.additiveOutgoingBonus());
-        assertEquals(.925, ancient.incomingMultiplier());
+        assertEquals(.05, ancient.additiveOutgoingBonus());
+        assertEquals(.95, ancient.incomingMultiplier());
+
+        assertEquals(.05, load("yjiki").additiveOutgoingBonus());
+        assertEquals(.85, load("yjiki").incomingMultiplier());
+        assertEquals(0x7D3F9E, load("dimensional_traveler").presentationColor());
+        assertEquals(.075, load("dimensional_traveler").additiveOutgoingBonus());
+        assertEquals(1.0, load("engineer").incomingMultiplier());
+        assertEquals(0.0, load("ranger").additiveOutgoingBonus());
+        assertEquals(0xFFED0F, load("dragonslayer").presentationColor());
+        assertEquals(.10, load("dragonslayer").additiveOutgoingBonus());
     }
 
     @Test void ancientDefinitionWorksThroughGenericCrystalTransaction() {
