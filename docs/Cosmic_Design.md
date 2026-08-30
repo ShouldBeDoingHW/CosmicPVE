@@ -145,17 +145,20 @@ Loot when broken:
 | Unexamined Elite Enchantment Book | 12 | 2 |
 | Unexamined Ultimate Enchantment Book | 12 | 1 |
 | Unexamined Legendary Enchantment Book | 8 | 1 |
-| Random Boss Spawn Egg | 5 | 1 |
+| Mystery Simple Spawner | 15 | 1 |
 | Trial Portal | 10 | 1 |
 | Trial Portal | 5 | 2 |
 | Transmog Scroll | 10 | 1 |
 | White Scroll | 9 | 1 |
 | 50% Black Scroll | 10 | 1 |
-| 65% Black Scroll | 6 | 1 |
+| 75% Black Scroll | 6 | 1 |
 | Repair Scroll | 10 | 1 |
-| Gkit Refresher | 4 | 1 |
 | Legendary Space Chest | 8 | 1 |
 | Ultimate Space Chest | 10 | 1 |
+| Heroic Crystal | 5 | 1 |
+| \+1 Minute Trial Trinket | 3 | 1 |
+| \+1 Insurance Trial Trinket | 3 | 1 |
+| Skip 1 Room Trial Trinket | 3 | 1 |
 
 In addition to the random loot, each conquest chest gives a guaranteed banknote that ranges between 100k and 1 million, always a multiple of 10,000. Examples: 330k, 970k, 560k.
 
@@ -283,9 +286,9 @@ Milk and Cookies: Right click to eat milk and cookies, giving you \+5 random inv
 
 Guaranteed loot:
 
-1-2 100% Blackscroll
-Random 50% Armor Set Crystal
-1-3 Cow OR Guardian Spawners
+1-2 100% Blackscroll OR Enchanted Blackscroll
+Random 100% Armor Set Crystal
+1-3 Elite OR
 3-6 Trial Portals
 Random Tier 3 Trial Trinket OR 2x Random Tier 2 Trial Trinket
 Sand Castle OR Potted Cactus Custom Block
@@ -295,7 +298,7 @@ Jumbo Popsicle Sword Skin OR Spiked Baseball Bat Axe Skin
 
 1 Extraordinary item:
 
-Super Kit Refresher — PENDING M-KIT REDESIGN
+Vkit Bundle
 Memory Chest
 Secret Weapon Cache
 Maxed out Trial Portal
@@ -437,6 +440,10 @@ Heroic Abandoned Spaceship Lootbag:
 | Voodoo | 6 | Helmet | Elite | level% chance to give your opponent a Voodoo stack for 10s when hit. Voodoo stacks are negative and make your target deal 3% less damage per stack, up to a maximum of 15%.  |
 | Snare | 4 | Crossbow | Elite | (3 x level)% chance to snare your target for 1.25 seconds on hit, stopping all movement. |
 | Plague Carrier | 7 | Leggings | Unique | When hit below 25% HP, give your attacker (Poison 1 at levels 1-5, Poison 2 at levels 6 & 7\) for 2 \+ level seconds. 30 second cooldown.   |
+| Obsidian Destroyer | 4 | Pickaxe | Unique | Gives \+2 mining efficiency per level while mining obsidian.  |
+| Stormcaller | 5 | Boots/Chestplate | Elite | Level % chance (capped at 5% base) to strike your attacker with lightning when hit, dealing (1 \+ (0.2 x aggregate stormcaller level)) true damage and giving them slowness 1 for 2 seconds. |
+| Hex | 5 | Axe | Legendary | Level % chance to give your opponent a hex stack for 5s on hit. For each hex stack, you take 2% more incoming damage and deal \-2% outgoing damage. |
+| Inversion | 4 | Sword | Ultimate | While holding the sword and hit, you have a level % chance to invert the attack, ignoring all damage and effects and then rolling the enchantments on your attacker instead of you. Your luck factor can help these inverted enchantments.  |
 
 #
 
@@ -520,7 +527,6 @@ Advanced Loot Table:
 | M-Kit Unlock Item — PENDING REDESIGN | 6 | 1 |
 | Skip 2 Rooms Trial Trinket | 7 | 1 |
 | Skip 3 Rooms Trial Trinket | 4 | 1 |
-| Super Kit Refresher — PENDING M-KIT REDESIGN | 8 | 1 |
 | Trial Portal | 10 | 2 |
 | Trial Portal | 10 | 3 |
 | 80% Weapon Enchantment Orb | 8 | 1 |
@@ -539,15 +545,9 @@ Invasion Implementation and Edge Cases
 
 # V Kits
 
-# Kits
-
-# General Rules
-
-Kits are permanent unlocks rather than routine timed-cooldown rewards. Where a kit uses a Refresh Crystal, claiming the kit consumes its current claim availability until the appropriate refresher restores it.
-
 # V-Kits
 
-V-Kits are evolving kits with levels I–X. Higher V-Kit levels provide more and stronger Cosmic enchantments. Each V-Kit has two possible rolls: a piece of armor and a weapon.
+V-Kits are evolving kits with levels I–X. Higher V-Kit levels provide more and stronger Cosmic enchantments. Each V-Kit has two possible rolls: a piece of armor and a weapon, with equal 50-50 chances.
 
 | Kit Name | Armor | Weapon | Color (in hex \#) |
 | :---- | :---- | :---- | :---- |
@@ -556,24 +556,61 @@ V-Kits are evolving kits with levels I–X. Higher V-Kit levels provide more and
 | Judgement | Leggings | Axe | 663434 |
 | Slayer | Helmet | Bow | 8C0B0B |
 
-A V-Kit is unlocked via Vkit gems (enchanted glimmering Diamond base item. Text goes: “V-Kit Crystal” in white that’s bolded, and then the name of the kit such as ogre, slayer, ect. The name of the kit is underlined, italicized, bolded, and in the color of it’s kit.)
+A V-Kit is unlocked via Vkit gems (various dyes base item. Text goes: “V-Kit Crystal” in white that’s bolded, and then the name of the kit such as ogre, slayer, ect. The name of the kit is underlined, italicized, bolded, and in the color of it’s kit.) First Gem → unlock level I and receive the level-I roll. Second Gem → advance to II and receive the level-II roll, and so on. Gems 11+ all give the same level 10 roll.
 
 At unlock, the kit gives level 1 items. Each additional matching V-Kit Gem raises that V-Kit by exactly one level, up to level 10 (Vkit levels are always written in Roman Numerals). Matching Gems are the only way to level a V-Kit.
 
-When a V-Kit is claimed, its reward is rolled from that kit's two listed equipment types according to the V-Kit reward-generation rules for its current level. You only get 1 item every roll of each Vkit. Vkit sword and axe are diamond base weapons. Vkit armor is Iron.
+When a V-Kit is claimed, its reward is rolled from that kit's two listed equipment types according to the V-Kit reward-generation rules for its current level. You only get 1 item every roll of each Vkit. Vkit sword and axe are diamond base weapons. Vkit armor is Iron. Vanilla enchantments are protection 4/sharp 5/power 5/piercing 4 for all appropriate gear. Unbreaking 3 is added to everything at tier 3, and mending (infinity for bows) at tier 8\.
+
+Unlock gems items (all have enchantment shimmering glint). Each flavor text is in the hex color of the kit, italicised, and the name of the kit (Pheonix Vkit, Ogre Vkit, ect) is underlined.
+
+| Kit | Gem Texture | Flavor/explainer text. |
+| :---- | :---- | :---- |
+| Phoenix | Purple Dye | Return from the ashes once more. Right click to level up your Pheonix Vkit\! |
+| Ogre | Green Dye | The best offense is… A fat defense? Right click to level up your Ogre Vkit\! |
+| Judgement | Black Dye | Will you use this kit for good? Or Evil? Right click to level up your Judgement Vkit\! |
+| Slayer | Red Dye | Quality over quantity. Your enemies quake. Right click to level up your Slayer Vkit\! |
 
 Vkit Item names:
 
 Sword — Sikanda
 Bow — Glitched Bow
-Crossbow — WIP
+Crossbow — The Gutbuster
 Axe — The Banhammer
 Boots — Sandals of the Phoenix
 Leggings — Trousers of Retribution
 Chestplate — Fat Tummy
 Helmet — Shroud of War
 
-Each Vkit weapon and armor name is in the color of the Vkit, bolded, italicised, and the level of the kit at the time of claiming is in () at the end. So the Fat Tummy (8) would be in green, bolded italicised, and the 8 would display that this particular fat tummy was claimed at Vkit level 8\.
+Each Vkit weapon and armor name is in the color of the Vkit, bolded, italicised, and the level of the kit at the time of claiming is in (), in roman numeral form, at the end. So the “Fat Tummy (VIII)” would be in green, bolded italicised, and the 8 would display that this particular fat tummy was claimed at Vkit level 8\.
+
+Each Vkit roll uses the following table to determine how the gear turns out:
+
+| Level | Enchantment Points |
+| :---- | :---- |
+| 1 | 5 |
+| 2 | 6 |
+| 3 | 7 |
+| 4 | 9 |
+| 5 | 10 |
+| 6 | 12 |
+| 7 | 13 |
+| 8 | 14 |
+| 9 | 16 |
+| 10 | 18 |
+
+The way it works is very procedure based. A level 4 vkit item has 9 total enchantment levels to roll. Each item has a pool of associated enchantments. One is randomly selected, and enchantment points are spent until the item runs out of enchantment points or the enchantment is max level. If the remaining points is still \> 0, another enchantment from the pool (no duplicates allowed) is chosen, and the process repeats, again, until the enchantment points run out. In this system, only 1 enchantment on the item can be below max level. The weapon/armor weight is 50-50.
+
+| Item | Available Enchantments |
+| :---- | :---- |
+| Sword | Rage, Doublestrike, Divine Immolation (only rolls at level 8+), Execute, Greatsword. |
+| Bow | Virus, Sniper, Soul Siphon (Only level 8+), Lightning, Eagle Eye. |
+| Crossbow | Virus, Eagle Eye, Lightning, Venom, Snare.  |
+| Axe | Rage, Soul Tether (only rolls at level 8+), Devour, Pummel, Insanity.  |
+| Helmet | Mortal Coil (only rolls at level 8+), Molten, Armored, Voodoo, Angelic. |
+| Chestplate | Aegis, Armored, Angelic, Leadership. |
+| Leggings | Plague Carrier, Armored, Cactus, Self Destruct, Molten. |
+| Boots | Phoenix (only rolls at level 8+), Ender Walker, Gears, Dodge, Luck. |
 
 # Masks / Skins
 
@@ -790,17 +827,7 @@ Custom attacks/abilities: N/A
 Speed: 0.4
 Drops: Nothing by default.
 
-# Fallen Heroes
-
-Fallen Heroes are summonable kit bosses whose summon items are dropped by selected activities. Each Fallen Hero is tied to a specific G-Kit or V-Kit.
-
-When summoned, the Fallen Hero spawns wearing the strongest possible version of that kit's gear. The boss uses that maxed gear for the fight; this does not mean its dropped equipment reward is maxed.
-
-Killing a Fallen Hero produces exactly one of two equally likely outcomes:
-• 50% — the corresponding kit Unlock/Progression Gem.
-• 50% — one random piece from that kit's normal loot pool, rolled normally rather than as a maxed version.
-
-For G-Kits, the Gem unlocks the corresponding kit. For V-Kits, the first matching Gem unlocks the V-Kit at level I and additional matching Gems are used to raise its V-Kit level according to the V-Kit rules.
+# Fallen Heroes **REMOVED**
 
 # Modpack
 
@@ -824,6 +851,7 @@ Sodium by JellySquid
 Spark by lucko
 YetAnotherConfigLib by isXander
 Homework’s Recipes by ShouldBeDoingHW
+Homework’s Mob Drops by ShouldBeDoingHW
 
 # Money and Economy
 
@@ -873,7 +901,6 @@ Flash sale availability table:
 | Repair Scroll | 5 | 200k | 400k | 600k |
 | Heroic Crystal | 1 | 450k | 650k | 775k |
 | Random Mkit unlock | 1 | 4m | 5m | 6m |
-| Super Kit Refresher | 1 | 3.3m | 3.6m | 3.9m |
 
 Dungeon Keys can also be purchased with money, inside the /dungeonmaster menu.
 
@@ -919,9 +946,115 @@ Abandoned Spaceship keys cost 1m base, and increase by 10k for each Abandoned Sp
 
 ***New Trial Rooms:***
 
-Color Crisis:
+Both builds are still WIP.
 
-Deep Sea Dive:
+Color Crisis: Placeholder description text
+
+Deep Sea Dive: Placeholder description text
+
+***Adventures:***
+
+Alternative dimensions that you can teleport to using a special item for each of the 3 adventures. Loot structures, fight mobs, and use desecrated tombs to summon bosses that drop special armorset crystals. Played exclusively in adventure mode without keep inventory.
+
+There are 3 Adventures: Dense Woodlands, Frozen Wasteland, and a name that I need ideas for but is themed loosely on underwater (it won’t actually be underwater though) with kind of like a coral reef bottom of the ocean floor type of terrain/structures.
+
+Each adventure has separate limitations on it to encourage players to make multiple armor sets\!
+
+| Adventure Type | Limitations | Summonable Boss | Armorset Crystal Available Here |
+| :---- | :---- | :---- | :---- |
+| Dense Woodlands | Only Simple, Unique, and Elite enchantments work\! Armorsets, masks, and skins have their effects disabled\! | Space Ranger (WIP name) | Ranger |
+| Frozen Wasteland | Mastery and heroic enchantments are disabled\! Skins and masks have their effects disabled\! | Abominable Yeti | Yeti |
+| Coral Wastes | Everything allowed\! | The Leviathan | Ancient |
+
+There is no /pv during adventures\! Players spawn in random valid coordinates between \+100,000/-100,000 on both the X and Z coordinates. Since the terrain is controlled with features and structures and a custom biome, the map does not need to be hand built, only the individual scattered assets, meaning that the player can dive into the dimension dozens of times without finding structures and areas they’ve already looted. Also, syncing up your entry with your friends does little for you since you’ll likely spawn tens of thousands of blocks apart\!
+
+Entry is granted via a special portal that comes in 10, 20, and 30 minute increments. When you enter the dimension, a special compass is given to the player that always points to their exit portal (always within 1000, 2000, 3000 blocks respective to their spawn depending on their initial time). Every 60s the player can right click the compass to get a chat message that tells them: “Hurry up Cosmonaut\! The exit portal is X blocks away\!”
+
+ Failing to find the exit portal before time is up causes the player to die\!
+
+Dimensional traveler crystals will be amended on release of adventures to have slightly worse base benefits but doubled bonuses while playing inside an adventure\!
+
+***Godly Vkit Bundle:***
+
+A nested loot item that contains exactly 1 of each of the 4 Vkit gems. Default item is a red dyed bundle. Enchanted shimmering texture. Item name is bolded and goes “Godly (\#F7658D) Vkit (\#F22960) Bundle\! (\#FA0246)”
+
+Flavor text is the standard yellow and reads “Found nested inside the deepest corner of the earth, there is unimaginable power within this bag. Right click to open\!”
+
+Opening it shoots a firework and plays the “player levelup” sound. No opening animation.
+
+***/Upgrades:***
+
+An accessible menu where players can use a new item called “Upgrade Crystals” in tandem with $$$ to buy permanent upgrades for themselves. Upgrade crystals are primarily found in Conquest chests in small amounts and dungeons in large amounts.
+
+Each upgrade with multiple tiers would have their subsequent tiers hidden until the previous tier has been unlocked. This will incentivise players to create a Yjiki set for dungeons, a ranger set for certain times when ranged combat is best, a dimensional traveler set for the tier 2 and 3 adventures (where armorsets are not disabled), and then an optional general purpose set out of Yeti, Ranger, Engineer, Dragonslayer, and Phantom.
+
+| Upgrade Name | Upgrade Tier | Upgrade Crystal Cost | Upgrade $$$ Cost | Effect |
+| :---- | :---- | :---- | :---- | :---- |
+| More Damage\! | I | 4 | 1m | Deal \+1% damage\! |
+| More Damage\! | II | 8 | 2m | Deal \+2% damage\! |
+| More Damage\! | III | 12 | 3m | Deal \+3% damage\! |
+| More Damage\! | IV | 16 | 4m | Deal \+4% damage\! |
+| More Damage\! | V | 20 | 5m | Deal \+5% damage\! |
+| Less Damage\! | I | 4 | 1m | Take \-1% damage\! |
+| Less Damage\! | II | 8 | 2m | Take \-2% damage\! |
+| Less Damage\! | III | 12 | 3m | Take \-3% damage\! |
+| Less Damage\! | IV | 16 | 4m | Take \-4% damage\! |
+| Less Damage\! | V | 20 | 5m | Take \-5% damage\! |
+| Dungeon Mastery\! | I | 16 | 5m | 2.5% chance not to consume a dungeon key upon entering a dungeon\! |
+| Dungeon Mastery\! | II | 32 | 10m | 5% chance not to consume a dungeon key upon entering a dungeon\! |
+| Dungeon Mastery\! | III | 48 | 15m | 7.5% chance not to consume a dungeon key upon entering a dungeon\! |
+| Dungeon Mastery\! | IV | 64 | 20m | 10% chance not to consume a dungeon key upon entering a dungeon\! |
+| Slow Mo\! | I | 10 | 2.5m | Gain \+20s at the beginning of each trial\! |
+| Slow Mo\! | II | 20 | 5m | Gain \+40s at the beginning of each trial\! |
+| Slow Mo\! | III | 30 | 7.5m | Gain \+60s at the beginning of each trial\! |
+| Safety Net\! | I | 12 | 3m | Enchantment books have a \-2% destroy chance when attempting to apply\! |
+| Safety Net\! | II | 24 | 6m | Enchantment books have a \-4% destroy chance when attempting to apply\! |
+| Safety Net\! | III | 36 | 9m | Enchantment books have a \-6% destruction chance when attempting to apply\! |
+| Safety Net\! | IV | 48 | 12m | Enchantment books have a \-8% destruction chance when attempting to apply\! |
+| Safety Net\! | V | 60 | 15m | Enchantment books have a \-10% destruction chance when attempting to apply\! |
+
+Misc notes:
+
+Safety net is a flat \- to the percentage, not a multiplicative 0.9x or similar.
+
+***Holy Whitescrolls:***
+
+Requires a whitescroll on an item to apply. When applied, removes the whitescroll and then makes the item holy, which gives you a 50% chance to retain the item on death in non-keep inventory areas such as Invasions and Adventures. Primarily found inside dungeons. The effect cannot stack.
+
+Item base texture is a blank map with the enchanted shimmer. Item display name reads as follows:
+
+“\* Holy \* Whitescroll” — Holy being in \#C4394A, and Whitescroll in standard white.The \* are intentional and part of the item name, not a formatting error. Also, both in the flavor text and the item name, the “holy” part of the name should be underlined.
+
+The flavor text should use the same \#C4394A color, italicised, and read  “Apply to an item with an already applied whitescroll to consume it and turn the item holy\! Holy items have a 50% chance to be preserved upon death in a non keep-inventory death\!”
+
+Items that can be holy whitescrolled are pickaxes, swords, axes, bows, crossbows, and all armor pieces.
+
+Items that are holy but roll on the bad side of RNG on death are dropped like your other items. Successfully saving an item via holy removes the holy effect from the item.
+
+***Trial Fame System:***
+
+In addition to the cumulative loot pool, Trials now give a new currency: Fame.
+
+Each room you complete adds a fame value to the pool, which is displayed when you hover over the green glass panes in the decision box loot preview GUI. Apprentice rooms add 1-3 fame, hardcore rooms add 4-7 fame, and demonic rooms add 8-11 fame.
+
+A new GUI can be accessed by doing /fame or /fameshop. Here, players can spend their accumulated fame to purchase items directly from the trial loot pool, which will be revamped.
+
+Instead of loot being sorted by apprentice, hardcore, and demonic rooms, loot will now be sorted into rooms 1-4, rooms 5-9, and rooms 10+, which allows for better upper end loot (memory chests, armorset crystals, ect) to be added to the pool while still remaining balanced due to the extreme difficulty in reaching rooms 10+.
+
+# Roadmap
+
+- [ ] **V-Kits \+ weapon normalization**
+- [ ] **Personal Vaults \+ Obsidian Destroyer**
+- [ ] **Gear Tinkering \+ Enchanted Black Scroll \+ Hex**
+- [ ] **Secret Weapon Cache \+ Admin Abuse \+ Cosmic Enchantment Table \+ Godly V-Kit Bundle**
+- [ ] **Flash Sale \+ Space Chest rebalance**
+- [ ] **Heroic enchantments**
+- [ ] **`/upgrades` \+ Upgrade Crystals \+ Stormcaller \+ Conquest Chest Upgrade-Crystal rebalance**
+- [ ] **Holy White Scrolls \+ Inversion**
+- [ ] **Dungeon \#1 — Abandoned Spaceship**
+- [ ] **Color Crisis/Deep Sea Dive \#1 \+ Trial loot rebalance**
+- [ ] **the other new Trial room \+ Fame system**
+- [ ]
 
 # Space Chests
 
@@ -1123,7 +1256,6 @@ Insurance: Randomly salvages 1, 2, or 3, loot items from the accumulated pot sho
 | Skip 3 Rooms Trial Trinket | 5 | 1 |
 | \+3 Insurance Trial Trinket | 5 | 1 |
 | Random Boss Spawn Egg | 8 | 1 |
-| M-Kit Refresher — PENDING REDESIGN | 6 | 1 |
 | Unexamined Mastery Enchantment Book | 12 | 1 |
 | Random Double Mask | 10 | 1 |
 | Heroic Abandoned Spaceship Dungeon Portal | 4 | 1 |

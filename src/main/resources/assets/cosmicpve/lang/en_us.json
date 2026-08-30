@@ -381,4 +381,11 @@
   ,"enchantment.cosmicpve.ender_walker.description":"Reduces damage caused by Poison and Wither effects."
   ,"enchantment.cosmicpve.voodoo":"Voodoo"
   ,"enchantment.cosmicpve.voodoo.description":"Attacks may apply stacking reductions to the enemy's outgoing damage."
+  ,"enchantment.cosmicpve.sniper":"Sniper"
+  ,"enchantment.cosmicpve.sniper.description":"Headshots with bows and crossbows deal increased ordinary damage."
+  ,"enchantment.cosmicpve.snare":"Snare"
+  ,"enchantment.cosmicpve.snare.description":"Crossbow hits may briefly root enemies in place."
+  ,"enchantment.cosmicpve.plague_carrier":"Plague Carrier"
+  ,"enchantment.cosmicpve.plague_carrier.description":"Taking damage at low health poisons your attacker."
+  ,"tooltip.cosmicpve.applicability.crossbow":"Crossbow Enchantment"
 }

@@ -30,7 +30,7 @@ class TrialResourceTest {
         assertStructure("decision_box",47,28,47);
         assertStructure("development_room",41,17,41);
         assertStructure("raiding_rainbow",41,17,41,1);
-        assertStructure("circuit_circus",25,25,31,5);
+        assertStructure("circuit_circus",25,25,31,1);
         assertStructure("fire_colony",47,31,11,1);
         assertStructure("zero_g",22,45,21,1);
         assertStructure("cold_snap",39,31,37,1);

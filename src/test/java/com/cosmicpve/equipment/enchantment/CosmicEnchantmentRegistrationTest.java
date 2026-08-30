@@ -61,7 +61,10 @@ class CosmicEnchantmentRegistrationTest {
                 Map.entry("soul_siphon", 4),
                 Map.entry("blackout", 4),
                 Map.entry("ender_walker", 5),
-                Map.entry("voodoo", 6));
+                Map.entry("voodoo", 6),
+                Map.entry("sniper", 5),
+                Map.entry("snare", 4),
+                Map.entry("plague_carrier", 7));
         for (var entry : expected.entrySet()) {
             var resource = getClass().getClassLoader()
                     .getResourceAsStream("data/cosmicpve/enchantment/" + entry.getKey() + ".json");
@@ -96,10 +99,17 @@ class CosmicEnchantmentRegistrationTest {
                 } else if (entry.getKey().equals("phoenix")) {
                     assertEquals("#minecraft:enchantable/foot_armor", json.get("supported_items").getAsString());
                     assertEquals("feet", json.getAsJsonArray("slots").get(0).getAsString());
+                } else if (entry.getKey().equals("sniper")) {
+                    assertEquals("#cosmicpve:enchantable/bow_or_crossbow", json.get("supported_items").getAsString());
+                } else if (entry.getKey().equals("snare")) {
+                    assertEquals("#cosmicpve:enchantable/crossbow", json.get("supported_items").getAsString());
+                } else if (entry.getKey().equals("plague_carrier")) {
+                    assertEquals("#cosmicpve:enchantable/leggings", json.get("supported_items").getAsString());
+                    assertEquals("legs", json.getAsJsonArray("slots").get(0).getAsString());
                 }
             }
         }
-        assertEquals(46, CosmicEnchantmentSpecs.ALL.size());
+        assertEquals(49, CosmicEnchantmentSpecs.ALL.size());
         assertEquals(CosmicEnchantmentTier.ELITE, CosmicEnchantmentSpecs.EXECUTE.tier());
         assertEquals(CosmicEnchantmentTier.ULTIMATE, CosmicEnchantmentSpecs.ANGELIC.tier());
         assertEquals(CosmicEnchantmentTier.SIMPLE, CosmicEnchantmentSpecs.LIGHTNING.tier());

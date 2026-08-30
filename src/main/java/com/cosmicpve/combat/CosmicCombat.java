@@ -99,10 +99,16 @@ public final class CosmicCombat {
             new WeaponSkinCombatResolver(WEAPON_SKINS, STACKS, CHILD_ACTIONS);
     private static final com.cosmicpve.combat.enchantment.SoulTetherService SOUL_TETHERS =
             new com.cosmicpve.combat.enchantment.SoulTetherService();
+    private static final com.cosmicpve.combat.enchantment.SnareRootService SNARE_ROOTS =
+            new com.cosmicpve.combat.enchantment.SnareRootService();
+    private static final com.cosmicpve.combat.enchantment.SnareEventBridge SNARE_EVENTS =
+            new com.cosmicpve.combat.enchantment.SnareEventBridge(SNARE_ROOTS);
+    private static final com.cosmicpve.combat.enchantment.ProjectileImpactContextService PROJECTILE_IMPACTS =
+            new com.cosmicpve.combat.enchantment.ProjectileImpactContextService();
     private static final CosmicEnchantmentBehaviorResolver ENCHANTMENT_BEHAVIORS =
             new CosmicEnchantmentBehaviorResolver(
                     CHILD_ACTIONS, STACKS, BLEED_RUNTIME, ARMOR_SET_IMMUNITIES, COOLDOWNS, SOUL_TETHERS,
-                    ARMOR_SETS, ARMOR_SET_SUPPRESSION);
+                    ARMOR_SETS, ARMOR_SET_SUPPRESSION, SNARE_ROOTS);
     private static final NutritionFoodService NUTRITION = new NutritionFoodService(ENCHANTMENTS);
     private static final ExecutionService EXECUTIONS = new ExecutionService(SEQUENCES, TRACES);
     private static final CombatEventBridge EVENTS =
@@ -126,6 +132,7 @@ public final class CosmicCombat {
         OUTGOING.register(new GreatswordBehavior());
         OUTGOING.register(new InsanityBehavior());
         OUTGOING.register(new EagleEyeBehavior());
+        OUTGOING.register(new com.cosmicpve.combat.enchantment.SniperBehavior(PROJECTILE_IMPACTS));
         OUTGOING.register(new RageBehavior(RECENT_COMBAT_MEMORY));
         OUTGOING.register(ARMOR_SET_COMBAT);
         OUTGOING.register(WEAPON_SKIN_COMBAT);
@@ -159,6 +166,8 @@ public final class CosmicCombat {
         NeoForge.EVENT_BUS.addListener(PROC_HOOKS::onFoodEaten);
         NeoForge.EVENT_BUS.addListener(PROC_HOOKS::onPlayerTick);
         NeoForge.EVENT_BUS.addListener(PROC_HOOKS::onEntityTick);
+        NeoForge.EVENT_BUS.addListener(SNARE_EVENTS::onEntityTick);
+        NeoForge.EVENT_BUS.addListener(PROJECTILE_IMPACTS::onImpact);
         NeoForge.EVENT_BUS.addListener(STACK_EVENTS::onPlayerTick);
         NeoForge.EVENT_BUS.addListener(STACK_EVENTS::onEntityTick);
         NeoForge.EVENT_BUS.addListener(STACK_EVENTS::onPlayerClone);

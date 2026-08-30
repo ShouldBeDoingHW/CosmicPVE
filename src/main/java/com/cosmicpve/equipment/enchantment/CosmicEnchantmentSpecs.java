@@ -99,6 +99,12 @@ public final class CosmicEnchantmentSpecs {
             ModEnchantments.ENDER_WALKER.identifier(), 5, CosmicEnchantmentTier.ULTIMATE, "boots");
     public static final CosmicEnchantmentSpec VOODOO = new CosmicEnchantmentSpec(
             ModEnchantments.VOODOO.identifier(), 6, CosmicEnchantmentTier.ELITE, "helmet");
+    public static final CosmicEnchantmentSpec SNIPER = new CosmicEnchantmentSpec(
+            ModEnchantments.SNIPER.identifier(), 5, CosmicEnchantmentTier.LEGENDARY, "bow_or_crossbow");
+    public static final CosmicEnchantmentSpec SNARE = new CosmicEnchantmentSpec(
+            ModEnchantments.SNARE.identifier(), 4, CosmicEnchantmentTier.ELITE, "crossbow");
+    public static final CosmicEnchantmentSpec PLAGUE_CARRIER = new CosmicEnchantmentSpec(
+            ModEnchantments.PLAGUE_CARRIER.identifier(), 7, CosmicEnchantmentTier.UNIQUE, "leggings");
 
     public static final List<CosmicEnchantmentSpec> ALL =
             List.of(EXECUTE, ANGELIC, LIGHTNING, ENDER_SHIFT, DOUBLESTRIKE, BLEED, LUCK, POISON, PUMMEL,
@@ -106,7 +112,8 @@ public final class CosmicEnchantmentSpecs {
                     OBSIDIANSHIELD, OXYGENATE, ARMORED, DEATH_PACT, AUTO_SMELT, EXPERIENCE, BLESSED, IMPLANTS, TRAP, CACTUS,
                     GEARS, PERMAFROST, MORTAL_COIL, SELF_DESTRUCT, PHOENIX, DIVINE_IMMOLATION, VIRUS, DEVOUR,
                     UNDEAD_RUSE, OBLITERATE, SOUL_TETHER, DODGE, LEADERSHIP,
-                    HERO_KILLER, SOUL_SIPHON, BLACKOUT, ENDER_WALKER, VOODOO);
+                    HERO_KILLER, SOUL_SIPHON, BLACKOUT, ENDER_WALKER, VOODOO,
+                    SNIPER, SNARE, PLAGUE_CARRIER);
 
     private CosmicEnchantmentSpecs() {}
 

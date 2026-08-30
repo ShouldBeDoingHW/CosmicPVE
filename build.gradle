@@ -27,6 +27,16 @@ sourceSets.main.resources {
     exclude("src/generated/**/.cache") // datagen cache files
 }
 
+def trialStructureSourceDir = layout.projectDirectory.dir('trial rooms')
+def trialStructureRuntimePath = 'data/cosmicpve/structure/trial'
+
+tasks.named('processResources', ProcessResources).configure {
+    from(trialStructureSourceDir) {
+        include '*.nbt'
+        into trialStructureRuntimePath
+    }
+}
+
 repositories {
     // Add here additional repositories if required by some of the dependencies below.
 }
@@ -149,6 +159,53 @@ dependencies {
 
 tasks.named('test', Test).configure {
     useJUnitPlatform()
+    systemProperty 'cosmicpve.projectDir', layout.projectDirectory.asFile.absolutePath
+}
+
+def trialStructureSources = fileTree(trialStructureSourceDir) { include '*.nbt' }
+def obsoleteTrialStructureSources = fileTree('src/main/resources/data/cosmicpve/structure/trial') { include '*.nbt' }
+def productionJar = tasks.named('jar', Jar).flatMap { it.archiveFile }
+
+def verifyTrialStructurePackaging = tasks.register('verifyTrialStructurePackaging') {
+    dependsOn tasks.named('jar')
+    inputs.files(trialStructureSources)
+    inputs.files(obsoleteTrialStructureSources)
+    inputs.file(productionJar)
+
+    doLast {
+        def sources = trialStructureSources.files.sort { it.name }
+        if (sources.isEmpty()) {
+            throw new GradleException("No canonical Trial structures found in ${trialStructureSourceDir.asFile}")
+        }
+
+        def duplicates = obsoleteTrialStructureSources.files
+        if (!duplicates.isEmpty()) {
+            throw new GradleException("Trial NBTs must only be maintained under 'trial rooms/': ${duplicates*.name.sort()}")
+        }
+
+        def jarFile = productionJar.get().asFile
+        def zip = new java.util.zip.ZipFile(jarFile)
+        try {
+            sources.each { source ->
+                def entryName = "${trialStructureRuntimePath}/${source.name}"
+                def entry = zip.getEntry(entryName)
+                if (entry == null) {
+                    throw new GradleException("Missing packaged Trial structure: ${entryName}")
+                }
+                def sourceBytes = source.bytes
+                def packagedBytes = zip.getInputStream(entry).withCloseable { it.bytes }
+                if (!java.util.Arrays.equals(sourceBytes, packagedBytes)) {
+                    throw new GradleException("Packaged Trial structure differs from canonical source: ${source.name}")
+                }
+            }
+        } finally {
+            zip.close()
+        }
+    }
+}
+
+tasks.named('check').configure {
+    dependsOn verifyTrialStructurePackaging
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.

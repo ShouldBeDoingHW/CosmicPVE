@@ -63,7 +63,7 @@ class Step7EEnchantmentExpansionTest {
     }
 
     @Test void allFiveJoinGenericBookCapacityTransmogAndExtractionMetadata() {
-        assertEquals(46, CosmicEnchantmentSpecs.ALL.size());
+        assertEquals(49, CosmicEnchantmentSpecs.ALL.size());
         assertTrue(CosmicEnchantmentSpecs.UNDEAD_RUSE.tier().extractableByBlackScroll());
         assertTrue(CosmicEnchantmentSpecs.OBLITERATE.tier().extractableByBlackScroll());
         assertFalse(CosmicEnchantmentSpecs.SOUL_TETHER.tier().extractableByBlackScroll());

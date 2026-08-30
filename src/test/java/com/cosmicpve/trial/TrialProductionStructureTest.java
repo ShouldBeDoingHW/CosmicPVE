@@ -24,8 +24,10 @@ class TrialProductionStructureTest {
         assertEquals("minecraft:emerald_block",circuit.get(new BlockPos(12,3,12)));
         assertEquals(List.of("minecraft:smooth_quartz","minecraft:smooth_quartz","minecraft:smooth_quartz","minecraft:smooth_quartz"),
                 neighbors(circuit,new BlockPos(12,3,12)));
-        assertEquals(5,circuit.values().stream().filter("minecraft:emerald_block"::equals).count(),
-                "four legitimate Emerald pillar blocks must remain in addition to the marker");
+        assertEquals(1,circuit.values().stream().filter("minecraft:emerald_block"::equals).count(),
+                "only the explicit spawn marker remains Emerald");
+        assertEquals(8,verticalBases(circuit,"minecraft:obsidian").size(),
+                "the eight randomized 2x1 pillar origins use obsidian placeholders");
 
         var fire=states("fire_colony");
         assertEquals("minecraft:emerald_block",fire.get(new BlockPos(3,1,3)));
@@ -50,6 +52,12 @@ class TrialProductionStructureTest {
 
     private static List<String> neighbors(Map<BlockPos,String> states,BlockPos pos) {
         return List.of(states.get(pos.east()),states.get(pos.west()),states.get(pos.south()),states.get(pos.north()));
+    }
+    private static List<BlockPos> verticalBases(Map<BlockPos,String> states,String block) {
+        return states.entrySet().stream().filter(entry -> entry.getValue().equals(block))
+                .map(Map.Entry::getKey)
+                .filter(pos -> block.equals(states.get(pos.above())) && !block.equals(states.get(pos.below())))
+                .sorted().toList();
     }
     private Map<BlockPos,String> states(String name) throws Exception {
         try(var stream=getClass().getClassLoader().getResourceAsStream("data/cosmicpve/structure/trial/"+name+".nbt")) {

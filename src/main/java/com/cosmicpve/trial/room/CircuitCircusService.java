@@ -23,8 +23,9 @@ public final class CircuitCircusService {
     private static final int TARGET_MIN_LOCAL_Y = 15;
 
     public TrialEncounterState initialize(ServerLevel level, BlockPos origin, InstanceBounds bounds, RandomSource random) {
-        List<BlockPos> bases = pillarBases(level, bounds);
-        if (bases.size() != 8) throw new IllegalStateException("Circuit Circus requires eight pillar bases, found " + bases.size());
+        List<BlockPos> bases = placeholderPillarBases(level, bounds);
+        if (bases.size() != 8) throw new IllegalStateException(
+                "Circuit Circus requires eight 2x1 obsidian pillar placeholders, found " + bases.size());
         var assignments = new ArrayList<>(assignmentPool());
         for (int i = assignments.size() - 1; i > 0; i--) java.util.Collections.swap(assignments, i, random.nextInt(i + 1));
         for (int i = 0; i < bases.size(); i++) {
@@ -81,7 +82,7 @@ public final class CircuitCircusService {
     }
 
     private boolean connected(ServerLevel level, InstanceBounds bounds, CircuitMaterial material) {
-        List<BlockPos> bases = pillarBases(level, bounds).stream()
+        List<BlockPos> bases = assignedPillarBases(level, bounds).stream()
                 .filter(pos -> level.getBlockState(pos).is(material.pillar())).toList();
         if (bases.size() != 2) return false;
         Set<BlockPos> glass = new HashSet<>();
@@ -112,7 +113,11 @@ public final class CircuitCircusService {
         return result;
     }
 
-    private static List<BlockPos> pillarBases(ServerLevel level, InstanceBounds bounds) {
+    private static List<BlockPos> placeholderPillarBases(ServerLevel level, InstanceBounds bounds) {
+        return verticalPillarBases(level, bounds, Blocks.OBSIDIAN);
+    }
+
+    private static List<BlockPos> assignedPillarBases(ServerLevel level, InstanceBounds bounds) {
         var result = new ArrayList<BlockPos>();
         for (BlockPos mutable : BlockPos.betweenClosed(bounds.min(), bounds.max())) {
             BlockPos pos = mutable.immutable(); Block block = level.getBlockState(pos).getBlock();
@@ -120,6 +125,17 @@ public final class CircuitCircusService {
             if (pillar && level.getBlockState(pos.above()).is(block) && !level.getBlockState(pos.below()).is(block)) result.add(pos);
         }
         result.sort(BlockPos::compareTo); return result;
+    }
+
+    private static List<BlockPos> verticalPillarBases(ServerLevel level, InstanceBounds bounds, Block block) {
+        var result = new ArrayList<BlockPos>();
+        for (BlockPos mutable : BlockPos.betweenClosed(bounds.min(), bounds.max())) {
+            BlockPos pos = mutable.immutable();
+            if (level.getBlockState(pos).is(block) && level.getBlockState(pos.above()).is(block)
+                    && !level.getBlockState(pos.below()).is(block)) result.add(pos);
+        }
+        result.sort(BlockPos::compareTo);
+        return result;
     }
 
     public record TargetResult(boolean accepted, TrialEncounterState state, int quantity, CircuitMaterial material) {}

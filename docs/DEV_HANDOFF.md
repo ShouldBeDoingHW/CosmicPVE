@@ -1,8 +1,8 @@
 # CosmicPVE Development Handoff
 
-Current accepted baseline: Step 8A. Armor Sets 1.0, Omni resolution, shared armor-set modifier foundations, Mystery Spawners, and the final presentation follow-up are implemented, automated/runtime verified, and manually verified/accepted. The ordinary Enchantments 1.0 content pool remains exactly 46 real enchantments.
+Current accepted baseline: Step 8A.1. The canonical Trial structure pipeline plus Sniper V, Snare IV, and Plague Carrier VII are implemented, automated/runtime verified, and manually verified/accepted. The small Conquest Chest reward synchronization is also manually accepted and awaiting its separate closure commit.
 
-Repository state: Steps 6A–8A are implemented, automated/runtime verified, and manually accepted. Step 8A is ready for its closure commit. The root `assets` source-art folder remains deliberately untracked. The root `trial rooms` directory changes status in Step 8A.1 and becomes the tracked canonical source for Trial NBTs.
+Repository state: Steps 6A–8A are implemented, automated/runtime verified, manually accepted, and committed. Step 8A.1 and the Conquest reward synchronization are accepted closure candidates. The root `assets` source-art folder remains deliberately untracked. The canonical `trial rooms/*.nbt` files are intentional tracked build inputs.
 
 Last handoff update: 2026-08-29
 
@@ -374,6 +374,33 @@ Shared armor-set systems now own activity-aware damage, categorical reductions, 
 
 Three stackable typed Mystery Spawner items are implemented for Simple, Elite, and Mastery pools. They use the vanilla Vault presentation, forced glint, bold rarity-colored names, uniform selection from their exact configured pools, and the existing typed Mob Spawner output factory. A valid server-side opening consumes exactly one item, safely delivers the resulting real Mob Spawner, and plays `minecraft:entity.experience_orb.pickup` in the Master sound category. Invalid typed data consumes nothing and produces no reward.
 
+Step 8A is closed in `d79f3a159fe25a2df496bd58cdfd95f29e274d86` (`Complete armor sets and mystery spawners`).
+
+### Step 8A.1 — IMPLEMENTED; AUTOMATED/RUNTIME VERIFIED; MANUALLY VERIFIED / ACCEPTED
+
+Project-root `trial rooms/*.nbt` is the sole maintained Trial-structure source. Gradle `processResources` declares those files as inputs and publishes them byte-for-byte to `data/cosmicpve/structure/trial/` for tests, development launches, and the production JAR. The obsolete duplicate NBTs under `src/main/resources` are removed. `verifyTrialStructurePackaging` fails on missing JAR entries, byte drift, or reintroduced duplicate source NBTs, and the JUnit audit compares every canonical source with its processed classpath resource. The former runtime-only `development_room.nbt` was preserved by promoting its existing verified bytes into the canonical source set rather than deleting or fabricating it.
+
+Canonical structure mapping:
+
+| Source | Runtime structure ID | Consuming room |
+|---|---|---|
+| `bomb_squad.nbt` | `cosmicpve:trial/bomb_squad` | Bomb Squad |
+| `circuit_circus.nbt` | `cosmicpve:trial/circuit_circus` | Circuit Circus |
+| `cold_snap.nbt` | `cosmicpve:trial/cold_snap` | Cold Snap |
+| `deadeye_west.nbt` | `cosmicpve:trial/deadeye_west` | Deadeye west piece |
+| `deadeye_east.nbt` | `cosmicpve:trial/deadeye_east` | Deadeye east piece |
+| `decision_box.nbt` | `cosmicpve:trial/decision_box` | Decision Box |
+| `development_room.nbt` | `cosmicpve:trial/development_room` | Development room |
+| `fire_colony.nbt` | `cosmicpve:trial/fire_colony` | Fire Colony |
+| `haze_seek.nbt` | `cosmicpve:trial/haze_seek` | Haze and Seek |
+| `hidden_graveyard.nbt` | `cosmicpve:trial/hidden_graveyard` | Hidden Graveyard |
+| `raiding_rainbow.nbt` | `cosmicpve:trial/raiding_rainbow` | Raiding Rainbow |
+| `warzone_giants_west.nbt` | `cosmicpve:trial/warzone_giants_west` | Warzone Giants west piece |
+| `warzone_giants_east.nbt` | `cosmicpve:trial/warzone_giants_east` | Warzone Giants east piece |
+| `zero_g.nbt` | `cosmicpve:trial/zero_g` | Zero-G |
+
+Sniper V, Snare IV, and Plague Carrier VII complete the ordinary Cosmic enchantment pool at 49. Sniper captures the real entity-hit position narrowly at projectile impact, resolves the launch weapon through Minecraft's projectile-owned weapon item, and adds its deterministic headshot contribution to the shared ordinary outgoing bucket. Snare uses the committed projectile ProcEngine hook, central relative Luck calculation, and a bounded server-side root service that refreshes one 25-tick state while preserving gravity and cleaning itself without permanent attributes. Plague Carrier uses the committed defensive hook and the shared cooldown service; it deterministically poisons the responsible living attacker below the strict 25% threshold, with its 600-tick base duration automatically becoming 480 ticks under Dimensional Traveler's generic cooldown multiplier. The refreshed Circuit Circus structure uses eight 2x1 obsidian pillar placeholders; initialization resolves those placeholders once and replaces each pair with its randomized circuit material.
+
 ## 3. Current Real Enchantments
 
 These are registered through Minecraft's enchantment infrastructure, use actual enchantment data on the item, and are not present in normal enchanting-table, librarian, random-loot, random-equipment, or mob-equipment acquisition pools.
@@ -428,10 +455,13 @@ These are registered through Minecraft's enchantment infrastructure, use actual 
 | `cosmicpve:blackout` | IV | Sword | Mastery | Has 2% chance per level to suppress the target's active armor-set bonus for one second per level. |
 | `cosmicpve:ender_walker` | V | Boots | Ultimate | Reduces Poison- and Wither-effect damage by 10% per level without removing either status effect. |
 | `cosmicpve:voodoo` | VI | Helmet | Elite | Hits have 1% chance per level to add an independently expiring ten-second stack; each stack reduces ordinary outgoing damage by 3%, capped at five stacks. |
+| `cosmicpve:sniper` | V | Bow/crossbow | Legendary | Projectile impacts in the upper 20% of the target's current bounding box add 5% ordinary parent-projectile damage per level. The launch weapon is authoritative and the effect is deterministic. |
+| `cosmicpve:snare` | IV | Crossbow | Elite | Committed crossbow projectile hits have 3% chance per level, modified relatively by Luck, to root the target for 25 ticks while gravity continues. Reapplication refreshes one state. |
+| `cosmicpve:plague_carrier` | VII | Leggings | Unique | A committed hit leaving the wearer strictly below 25% health poisons the responsible living attacker for `(2 + level)` seconds: Poison I at I–V and Poison II at VI–VII. Base cooldown is 600 ticks through the shared service. |
 
 ### DESIGNED BUT NOT IMPLEMENTED
 
-The ordinary Cosmic enchantment pool is content-complete for the current Enchantments 1.0 cycle at exactly 46 implemented real enchantments. Death Pact, Permafrost, Mortal Coil, Phoenix, Divine Immolation, Soul Tether, Hero Killer, Soul Siphon, and Blackout are the implemented Mastery enchantments. Heroic enchantments and the final Enchantments 1.0 balance pass remain separate future work; do not add behavior assumptions beyond `Cosmic_Design.md`.
+The ordinary Cosmic enchantment pool is content-complete at exactly 49 implemented real enchantments. Death Pact, Permafrost, Mortal Coil, Phoenix, Divine Immolation, Soul Tether, Hero Killer, Soul Siphon, and Blackout are the implemented Mastery enchantments. Heroic enchantments and the final balance pass remain separate future work; do not add behavior assumptions beyond `Cosmic_Design.md`.
 
 ## 4. Critical Combat Semantics
 
@@ -698,21 +728,20 @@ Commands call gameplay services or create the same typed components used by game
 - **Scheduled instance mutation hooks:** direct block use/ignition, fluid block formation, explosions, pistons, entity grief, placement, and breaking are scoped and denied. Fire Colony adds a bounded cached baseline guard for its intentional fire/lava hazard neighborhood. NeoForge still does not expose a complete cancellable hook for every scheduled vanilla mutation, so other future hazard rooms need an equally scoped policy rather than global gamerule changes.
 - **Loot tables:** several current design tables are incomplete or malformed and contain ambiguous duplicates. Validation must distinguish intentional duplicate weights from mistakes.
 - **Attribute units/caps:** future health, movement, incoming damage, cooldown, and stacked modifier caps/floors need normalization before large content expansion.
-- **Pheonix/Phoenix identity and death order:** settle the stable spelling/ID and verify pinned NeoForge kill/death-prevention event ordering before implementing it.
 - **Activity key/portal terminology and acquisition:** Dungeons are intended as costly/keyed activities, but current design text primarily describes portals; reconcile this before item implementation.
 - **Seasonal crate finalization:** substantial draft tables and mechanics exist, but their exact balance, rewards, acquisition rates, prerequisites, and implementation details remain subject to a bounded reconciliation milestone.
 - **Armorer trade policy:** Step 6I disables Diamond/Netherite armor recipes and replaces generated Diamond armor in the six audited chest tables. Vanilla Armorer villagers remain a separate Diamond-armor acquisition path because the current bounded rule did not specify trade replacement; settle whether those offers should be removed or replaced before declaring Iron the ceiling for every normal acquisition route.
-- **Remaining Trial reward dependencies:** Ranger Armor is not implemented, and Random Boss Spawn Egg, Dungeon Portal, and broader Demonic reward dependencies still require their own bounded systems. Step 6T deliberately does not fake those rows; the supported development table now includes Mask, Splicer, and 35% Yeti Crystal prerequisites only.
+- **Remaining Trial reward dependencies:** Random Boss Spawn Egg, Dungeon Portal, and broader Demonic reward dependencies still require their own bounded systems. Existing supported reward rows must not be mistaken for those deferred primitives.
 
 The final post-Orb capacity is no longer unresolved for current target classes: armor is 8 and swords/axes/bows/crossbows are 10. Do not reopen those limits incidentally during unrelated work.
 
 ## 16. Current Next Milestone
 
-**Immediate next action: close Step 8A, then implement Step 8A.1 — Canonical Trial Structure Pipeline + Final Ordinary Enchantments.**
+**Immediate next action: close the accepted Step 8A.1 and Conquest synchronization, then implement Step 8B — V-Kits 1.0 + Weapon Damage Normalization.**
 
 Current intended sequence:
 
-Step 8A is manually accepted and ready for closure. Step 8A.1 is the next bounded milestone: make project-root `trial rooms/` the tracked canonical Trial-structure source and implement Sniper V, Snare IV, and Plague Carrier VII. Space Chest rebalance, Gear Tinkering, Personal Vaults, Heroic Enchantments, and Dungeon #1 remain deferred.
+Step 8A is closed. Step 8A.1 and the Conquest synchronization are accepted closure candidates. Step 8B is the next bounded implementation milestone; Secret Weapon Cache and later roadmap work remain deferred.
 
 The ordinary-enchantment expansion remains split across bounded patches. Step 7C is the explicit instruction that made the current canonical Design Doc enchantment-table values implementation-authoritative; later design edits still require their own explicit implementation milestone.
 
@@ -736,7 +765,14 @@ For the Step 8A candidate:
 - The original full `gradlew.bat cleanTest test build` verification passed, and the final presentation follow-up `gradlew.bat build` passes all 444 JUnit tests across 119 suites with 0 failures, errors, or skips. Coverage includes all eight armor-set definitions and final presentation colors, Omni anchor resolution, corrected Ancient values, category-reduction and movement-cap rules, bold Transmog Scroll/Repair Scroll/Cosmic Dust names, Mystery Spawner codecs/pools/presentation, exact output eligibility, atomic consumption, and the required Master-category pickup sound.
 - NeoForge `runGameTestServer` completes all three required GameTests. Dedicated-server startup reaches `Done` and atomically publishes all eight armor-set definitions. Fresh-client startup completes resource reload, SoundEngine/OpenAL initialization, and texture-atlas construction without relevant model, texture, registry, datapack, localization, or sided-classloading errors.
 - All 209 main-resource JSON files decode successfully. `git diff --check` reports no whitespace errors beyond normal Windows line-ending notices. Pinned versions and identifiers remain unchanged.
-- Step 8A is manually verified/accepted and ready for its closure commit. The root `assets/` remains untouched and untracked; `trial rooms/` becomes tracked canonical build input only in Step 8A.1.
+- Step 8A is manually verified/accepted and closed in `d79f3a159fe25a2df496bd58cdfd95f29e274d86` (`Complete armor sets and mystery spawners`). The root `assets/` remains untouched and untracked; `trial rooms/` becomes tracked canonical build input only in Step 8A.1.
+
+For the Step 8A.1 candidate:
+
+- `gradlew.bat cleanTest test build` passes all 450 JUnit tests across 121 suites with 0 failures, errors, or skips. The build's `verifyTrialStructurePackaging` audit verifies all 14 canonical Trial NBTs are present in the production JAR and byte-identical to their project-root sources. Existing structure/marker audits run against the processed canonical resources without being weakened.
+- NeoForge `runGameTestServer` completes all three required GameTests. Dedicated-server startup loads 1,462 recipes, publishes all 12 Trial room definitions, and reaches `Done`. Fresh-client startup completes resource reload, SoundEngine/OpenAL initialization, and texture-atlas construction without relevant structure, registry, datapack, localization, model/texture, or sided-classloading failures.
+- All 213 main-resource JSON files decode successfully. `git diff --check` passes. Minecraft 1.21.11, NeoForge 21.11.45, Java 21, Gradle 9.2.1, ModDevGradle 2.0.144, mod ID `cosmicpve`, and package `com.cosmicpve` remain unchanged.
+- Step 8A.1 is manually verified/accepted and ready for closure. Its canonical `trial rooms/*.nbt` files are intentional tracked sources; only root `assets/` remains unrelated and intentionally untracked. The current Circuit Circus canonical source uses eight 2x1 obsidian pillar placeholders, and the placement procedure/tests have been reconciled to that accepted structure.
 
 For the accepted Step 7G/7G.1 closure:
 

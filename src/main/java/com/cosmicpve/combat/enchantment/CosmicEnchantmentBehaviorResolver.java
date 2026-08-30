@@ -43,6 +43,7 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
     private final SoulTetherService soulTethers;
     private final com.cosmicpve.equipment.armor.ArmorSetResolver armorSets;
     private final com.cosmicpve.equipment.armor.ArmorSetSuppressionService armorSetSuppression;
+    private final SnareRootService snareRoots;
 
     public CosmicEnchantmentBehaviorResolver(
             ChildCombatActionService childActions,
@@ -53,6 +54,20 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
             SoulTetherService soulTethers,
             com.cosmicpve.equipment.armor.ArmorSetResolver armorSets,
             com.cosmicpve.equipment.armor.ArmorSetSuppressionService armorSetSuppression) {
+        this(childActions, stacks, bleedRuntime, immunities, cooldowns, soulTethers, armorSets,
+                armorSetSuppression, new SnareRootService());
+    }
+
+    public CosmicEnchantmentBehaviorResolver(
+            ChildCombatActionService childActions,
+            CombatStackService stacks,
+            BleedRuntimeService bleedRuntime,
+            ArmorSetImmunityResolver immunities,
+            CooldownService cooldowns,
+            SoulTetherService soulTethers,
+            com.cosmicpve.equipment.armor.ArmorSetResolver armorSets,
+            com.cosmicpve.equipment.armor.ArmorSetSuppressionService armorSetSuppression,
+            SnareRootService snareRoots) {
         this.childActions = childActions;
         this.stacks = stacks;
         this.bleedRuntime = bleedRuntime;
@@ -61,6 +76,7 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
         this.soulTethers = soulTethers;
         this.armorSets = armorSets;
         this.armorSetSuppression = armorSetSuppression;
+        this.snareRoots = snareRoots;
     }
 
     public CosmicEnchantmentBehaviorResolver(
@@ -89,6 +105,7 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
             addLightning(event, result);
             addVenom(event, result);
             addVirus(event, result);
+            addSnare(event, result);
         } else if (event.hook() == ProcHook.ON_DAMAGE_TAKEN) {
             addAngelic(event, result);
             addEnderShift(event, result);
@@ -98,6 +115,7 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
             addMortalCoil(event, result);
             addSelfDestruct(event, result);
             addUndeadRuse(event, result);
+            addPlagueCarrier(event, result);
         } else if (event.hook() == ProcHook.ON_PRE_DEATH) {
             addPhoenix(event, result);
         } else if (event.hook() == ProcHook.ON_PRE_DAMAGE_CALCULATION) {
@@ -203,6 +221,30 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
                 condition(CosmicPVE.id("virus_poisoned_projectile_target"), procEvent ->
                         procEvent.combatResult().map(resultHit -> resultHit.context().category()
                                         == com.cosmicpve.combat.api.AttackCategory.PROJECTILE).orElse(false))));
+    }
+
+    private void addSnare(ProcEvent event, List<ProcCandidate> result) {
+        int level = Math.min(4, event.effectiveEnchantments().level(ModEnchantments.SNARE.identifier()));
+        if (level <= 0 || event.target() == null) return;
+        result.add(candidate(ModEnchantments.SNARE.identifier(), ProcHook.ON_PROJECTILE_HIT,
+                SnareBehavior.chance(level), Optional.empty(), 0L, Optional.empty(), ChildProcEligibility.ROOT_ONLY,
+                activation -> SnareBehavior.activate(activation.event(), snareRoots),
+                provenance(event, ModEnchantments.SNARE.identifier()),
+                condition(CosmicPVE.id("snare_crossbow_projectile"), SnareBehavior::eligible)));
+    }
+
+    private void addPlagueCarrier(ProcEvent event, List<ProcCandidate> result) {
+        int level = Math.min(7, event.effectiveEnchantments().level(ModEnchantments.PLAGUE_CARRIER.identifier()));
+        if (level <= 0 || event.target() == null || event.attacker() == null
+                || event.attacker() == event.target() || event.attacker().isDeadOrDying()) return;
+        result.add(deterministicCandidate(ModEnchantments.PLAGUE_CARRIER.identifier(), ProcHook.ON_DAMAGE_TAKEN,
+                1.0, Optional.of(PlagueCarrierBehavior.COOLDOWN_KEY), PlagueCarrierBehavior.COOLDOWN_TICKS,
+                Optional.empty(), ChildProcEligibility.LIMITED_DEFENSIVE_REACTION,
+                activation -> PlagueCarrierBehavior.activate(activation.event().attacker(), level),
+                provenance(event, ModEnchantments.PLAGUE_CARRIER.identifier()),
+                condition(CosmicPVE.id("plague_carrier_below_quarter"), procEvent ->
+                        procEvent.target() != null && PlagueCarrierBehavior.belowThreshold(
+                                procEvent.target().getHealth(), procEvent.target().getMaxHealth()))));
     }
 
     private void addSelfDestruct(ProcEvent event, List<ProcCandidate> result) {
