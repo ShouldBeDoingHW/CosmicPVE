@@ -28,6 +28,9 @@ import com.cosmicpve.reward.spawner.MysterySpawnerItem;
 import com.cosmicpve.data.component.MysterySpawnerData;
 import com.cosmicpve.data.component.MysterySpawnerTier;
 import com.cosmicpve.item.BoldNameItem;
+import com.cosmicpve.vkit.VKitCrystalItem;
+import com.cosmicpve.vkit.VKitDefinition;
+import com.cosmicpve.data.component.VKitCrystalData;
 
 public final class ModItems {
     private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(CosmicPVE.MOD_ID);
@@ -90,6 +93,15 @@ public final class ModItems {
     public static final DeferredItem<MysterySpawnerItem> MYSTERY_MASTERY_SPAWNER = mysterySpawner(
             "mystery_mastery_spawner", MysterySpawnerTier.MASTERY);
 
+    public static final DeferredItem<VKitCrystalItem> PHOENIX_VKIT_CRYSTAL = vkitCrystal(
+            "phoenix_vkit_crystal", VKitDefinition.PHOENIX);
+    public static final DeferredItem<VKitCrystalItem> OGRE_VKIT_CRYSTAL = vkitCrystal(
+            "ogre_vkit_crystal", VKitDefinition.OGRE);
+    public static final DeferredItem<VKitCrystalItem> JUDGEMENT_VKIT_CRYSTAL = vkitCrystal(
+            "judgement_vkit_crystal", VKitDefinition.JUDGEMENT);
+    public static final DeferredItem<VKitCrystalItem> SLAYER_VKIT_CRYSTAL = vkitCrystal(
+            "slayer_vkit_crystal", VKitDefinition.SLAYER);
+
     public static final DeferredItem<SpaceChestItem> SPACE_CHEST = ITEMS.registerItem(
             "space_chest", SpaceChestItem::new, properties -> properties.stacksTo(1));
 
@@ -123,6 +135,12 @@ public final class ModItems {
         return ITEMS.registerItem(name, MysterySpawnerItem::new, properties -> properties.stacksTo(64)
                 .component(ModDataComponents.MYSTERY_SPAWNER.get(),
                         new MysterySpawnerData(MysterySpawnerData.CURRENT_DATA_VERSION, tier)));
+    }
+
+    private static DeferredItem<VKitCrystalItem> vkitCrystal(String name, VKitDefinition definition) {
+        return ITEMS.registerItem(name, VKitCrystalItem::new, properties -> properties.stacksTo(VKitCrystalItem.MAX_STACK_SIZE)
+                .component(ModDataComponents.VKIT_CRYSTAL.get(), new VKitCrystalData(
+                        VKitCrystalData.CURRENT_DATA_VERSION, definition.id())));
     }
 
     private ModItems() {}

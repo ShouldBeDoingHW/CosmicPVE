@@ -31,6 +31,7 @@ import com.cosmicpve.equipment.mask.MaskEventBridge;
 import com.cosmicpve.equipment.mask.MaskAnvilEventBridge;
 import com.cosmicpve.conquest.ConquestBootstrap;
 import com.cosmicpve.conquest.ConquestGameTests;
+import com.cosmicpve.vkit.VKitGameTests;
 import com.mojang.logging.LogUtils;
 import net.minecraft.resources.Identifier;
 import net.minecraft.network.chat.Component;
@@ -54,6 +55,7 @@ public final class CosmicPVE {
         ModBlocks.register(modBus);
         ModBlockEntities.register(modBus);
         ConquestGameTests.register(modBus);
+        VKitGameTests.register(modBus);
         ModItems.register(modBus);
         ModEntities.register(modBus);
         ModMenus.register(modBus);

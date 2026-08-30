@@ -1,10 +1,10 @@
 # CosmicPVE Development Handoff
 
-Current accepted baseline: Step 8A.1, committed as `c56461f81216b7f860834fef660f753fb6768010` (`Complete Trial structure pipeline and enchantments`). The canonical Trial structure pipeline plus Sniper V, Snare IV, and Plague Carrier VII are implemented, automated/runtime verified, and manually verified/accepted. The Conquest Chest reward table is synchronized to the current canonical design.
+Current accepted baseline: Step 8B — V-Kits 1.0 + Weapon Damage Normalization is implemented, automated/runtime verified, and manually verified/accepted. Its final Crystal redemption correction was manually retested successfully after the authoritative hand-writeback and player-targeted sound fixes.
 
-Repository state: Steps 6A–8A.1 are implemented, automated/runtime verified, manually accepted, and committed. The accepted Conquest reward synchronization is being closed separately before Step 8B begins. The root `assets` source-art folder remains deliberately untracked. The canonical `trial rooms/*.nbt` files are tracked build inputs.
+Repository state: Steps 6A–8B and the Conquest synchronization are implemented, verified, and manually accepted. The root `assets` and `woodlands` development-source folders remain untouched and untracked. The canonical tracked `trial rooms/*.nbt` files are build inputs; untracked future `trial rooms/cave_diving.nbt` is intentionally outside the current pipeline.
 
-Last handoff update: 2026-08-29
+Last handoff update: 2026-08-30
 
 Pinned environment:
 
@@ -403,6 +403,20 @@ Sniper V, Snare IV, and Plague Carrier VII complete the ordinary Cosmic enchantm
 
 Step 8A.1 is closed in `c56461f81216b7f860834fef660f753fb6768010` (`Complete Trial structure pipeline and enchantments`). The accepted Conquest micro-pass synchronizes the production table to 19 weighted rows (total weight 169), including the Simple Mystery Spawner, Heroic Crystal, tier-one Trial Trinkets, and the corrected 75% Black Scroll while preserving the guaranteed Banknote and all Conquest mechanics.
 
+### Step 8B — IMPLEMENTED; AUTOMATED/RUNTIME VERIFIED; MANUALLY VERIFIED / ACCEPTED
+
+Vanilla Wooden, Copper, Stone, Golden, Iron, Diamond, and Netherite Swords now carry the same actual base attack-damage component as their same-material Axes. The Axe component is the pinned-runtime source of truth; no duplicate weapon, Cosmic outgoing contribution, or child packet is involved. Observed totals are 7/9/9/7/9/9/10 respectively. The normalized value therefore enters ordinary combat as base damage before Sharpness, critical hits, and later Cosmic percentage contributors. Axes remain unchanged, while `LegacyCombatService` continues to own 20 total attack speed, zero minimum charge, sweep suppression, and accepted vanilla crit/sprint behavior.
+
+The four V-Kits use stable IDs `cosmicpve:phoenix`, `cosmicpve:ogre`, `cosmicpve:judgement`, and `cosmicpve:slayer`. A dedicated versioned player attachment stores independent levels 0–10 by ID and is serialized/copied through ordinary player recreation. One shared typed Crystal implementation backs four registered dye-presented variants. Crystals use forced glint, a bold white `V-Kit Crystal` identity, an underlined/bold/italic kit-colored identity, and kit-colored italic flavor text. A valid server-side use consumes one Crystal, advances 0→I through IX→X, generates exactly one roll at the resulting level, and safely delivers it; further Crystals at X remain consumable and each independently produces another level-X roll.
+
+`VKitEquipmentGenerator` makes one unbiased Boolean armor/weapon decision, then spends the exact level budget `5, 6, 7, 9, 10, 12, 13, 14, 16, 18`. It uniformly selects a remaining eligible enchantment ID, fills it to maximum or exhaustion, and repeats without replacement, so only the final selection can be partial. Pool sufficiency is validated loudly. Exact per-item pools are declared centrally; Divine Immolation, Soul Siphon, Soul Tether, Mortal Coil, and the Phoenix enchantment enter only at V-Kit VIII. Generated enchants are the real registered Minecraft Cosmic enchantments and pass the ordinary centralized capacity check.
+
+The eight outputs are Sikanda (Diamond Sword), Sandals of the Phoenix (Iron Boots), The Gutbuster (Crossbow), Fat Tummy (Iron Chestplate), The Banhammer (Diamond Axe), Trousers of Retribution (Iron Leggings), Glitched Bow (Bow), and Shroud of War (Iron Helmet). Names retain the roll's Roman level in parentheses and use the kit color, bold, and italic styles. Armor receives Protection IV, melee receives Sharpness V, the Bow receives Power V, and the Crossbow receives Piercing IV. Everything gains Unbreaking III at level III; non-Bows gain Mending I and the Bow gains Infinity I at level VIII. V-Kit gear does not receive Heroic status, Orbs, extra capacity, White Scroll, Transmog, armor-set identity, Mask, or Skin automatically.
+
+Development commands are `/cosmic vkit inspect <player>`, `/cosmic vkit set <player> <kit> <0..10>`, `/cosmic vkit reset <player> [kit]`, `/cosmic vkit give <player> <kit> [count]`, and `/cosmic vkit generate <player> <kit> <armor|weapon> <1..10> [seed]`. There is no recurring claim command or timer.
+
+The Step 8B.1 redemption correction makes all four V-Kit Crystals non-stackable and fixes final-single-item redemption. Minecraft 1.21.11's `ItemStack.use` wrapper converts every immediate successful use into an explicit transformed-hand result after the item handler returns. The original delivery-first path could place the generated reward into the selected slot vacated by the consumed Crystal, after which that wrapper wrote the now-empty Crystal back over the same slot. Rewards survived only when inventory layout caused safe delivery to choose another empty slot, explaining the intermittent behavior. A normal count-one redemption now returns the generated equipment itself as the authoritative transformed-hand stack; it therefore replaces the consumed Crystal through the vanilla server writeback and cannot be erased. Synthetic pre-fix multi-Crystal stacks retain their remaining Crystals in hand and use safe inventory/overflow delivery for the generated reward. Generation still precedes mutation, followed by one progression update, one Crystal consumption, one reward result, and one feedback event. Feedback uses a direct player-targeted `ClientboundSoundPacket` for `minecraft:entity.player.levelup`; `Player.playSound` was unsuitable because its server override excludes that player from the level broadcast. Rejected or pre-commit generation failures play no sound.
+
 ## 3. Current Real Enchantments
 
 These are registered through Minecraft's enchantment infrastructure, use actual enchantment data on the item, and are not present in normal enchanting-table, librarian, random-loot, random-equipment, or mob-equipment acquisition pools.
@@ -739,11 +753,11 @@ The final post-Orb capacity is no longer unresolved for current target classes: 
 
 ## 16. Current Next Milestone
 
-**Immediate next action: implement Step 8B — V-Kits 1.0 + Weapon Damage Normalization.**
+**Immediate next action: implement the bounded Obsidian Destroyer IV + Dominate IV ordinary-enchantment micro-milestone.**
 
 Current intended sequence:
 
-Steps 8A and 8A.1 are closed, and the accepted Conquest synchronization is isolated in its own closure commit. Step 8B is the next bounded implementation milestone; Secret Weapon Cache and later roadmap work remain deferred.
+Steps 8A, 8A.1, and 8B are accepted, and the Conquest synchronization is isolated in its own closure commit. The next bounded work is only Obsidian Destroyer and Dominate; Secret Weapon Cache, Personal Vaults, and other roadmap work remain deferred.
 
 The ordinary-enchantment expansion remains split across bounded patches. Step 7C is the explicit instruction that made the current canonical Design Doc enchantment-table values implementation-authoritative; later design edits still require their own explicit implementation milestone.
 
@@ -761,6 +775,13 @@ The ordinary-enchantment expansion remains split across bounded patches. Step 7C
 Preserve unrelated dirty changes. Never change pinned versions as a side effect of gameplay work. Prefer service-level rules and typed data over one-off event logic, and keep client-only classes isolated from dedicated-server loading.
 
 ## 18. Verification Snapshot
+
+For the Step 8B/8B.1 candidate:
+
+- The V-Kit-focused JUnit run passes all 15 tests. An initial `gradlew.bat cleanTest test build` run passed all 467 JUnit tests across 123 suites; a final rerun after an unrelated untracked `trial rooms/cave_diving.nbt` appeared executed the same 467 tests with only `TrialStructurePipelineTest` failing because that new canonical-source filename has no tracked pipeline declaration yet. No Trial structure file was changed as part of Step 8B. Coverage pins every sword/axe material pair and observed base-damage total; stable typed Crystal/equipment/progression codecs; the four definitions, colors, item identities, exact pools, level budgets, uniform no-replacement allocation rules, VIII gates, capacity, naming/styles, progression boundaries, and the five V-Kit command/generation seams. Corrective coverage additionally pins all four Crystal stack limits, locked/mid/X single-Crystal transactions, exact callback counts, the synthetic legacy-stack compatibility path, authoritative generated-item hand replacement, and the player-level-up cue.
+- NeoForge `runGameTestServer` completes all five required GameTests. The loaded-registry generation test verifies the real runtime item components for all seven sword/axe pairs and generates all four kits, both equipment types, and all ten levels using actual registered Cosmic enchantments, exact point totals, capacity limits, level gates, names, and vanilla enchantment thresholds. The redemption GameTest drives the actual `ServerPlayerGameMode.useItem`/`ItemStack.use` writeback path through 32 consecutive full-inventory redemptions plus a partial-inventory redemption, verifies one surviving generated hand item and one progression step per use through repeated level X, rejects duplication, rechecks persistence after later server ticks, records exactly 33 player-local level-up packets for 33 successes, and records zero for a rejected malformed Crystal.
+- Dedicated-server startup loads 1,462 recipes, publishes Cosmic content, and reaches `Done` without relevant registry, attachment, component, command, codec, or common-side classloading errors. Fresh-client startup loads CosmicPVE, completes resource reload, initializes OpenAL, and creates the item/block/GUI atlases without relevant missing-model, missing-texture, malformed-resource, or sided-loading errors.
+- All 217 main-resource JSON files decode successfully. `git diff --check` passes with only normal Windows line-ending notices. Minecraft 1.21.11, NeoForge 21.11.45, Java 21, Gradle 9.2.1, ModDevGradle 2.0.144, mod ID `cosmicpve`, and package `com.cosmicpve` remain unchanged. Step 8B's final corrective is manually verified/accepted; root `assets/`, `woodlands/`, and future `trial rooms/cave_diving.nbt` remain unrelated untouched untracked development assets.
 
 For the Step 8A candidate:
 

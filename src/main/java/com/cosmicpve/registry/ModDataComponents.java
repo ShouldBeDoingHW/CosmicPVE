@@ -20,6 +20,8 @@ import com.cosmicpve.data.component.MaskLoadout;
 import com.cosmicpve.data.component.HiddenGraveyardKeyData;
 import com.cosmicpve.data.component.CosmicDustData;
 import com.cosmicpve.data.component.MysterySpawnerData;
+import com.cosmicpve.data.component.VKitCrystalData;
+import com.cosmicpve.data.component.VKitEquipmentData;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
@@ -130,6 +132,14 @@ public final class ModDataComponents {
             COMPONENTS.registerComponentType("mystery_spawner",
                     builder -> builder.persistent(MysterySpawnerData.CODEC)
                             .networkSynchronized(ByteBufCodecs.fromCodecWithRegistries(MysterySpawnerData.CODEC)).cacheEncoding());
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<VKitCrystalData>> VKIT_CRYSTAL =
+            COMPONENTS.registerComponentType("vkit_crystal",
+                    builder -> builder.persistent(VKitCrystalData.CODEC)
+                            .networkSynchronized(ByteBufCodecs.fromCodecWithRegistries(VKitCrystalData.CODEC)).cacheEncoding());
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<VKitEquipmentData>> VKIT_EQUIPMENT =
+            COMPONENTS.registerComponentType("vkit_equipment",
+                    builder -> builder.persistent(VKitEquipmentData.CODEC)
+                            .networkSynchronized(ByteBufCodecs.fromCodecWithRegistries(VKitEquipmentData.CODEC)).cacheEncoding());
     private ModDataComponents() {}
 
     public static void register(IEventBus modBus) {

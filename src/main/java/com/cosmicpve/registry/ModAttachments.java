@@ -5,6 +5,7 @@ import com.cosmicpve.data.attachment.PlayerProfileData;
 import com.cosmicpve.combat.stack.CombatStackContainer;
 import com.cosmicpve.spacechest.SpaceChestSessionAttachment;
 import com.cosmicpve.trial.persistence.TrialPlayerState;
+import com.cosmicpve.data.attachment.VKitProgressionData;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.attachment.AttachmentType;
 import net.neoforged.neoforge.registries.DeferredHolder;
@@ -38,6 +39,10 @@ public final class ModAttachments {
     public static final DeferredHolder<AttachmentType<?>, AttachmentType<TrialPlayerState>> TRIAL_PLAYER_STATE =
             ATTACHMENTS.register("trial_player_state", () -> AttachmentType.builder(TrialPlayerState::restored)
                     .serialize(TrialPlayerState.CODEC).copyOnDeath().build());
+
+    public static final DeferredHolder<AttachmentType<?>, AttachmentType<VKitProgressionData>> VKIT_PROGRESSION =
+            ATTACHMENTS.register("vkit_progression", () -> AttachmentType.builder(VKitProgressionData::empty)
+                    .serialize(VKitProgressionData.CODEC).copyOnDeath().build());
 
     private ModAttachments() {}
 

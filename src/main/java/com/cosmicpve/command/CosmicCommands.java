@@ -87,7 +87,9 @@ public final class CosmicCommands {
                 .then(ConquestCommands.create())
                 .then(TinkererCommands.create())
                 .then(CombatStackCommands.create())
-                .then(MaskCommands.create()));
+                .then(MaskCommands.create())
+                .then(VKitCommands.create()));
+
 
         event.getDispatcher().register(Commands.literal("feed")
                 .requires(Commands.hasPermission(new PermissionCheck.Require(Permissions.COMMANDS_GAMEMASTER)))
