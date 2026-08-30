@@ -4,6 +4,7 @@ import com.cosmicpve.CosmicPVE;
 import com.cosmicpve.spacechest.SpaceChestMenu;
 import com.cosmicpve.trial.TrialDecisionMenu;
 import com.cosmicpve.tinkerer.TinkererMenu;
+import com.cosmicpve.personalvault.PersonalVaultMenu;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.inventory.MenuType;
 import net.neoforged.bus.api.IEventBus;
@@ -19,6 +20,8 @@ public final class ModMenus {
             "trial_decision", () -> IMenuTypeExtension.create(TrialDecisionMenu::client));
     public static final DeferredHolder<MenuType<?>, MenuType<TinkererMenu>> TINKERER = MENUS.register(
             "tinkerer", () -> IMenuTypeExtension.create(TinkererMenu::client));
+    public static final DeferredHolder<MenuType<?>, MenuType<PersonalVaultMenu>> PERSONAL_VAULT = MENUS.register(
+            "personal_vault", () -> IMenuTypeExtension.create(PersonalVaultMenu::client));
     private ModMenus() {}
     public static void register(IEventBus bus) { MENUS.register(bus); }
 }

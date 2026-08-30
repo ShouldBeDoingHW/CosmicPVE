@@ -1,8 +1,8 @@
 # CosmicPVE Development Handoff
 
-Current accepted baseline: Step 8B — V-Kits 1.0 + Weapon Damage Normalization and the bounded Obsidian Destroyer + Dominate micro-milestone are implemented, automated verified, and manually verified/accepted. Step 8B is closed in `433b5f8aa185ef8bdc1417b4bd5d60e793b34643` (`Add V-Kits and normalize weapon damage`).
+Current accepted baseline: Step 8C — Personal Vaults + Mystery Spawner Canonicalization is implemented, automated/runtime verified, and manually verified/accepted. Step 8B is closed in `433b5f8aa185ef8bdc1417b4bd5d60e793b34643` (`Add V-Kits and normalize weapon damage`); the accepted enchantment mini-pass is closed in `ed71cc597bc168159ee1892f5cb22ed27b900b00` (`Add Obsidian Destroyer and Dominate`).
 
-Repository state: Steps 6A–8B and the Conquest synchronization are implemented, verified, and manually accepted. The root `assets` and `woodlands` development-source folders remain untouched and untracked. The canonical tracked `trial rooms/*.nbt` files are build inputs; untracked future `trial rooms/cave_diving.nbt` is intentionally outside the current pipeline.
+Repository state: Steps 6A–8C and the Conquest synchronization are implemented, verified, and manually accepted. The root `assets`, `drafts`, and `woodlands` development-source folders remain untouched and untracked. The canonical tracked `trial rooms/*.nbt` files are build inputs; the user has moved the future Cave Diving work outside that canonical directory.
 
 Last handoff update: 2026-08-30
 
@@ -423,6 +423,18 @@ The Step 8B.1 redemption correction makes all four V-Kit Crystals non-stackable 
 
 `cosmicpve:dominate` IV is an Ultimate Bow/Crossbow enchantment. A committed projectile hit whose launch-time weapon snapshot contains Dominate rolls one Luck-relative 20% candidate. Success applies one harmful timed state for 20/40/60/80 ticks and contributes -3/-6/-9/-12% to the target's centralized ordinary outgoing bucket. Reapplication never adds a second reduction: it retains the stronger level and refreshes that strongest duration. True damage bypasses the ordinary contribution, and Blessed recognizes the harmful state through its existing generic negative-effect cleanup. Both enchantments use the ordinary book, Unexamined generation, capacity, Transmog, Tinkerer, command, and Black Scroll paths without entering the accepted V-Kit pools. The implemented ordinary-enchantment count is 51; the remaining newly designed ordinary gaps are Stormcaller, Hex, and Inversion.
 
+The accepted mini-pass is committed as `ed71cc597bc168159ee1892f5cb22ed27b900b00` (`Add Obsidian Destroyer and Dominate`).
+
+### Step 8C — IMPLEMENTED; AUTOMATED/RUNTIME VERIFIED; MANUALLY VERIFIED / ACCEPTED
+
+Personal Vaults use their own versioned, death-copied player attachment. One nonnegative total-unlocked-row count defines the strict endless sequence of three rows per vault; contents are a sparse list keyed by positive `long` vault number, and each existing vault retains exact `ItemStack` component data in up to 27 internal slots. `/pv <number>` accepts any positive `long`, rejects locked vaults, and opens an authoritative vanilla chest-style menu exposing exactly 9, 18, or 27 slots. Its server container publishes immutable attachment replacements on mutations and close, including shift-click and forced-close paths, while preserving any hidden future-row data.
+
+`cosmicpve:personal_vault_unlock` is a stackable Emerald-presented item with forced glint and a bold white name. Each successful server-side right-click determines the next strict position, persists exactly one new row, consumes exactly one item through Minecraft 1.21.11's transformed-hand writeback, and sends the redeemer one player-targeted `minecraft:entity.arrow.hit_player` sound. It has no invented flavor lore. Debug support is `/cosmic pv inspect <player>`, `/cosmic pv unlocks set|add <player> <rows>`, and `/cosmic pv combat-tag inspect|clear <player>`.
+
+The Personal Vault access policy uses a persisted canonical overworld-game-time expiry. A positive committed attributed combat hit between a player and another player/mob sets or refreshes the involved player expiry to `now + 200` ticks; misses, zero/canceled/rejected damage, self/environmental damage, and noncombat living entities do not qualify. Becoming tagged immediately closes only a typed Personal Vault menu. Access also checks real active Trial participation plus the shared typed `TRIAL`/`INVASION`/`DUNGEON` activity context. Trial joining invokes the forced-close seam directly. Invasion and Dungeon gameplay have no production session owners yet; those future owners must set the shared activity context and call `PersonalVaultAccessService.onActivityEntered`, while the open-time policy remains defense in depth. Adventures remain deferred.
+
+Mystery Spawner presentation and uniform index selection are unchanged. The canonical Simple pool is Sheep, Pig, Zombie, Spider, Skeleton, Chicken, and Cow. The Elite pool is Stray, Creeper, Zombified Piglin, Husk, Bogged, Blaze, Slime, and Enderman. Mastery remains Iron Golem, Wither Skeleton, Witch, Vindicator, and Guardian. Cow moved from Elite to Simple; Snow Golem left Elite; Stray and Bogged entered Elite. All results still use the existing real typed Mob Spawner factory.
+
 ## 3. Current Real Enchantments
 
 These are registered through Minecraft's enchantment infrastructure, use actual enchantment data on the item, and are not present in normal enchanting-table, librarian, random-loot, random-equipment, or mob-equipment acquisition pools.
@@ -761,11 +773,11 @@ The final post-Orb capacity is no longer unresolved for current target classes: 
 
 ## 16. Current Next Milestone
 
-**Immediate next action: Step 8C — Personal Vaults + Mystery Spawner Canonicalization.**
+**Immediate next action: Step 8C.1 — Godly V-Kit Bundle + Single-Reward Loot Animation Foundation.**
 
 Current intended sequence:
 
-Steps 8A, 8A.1, 8B, and the Obsidian Destroyer + Dominate micro-milestone are accepted. Step 8C is bounded to Personal Vaults, their Unlock item and access restrictions, plus canonical Mystery Spawner pool synchronization. Secret Weapon Cache, Stormcaller, Hex, Inversion, and other roadmap work remain deferred.
+Steps 8A–8C and the Obsidian Destroyer + Dominate micro-milestone are accepted. Step 8C.1 is bounded to the immediate Godly V-Kit Bundle and a reusable single-reward animation foundation; Secret Weapon Cache, Admin Abuse, Cosmic Enchantment Table, Stormcaller, Hex, Inversion, and Roadmap Step 3 remain deferred.
 
 The ordinary-enchantment expansion remains split across bounded patches. Step 7C is the explicit instruction that made the current canonical Design Doc enchantment-table values implementation-authoritative; later design edits still require their own explicit implementation milestone.
 
@@ -783,6 +795,13 @@ The ordinary-enchantment expansion remains split across bounded patches. Step 7C
 Preserve unrelated dirty changes. Never change pinned versions as a side effect of gameplay work. Prefer service-level rules and typed data over one-off event logic, and keep client-only classes isolated from dedicated-server loading.
 
 ## 18. Verification Snapshot
+
+For the Step 8C candidate:
+
+- The focused Personal Vault/Mystery Spawner run passes all 13 tests across three suites. Coverage pins the uncapped row mapping through PV11 and beyond, sparse multi-vault component-bearing stack serialization, row expansion/isolation, exact 200-tick expiry boundaries/refresh, typed activity restrictions, Unlock stackability/glint/name style, exact single/stacked/rejected transaction callback counts and sound identity, exact canonical pool sets, uniform index reachability, and real Cow/Stray/Bogged typed-spawner outputs.
+- The original full suite executed 481 tests with only the expected Cave Diving source-pipeline conflict. After the user moved that future work outside canonical `trial rooms/`, Step 8C closure verification passes all 481 tests with zero failures.
+- All 221 main-resource JSON files parse successfully. `git diff --check` passes for the Step 8C diff with only normal Windows line-ending notices. Dedicated-server startup loads 1,462 recipes, publishes Cosmic content, registers the attachment/item/menu/commands, and reaches `Done`. Fresh-client startup completes resource reload, OpenAL/SoundEngine initialization, and all item/GUI atlases without relevant missing-model, missing-texture, localization, menu, or sided-classloading errors.
+- Minecraft 1.21.11, NeoForge 21.11.45, Java 21, Gradle 9.2.1, ModDevGradle 2.0.144, mod ID `cosmicpve`, and package `com.cosmicpve` remain unchanged. Step 8C is manually verified/accepted; root `assets/`, `drafts/`, `woodlands/`, and the user's live `docs/Cosmic_Design.md` edits remain untouched/uncommitted.
 
 For the Obsidian Destroyer + Dominate micro-milestone:
 

@@ -161,6 +161,8 @@ public final class TrialSessionService {
         if (session.activeParticipant(player.getUUID())) return TrialOperationResult.ok("Already joined.");
         if (!session.acceptsJoins()) return TrialOperationResult.rejected("The Trial joining period has ended.");
         if (session.participants().size() >= TrialSession.MAX_PARTICIPANTS) return TrialOperationResult.rejected("This Trial party is full.");
+        com.cosmicpve.personalvault.PersonalVaultRuntime.access().onActivityEntered(
+                player, com.cosmicpve.activity.ActivityType.TRIAL);
         if (!inventories.enter(player, session.sessionId())) return TrialOperationResult.rejected("Could not durably snapshot your inventory.");
         try {
             TrialSession joined = session.addParticipant(player.getUUID()); repository.publish(player.level().getServer(), joined);

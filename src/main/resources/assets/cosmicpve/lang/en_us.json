@@ -405,4 +405,9 @@
   ,"tooltip.cosmicpve.vkit.judgement.suffix":"!"
   ,"tooltip.cosmicpve.vkit.slayer.prefix":"Quality over quantity. Your enemies quake. Right click to level up your "
   ,"tooltip.cosmicpve.vkit.slayer.suffix":"!"
+  ,"item.cosmicpve.personal_vault_unlock":"Personal Vault Unlock"
+  ,"container.cosmicpve.personal_vault":"Personal Vault #%s"
+  ,"message.cosmicpve.personal_vault.locked":"Personal Vault #%s is locked."
+  ,"message.cosmicpve.personal_vault.unlock_failed":"That Personal Vault row could not be unlocked safely."
+  ,"message.cosmicpve.personal_vault.unlocked":"Unlocked Personal Vault #%s, row %s."
 }

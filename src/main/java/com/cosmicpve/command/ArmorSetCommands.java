@@ -72,6 +72,7 @@ public final class ArmorSetCommands {
         try { type = com.cosmicpve.activity.ActivityType.valueOf(value.toUpperCase(java.util.Locale.ROOT)); }
         catch (IllegalArgumentException exception) { source.sendFailure(Component.literal("Unknown activity: " + value)); return 0; }
         com.cosmicpve.combat.CosmicCombat.activities().set(player.getUUID(), type);
+        com.cosmicpve.personalvault.PersonalVaultRuntime.access().onActivityEntered(player, type);
         source.sendSuccess(() -> Component.literal("Set " + player.getName().getString() + " activity to " + type + "."), true);
         return 1;
     }

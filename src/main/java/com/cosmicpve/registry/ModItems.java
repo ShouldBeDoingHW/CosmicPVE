@@ -31,6 +31,7 @@ import com.cosmicpve.item.BoldNameItem;
 import com.cosmicpve.vkit.VKitCrystalItem;
 import com.cosmicpve.vkit.VKitDefinition;
 import com.cosmicpve.data.component.VKitCrystalData;
+import com.cosmicpve.personalvault.PersonalVaultUnlockItem;
 
 public final class ModItems {
     private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(CosmicPVE.MOD_ID);
@@ -79,6 +80,9 @@ public final class ModItems {
 
     public static final DeferredItem<BanknoteItem> BANKNOTE = ITEMS.registerItem(
             "banknote", BanknoteItem::new, properties -> properties.stacksTo(1));
+
+    public static final DeferredItem<PersonalVaultUnlockItem> PERSONAL_VAULT_UNLOCK = ITEMS.registerItem(
+            "personal_vault_unlock", PersonalVaultUnlockItem::new, properties -> properties.stacksTo(64));
 
     public static final DeferredItem<BoldNameItem> REPAIR_SCROLL = ITEMS.registerItem(
             "repair_scroll", BoldNameItem::new, properties -> properties.stacksTo(64));

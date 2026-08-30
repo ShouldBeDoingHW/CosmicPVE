@@ -37,6 +37,7 @@ public final class CosmicPVEClient {
         event.register(com.cosmicpve.registry.ModMenus.SPACE_CHEST.get(), SpaceChestScreen::new);
         event.register(com.cosmicpve.registry.ModMenus.TRIAL_DECISION.get(), TrialDecisionScreen::new);
         event.register(com.cosmicpve.registry.ModMenus.TINKERER.get(), TinkererScreen::new);
+        event.register(com.cosmicpve.registry.ModMenus.PERSONAL_VAULT.get(), PersonalVaultScreen::new);
     }
 
     private static void registerEntityRenderers(EntityRenderersEvent.RegisterRenderers event) {

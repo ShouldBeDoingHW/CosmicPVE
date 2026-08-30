@@ -211,6 +211,7 @@ public final class CombatEventBridge {
                 && committed.context().attacker() instanceof net.minecraft.world.entity.player.Player player) {
             DevourBehavior.commit(player);
         }
+        com.cosmicpve.personalvault.PersonalVaultRuntime.combatTags().onCommitted(committed);
         procEvents.onCommittedDamage(committed);
     }
 

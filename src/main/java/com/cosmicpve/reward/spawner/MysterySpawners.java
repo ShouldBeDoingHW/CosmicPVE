@@ -12,9 +12,9 @@ import net.minecraft.world.item.ItemStack;
 
 public final class MysterySpawners {
     public static final List<Identifier> SIMPLE = ids(EntityType.SHEEP, EntityType.PIG, EntityType.ZOMBIE,
-            EntityType.SPIDER, EntityType.SKELETON, EntityType.CHICKEN);
-    public static final List<Identifier> ELITE = ids(EntityType.COW, EntityType.CREEPER, EntityType.ZOMBIFIED_PIGLIN,
-            EntityType.HUSK, EntityType.SNOW_GOLEM, EntityType.BLAZE, EntityType.SLIME, EntityType.ENDERMAN);
+            EntityType.SPIDER, EntityType.SKELETON, EntityType.CHICKEN, EntityType.COW);
+    public static final List<Identifier> ELITE = ids(EntityType.STRAY, EntityType.CREEPER, EntityType.ZOMBIFIED_PIGLIN,
+            EntityType.HUSK, EntityType.BOGGED, EntityType.BLAZE, EntityType.SLIME, EntityType.ENDERMAN);
     public static final List<Identifier> MASTERY = ids(EntityType.IRON_GOLEM, EntityType.WITHER_SKELETON,
             EntityType.WITCH, EntityType.VINDICATOR, EntityType.GUARDIAN);
 

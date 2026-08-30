@@ -9,6 +9,7 @@ import com.mojang.serialization.JsonOps;
 import java.util.Set;
 import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.EntityType;
 import org.junit.jupiter.api.Test;
 
 class MysterySpawnerTest {
@@ -20,18 +21,32 @@ class MysterySpawnerTest {
     }
 
     @Test void exactPoolsHaveNoCrossTierContamination() {
-        assertEquals(6, MysterySpawners.SIMPLE.size());
+        assertEquals(7, MysterySpawners.SIMPLE.size());
         assertEquals(8, MysterySpawners.ELITE.size());
         assertEquals(5, MysterySpawners.MASTERY.size());
         assertTrue(java.util.Collections.disjoint(MysterySpawners.SIMPLE, MysterySpawners.ELITE));
         assertTrue(java.util.Collections.disjoint(MysterySpawners.SIMPLE, MysterySpawners.MASTERY));
         assertTrue(java.util.Collections.disjoint(MysterySpawners.ELITE, MysterySpawners.MASTERY));
         assertEquals(Set.of("minecraft:sheep", "minecraft:pig", "minecraft:zombie", "minecraft:spider",
-                "minecraft:skeleton", "minecraft:chicken"), strings(MysterySpawners.SIMPLE));
-        assertEquals(Set.of("minecraft:cow", "minecraft:creeper", "minecraft:zombified_piglin", "minecraft:husk",
-                "minecraft:snow_golem", "minecraft:blaze", "minecraft:slime", "minecraft:enderman"), strings(MysterySpawners.ELITE));
+                "minecraft:skeleton", "minecraft:chicken", "minecraft:cow"), strings(MysterySpawners.SIMPLE));
+        assertEquals(Set.of("minecraft:stray", "minecraft:creeper", "minecraft:zombified_piglin", "minecraft:husk",
+                "minecraft:bogged", "minecraft:blaze", "minecraft:slime", "minecraft:enderman"), strings(MysterySpawners.ELITE));
         assertEquals(Set.of("minecraft:iron_golem", "minecraft:wither_skeleton", "minecraft:witch",
                 "minecraft:vindicator", "minecraft:guardian"), strings(MysterySpawners.MASTERY));
+    }
+
+    @Test void canonicalPoolMovesAndNewTypedOutputsAreExact() {
+        assertTrue(MysterySpawners.SIMPLE.contains(Identifier.withDefaultNamespace("cow")));
+        assertFalse(MysterySpawners.ELITE.contains(Identifier.withDefaultNamespace("cow")));
+        assertFalse(MysterySpawners.ELITE.contains(Identifier.withDefaultNamespace("snow_golem")));
+        for (String name : java.util.List.of("stray", "bogged"))
+            assertTrue(MysterySpawners.ELITE.contains(Identifier.withDefaultNamespace(name)));
+        for (var expected : java.util.List.of(EntityType.COW, EntityType.STRAY, EntityType.BOGGED)) {
+            Identifier id = net.minecraft.core.registries.BuiltInRegistries.ENTITY_TYPE.getKey(expected);
+            var output = MobSpawners.create(id, 1);
+            assertEquals(id, output.get(ModDataComponents.MOB_SPAWNER.get()).entityTypeId());
+            assertTrue(MobSpawnerEligibility.isEligible(id));
+        }
     }
 
     @Test void openingDeterministicallyProducesExactlyOneCanonicalTypedSpawner() {
