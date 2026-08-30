@@ -55,6 +55,8 @@ public final class ModEnchantments {
     public static final ResourceKey<Enchantment> SNIPER = createKey("sniper");
     public static final ResourceKey<Enchantment> SNARE = createKey("snare");
     public static final ResourceKey<Enchantment> PLAGUE_CARRIER = createKey("plague_carrier");
+    public static final ResourceKey<Enchantment> OBSIDIAN_DESTROYER = createKey("obsidian_destroyer");
+    public static final ResourceKey<Enchantment> DOMINATE = createKey("dominate");
 
     private ModEnchantments() {}
 

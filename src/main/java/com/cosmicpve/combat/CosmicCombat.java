@@ -144,6 +144,7 @@ public final class CosmicCombat {
         OUTGOING.register(new com.cosmicpve.combat.enchantment.HeroKillerBehavior(ARMOR_SETS));
         OUTGOING.register(new com.cosmicpve.combat.enchantment.VoodooBehavior(STACKS));
         OUTGOING.register(MASK_COMBAT);
+        OUTGOING.register(new com.cosmicpve.combat.enchantment.DominateBehavior());
         INCOMING.register(ARMOR_SET_COMBAT);
         INCOMING.register(WEAPON_SKIN_COMBAT);
         INCOMING.register(deathPact);

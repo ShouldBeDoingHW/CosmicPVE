@@ -10,6 +10,7 @@ import com.cosmicpve.registry.ModDataComponents;
 import com.cosmicpve.registry.ModItems;
 import com.cosmicpve.registry.ModBlocks;
 import com.cosmicpve.registry.ModEntities;
+import com.cosmicpve.registry.ModMobEffects;
 import com.cosmicpve.registry.ModMenus;
 import com.cosmicpve.registry.ModBlockEntities;
 import com.cosmicpve.spacechest.SpaceChestEventBridge;
@@ -51,6 +52,7 @@ public final class CosmicPVE {
 
     public CosmicPVE(IEventBus modBus) {
         ModDataComponents.register(modBus);
+        ModMobEffects.register(modBus);
         ModAttachments.register(modBus);
         ModBlocks.register(modBus);
         ModBlockEntities.register(modBus);
@@ -80,6 +82,7 @@ public final class CosmicPVE {
         NeoForge.EVENT_BUS.addListener(oxygenate::onBlockDrops);
         var miningEnchantments = new MiningEnchantmentEventBridge();
         NeoForge.EVENT_BUS.addListener(miningEnchantments::onBlockDrops);
+        NeoForge.EVENT_BUS.addListener(miningEnchantments::onBreakSpeed);
         var repairs = new RepairScrollEventBridge();
         NeoForge.EVENT_BUS.addListener(repairs::onStacked);
         var trialTrinkets = new TrialTrinketEventBridge();

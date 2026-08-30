@@ -1,6 +1,6 @@
 # CosmicPVE Development Handoff
 
-Current accepted baseline: Step 8B — V-Kits 1.0 + Weapon Damage Normalization is implemented, automated/runtime verified, and manually verified/accepted. Its final Crystal redemption correction was manually retested successfully after the authoritative hand-writeback and player-targeted sound fixes.
+Current accepted baseline: Step 8B — V-Kits 1.0 + Weapon Damage Normalization and the bounded Obsidian Destroyer + Dominate micro-milestone are implemented, automated verified, and manually verified/accepted. Step 8B is closed in `433b5f8aa185ef8bdc1417b4bd5d60e793b34643` (`Add V-Kits and normalize weapon damage`).
 
 Repository state: Steps 6A–8B and the Conquest synchronization are implemented, verified, and manually accepted. The root `assets` and `woodlands` development-source folders remain untouched and untracked. The canonical tracked `trial rooms/*.nbt` files are build inputs; untracked future `trial rooms/cave_diving.nbt` is intentionally outside the current pipeline.
 
@@ -399,7 +399,7 @@ Canonical structure mapping:
 | `warzone_giants_east.nbt` | `cosmicpve:trial/warzone_giants_east` | Warzone Giants east piece |
 | `zero_g.nbt` | `cosmicpve:trial/zero_g` | Zero-G |
 
-Sniper V, Snare IV, and Plague Carrier VII complete the ordinary Cosmic enchantment pool at 49. Sniper captures the real entity-hit position narrowly at projectile impact, resolves the launch weapon through Minecraft's projectile-owned weapon item, and adds its deterministic headshot contribution to the shared ordinary outgoing bucket. Snare uses the committed projectile ProcEngine hook, central relative Luck calculation, and a bounded server-side root service that refreshes one 25-tick state while preserving gravity and cleaning itself without permanent attributes. Plague Carrier uses the committed defensive hook and the shared cooldown service; it deterministically poisons the responsible living attacker below the strict 25% threshold, with its 600-tick base duration automatically becoming 480 ticks under Dimensional Traveler's generic cooldown multiplier. The refreshed Circuit Circus structure uses eight 2x1 obsidian pillar placeholders; initialization resolves those placeholders once and replaces each pair with its randomized circuit material.
+Sniper V, Snare IV, and Plague Carrier VII brought the accepted Step 8A.1 ordinary Cosmic enchantment pool to 49. Sniper captures the real entity-hit position narrowly at projectile impact, resolves the launch weapon through Minecraft's projectile-owned weapon item, and adds its deterministic headshot contribution to the shared ordinary outgoing bucket. Snare uses the committed projectile ProcEngine hook, central relative Luck calculation, and a bounded server-side root service that refreshes one 25-tick state while preserving gravity and cleaning itself without permanent attributes. Plague Carrier uses the committed defensive hook and the shared cooldown service; it deterministically poisons the responsible living attacker below the strict 25% threshold, with its 600-tick base duration automatically becoming 480 ticks under Dimensional Traveler's generic cooldown multiplier. The refreshed Circuit Circus structure uses eight 2x1 obsidian pillar placeholders; initialization resolves those placeholders once and replaces each pair with its randomized circuit material.
 
 Step 8A.1 is closed in `c56461f81216b7f860834fef660f753fb6768010` (`Complete Trial structure pipeline and enchantments`). The accepted Conquest micro-pass synchronizes the production table to 19 weighted rows (total weight 169), including the Simple Mystery Spawner, Heroic Crystal, tier-one Trial Trinkets, and the corrected 75% Black Scroll while preserving the guaranteed Banknote and all Conquest mechanics.
 
@@ -416,6 +416,12 @@ The eight outputs are Sikanda (Diamond Sword), Sandals of the Phoenix (Iron Boot
 Development commands are `/cosmic vkit inspect <player>`, `/cosmic vkit set <player> <kit> <0..10>`, `/cosmic vkit reset <player> [kit]`, `/cosmic vkit give <player> <kit> [count]`, and `/cosmic vkit generate <player> <kit> <armor|weapon> <1..10> [seed]`. There is no recurring claim command or timer.
 
 The Step 8B.1 redemption correction makes all four V-Kit Crystals non-stackable and fixes final-single-item redemption. Minecraft 1.21.11's `ItemStack.use` wrapper converts every immediate successful use into an explicit transformed-hand result after the item handler returns. The original delivery-first path could place the generated reward into the selected slot vacated by the consumed Crystal, after which that wrapper wrote the now-empty Crystal back over the same slot. Rewards survived only when inventory layout caused safe delivery to choose another empty slot, explaining the intermittent behavior. A normal count-one redemption now returns the generated equipment itself as the authoritative transformed-hand stack; it therefore replaces the consumed Crystal through the vanilla server writeback and cannot be erased. Synthetic pre-fix multi-Crystal stacks retain their remaining Crystals in hand and use safe inventory/overflow delivery for the generated reward. Generation still precedes mutation, followed by one progression update, one Crystal consumption, one reward result, and one feedback event. Feedback uses a direct player-targeted `ClientboundSoundPacket` for `minecraft:entity.player.levelup`; `Player.playSound` was unsuitable because its server override excludes that player from the level broadcast. Rejected or pre-commit generation failures play no sound.
+
+### Obsidian Destroyer + Dominate micro-milestone — IMPLEMENTED; AUTOMATED VERIFIED; MANUALLY VERIFIED / ACCEPTED
+
+`cosmicpve:obsidian_destroyer` IV is a Unique Pickaxe enchantment. The server-authoritative break-speed hook adds exactly 2 mining-speed points per level to Minecraft's already-resolved current speed only for vanilla Obsidian; it does not replace Efficiency, create Haste, or affect Crying Obsidian or other blocks.
+
+`cosmicpve:dominate` IV is an Ultimate Bow/Crossbow enchantment. A committed projectile hit whose launch-time weapon snapshot contains Dominate rolls one Luck-relative 20% candidate. Success applies one harmful timed state for 20/40/60/80 ticks and contributes -3/-6/-9/-12% to the target's centralized ordinary outgoing bucket. Reapplication never adds a second reduction: it retains the stronger level and refreshes that strongest duration. True damage bypasses the ordinary contribution, and Blessed recognizes the harmful state through its existing generic negative-effect cleanup. Both enchantments use the ordinary book, Unexamined generation, capacity, Transmog, Tinkerer, command, and Black Scroll paths without entering the accepted V-Kit pools. The implemented ordinary-enchantment count is 51; the remaining newly designed ordinary gaps are Stormcaller, Hex, and Inversion.
 
 ## 3. Current Real Enchantments
 
@@ -474,10 +480,12 @@ These are registered through Minecraft's enchantment infrastructure, use actual 
 | `cosmicpve:sniper` | V | Bow/crossbow | Legendary | Projectile impacts in the upper 20% of the target's current bounding box add 5% ordinary parent-projectile damage per level. The launch weapon is authoritative and the effect is deterministic. |
 | `cosmicpve:snare` | IV | Crossbow | Elite | Committed crossbow projectile hits have 3% chance per level, modified relatively by Luck, to root the target for 25 ticks while gravity continues. Reapplication refreshes one state. |
 | `cosmicpve:plague_carrier` | VII | Leggings | Unique | A committed hit leaving the wearer strictly below 25% health poisons the responsible living attacker for `(2 + level)` seconds: Poison I at I–V and Poison II at VI–VII. Base cooldown is 600 ticks through the shared service. |
+| `cosmicpve:obsidian_destroyer` | IV | Pickaxe | Unique | Adds 2 mining-speed points per level to the resolved break speed only while mining vanilla Obsidian. It is not Haste and does not affect Crying Obsidian. |
+| `cosmicpve:dominate` | IV | Bow/crossbow | Ultimate | Committed launch-snapshotted projectile hits have a flat 20% Luck-relative chance to apply one nonstacking harmful state for 1 second per level, reducing ordinary outgoing damage by 3% per level. Stronger reapplications are retained and duration is refreshed. |
 
 ### DESIGNED BUT NOT IMPLEMENTED
 
-The ordinary Cosmic enchantment pool is content-complete at exactly 49 implemented real enchantments. Death Pact, Permafrost, Mortal Coil, Phoenix, Divine Immolation, Soul Tether, Hero Killer, Soul Siphon, and Blackout are the implemented Mastery enchantments. Heroic enchantments and the final balance pass remain separate future work; do not add behavior assumptions beyond `Cosmic_Design.md`.
+The ordinary Cosmic enchantment pool currently contains exactly 51 implemented real enchantments. Death Pact, Permafrost, Mortal Coil, Phoenix, Divine Immolation, Soul Tether, Hero Killer, Soul Siphon, and Blackout are the implemented Mastery enchantments. Stormcaller, Hex, and Inversion are the remaining newly designed ordinary gaps; Heroic enchantments and later balance work remain separate future scope and require explicit implementation instructions.
 
 ## 4. Critical Combat Semantics
 
@@ -753,11 +761,11 @@ The final post-Orb capacity is no longer unresolved for current target classes: 
 
 ## 16. Current Next Milestone
 
-**Immediate next action: implement the bounded Obsidian Destroyer IV + Dominate IV ordinary-enchantment micro-milestone.**
+**Immediate next action: Step 8C — Personal Vaults + Mystery Spawner Canonicalization.**
 
 Current intended sequence:
 
-Steps 8A, 8A.1, and 8B are accepted, and the Conquest synchronization is isolated in its own closure commit. The next bounded work is only Obsidian Destroyer and Dominate; Secret Weapon Cache, Personal Vaults, and other roadmap work remain deferred.
+Steps 8A, 8A.1, 8B, and the Obsidian Destroyer + Dominate micro-milestone are accepted. Step 8C is bounded to Personal Vaults, their Unlock item and access restrictions, plus canonical Mystery Spawner pool synchronization. Secret Weapon Cache, Stormcaller, Hex, Inversion, and other roadmap work remain deferred.
 
 The ordinary-enchantment expansion remains split across bounded patches. Step 7C is the explicit instruction that made the current canonical Design Doc enchantment-table values implementation-authoritative; later design edits still require their own explicit implementation milestone.
 
@@ -775,6 +783,12 @@ The ordinary-enchantment expansion remains split across bounded patches. Step 7C
 Preserve unrelated dirty changes. Never change pinned versions as a side effect of gameplay work. Prefer service-level rules and typed data over one-off event logic, and keep client-only classes isolated from dedicated-server loading.
 
 ## 18. Verification Snapshot
+
+For the Obsidian Destroyer + Dominate micro-milestone:
+
+- Focused behavior and registry tests pass, including exact Obsidian-only +2/+4/+6/+8 additive speed, preserved preexisting break speed, 51 registered specs, metadata/Black Scroll eligibility, flat 20% Dominate chance, 24% under +20 Luck, exact reductions/durations, projectile-only classification, strongest-state refresh rules, harmful cleanse classification, and ordinary-only outgoing contribution.
+- The bounded full `gradlew.bat test` run executes 473 tests; 472 pass and only `TrialStructurePipelineTest.everyCanonicalSourceIsPublishedByteForByte` fails because the user-authored untracked future `trial rooms/cave_diving.nbt` has no current canonical pipeline declaration. That known unrelated file, its future pipeline work, and the test were not modified.
+- Both new enchantment JSON definitions and the localization JSON decode successfully. Compilation succeeds. No client/server smoke was required because the existing generic registration/resource architecture is unchanged. The user manually verified both enchantments and accepted the micro-milestone.
 
 For the Step 8B/8B.1 candidate:
 

@@ -11,6 +11,8 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.crafting.SingleRecipeInput;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.event.level.BlockDropsEvent;
 
 public final class MiningEnchantmentService {
@@ -24,6 +26,19 @@ public final class MiningEnchantmentService {
             transformDrops(event.getDrops(), stack -> smeltingResult(level, stack));
         }
         if (experience > 0) event.setDroppedExperience(scaleBlockExperience(event.getDroppedExperience(), experience));
+    }
+
+    public float applyObsidianDestroyer(float currentSpeed, BlockState state, ItemStack tool) {
+        int level = enchantments.resolve(tool, List.of()).level(ModEnchantments.OBSIDIAN_DESTROYER.identifier());
+        return applyObsidianDestroyer(currentSpeed, state, level);
+    }
+
+    public static float applyObsidianDestroyer(float currentSpeed, BlockState state, int level) {
+        return currentSpeed + (float) obsidianDestroyerBonus(state, level);
+    }
+
+    public static double obsidianDestroyerBonus(BlockState state, int level) {
+        return state.is(Blocks.OBSIDIAN) ? 2.0 * Math.max(0, Math.min(4, level)) : 0.0;
     }
 
     static ItemStack smeltingResult(ServerLevel level, ItemStack inputStack) {

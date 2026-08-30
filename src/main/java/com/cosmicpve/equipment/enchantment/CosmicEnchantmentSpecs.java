@@ -105,6 +105,10 @@ public final class CosmicEnchantmentSpecs {
             ModEnchantments.SNARE.identifier(), 4, CosmicEnchantmentTier.ELITE, "crossbow");
     public static final CosmicEnchantmentSpec PLAGUE_CARRIER = new CosmicEnchantmentSpec(
             ModEnchantments.PLAGUE_CARRIER.identifier(), 7, CosmicEnchantmentTier.UNIQUE, "leggings");
+    public static final CosmicEnchantmentSpec OBSIDIAN_DESTROYER = new CosmicEnchantmentSpec(
+            ModEnchantments.OBSIDIAN_DESTROYER.identifier(), 4, CosmicEnchantmentTier.UNIQUE, "pickaxe");
+    public static final CosmicEnchantmentSpec DOMINATE = new CosmicEnchantmentSpec(
+            ModEnchantments.DOMINATE.identifier(), 4, CosmicEnchantmentTier.ULTIMATE, "bow_or_crossbow");
 
     public static final List<CosmicEnchantmentSpec> ALL =
             List.of(EXECUTE, ANGELIC, LIGHTNING, ENDER_SHIFT, DOUBLESTRIKE, BLEED, LUCK, POISON, PUMMEL,
@@ -113,7 +117,7 @@ public final class CosmicEnchantmentSpecs {
                     GEARS, PERMAFROST, MORTAL_COIL, SELF_DESTRUCT, PHOENIX, DIVINE_IMMOLATION, VIRUS, DEVOUR,
                     UNDEAD_RUSE, OBLITERATE, SOUL_TETHER, DODGE, LEADERSHIP,
                     HERO_KILLER, SOUL_SIPHON, BLACKOUT, ENDER_WALKER, VOODOO,
-                    SNIPER, SNARE, PLAGUE_CARRIER);
+                    SNIPER, SNARE, PLAGUE_CARRIER, OBSIDIAN_DESTROYER, DOMINATE);
 
     private CosmicEnchantmentSpecs() {}
 

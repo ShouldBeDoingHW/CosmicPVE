@@ -106,6 +106,7 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
             addVenom(event, result);
             addVirus(event, result);
             addSnare(event, result);
+            addDominate(event, result);
         } else if (event.hook() == ProcHook.ON_DAMAGE_TAKEN) {
             addAngelic(event, result);
             addEnderShift(event, result);
@@ -231,6 +232,17 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
                 activation -> SnareBehavior.activate(activation.event(), snareRoots),
                 provenance(event, ModEnchantments.SNARE.identifier()),
                 condition(CosmicPVE.id("snare_crossbow_projectile"), SnareBehavior::eligible)));
+    }
+
+    private void addDominate(ProcEvent event, List<ProcCandidate> result) {
+        int level = Math.min(4, event.effectiveEnchantments().level(ModEnchantments.DOMINATE.identifier()));
+        if (level <= 0 || !DominateBehavior.eligible(event)) return;
+        result.add(candidate(ModEnchantments.DOMINATE.identifier(), ProcHook.ON_PROJECTILE_HIT,
+                DominateBehavior.chance(level), Optional.empty(), 0L, Optional.empty(),
+                ChildProcEligibility.ROOT_ONLY,
+                activation -> DominateBehavior.activate(activation.event().target(), level),
+                provenance(event, ModEnchantments.DOMINATE.identifier()),
+                condition(CosmicPVE.id("dominate_projectile_hit"), DominateBehavior::eligible)));
     }
 
     private void addPlagueCarrier(ProcEvent event, List<ProcCandidate> result) {

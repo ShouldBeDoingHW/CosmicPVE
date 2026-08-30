@@ -106,10 +106,16 @@ class CosmicEnchantmentRegistrationTest {
                 } else if (entry.getKey().equals("plague_carrier")) {
                     assertEquals("#cosmicpve:enchantable/leggings", json.get("supported_items").getAsString());
                     assertEquals("legs", json.getAsJsonArray("slots").get(0).getAsString());
+                } else if (entry.getKey().equals("obsidian_destroyer")) {
+                    assertEquals("#cosmicpve:enchantable/pickaxe", json.get("supported_items").getAsString());
+                    assertEquals(4, json.get("max_level").getAsInt());
+                } else if (entry.getKey().equals("dominate")) {
+                    assertEquals("#cosmicpve:enchantable/bow_or_crossbow", json.get("supported_items").getAsString());
+                    assertEquals(4, json.get("max_level").getAsInt());
                 }
             }
         }
-        assertEquals(49, CosmicEnchantmentSpecs.ALL.size());
+        assertEquals(51, CosmicEnchantmentSpecs.ALL.size());
         assertEquals(CosmicEnchantmentTier.ELITE, CosmicEnchantmentSpecs.EXECUTE.tier());
         assertEquals(CosmicEnchantmentTier.ULTIMATE, CosmicEnchantmentSpecs.ANGELIC.tier());
         assertEquals(CosmicEnchantmentTier.SIMPLE, CosmicEnchantmentSpecs.LIGHTNING.tier());
