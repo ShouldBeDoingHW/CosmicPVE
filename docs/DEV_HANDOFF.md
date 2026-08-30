@@ -1,8 +1,8 @@
 # CosmicPVE Development Handoff
 
-Current accepted baseline: Step 8A.1. The canonical Trial structure pipeline plus Sniper V, Snare IV, and Plague Carrier VII are implemented, automated/runtime verified, and manually verified/accepted. The small Conquest Chest reward synchronization is also manually accepted and awaiting its separate closure commit.
+Current accepted baseline: Step 8A.1, committed as `c56461f81216b7f860834fef660f753fb6768010` (`Complete Trial structure pipeline and enchantments`). The canonical Trial structure pipeline plus Sniper V, Snare IV, and Plague Carrier VII are implemented, automated/runtime verified, and manually verified/accepted. The Conquest Chest reward table is synchronized to the current canonical design.
 
-Repository state: Steps 6A–8A are implemented, automated/runtime verified, manually accepted, and committed. Step 8A.1 and the Conquest reward synchronization are accepted closure candidates. The root `assets` source-art folder remains deliberately untracked. The canonical `trial rooms/*.nbt` files are intentional tracked build inputs.
+Repository state: Steps 6A–8A.1 are implemented, automated/runtime verified, manually accepted, and committed. The accepted Conquest reward synchronization is being closed separately before Step 8B begins. The root `assets` source-art folder remains deliberately untracked. The canonical `trial rooms/*.nbt` files are tracked build inputs.
 
 Last handoff update: 2026-08-29
 
@@ -401,6 +401,8 @@ Canonical structure mapping:
 
 Sniper V, Snare IV, and Plague Carrier VII complete the ordinary Cosmic enchantment pool at 49. Sniper captures the real entity-hit position narrowly at projectile impact, resolves the launch weapon through Minecraft's projectile-owned weapon item, and adds its deterministic headshot contribution to the shared ordinary outgoing bucket. Snare uses the committed projectile ProcEngine hook, central relative Luck calculation, and a bounded server-side root service that refreshes one 25-tick state while preserving gravity and cleaning itself without permanent attributes. Plague Carrier uses the committed defensive hook and the shared cooldown service; it deterministically poisons the responsible living attacker below the strict 25% threshold, with its 600-tick base duration automatically becoming 480 ticks under Dimensional Traveler's generic cooldown multiplier. The refreshed Circuit Circus structure uses eight 2x1 obsidian pillar placeholders; initialization resolves those placeholders once and replaces each pair with its randomized circuit material.
 
+Step 8A.1 is closed in `c56461f81216b7f860834fef660f753fb6768010` (`Complete Trial structure pipeline and enchantments`). The accepted Conquest micro-pass synchronizes the production table to 19 weighted rows (total weight 169), including the Simple Mystery Spawner, Heroic Crystal, tier-one Trial Trinkets, and the corrected 75% Black Scroll while preserving the guaranteed Banknote and all Conquest mechanics.
+
 ## 3. Current Real Enchantments
 
 These are registered through Minecraft's enchantment infrastructure, use actual enchantment data on the item, and are not present in normal enchanting-table, librarian, random-loot, random-equipment, or mob-equipment acquisition pools.
@@ -737,11 +739,11 @@ The final post-Orb capacity is no longer unresolved for current target classes: 
 
 ## 16. Current Next Milestone
 
-**Immediate next action: close the accepted Step 8A.1 and Conquest synchronization, then implement Step 8B — V-Kits 1.0 + Weapon Damage Normalization.**
+**Immediate next action: implement Step 8B — V-Kits 1.0 + Weapon Damage Normalization.**
 
 Current intended sequence:
 
-Step 8A is closed. Step 8A.1 and the Conquest synchronization are accepted closure candidates. Step 8B is the next bounded implementation milestone; Secret Weapon Cache and later roadmap work remain deferred.
+Steps 8A and 8A.1 are closed, and the accepted Conquest synchronization is isolated in its own closure commit. Step 8B is the next bounded implementation milestone; Secret Weapon Cache and later roadmap work remain deferred.
 
 The ordinary-enchantment expansion remains split across bounded patches. Step 7C is the explicit instruction that made the current canonical Design Doc enchantment-table values implementation-authoritative; later design edits still require their own explicit implementation milestone.
 
@@ -772,7 +774,7 @@ For the Step 8A.1 candidate:
 - `gradlew.bat cleanTest test build` passes all 450 JUnit tests across 121 suites with 0 failures, errors, or skips. The build's `verifyTrialStructurePackaging` audit verifies all 14 canonical Trial NBTs are present in the production JAR and byte-identical to their project-root sources. Existing structure/marker audits run against the processed canonical resources without being weakened.
 - NeoForge `runGameTestServer` completes all three required GameTests. Dedicated-server startup loads 1,462 recipes, publishes all 12 Trial room definitions, and reaches `Done`. Fresh-client startup completes resource reload, SoundEngine/OpenAL initialization, and texture-atlas construction without relevant structure, registry, datapack, localization, model/texture, or sided-classloading failures.
 - All 213 main-resource JSON files decode successfully. `git diff --check` passes. Minecraft 1.21.11, NeoForge 21.11.45, Java 21, Gradle 9.2.1, ModDevGradle 2.0.144, mod ID `cosmicpve`, and package `com.cosmicpve` remain unchanged.
-- Step 8A.1 is manually verified/accepted and ready for closure. Its canonical `trial rooms/*.nbt` files are intentional tracked sources; only root `assets/` remains unrelated and intentionally untracked. The current Circuit Circus canonical source uses eight 2x1 obsidian pillar placeholders, and the placement procedure/tests have been reconciled to that accepted structure.
+- Step 8A.1 is manually verified/accepted and closed in `c56461f81216b7f860834fef660f753fb6768010` (`Complete Trial structure pipeline and enchantments`). Its canonical `trial rooms/*.nbt` files are tracked sources; only root `assets/` remains unrelated and intentionally untracked. The current Circuit Circus canonical source uses eight 2x1 obsidian pillar placeholders, and the placement procedure/tests are reconciled to that accepted structure.
 
 For the accepted Step 7G/7G.1 closure:
 

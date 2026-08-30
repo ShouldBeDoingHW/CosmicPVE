@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.google.gson.JsonParser;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 
 class ConquestResourceTest {
@@ -14,9 +15,10 @@ class ConquestResourceTest {
             assertNotNull(stream);
             var entries = JsonParser.parseReader(new InputStreamReader(stream, StandardCharsets.UTF_8))
                     .getAsJsonObject().getAsJsonArray("entries");
-            assertEquals(14, entries.size());
+            assertEquals(19, entries.size());
             int totalWeight = 0;
             int unexaminedRows = 0;
+            var normalized = new java.util.ArrayList<String>();
             for (var value : entries) {
                 var entry = value.getAsJsonObject();
                 totalWeight += entry.get("weight").getAsInt();
@@ -25,9 +27,32 @@ class ConquestResourceTest {
                 if (type.equals("unexamined_book")) unexaminedRows++;
                 assertFalse(reward.toString().contains("boss"));
                 assertFalse(reward.toString().contains("gkit"));
+                int minimum = entry.has("minimum_quantity") ? entry.get("minimum_quantity").getAsInt() : 1;
+                int maximum = entry.has("maximum_quantity") ? entry.get("maximum_quantity").getAsInt() : minimum;
+                normalized.add(entry.get("weight").getAsInt() + "|" + minimum + "|" + maximum + "|" + reward);
             }
-            assertEquals(140, totalWeight);
+            assertEquals(169, totalWeight);
             assertEquals(5, unexaminedRows);
+            assertEquals(List.of(
+                    "15|2|2|{\"type\":\"unexamined_book\",\"rarity\":\"simple\"}",
+                    "15|2|2|{\"type\":\"unexamined_book\",\"rarity\":\"unique\"}",
+                    "12|2|2|{\"type\":\"unexamined_book\",\"rarity\":\"elite\"}",
+                    "12|1|1|{\"type\":\"unexamined_book\",\"rarity\":\"ultimate\"}",
+                    "8|1|1|{\"type\":\"unexamined_book\",\"rarity\":\"legendary\"}",
+                    "15|1|1|{\"type\":\"static_item\",\"item\":\"cosmicpve:mystery_simple_spawner\"}",
+                    "10|1|1|{\"type\":\"static_item\",\"item\":\"cosmicpve:trial_portal\"}",
+                    "5|2|2|{\"type\":\"static_item\",\"item\":\"cosmicpve:trial_portal\"}",
+                    "10|1|1|{\"type\":\"static_item\",\"item\":\"cosmicpve:transmog_scroll\"}",
+                    "9|1|1|{\"type\":\"static_item\",\"item\":\"cosmicpve:white_scroll\"}",
+                    "10|1|1|{\"type\":\"black_scroll\",\"success_rate\":50}",
+                    "6|1|1|{\"type\":\"black_scroll\",\"success_rate\":75}",
+                    "10|1|1|{\"type\":\"static_item\",\"item\":\"cosmicpve:repair_scroll\"}",
+                    "8|1|1|{\"type\":\"space_chest\",\"rarity\":\"legendary\"}",
+                    "10|1|1|{\"type\":\"space_chest\",\"rarity\":\"ultimate\"}",
+                    "5|1|1|{\"type\":\"static_item\",\"item\":\"cosmicpve:heroic_crystal\"}",
+                    "3|1|1|{\"type\":\"static_item\",\"item\":\"cosmicpve:trial_trinket_time_1\"}",
+                    "3|1|1|{\"type\":\"static_item\",\"item\":\"cosmicpve:trial_trinket_insurance_1\"}",
+                    "3|1|1|{\"type\":\"static_item\",\"item\":\"cosmicpve:trial_trinket_skip_1\"}"), normalized);
         }
     }
 
