@@ -35,6 +35,8 @@ import com.cosmicpve.conquest.ConquestGameTests;
 import com.cosmicpve.vkit.VKitGameTests;
 import com.cosmicpve.reward.animation.LootAnimationEventBridge;
 import com.cosmicpve.reward.lootbox.Step8EGameTests;
+import com.cosmicpve.economy.flashsale.FlashSaleBootstrap;
+import com.cosmicpve.economy.flashsale.Step8FGameTests;
 import com.mojang.logging.LogUtils;
 import net.minecraft.resources.Identifier;
 import net.minecraft.network.chat.Component;
@@ -61,6 +63,7 @@ public final class CosmicPVE {
         ConquestGameTests.register(modBus);
         VKitGameTests.register(modBus);
         Step8EGameTests.register(modBus);
+        Step8FGameTests.register(modBus);
         ModItems.register(modBus);
         ModEntities.register(modBus);
         ModMenus.register(modBus);
@@ -98,6 +101,7 @@ public final class CosmicPVE {
         ArmorRecipeProgression.register();
         TrialBootstrap.register();
         ConquestBootstrap.register();
+        FlashSaleBootstrap.register();
         var spaceChests = new SpaceChestEventBridge();
         NeoForge.EVENT_BUS.addListener(spaceChests::onLogin);
         NeoForge.EVENT_BUS.addListener(spaceChests::onRespawn);

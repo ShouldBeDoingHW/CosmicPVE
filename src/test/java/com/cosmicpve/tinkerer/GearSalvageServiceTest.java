@@ -143,6 +143,13 @@ class GearSalvageServiceTest {
         assertEquals(3075, points.get());
     }
 
+    @Test void xpBottleSuccessMessageUsesGroupedBoldStandardGreenPresentation() {
+        var message = SalvagedXpBottleItem.successMessage(2_275);
+        assertEquals("+2,275 XP", message.getString());
+        assertTrue(message.getStyle().isBold());
+        assertEquals(0x55FF55, message.getStyle().getColor().getValue());
+    }
+
     @Test void insertionFeedbackOnlyCoversSuccessfulPlayerToTinkererMoves() {
         assertEquals(net.minecraft.sounds.SoundEvents.ARMOR_EQUIP_NETHERITE,
                 TinkererInsertionFeedback.sound());

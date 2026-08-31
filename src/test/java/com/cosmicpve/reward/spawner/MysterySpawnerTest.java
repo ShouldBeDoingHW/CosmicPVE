@@ -7,9 +7,11 @@ import com.cosmicpve.registry.ModDataComponents;
 import com.cosmicpve.registry.ModItems;
 import com.mojang.serialization.JsonOps;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.ItemStack;
 import org.junit.jupiter.api.Test;
 
 class MysterySpawnerTest {
@@ -83,6 +85,24 @@ class MysterySpawnerTest {
         stale.set(ModDataComponents.MYSTERY_SPAWNER.get(), new MysterySpawnerData(0, MysterySpawnerTier.SIMPLE));
         assertTrue(MysterySpawners.openAndConsume(stale, bound -> 0).isEmpty());
         assertEquals(2, stale.getCount());
+    }
+
+    @Test void finalSourceTransformsIntoRewardWhileRemainingSourcesUseSafeDelivery() {
+        var finalReward = MobSpawners.create(Identifier.withDefaultNamespace("pig"), 1);
+        var deliveries = new AtomicInteger();
+        var finalResult = MysterySpawnerItem.commitOpening(ItemStack.EMPTY, finalReward,
+                ignored -> deliveries.incrementAndGet());
+        assertSame(finalReward, finalResult.heldItemTransformedTo());
+        assertEquals(0, deliveries.get());
+
+        var remaining = MysterySpawners.create(MysterySpawnerTier.SIMPLE, 1);
+        var nextReward = MobSpawners.create(Identifier.withDefaultNamespace("sheep"), 1);
+        var stackedResult = MysterySpawnerItem.commitOpening(remaining, nextReward, delivered -> {
+            assertSame(nextReward, delivered);
+            deliveries.incrementAndGet();
+        });
+        assertSame(remaining, stackedResult.heldItemTransformedTo());
+        assertEquals(1, deliveries.get());
     }
 
     private static Set<String> strings(java.util.List<Identifier> ids) {

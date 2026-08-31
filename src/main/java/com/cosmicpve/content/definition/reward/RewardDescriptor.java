@@ -6,7 +6,8 @@ import net.minecraft.resources.Identifier;
 public sealed interface RewardDescriptor permits RewardDescriptor.StaticItem, RewardDescriptor.Banknote,
         RewardDescriptor.CosmicBook, RewardDescriptor.UnexaminedBook, RewardDescriptor.BlackScroll, RewardDescriptor.ArmorOrb,
         RewardDescriptor.WeaponOrb, RewardDescriptor.MobSpawner, RewardDescriptor.GeneratedEquipment,
-        RewardDescriptor.SpaceChest, RewardDescriptor.Mask, RewardDescriptor.ArmorSetCrystal {
+        RewardDescriptor.SpaceChest, RewardDescriptor.Mask, RewardDescriptor.ArmorSetCrystal,
+        RewardDescriptor.XpBottle, RewardDescriptor.RandomVKitCrystal, RewardDescriptor.EnchantedBlackScroll {
     RewardType type();
     record StaticItem(Identifier itemId) implements RewardDescriptor { public RewardType type(){return RewardType.STATIC_ITEM;} }
     record Banknote(long cents) implements RewardDescriptor { public RewardType type(){return RewardType.BANKNOTE;} }
@@ -27,5 +28,10 @@ public sealed interface RewardDescriptor permits RewardDescriptor.StaticItem, Re
     record Mask(int maskCount) implements RewardDescriptor { public RewardType type(){return RewardType.MASK;} }
     record ArmorSetCrystal(Identifier armorSetId, int successRate) implements RewardDescriptor {
         public RewardType type(){return RewardType.ARMOR_SET_CRYSTAL;}
+    }
+    record XpBottle(long experience) implements RewardDescriptor { public RewardType type(){return RewardType.XP_BOTTLE;} }
+    record RandomVKitCrystal() implements RewardDescriptor { public RewardType type(){return RewardType.RANDOM_VKIT_CRYSTAL;} }
+    record EnchantedBlackScroll(int successRate) implements RewardDescriptor {
+        public RewardType type(){return RewardType.ENCHANTED_BLACK_SCROLL;}
     }
 }

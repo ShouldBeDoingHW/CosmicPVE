@@ -1,10 +1,10 @@
 # CosmicPVE Development Handoff
 
-Current accepted baseline: Step 8C — Personal Vaults + Mystery Spawner Canonicalization is implemented, automated/runtime verified, manually verified/accepted, and closed in `92d3fa9a4175adf67477081a1e80c69188c4a89d` (`Add Personal Vaults and update Mystery Spawners`). Step 8C.1 — Godly V-Kit Bundle + Single-Reward Loot Animation Foundation is manually verified/accepted and closed in `551b2e57467adc50972e02fa545e87743701c0d7` (`Add Godly V-Kit Bundle and loot animation`). Step 8D — Gear Tinkering + Enchanted Black Scroll + Hex is implemented, automated/runtime verified, and manually verified/accepted. Step 8B is closed in `433b5f8aa185ef8bdc1417b4bd5d60e793b34643` (`Add V-Kits and normalize weapon damage`); the accepted enchantment mini-pass is closed in `ed71cc597bc168159ee1892f5cb22ed27b900b00` (`Add Obsidian Destroyer and Dominate`).
+Current accepted baseline: Step 8F — Flash Sales + Standard Space Chest Loot Rebalance, including the Step 8F.1 corrective, is implemented, automated/runtime verified, and manually verified/accepted. Its closure commit is recorded below. Earlier accepted milestones remain recorded below.
 
-Repository state: Steps 6A–8C and the Conquest synchronization are implemented, verified, and manually accepted. The root `assets`, `drafts`, and `woodlands` development-source folders remain untouched and untracked. The canonical tracked `trial rooms/*.nbt` files are build inputs; the user has moved the future Cave Diving work outside that canonical directory.
+Repository state: Steps 6A–8F and the Conquest synchronization are implemented, verified, and manually accepted. Step 8G is the next bounded implementation milestone. The root `assets`, `drafts`, and `woodlands` development-source folders remain untouched and untracked. The canonical tracked `trial rooms/*.nbt` files are build inputs; the user has moved the future Cave Diving work outside that canonical directory.
 
-Last handoff update: 2026-08-30
+Last handoff update: 2026-08-31
 
 Pinned environment:
 
@@ -467,6 +467,18 @@ Armor Set tint and tooltip presentation now resolve through one visual-only stac
 
 The accepted Step 8E implementation is closed in `43dde28` (`Add premium Cosmic reward lootboxes`).
 
+### Step 8F — IMPLEMENTED; AUTOMATED/RUNTIME VERIFIED; MANUALLY VERIFIED / ACCEPTED
+
+One server-wide Flash Sale schedule is persisted in Overworld `SavedData`. It stores the active catalog entry, selected LOW/MEDIUM/HIGH tier, exact cent-safe price, start/end game ticks, reminder state, purchaser UUIDs, and next start tick. Starts use a deterministic-RNG seam and a uniformly selected 45–75-minute inclusive start-to-start interval; each sale lasts 6,000 ticks, sends one reminder at 4,800 ticks, and permits each player to purchase once. `/flashsale buy` and `/buy` share one server-authoritative transaction that validates the sale and purchaser, constructs the reward, validates/debits the existing Money balance, marks the purchaser, and finally uses the existing inventory-first/safe-overflow delivery service. Permission-gated `/cosmic flashsale status|random|force|close|reset-purchasers` commands expose development control without changing production selection semantics.
+
+The canonical Flash Sale catalog records the 20 documented non-Memory rows and keeps the Memory Chest as a separate explicitly deferred entry. Nineteen rows are currently production-selectable: the Abandoned Spaceship Portal row is retained with its exact quantity/prices but cannot be selected or forced because no legitimate portal item/factory exists. This is an explicit dependency boundary, not a placeholder; Step 8F does not create Dungeon gameplay or a fake portal. Memory Chest remains inactive and was not implemented. All constructible rows and LOW/MEDIUM/HIGH tiers are selected uniformly.
+
+The accepted Space Chest item, menu, selection, animation, sound, escrow, recovery, session, and delivery architecture is unchanged. Step 8F replaces only the three standard reward-table resources. Ultimate now contains the exact 20 constructible canonical rows; Legendary contains the exact 22 canonical rows; Mastery contains the 25 currently constructible canonical rows and deliberately omits only the unresolved Abandoned Spaceship Portal row. Memory Chest data and runtime behavior were not touched, and no seasonal Cosmic Crate halves were added. Existing factories are reused for Unexamined Books, fixed-rate Black Scrolls, Scrolls, Orbs, Trial Portals/Trinkets, Mystery Spawners, Banknotes, Personal Vault Unlocks, Masks, generated armor, and Cosmic Enchantment Tables. Minimal generic reward descriptors add exact raw-XP Bottles through the accepted Salvaged XP Bottle factory, a uniformly selected Phoenix/Ogre/Judgement/Slayer V-Kit Crystal, and a fixed-50% Enchanted Black Scroll.
+
+The Step 8F.1 corrective fixes Mystery Spawner final-item loss at the actual Minecraft `ItemStack.use` transformed-hand boundary. When the final Mystery Spawner is consumed, its generated typed Mob Spawner is now the authoritative hand replacement; when a synthetic/multi-item source remains, the remaining source stays in hand and the one generated reward uses existing safe inventory/overflow delivery. All Simple, Elite, and Mastery pools, presentation, glint, uniform selection, and pickup sound remain unchanged. Loaded-registry tests cover every tier in normal and completely full inventories plus the multi-source path with exactly one reward and no loss/duplication.
+
+Repeat V-Kit Crystal redemption at an already-capped level X remains valid, leaves progression at X, grants one normal level-X equipment result, and retains its success sound; its message is now exactly `Your <KIT> Vkit is already level 10. Nice!`. Reaching X from IX keeps the established level-up message. Each newly started Flash Sale now sends exactly one player-targeted `minecraft:entity.ender_dragon.growl` alert to every currently connected player; reminders, purchases, close, status, and persisted-state reload do not call the start-alert path. Successful typed XP Bottle redemption now adds one bold `#55FF55` system message in grouped `+X XP` form after exact raw-XP grant/consumption and the existing level-up sound at pitch 1.5; invalid bottles retain silent non-consumption semantics.
+
 ## 3. Current Real Enchantments
 
 These are registered through Minecraft's enchantment infrastructure, use actual enchantment data on the item, and are not present in normal enchanting-table, librarian, random-loot, random-equipment, or mob-equipment acquisition pools.
@@ -801,16 +813,17 @@ Commands call gameplay services or create the same typed components used by game
 - **Seasonal crate finalization:** substantial draft tables and mechanics exist, but their exact balance, rewards, acquisition rates, prerequisites, and implementation details remain subject to a bounded reconciliation milestone.
 - **Armorer trade policy:** Step 6I disables Diamond/Netherite armor recipes and replaces generated Diamond armor in the six audited chest tables. Vanilla Armorer villagers remain a separate Diamond-armor acquisition path because the current bounded rule did not specify trade replacement; settle whether those offers should be removed or replaced before declaring Iron the ceiling for every normal acquisition route.
 - **Remaining Trial reward dependencies:** Random Boss Spawn Egg, Dungeon Portal, and broader Demonic reward dependencies still require their own bounded systems. Existing supported reward rows must not be mistaken for those deferred primitives.
+- **Abandoned Spaceship Portal reward dependency:** the current design lists this item in Flash Sales and the Mastery Space Chest, but the repository has no production portal item or compatible Dungeon-portal foundation. Its catalog/table metadata is retained where useful for inspection, but it is excluded from production generation until a bounded Dungeon/portal milestone supplies the legitimate item.
 
 The final post-Orb capacity is no longer unresolved for current target classes: armor is 8 and swords/axes/bows/crossbows are 10. Do not reopen those limits incidentally during unrelated work.
 
 ## 16. Current Next Milestone
 
-**Immediate next action: Step 8F — Flash Sales + Standard Space Chest Loot Rebalance.**
+**Immediate next action: Step 8G — Heroic Enchantments + Heroic Cosmic Enchantment Table.**
 
 Current intended sequence:
 
-Steps 8A–8D.1, the Obsidian Destroyer + Dominate micro-milestone, and Step 8E are manually verified and accepted. Step 8F is the next bounded milestone; Stormcaller, Inversion, Heroics, and later roadmap work remain deferred.
+Steps 8A–8F and the Obsidian Destroyer + Dominate micro-milestone are manually verified and accepted. Step 8G is the next bounded milestone. Memory Chests, Cosmic Crate halves, Dungeon gameplay, `/upgrades`, Stormcaller's combat effect, Inversion, and later roadmap work remain deferred.
 
 The ordinary-enchantment expansion remains split across bounded patches. Step 7C is the explicit instruction that made the current canonical Design Doc enchantment-table values implementation-authoritative; later design edits still require their own explicit implementation milestone.
 
@@ -828,6 +841,12 @@ The ordinary-enchantment expansion remains split across bounded patches. Step 7C
 Preserve unrelated dirty changes. Never change pinned versions as a side effect of gameplay work. Prefer service-level rules and typed data over one-off event logic, and keep client-only classes isolated from dedicated-server loading.
 
 ## 18. Verification Snapshot
+
+For the accepted Step 8F baseline:
+
+- Focused Flash Sale, standard Space Chest table, reward-constructor, Mystery Spawner, V-Kit, and Salvaged XP Bottle regression suites pass. The final closure `gradlew.bat cleanTest test build` succeeds; the suite contains 526 tests across 134 suites with zero failures, errors, or skips. All 9 required loaded-registry GameTests pass, including generation of every supported Step 8F reward-table row and production-selectable Flash Sale factory plus actual-use/writeback coverage for all three Mystery tiers, full inventories, typed XP feedback, and capped V-Kit redemption.
+- All 230 main-resource JSON files parse successfully. The dedicated server loads 1,462 recipes, publishes all eight reward tables including the three updated standard Space Chest pools, verifies progression recipe controls, and reaches `Done`. Fresh client startup completes ResourceManager reload, OpenAL/SoundEngine initialization, and item/block/GUI/chest atlas creation without relevant missing-model, missing-texture, reward-codec, menu, command, or sided-classloading errors.
+- `git diff --check` passes for Step 8F-owned files with only normal Windows line-ending notices. Minecraft 1.21.11, NeoForge 21.11.45, Java 21, Gradle 9.2.1, ModDevGradle 2.0.144, mod ID `cosmicpve`, and package `com.cosmicpve` remain unchanged. The user's live `docs/Cosmic_Design.md` and root `assets`, `drafts`, and `woodlands` directories remain outside Step 8F ownership.
 
 For the Step 8E candidate:
 

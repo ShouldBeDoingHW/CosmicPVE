@@ -1,6 +1,8 @@
 package com.cosmicpve.tinkerer;
 
 import com.cosmicpve.registry.ModDataComponents;
+import java.text.NumberFormat;
+import java.util.Locale;
 import java.util.function.IntConsumer;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
@@ -33,6 +35,7 @@ public final class SalvagedXpBottleItem extends Item {
     @Override public InteractionResult use(Level level, net.minecraft.world.entity.player.Player player,
             InteractionHand hand) {
         ItemStack held = player.getItemInHand(hand);
+        long amount = storedXp(held);
         if (level.isClientSide()) return validForRedemption(held, player.totalExperience)
                 ? InteractionResult.SUCCESS : InteractionResult.FAIL;
         if (!(player instanceof ServerPlayer serverPlayer)
@@ -42,7 +45,13 @@ public final class SalvagedXpBottleItem extends Item {
         serverPlayer.connection.send(new ClientboundSoundPacket(
                 BuiltInRegistries.SOUND_EVENT.wrapAsHolder(redeemSound()), SoundSource.PLAYERS,
                 player.getX(), player.getY(), player.getZ(), 1.0F, REDEEM_PITCH, player.getRandom().nextLong()));
+        serverPlayer.sendSystemMessage(successMessage(amount));
         return InteractionResult.SUCCESS_SERVER.heldItemTransformedTo(held);
+    }
+
+    static Component successMessage(long amount) {
+        return Component.literal("+" + NumberFormat.getIntegerInstance(Locale.US).format(amount) + " XP")
+                .withStyle(style -> style.withColor(0x55FF55).withBold(true));
     }
 
     static boolean redeem(ItemStack stack, int currentTotalXp, IntConsumer grant) {

@@ -180,6 +180,17 @@ class VKitFoundationTest {
     }
 
     @Test
+    void redemptionMessagesDistinguishReachingTenFromRepeatingAtTenForEveryKit() {
+        assertEquals("Phoenix V-Kit is now level X.",
+                VKitCrystalItem.redemptionMessage(VKitDefinition.PHOENIX, 9, 10).getString());
+        for (VKitDefinition definition : VKitDefinition.ALL) {
+            var message = VKitCrystalItem.redemptionMessage(definition, 10, 10);
+            assertEquals("Your " + definition.displayName() + " Vkit is already level 10. Nice!", message.getString());
+            assertEquals(definition.color(), message.getStyle().getColor().getValue());
+        }
+    }
+
+    @Test
     void flavorUsesKitColorItalicAndUnderlinesTheFullKitIdentity() {
         for (VKitDefinition definition : VKitDefinition.ALL) {
             var flavor = VKitCrystalItem.flavor(definition);

@@ -50,6 +50,21 @@ public final class RewardGeneratorService {
             case RewardDescriptor.ArmorSetCrystal reward -> com.cosmicpve.content.CosmicContent.repository()
                     .findArmorSetDefinition(reward.armorSetId())
                     .map(definition -> com.cosmicpve.equipment.armor.ArmorSetCrystals.create(definition, reward.successRate()));
+            case RewardDescriptor.XpBottle reward -> Optional.of(
+                    new com.cosmicpve.tinkerer.GearSalvageService().bottle(reward.experience()));
+            case RewardDescriptor.RandomVKitCrystal ignored -> {
+                var definitions = com.cosmicpve.vkit.VKitDefinition.ALL;
+                var definition = definitions.get(context.random().nextInt(definitions.size()));
+                yield Optional.of(new net.minecraft.world.item.ItemStack(switch (definition.id().getPath()) {
+                    case "phoenix" -> com.cosmicpve.registry.ModItems.PHOENIX_VKIT_CRYSTAL.get();
+                    case "ogre" -> com.cosmicpve.registry.ModItems.OGRE_VKIT_CRYSTAL.get();
+                    case "judgement" -> com.cosmicpve.registry.ModItems.JUDGEMENT_VKIT_CRYSTAL.get();
+                    case "slayer" -> com.cosmicpve.registry.ModItems.SLAYER_VKIT_CRYSTAL.get();
+                    default -> throw new IllegalStateException("Unknown canonical V-Kit: " + definition.id());
+                }));
+            }
+            case RewardDescriptor.EnchantedBlackScroll reward -> Optional.of(
+                    enchanting.enchantedBlackScroll(reward.successRate()));
         };
     }
 }

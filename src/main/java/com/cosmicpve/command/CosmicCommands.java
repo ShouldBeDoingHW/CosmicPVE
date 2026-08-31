@@ -22,6 +22,7 @@ public final class CosmicCommands {
 
     public static void register(RegisterCommandsEvent event) {
         EconomyCommands.registerPublic(event);
+        FlashSaleCommands.registerPublic(event);
         MaskLimitCommands.register(event);
         TinkererCommands.registerPublic(event);
         PersonalVaultCommands.registerPublic(event);
@@ -81,6 +82,7 @@ public final class CosmicCommands {
                 .then(WeaponSkinCommands.create())
                 .then(HeroicCommands.create())
                 .then(EconomyCommands.create())
+                .then(FlashSaleCommands.create())
                 .then(FoodDebugCommands.create())
                 .then(RewardCommands.create())
                 .then(SpaceChestCommands.create())

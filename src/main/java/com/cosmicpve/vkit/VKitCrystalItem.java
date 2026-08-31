@@ -65,6 +65,7 @@ public final class VKitCrystalItem extends Item {
         ItemStack held = player.getItemInHand(hand);
         VKitDefinition definition = definition(held);
         if (definition == null) return InteractionResult.FAIL;
+        int previousLevel = progression.level(serverPlayer, definition);
         int rollLevel = progression.nextRollLevel(serverPlayer, definition);
         ItemStack reward;
         try {
@@ -78,9 +79,17 @@ public final class VKitCrystalItem extends Item {
                 committedLevel -> progression.set(serverPlayer, definition, committedLevel),
                 committedReward -> delivery.deliver(serverPlayer, List.of(committedReward)),
                 () -> VKitCrystalFeedback.playSuccess(serverPlayer));
-        serverPlayer.sendSystemMessage(Component.literal(definition.displayName() + " V-Kit is now level "
-                + VKitEquipmentGenerator.roman(rollLevel) + ".").withStyle(style -> style.withColor(definition.color())));
+        serverPlayer.sendSystemMessage(redemptionMessage(definition, previousLevel, rollLevel));
         return result;
+    }
+
+    static Component redemptionMessage(VKitDefinition definition, int previousLevel, int rollLevel) {
+        if (previousLevel >= VKitEquipmentGenerator.MAX_KIT_LEVEL) {
+            return Component.literal("Your " + definition.displayName()
+                    + " Vkit is already level 10. Nice!").withStyle(style -> style.withColor(definition.color()));
+        }
+        return Component.literal(definition.displayName() + " V-Kit is now level "
+                + VKitEquipmentGenerator.roman(rollLevel) + ".").withStyle(style -> style.withColor(definition.color()));
     }
 
     static InteractionResult.Success commitRedemption(ItemStack crystal, int rollLevel, ItemStack reward,

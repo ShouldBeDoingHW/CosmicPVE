@@ -11,6 +11,7 @@ import com.cosmicpve.data.component.CosmicEnchantmentBookData;
 import com.cosmicpve.data.component.EnchantmentOrbData;
 import com.cosmicpve.data.component.MobSpawnerData;
 import com.cosmicpve.data.component.UnexaminedBookData;
+import com.cosmicpve.data.component.EnchantedBlackScrollData;
 import com.cosmicpve.equipment.enchantment.CosmicEnchantmentSpecs;
 import com.cosmicpve.equipment.enchantment.CosmicEnchantmentTier;
 import com.cosmicpve.registry.ModDataComponents;
@@ -85,6 +86,24 @@ class RewardGeneratorServiceTest {
         MobSpawnerData data = stack.get(ModDataComponents.MOB_SPAWNER.get());
         assertNotNull(data);
         assertEquals(Identifier.parse("minecraft:blaze"), data.entityTypeId());
+    }
+
+    @Test void step8fFactoriesReuseTypedXpEnchantedScrollAndUniformVKitItems() {
+        var xp = generate(new RewardDescriptor.XpBottle(15_000));
+        assertEquals(ModItems.SALVAGED_XP_BOTTLE.get(), xp.getItem());
+        assertEquals(15_000, xp.get(ModDataComponents.STORED_XP_BOTTLE.get()).storedXp());
+        var scroll = generate(new RewardDescriptor.EnchantedBlackScroll(50));
+        assertEquals(ModItems.ENCHANTED_BLACK_SCROLL.get(), scroll.getItem());
+        EnchantedBlackScrollData data = scroll.get(ModDataComponents.ENCHANTED_BLACK_SCROLL.get());
+        assertEquals(50, data.returnedSuccessRate());
+
+        var possible = java.util.Set.of(ModItems.PHOENIX_VKIT_CRYSTAL.get(), ModItems.OGRE_VKIT_CRYSTAL.get(),
+                ModItems.JUDGEMENT_VKIT_CRYSTAL.get(), ModItems.SLAYER_VKIT_CRYSTAL.get());
+        var seen = new java.util.HashSet<net.minecraft.world.item.Item>();
+        var random = RandomSource.create(55);
+        for (int roll = 0; roll < 100; roll++) seen.add(service.generate(new RewardDescriptor.RandomVKitCrystal(),
+                new RewardGenerationContext(RegistryAccess.EMPTY, random, null)).orElseThrow().getItem());
+        assertEquals(possible, seen);
     }
 
     private net.minecraft.world.item.ItemStack generate(RewardDescriptor descriptor) {

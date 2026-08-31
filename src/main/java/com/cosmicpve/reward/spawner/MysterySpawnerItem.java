@@ -2,6 +2,7 @@ package com.cosmicpve.reward.spawner;
 
 import com.cosmicpve.registry.ModDataComponents;
 import com.cosmicpve.reward.RewardDeliveryService;
+import java.util.List;
 import java.util.function.Consumer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -39,9 +40,22 @@ public final class MysterySpawnerItem extends Item {
         ItemStack held = player.getItemInHand(hand);
         ItemStack reward = MysterySpawners.openAndConsume(held, serverPlayer.getRandom()::nextInt);
         if (reward.isEmpty()) return InteractionResult.FAIL;
-        new RewardDeliveryService().deliver(serverPlayer, java.util.List.of(reward));
+        InteractionResult.Success result = commitOpening(held, reward,
+                generated -> new RewardDeliveryService().deliver(serverPlayer, List.of(generated)));
         level.playSound(null, player.blockPosition(), SoundEvents.EXPERIENCE_ORB_PICKUP,
                 OPEN_SOUND_SOURCE, 1.0F, 1.0F);
-        return InteractionResult.SUCCESS_SERVER.heldItemTransformedTo(held);
+        return result;
+    }
+
+    static InteractionResult.Success commitOpening(ItemStack remainingSource, ItemStack reward,
+            Consumer<ItemStack> rewardDelivery) {
+        if (remainingSource.isEmpty()) {
+            // ItemStack.use writes this transformed result back to the used hand after use()
+            // returns. The final source unit must therefore transform directly into the
+            // generated spawner instead of delivering into a slot that writeback can erase.
+            return InteractionResult.SUCCESS_SERVER.heldItemTransformedTo(reward);
+        }
+        rewardDelivery.accept(reward);
+        return InteractionResult.SUCCESS_SERVER.heldItemTransformedTo(remainingSource);
     }
 }
