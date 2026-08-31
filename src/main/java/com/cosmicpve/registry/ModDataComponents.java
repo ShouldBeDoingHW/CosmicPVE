@@ -24,6 +24,9 @@ import com.cosmicpve.data.component.VKitCrystalData;
 import com.cosmicpve.data.component.VKitEquipmentData;
 import com.cosmicpve.data.component.StoredXpBottleData;
 import com.cosmicpve.data.component.EnchantedBlackScrollData;
+import com.cosmicpve.data.component.SignatureWeaponIdentity;
+import com.cosmicpve.data.component.AdminAbuseRewardIdentity;
+import com.cosmicpve.data.component.CosmicBookRateOverride;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
@@ -150,6 +153,18 @@ public final class ModDataComponents {
             COMPONENTS.registerComponentType("enchanted_black_scroll",
                     builder -> builder.persistent(EnchantedBlackScrollData.CODEC)
                             .networkSynchronized(ByteBufCodecs.fromCodecWithRegistries(EnchantedBlackScrollData.CODEC)).cacheEncoding());
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<SignatureWeaponIdentity>> SIGNATURE_WEAPON =
+            COMPONENTS.registerComponentType("signature_weapon",
+                    builder -> builder.persistent(SignatureWeaponIdentity.CODEC)
+                            .networkSynchronized(ByteBufCodecs.fromCodecWithRegistries(SignatureWeaponIdentity.CODEC)).cacheEncoding());
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<AdminAbuseRewardIdentity>> ADMIN_ABUSE_REWARD =
+            COMPONENTS.registerComponentType("admin_abuse_reward",
+                    builder -> builder.persistent(AdminAbuseRewardIdentity.CODEC)
+                            .networkSynchronized(ByteBufCodecs.fromCodecWithRegistries(AdminAbuseRewardIdentity.CODEC)).cacheEncoding());
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<CosmicBookRateOverride>> COSMIC_BOOK_RATE_OVERRIDE =
+            COMPONENTS.registerComponentType("cosmic_book_rate_override",
+                    builder -> builder.persistent(CosmicBookRateOverride.CODEC)
+                            .networkSynchronized(ByteBufCodecs.fromCodecWithRegistries(CosmicBookRateOverride.CODEC)).cacheEncoding());
     private ModDataComponents() {}
 
     public static void register(IEventBus modBus) {

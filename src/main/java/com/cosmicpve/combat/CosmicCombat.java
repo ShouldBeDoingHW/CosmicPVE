@@ -76,6 +76,8 @@ public final class CosmicCombat {
             new com.cosmicpve.equipment.armor.ArmorSetSuppressionService();
     private static final ArmorSetResolver ARMOR_SETS =
             new ArmorSetResolver(CosmicContent.repository(), ARMOR_SET_SUPPRESSION);
+    private static final com.cosmicpve.reward.lootbox.SignatureWeaponCombatService SIGNATURE_WEAPONS =
+            new com.cosmicpve.reward.lootbox.SignatureWeaponCombatService(ARMOR_SETS);
     private static final com.cosmicpve.activity.ActivityContextService ACTIVITIES =
             new com.cosmicpve.activity.ActivityContextService();
     private static final ArmorSetCombatContributor ARMOR_SET_COMBAT =
@@ -113,7 +115,7 @@ public final class CosmicCombat {
     private static final ExecutionService EXECUTIONS = new ExecutionService(SEQUENCES, TRACES);
     private static final CombatEventBridge EVENTS =
             new CombatEventBridge(ENGINE, ATTRIBUTION, SEQUENCES, TRACES, ENCHANTMENTS, PROC_EVENTS,
-                    OUTGOING, INCOMING, PRE_DEFENSE_BOUNDS, RECENT_COMBAT_MEMORY, WEAPON_SKINS);
+                    OUTGOING, INCOMING, PRE_DEFENSE_BOUNDS, RECENT_COMBAT_MEMORY, WEAPON_SKINS, SIGNATURE_WEAPONS);
     private static final ProcHookEventBridge PROC_HOOKS =
             new ProcHookEventBridge(PROC_EVENTS, EXECUTIONS, NUTRITION, SOUL_TETHERS);
     private static final CombatStackEventBridge STACK_EVENTS = new CombatStackEventBridge(STACKS, BLEED_RUNTIME);

@@ -36,15 +36,21 @@ public final class HeroicApplicationService {
         if (kind.isEmpty() || !target.isDamageableItem()) return Outcome.INVALID_TARGET;
         if (target.has(ModDataComponents.HEROIC.get())) return Outcome.ALREADY_HEROIC;
 
-        target.set(ModDataComponents.HEROIC.get(), HeroicIdentity.of(kind.orElseThrow()));
+        applyState(target, kind.orElseThrow());
+        crystal.shrink(1);
+        return Outcome.SUCCESS;
+    }
+
+    /** Applies the canonical typed Heroic state for authoritative reward construction. */
+    public static void applyState(ItemStack target, HeroicEquipmentKind kind) {
+        if (target.has(ModDataComponents.HEROIC.get())) return;
+        target.set(ModDataComponents.HEROIC.get(), HeroicIdentity.of(kind));
         target.set(DataComponents.MAX_DAMAGE, target.getMaxDamage() + HeroicIdentity.DURABILITY_BONUS);
-        switch (kind.orElseThrow()) {
+        switch (kind) {
             case PICKAXE -> target.set(DataComponents.ITEM_MODEL, CosmicPVE.id("heroic_golden_pickaxe"));
             case SHOVEL -> target.set(DataComponents.ITEM_MODEL, CosmicPVE.id("heroic_golden_shovel"));
             case ARMOR -> applyArmorPresentation(target);
         }
-        crystal.shrink(1);
-        return Outcome.SUCCESS;
     }
 
     private static void applyArmorPresentation(ItemStack target) {

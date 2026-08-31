@@ -25,15 +25,9 @@ public final class EquipmentTooltipService {
         }
         if (stack.has(ModDataComponents.HEROIC.get()))
             event.getToolTip().add(Component.translatable("tooltip.cosmicpve.heroic").withColor(0xAA55FF));
-        var identity = stack.get(ModDataComponents.ARMOR_SET_ID.get());
-        if (identity != null) {
-            event.getToolTip().add(Component.empty());
-            event.getToolTip().add(Component.translatable("tooltip.cosmicpve.armor_set.identity", identity.displayName())
-                    .withColor(identity.color()));
-            event.getToolTip().add(Component.translatable("tooltip.cosmicpve.armor_set.full_bonus")
-                    .withColor(identity.color()));
-            identity.fullSetBonus().forEach(line -> event.getToolTip().add(line.copy().withColor(identity.color())));
-        }
+        event.getToolTip().addAll(armorSetPresentationLines(stack));
+        if (stack.is(com.cosmicpve.registry.ModItems.SECRET_WEAPON_CACHE.get()))
+            event.getToolTip().addAll(com.cosmicpve.reward.lootbox.AnimatedLootboxItem.secretWeaponCacheLore());
         var crystal = stack.get(ModDataComponents.ARMOR_SET_CRYSTAL.get());
         if (crystal != null) {
             int color = crystal.identity().color();
@@ -121,6 +115,22 @@ public final class EquipmentTooltipService {
             com.cosmicpve.equipment.skin.WeaponSkinDefinitions.find(activeSkin.skinId()).ifPresent(definition ->
                     event.getToolTip().add(com.cosmicpve.equipment.skin.WeaponSkinLore.active(definition)));
         }
+        var signature = stack.get(ModDataComponents.SIGNATURE_WEAPON.get());
+        if (signature != null) {
+            com.cosmicpve.content.CosmicContent.repository().findArmorSetDefinition(signature.matchingArmorSetId())
+                    .ifPresent(set -> {
+                        String setName = set.displayName().getString();
+                        String text = signature.kind() == com.cosmicpve.data.component.SignatureWeaponIdentity.Kind.MELEE
+                                ? "Gives +1 base damage when wielded in tandem with a full " + setName + " armor set!"
+                                : "Gives +1 projectile damage when wielded in tandem with a full " + setName + " armor set!";
+                        event.getToolTip().add(Component.literal(text).withStyle(style ->
+                                style.withColor(set.presentationColor()).withItalic(true)));
+                    });
+        }
+        var adminReward = stack.get(ModDataComponents.ADMIN_ABUSE_REWARD.get());
+        if (adminReward != null) com.cosmicpve.reward.lootbox.AdminAbuseRewards.ALL.stream()
+                .filter(outcome -> outcome.id().equals(adminReward.rewardId())).findFirst()
+                .ifPresent(outcome -> event.getToolTip().add(outcome.flavor()));
         var maskItem = stack.get(ModDataComponents.MASK_ITEM.get());
         if (maskItem != null && maskItem.valid()) {
             if (maskItem.presentations().size() == maskItem.maskIds().size()) event.getToolTip().addAll(
@@ -141,6 +151,21 @@ public final class EquipmentTooltipService {
             event.getToolTip().add(capacityLine(capacity.capacity(stack)));
         sortTransmogEnchantments(event);
         recolorCosmicEnchantments(event);
+    }
+
+    public static java.util.List<Component> armorSetPresentationLines(net.minecraft.world.item.ItemStack stack) {
+        var resolved = com.cosmicpve.equipment.armor.ArmorSetPresentationResolver.resolve(stack);
+        if (resolved.isEmpty()) return java.util.List.of();
+        var identity = resolved.orElseThrow();
+        var lines = new java.util.ArrayList<Component>();
+        lines.add(Component.empty());
+        lines.add(Component.translatable("tooltip.cosmicpve.armor_set.identity", identity.displayName())
+                .withColor(identity.color()));
+        if (!identity.fullSetBonus().isEmpty()) {
+            lines.add(Component.translatable("tooltip.cosmicpve.armor_set.full_bonus").withColor(identity.color()));
+            identity.fullSetBonus().forEach(line -> lines.add(line.copy().withColor(identity.color())));
+        }
+        return java.util.List.copyOf(lines);
     }
 
     public static Component capacityLine(int effectiveCapacity) {

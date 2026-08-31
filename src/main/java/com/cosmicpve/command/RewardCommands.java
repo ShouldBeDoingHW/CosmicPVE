@@ -58,12 +58,51 @@ public final class RewardCommands {
                                         .executes(context -> debugSpawnerDelay(context.getSource(),
                                                 BlockPosArgument.getLoadedBlockPos(context, "position"),
                                                 IntegerArgumentType.getInteger(context, "ticks"))))));
+        var secretCache = Commands.literal("secret-weapon-cache")
+                .then(Commands.literal("give").then(Commands.argument("player", EntityArgument.player())
+                        .executes(context -> giveLootbox(context.getSource(), EntityArgument.getPlayer(context, "player"),
+                                com.cosmicpve.registry.ModItems.SECRET_WEAPON_CACHE.get(), 1))
+                        .then(Commands.argument("count", IntegerArgumentType.integer(1, 64))
+                                .executes(context -> giveLootbox(context.getSource(), EntityArgument.getPlayer(context, "player"),
+                                        com.cosmicpve.registry.ModItems.SECRET_WEAPON_CACHE.get(),
+                                        IntegerArgumentType.getInteger(context, "count"))))))
+                .then(Commands.literal("force").then(Commands.argument("weapon", StringArgumentType.word())
+                        .suggests((context, builder) -> SharedSuggestionProvider.suggest(
+                                com.cosmicpve.reward.lootbox.SignatureWeaponDefinition.ALL.stream()
+                                        .map(value -> value.id().getPath()), builder))
+                        .executes(context -> forceSignature(context.getSource(),
+                                StringArgumentType.getString(context, "weapon")))));
+        var cosmicTable = Commands.literal("cosmic-enchantment-table")
+                .then(Commands.literal("give").then(Commands.argument("player", EntityArgument.player())
+                        .executes(context -> giveLootbox(context.getSource(), EntityArgument.getPlayer(context, "player"),
+                                com.cosmicpve.registry.ModItems.COSMIC_ENCHANTMENT_TABLE.get(), 1))))
+                .then(Commands.literal("force").then(Commands.argument("enchantment", StringArgumentType.word())
+                        .suggests((context, builder) -> SharedSuggestionProvider.suggest(
+                                com.cosmicpve.reward.lootbox.CosmicEnchantmentTableRewards.POOL.stream()
+                                        .map(value -> value.identifier().getPath()), builder))
+                        .then(Commands.argument("success", IntegerArgumentType.integer(1, 100))
+                                .executes(context -> forceTable(context.getSource(),
+                                        StringArgumentType.getString(context, "enchantment"),
+                                        IntegerArgumentType.getInteger(context, "success"))))));
+        var adminAbuse = Commands.literal("admin-abuse")
+                .then(Commands.literal("give").then(Commands.argument("player", EntityArgument.player())
+                        .executes(context -> giveLootbox(context.getSource(), EntityArgument.getPlayer(context, "player"),
+                                com.cosmicpve.registry.ModItems.ADMIN_ABUSE.get(), 1))))
+                .then(Commands.literal("force").then(Commands.argument("outcome", StringArgumentType.word())
+                        .suggests((context, builder) -> SharedSuggestionProvider.suggest(
+                                com.cosmicpve.reward.lootbox.AdminAbuseRewards.ALL.stream()
+                                        .map(com.cosmicpve.reward.lootbox.AdminAbuseRewards.Outcome::serializedName), builder))
+                        .executes(context -> forceAdmin(context.getSource(),
+                                StringArgumentType.getString(context, "outcome")))));
         return Commands.literal("reward")
                 .then(Commands.literal("list").executes(context -> list(context.getSource())))
                 .then(Commands.literal("inspect").then(tableId.executes(context -> inspect(
                         context.getSource(), IdentifierArgument.getId(context, "table")))))
                 .then(Commands.literal("reload").executes(context -> reload(context.getSource())))
                 .then(Commands.literal("animation-demo").executes(context -> animationDemo(context.getSource())))
+                .then(secretCache)
+                .then(cosmicTable)
+                .then(adminAbuse)
                 .then(Commands.literal("roll").then(Commands.argument("table", IdentifierArgument.id())
                         .suggests((context, builder) -> SharedSuggestionProvider.suggestResource(
                                 CosmicContent.repository().snapshot().rewardTables().keySet(), builder))
@@ -146,6 +185,45 @@ public final class RewardCommands {
                 com.cosmicpve.reward.animation.LootAnimationPreviewProvider.uniform(candidates), () -> {});
         if (!opened) { source.sendFailure(Component.literal("A loot animation is already active.")); return 0; }
         return 1;
+    }
+
+    private static int giveLootbox(net.minecraft.commands.CommandSourceStack source,
+            net.minecraft.server.level.ServerPlayer player, net.minecraft.world.item.Item item, int count) {
+        var stacks = new java.util.ArrayList<net.minecraft.world.item.ItemStack>(count);
+        for (int index = 0; index < count; index++) stacks.add(new net.minecraft.world.item.ItemStack(item));
+        DELIVERY.deliver(player, stacks);
+        source.sendSuccess(() -> Component.literal("Gave " + count + " " + item.getName(new net.minecraft.world.item.ItemStack(item)).getString() + "."), true);
+        return count;
+    }
+
+    private static int forceSignature(net.minecraft.commands.CommandSourceStack source, String name)
+            throws com.mojang.brigadier.exceptions.CommandSyntaxException {
+        var definition = com.cosmicpve.reward.lootbox.SignatureWeaponDefinition.ALL.stream()
+                .filter(value -> value.id().getPath().equals(name)).findFirst();
+        if (definition.isEmpty()) { source.sendFailure(Component.literal("Unknown signature weapon.")); return 0; }
+        return com.cosmicpve.reward.lootbox.Step8ELootboxService.INSTANCE.forceSignature(
+                source.getPlayerOrException(), definition.orElseThrow()) ? 1 : 0;
+    }
+
+    private static int forceTable(net.minecraft.commands.CommandSourceStack source, String name, int success)
+            throws com.mojang.brigadier.exceptions.CommandSyntaxException {
+        var key = com.cosmicpve.reward.lootbox.CosmicEnchantmentTableRewards.POOL.stream()
+                .filter(value -> value.identifier().getPath().equals(name)).findFirst();
+        if (key.isEmpty()) { source.sendFailure(Component.literal("Unknown Cosmic Enchantment Table entry.")); return 0; }
+        try {
+            return com.cosmicpve.reward.lootbox.Step8ELootboxService.INSTANCE.forceTable(
+                    source.getPlayerOrException(), key.orElseThrow(), success) ? 1 : 0;
+        } catch (IllegalArgumentException exception) {
+            source.sendFailure(Component.literal(exception.getMessage())); return 0;
+        }
+    }
+
+    private static int forceAdmin(net.minecraft.commands.CommandSourceStack source, String name)
+            throws com.mojang.brigadier.exceptions.CommandSyntaxException {
+        var outcome = com.cosmicpve.reward.lootbox.AdminAbuseRewards.find(name);
+        if (outcome.isEmpty()) { source.sendFailure(Component.literal("Unknown Admin Abuse outcome.")); return 0; }
+        return com.cosmicpve.reward.lootbox.Step8ELootboxService.INSTANCE.forceAdmin(
+                source.getPlayerOrException(), outcome.orElseThrow()) ? 1 : 0;
     }
 
     private static int inspect(net.minecraft.commands.CommandSourceStack source, Identifier id) {

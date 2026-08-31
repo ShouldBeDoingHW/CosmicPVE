@@ -29,7 +29,7 @@ public final class CosmicBookApplicationService {
         if (!book.is(ModItems.COSMIC_ENCHANTMENT_BOOK.get()) || data == null) return result(CosmicBookApplicationResult.Outcome.REJECTED_INVALID_BOOK, id, data, 0, used, limit, protectedBefore);
         var spec = CosmicEnchantmentSpecs.find(id);
         var holder = enchantments.get(id);
-        if (spec.isEmpty() || holder.isEmpty() || !spec.orElseThrow().tier().allowsRates(data.successRate(), data.destroyRate()))
+        if (spec.isEmpty() || holder.isEmpty() || !CosmicBookRateRules.allows(book, spec.orElseThrow(), data))
             return result(CosmicBookApplicationResult.Outcome.REJECTED_INVALID_BOOK, id, data, 0, used, limit, protectedBefore);
         var enchantment = holder.orElseThrow();
         if (!enchantment.value().canEnchant(target)) return result(CosmicBookApplicationResult.Outcome.REJECTED_TARGET, id, data, 0, used, limit, protectedBefore);

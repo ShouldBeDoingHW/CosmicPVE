@@ -1,7 +1,7 @@
 package com.cosmicpve.client;
 
 import com.cosmicpve.registry.ModDataComponents;
-import com.cosmicpve.equipment.armor.ArmorSetColorResolver;
+import com.cosmicpve.equipment.armor.ArmorSetPresentationResolver;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.client.color.item.ItemTintSource;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -18,8 +18,8 @@ public final class ArmorSetItemTintSource implements ItemTintSource {
     private ArmorSetItemTintSource() {}
 
     @Override public int calculate(ItemStack stack, @Nullable ClientLevel level, @Nullable LivingEntity entity) {
-        var identity = stack.get(ModDataComponents.ARMOR_SET_ID.get());
-        if (identity != null) return ArmorSetColorResolver.argbOrWhite(identity);
+        var presentationColor = ArmorSetPresentationResolver.color(stack);
+        if (presentationColor.isPresent()) return 0xFF000000 | presentationColor.getAsInt();
         if (stack.has(ModDataComponents.HEROIC.get()) || stack.has(DataComponents.DYED_COLOR)
                 || BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath().startsWith("leather_"))
             return DyedItemColor.getOrDefault(stack, DyedItemColor.LEATHER_COLOR);

@@ -46,6 +46,7 @@ public final class CombatEventBridge {
     private final PreDefenseBoundsContributor preDefenseBounds;
     private final RecentCombatMemoryService recentCombatMemory;
     private final WeaponSkinResolver weaponSkins;
+    private final com.cosmicpve.reward.lootbox.SignatureWeaponCombatService signatureWeapons;
     private final Map<DamageContainer, PendingCombat> incomingCandidates =
             Collections.synchronizedMap(new WeakHashMap<>());
     private final ThreadLocal<Deque<PendingCombat>> acceptedDamageStack =
@@ -62,7 +63,8 @@ public final class CombatEventBridge {
             IncomingDamageContributor incomingContributors,
             PreDefenseBoundsContributor preDefenseBounds,
             RecentCombatMemoryService recentCombatMemory,
-            WeaponSkinResolver weaponSkins) {
+            WeaponSkinResolver weaponSkins,
+            com.cosmicpve.reward.lootbox.SignatureWeaponCombatService signatureWeapons) {
         this.engine = engine;
         this.attribution = attribution;
         this.sequences = sequences;
@@ -74,6 +76,7 @@ public final class CombatEventBridge {
         this.preDefenseBounds = preDefenseBounds;
         this.recentCombatMemory = recentCombatMemory;
         this.weaponSkins = weaponSkins;
+        this.signatureWeapons = signatureWeapons;
     }
 
     public void onIncomingDamage(LivingIncomingDamageEvent event) {
@@ -109,7 +112,7 @@ public final class CombatEventBridge {
         var unchanged = CombatCalculationRequest.unchanged(event.getAmount());
         var resolvedOutgoing = outgoingContributors.resolve(context);
         var request = new CombatCalculationRequest(
-                unchanged.baseOrdinaryDamage(), unchanged.additiveOutgoingBonus(),
+                unchanged.baseOrdinaryDamage() + signatureWeapons.baseDamageBonus(context), unchanged.additiveOutgoingBonus(),
                 unchanged.separateOutgoingMultipliers(), preDefenseBounds.resolvePreDefenseBounds(context),
                 unchanged.incomingMultipliers(), unchanged.finalOrdinaryBounds(), unchanged.trueDamagePackets(),
                 resolvedOutgoing, incomingContributors.resolveIncoming(context));
@@ -125,7 +128,7 @@ public final class CombatEventBridge {
                 withDevour.add(new OutgoingDamageContribution(
                         ModEnchantments.DEVOUR.identifier(), DevourBehavior.damageBonus(devourLevel)));
                 request = new CombatCalculationRequest(
-                        unchanged.baseOrdinaryDamage(), unchanged.additiveOutgoingBonus(),
+                        unchanged.baseOrdinaryDamage() + signatureWeapons.baseDamageBonus(context), unchanged.additiveOutgoingBonus(),
                         unchanged.separateOutgoingMultipliers(), request.preDefenseBounds(),
                         unchanged.incomingMultipliers(), unchanged.finalOrdinaryBounds(), unchanged.trueDamagePackets(),
                         withDevour, request.incomingContributions());

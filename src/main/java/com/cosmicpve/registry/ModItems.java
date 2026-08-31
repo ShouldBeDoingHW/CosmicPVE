@@ -35,6 +35,7 @@ import com.cosmicpve.personalvault.PersonalVaultUnlockItem;
 import com.cosmicpve.vkit.GodlyVKitBundleItem;
 import com.cosmicpve.tinkerer.SalvagedXpBottleItem;
 import com.cosmicpve.equipment.enchantment.EnchantedBlackScrollItem;
+import com.cosmicpve.reward.lootbox.AnimatedLootboxItem;
 
 public final class ModItems {
     private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(CosmicPVE.MOD_ID);
@@ -117,6 +118,15 @@ public final class ModItems {
     public static final DeferredItem<GodlyVKitBundleItem> GODLY_VKIT_BUNDLE = ITEMS.registerItem(
             "godly_vkit_bundle", GodlyVKitBundleItem::new,
             properties -> properties.stacksTo(GodlyVKitBundleItem.MAX_STACK_SIZE));
+    public static final DeferredItem<AnimatedLootboxItem> SECRET_WEAPON_CACHE = ITEMS.registerItem(
+            "secret_weapon_cache", properties -> new AnimatedLootboxItem(properties,
+                    AnimatedLootboxItem.Kind.SECRET_WEAPON_CACHE), properties -> properties.stacksTo(1));
+    public static final DeferredItem<AnimatedLootboxItem> COSMIC_ENCHANTMENT_TABLE = ITEMS.registerItem(
+            "cosmic_enchantment_table", properties -> new AnimatedLootboxItem(properties,
+                    AnimatedLootboxItem.Kind.COSMIC_ENCHANTMENT_TABLE), properties -> properties.stacksTo(1));
+    public static final DeferredItem<AnimatedLootboxItem> ADMIN_ABUSE = ITEMS.registerItem(
+            "admin_abuse", properties -> new AnimatedLootboxItem(properties,
+                    AnimatedLootboxItem.Kind.ADMIN_ABUSE), properties -> properties.stacksTo(1));
 
     public static final DeferredItem<SpaceChestItem> SPACE_CHEST = ITEMS.registerItem(
             "space_chest", SpaceChestItem::new, properties -> properties.stacksTo(1));
