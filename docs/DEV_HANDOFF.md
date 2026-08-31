@@ -1,6 +1,6 @@
 # CosmicPVE Development Handoff
 
-Current accepted baseline: Step 8F — Flash Sales + Standard Space Chest Loot Rebalance, including the Step 8F.1 corrective, is implemented, automated/runtime verified, and manually verified/accepted. Its closure commit is recorded below. Earlier accepted milestones remain recorded below.
+Current accepted baseline: Step 8F — Flash Sales + Standard Space Chest Loot Rebalance, including the Step 8F.1 corrective, is implemented, automated/runtime verified, manually verified/accepted, and closed in `4db71a7` (`Add Flash Sales and rebalance Space Chests`). Earlier accepted milestones remain recorded below.
 
 Repository state: Steps 6A–8F and the Conquest synchronization are implemented, verified, and manually accepted. Step 8G is the next bounded implementation milestone. The root `assets`, `drafts`, and `woodlands` development-source folders remain untouched and untracked. The canonical tracked `trial rooms/*.nbt` files are build inputs; the user has moved the future Cave Diving work outside that canonical directory.
 
@@ -478,6 +478,8 @@ The accepted Space Chest item, menu, selection, animation, sound, escrow, recove
 The Step 8F.1 corrective fixes Mystery Spawner final-item loss at the actual Minecraft `ItemStack.use` transformed-hand boundary. When the final Mystery Spawner is consumed, its generated typed Mob Spawner is now the authoritative hand replacement; when a synthetic/multi-item source remains, the remaining source stays in hand and the one generated reward uses existing safe inventory/overflow delivery. All Simple, Elite, and Mastery pools, presentation, glint, uniform selection, and pickup sound remain unchanged. Loaded-registry tests cover every tier in normal and completely full inventories plus the multi-source path with exactly one reward and no loss/duplication.
 
 Repeat V-Kit Crystal redemption at an already-capped level X remains valid, leaves progression at X, grants one normal level-X equipment result, and retains its success sound; its message is now exactly `Your <KIT> Vkit is already level 10. Nice!`. Reaching X from IX keeps the established level-up message. Each newly started Flash Sale now sends exactly one player-targeted `minecraft:entity.ender_dragon.growl` alert to every currently connected player; reminders, purchases, close, status, and persisted-state reload do not call the start-alert path. Successful typed XP Bottle redemption now adds one bold `#55FF55` system message in grouped `+X XP` form after exact raw-XP grant/consumption and the existing level-up sound at pitch 1.5; invalid bottles retain silent non-consumption semantics.
+
+The accepted Step 8F/8F.1 implementation is closed in `4db71a7` (`Add Flash Sales and rebalance Space Chests`).
 
 ## 3. Current Real Enchantments
 
