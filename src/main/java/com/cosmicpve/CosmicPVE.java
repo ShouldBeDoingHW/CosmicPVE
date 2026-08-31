@@ -33,6 +33,7 @@ import com.cosmicpve.equipment.mask.MaskAnvilEventBridge;
 import com.cosmicpve.conquest.ConquestBootstrap;
 import com.cosmicpve.conquest.ConquestGameTests;
 import com.cosmicpve.vkit.VKitGameTests;
+import com.cosmicpve.reward.animation.LootAnimationEventBridge;
 import com.mojang.logging.LogUtils;
 import net.minecraft.resources.Identifier;
 import net.minecraft.network.chat.Component;
@@ -98,6 +99,9 @@ public final class CosmicPVE {
         var spaceChests = new SpaceChestEventBridge();
         NeoForge.EVENT_BUS.addListener(spaceChests::onLogin);
         NeoForge.EVENT_BUS.addListener(spaceChests::onRespawn);
+        var lootAnimations = new LootAnimationEventBridge();
+        NeoForge.EVENT_BUS.addListener(lootAnimations::onLogin);
+        NeoForge.EVENT_BUS.addListener(lootAnimations::onRespawn);
     }
 
     public static Identifier id(String path) {

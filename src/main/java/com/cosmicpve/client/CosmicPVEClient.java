@@ -38,6 +38,7 @@ public final class CosmicPVEClient {
         event.register(com.cosmicpve.registry.ModMenus.TRIAL_DECISION.get(), TrialDecisionScreen::new);
         event.register(com.cosmicpve.registry.ModMenus.TINKERER.get(), TinkererScreen::new);
         event.register(com.cosmicpve.registry.ModMenus.PERSONAL_VAULT.get(), PersonalVaultScreen::new);
+        event.register(com.cosmicpve.registry.ModMenus.SINGLE_REWARD_ANIMATION.get(), SingleRewardAnimationScreen::new);
     }
 
     private static void registerEntityRenderers(EntityRenderersEvent.RegisterRenderers event) {

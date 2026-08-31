@@ -1,6 +1,6 @@
 # CosmicPVE Development Handoff
 
-Current accepted baseline: Step 8C — Personal Vaults + Mystery Spawner Canonicalization is implemented, automated/runtime verified, and manually verified/accepted. Step 8B is closed in `433b5f8aa185ef8bdc1417b4bd5d60e793b34643` (`Add V-Kits and normalize weapon damage`); the accepted enchantment mini-pass is closed in `ed71cc597bc168159ee1892f5cb22ed27b900b00` (`Add Obsidian Destroyer and Dominate`).
+Current accepted baseline: Step 8C — Personal Vaults + Mystery Spawner Canonicalization is implemented, automated/runtime verified, manually verified/accepted, and closed in `92d3fa9a4175adf67477081a1e80c69188c4a89d` (`Add Personal Vaults and update Mystery Spawners`). Step 8C.1 — Godly V-Kit Bundle + Single-Reward Loot Animation Foundation is implemented, automated/runtime verified, and manually verified/accepted. Step 8B is closed in `433b5f8aa185ef8bdc1417b4bd5d60e793b34643` (`Add V-Kits and normalize weapon damage`); the accepted enchantment mini-pass is closed in `ed71cc597bc168159ee1892f5cb22ed27b900b00` (`Add Obsidian Destroyer and Dominate`).
 
 Repository state: Steps 6A–8C and the Conquest synchronization are implemented, verified, and manually accepted. The root `assets`, `drafts`, and `woodlands` development-source folders remain untouched and untracked. The canonical tracked `trial rooms/*.nbt` files are build inputs; the user has moved the future Cave Diving work outside that canonical directory.
 
@@ -435,6 +435,14 @@ The Personal Vault access policy uses a persisted canonical overworld-game-time 
 
 Mystery Spawner presentation and uniform index selection are unchanged. The canonical Simple pool is Sheep, Pig, Zombie, Spider, Skeleton, Chicken, and Cow. The Elite pool is Stray, Creeper, Zombified Piglin, Husk, Bogged, Blaze, Slime, and Enderman. Mastery remains Iron Golem, Wither Skeleton, Witch, Vindicator, and Guardian. Cow moved from Elite to Simple; Snow Golem left Elite; Stray and Bogged entered Elite. All results still use the existing real typed Mob Spawner factory.
 
+### Step 8C.1 — IMPLEMENTED; AUTOMATED/RUNTIME VERIFIED; MANUALLY VERIFIED / ACCEPTED
+
+`cosmicpve:godly_vkit_bundle` is a non-stackable, forced-glint Red Bundle presentation with the canonical three-segment bold name and yellow flavor line. Right-clicking it has no roulette GUI: generation is validated first, one Bundle is consumed, and exactly one Phoenix, Ogre, Judgement, and Slayer V-Kit Crystal is produced. The Phoenix Crystal is returned as Minecraft's authoritative transformed-hand result while the other three use safe inventory/overflow delivery, so a full inventory cannot erase the outputs during 1.21.11 hand writeback. One player-targeted level-up cue and one harmless client-side cosmetic firework are emitted on success.
+
+The reusable single-reward animation preselects exactly one final `ItemStack` server-side and persists that pending reward in a versioned death-copied player attachment before a future source transaction can commit. One active animation is allowed per player. Its read-only nine-slot menu shows red side panes counting 5/4/3/2/1, black filler panes, and an arbitrary full-component preview in the center. Preview changes occur every five true server ticks for 20 total displays and alternate player-targeted Arrow Hit Player pitch 1.0/1.3. At tick 100 the side panes turn green, the preselected reward is safely delivered exactly once, the player receives one level-up sound at the explicitly settled pitch **0.1**, and one harmless cosmetic firework; the final display copy remains for 20 ticks before auto-close. Early close/menu replacement delivers the persisted reward immediately, while login/respawn recovery fulfills an outstanding obligation without rerolling. The provider seam supports uniform or weighted preview candidates without coupling generation to delivery.
+
+Permission-gated development coverage is `/cosmic reward animation-demo`; it uses Brick, Feather, Amethyst Shard, and Copper Ingot solely as a synthetic presentation pool and creates no fake gameplay item. Secret Weapon Cache and other future lootboxes remain unimplemented.
+
 ## 3. Current Real Enchantments
 
 These are registered through Minecraft's enchantment infrastructure, use actual enchantment data on the item, and are not present in normal enchanting-table, librarian, random-loot, random-equipment, or mob-equipment acquisition pools.
@@ -773,11 +781,11 @@ The final post-Orb capacity is no longer unresolved for current target classes: 
 
 ## 16. Current Next Milestone
 
-**Immediate next action: Step 8C.1 — Godly V-Kit Bundle + Single-Reward Loot Animation Foundation.**
+**Immediate next action: Step 8D — Gear Tinkering + Enchanted Black Scroll + Hex.**
 
 Current intended sequence:
 
-Steps 8A–8C and the Obsidian Destroyer + Dominate micro-milestone are accepted. Step 8C.1 is bounded to the immediate Godly V-Kit Bundle and a reusable single-reward animation foundation; Secret Weapon Cache, Admin Abuse, Cosmic Enchantment Table, Stormcaller, Hex, Inversion, and Roadmap Step 3 remain deferred.
+Steps 8A–8C.1 and the Obsidian Destroyer + Dominate micro-milestone are accepted. Step 8D is the next bounded milestone; Secret Weapon Cache, Admin Abuse, Cosmic Enchantment Table, Stormcaller, Inversion, and later roadmap work remain deferred.
 
 The ordinary-enchantment expansion remains split across bounded patches. Step 7C is the explicit instruction that made the current canonical Design Doc enchantment-table values implementation-authoritative; later design edits still require their own explicit implementation milestone.
 
@@ -795,6 +803,13 @@ The ordinary-enchantment expansion remains split across bounded patches. Step 7C
 Preserve unrelated dirty changes. Never change pinned versions as a side effect of gameplay work. Prefer service-level rules and typed data over one-off event logic, and keep client-only classes isolated from dedicated-server loading.
 
 ## 18. Verification Snapshot
+
+For the Step 8C.1 candidate:
+
+- Focused Godly Bundle/animation coverage passes all 6 tests. The full `gradlew.bat cleanTest test build` verification passes all 487 tests, and all 6 loaded-registry GameTests pass. Coverage pins the Bundle's stack limit, forced glint, segmented colors/name, Red Bundle model, one-consume/four-output transaction (including the real full-inventory hand-writeback/overflow path), 100-tick reveal and 120-tick close boundaries, exactly 20 five-tick preview changes, alternating 1.0/1.3 preview pitches, exact 0.1 final level-up pitch, arbitrary/weighted preview copies, and registry-aware pending-`ItemStack` codec round-trip.
+- All 222 main-resource JSON files parse. `git diff --check` passes for the Step 8C.1 implementation/handoff diff with only normal Windows line-ending notices; the user's unrelated live `docs/Cosmic_Design.md` edits retain their pre-existing whitespace warnings and were not modified.
+- The dedicated server publishes Cosmic content and reaches `Done`. The fresh client completes ResourceManager reload, OpenAL/SoundEngine startup, and particle, item, chest, block, and GUI atlas creation with no relevant missing model/texture, localization, menu registration, networking, or sided-classloading error.
+- Pinned versions and identifiers remain unchanged. The user manually verified the Godly V-Kit Bundle, animation countdown/cycling, final delivery, and firework/reveal behavior and accepted Step 8C.1.
 
 For the Step 8C candidate:
 

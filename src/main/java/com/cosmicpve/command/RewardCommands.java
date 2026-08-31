@@ -63,6 +63,7 @@ public final class RewardCommands {
                 .then(Commands.literal("inspect").then(tableId.executes(context -> inspect(
                         context.getSource(), IdentifierArgument.getId(context, "table")))))
                 .then(Commands.literal("reload").executes(context -> reload(context.getSource())))
+                .then(Commands.literal("animation-demo").executes(context -> animationDemo(context.getSource())))
                 .then(Commands.literal("roll").then(Commands.argument("table", IdentifierArgument.id())
                         .suggests((context, builder) -> SharedSuggestionProvider.suggestResource(
                                 CosmicContent.repository().snapshot().rewardTables().keySet(), builder))
@@ -131,6 +132,20 @@ public final class RewardCommands {
         var tables = CosmicContent.repository().snapshot().rewardTables().keySet();
         source.sendSuccess(() -> Component.literal("Cosmic reward tables (" + tables.size() + "): " + tables), false);
         return tables.size();
+    }
+
+    private static int animationDemo(net.minecraft.commands.CommandSourceStack source)
+            throws com.mojang.brigadier.exceptions.CommandSyntaxException {
+        var player = source.getPlayerOrException();
+        var candidates = List.of(new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.BRICK),
+                new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.FEATHER),
+                new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.AMETHYST_SHARD),
+                new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.COPPER_INGOT));
+        var finalReward = candidates.get(player.getRandom().nextInt(candidates.size())).copy();
+        boolean opened = com.cosmicpve.reward.animation.SingleRewardAnimationService.INSTANCE.open(player, finalReward,
+                com.cosmicpve.reward.animation.LootAnimationPreviewProvider.uniform(candidates), () -> {});
+        if (!opened) { source.sendFailure(Component.literal("A loot animation is already active.")); return 0; }
+        return 1;
     }
 
     private static int inspect(net.minecraft.commands.CommandSourceStack source, Identifier id) {

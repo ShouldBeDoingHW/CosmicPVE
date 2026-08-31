@@ -20,6 +20,8 @@ import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
+import net.minecraft.network.protocol.common.ClientboundCustomPayloadPacket;
+import com.cosmicpve.network.TrialCelebrationPayload;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.CommonListenerCookie;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
@@ -47,6 +49,8 @@ public final class VKitGameTests {
             FUNCTIONS.register("vkit_generation", ignored -> VKitGameTests::generation);
     private static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> REDEMPTION =
             FUNCTIONS.register("vkit_crystal_redemption", ignored -> VKitGameTests::redemption);
+    private static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> GODLY_BUNDLE =
+            FUNCTIONS.register("godly_vkit_bundle_redemption", ignored -> VKitGameTests::godlyBundleRedemption);
 
     private VKitGameTests() {}
 
@@ -65,6 +69,10 @@ public final class VKitGameTests {
         event.registerTest(CosmicPVE.id("vkit_crystal_redemption"), new FunctionGameTestInstance(
                 ResourceKey.create(Registries.TEST_FUNCTION, CosmicPVE.id("vkit_crystal_redemption")),
                 new TestData<>(environment, CosmicPVE.id("trial/development_room"), 200, 0, true,
+                        Rotation.NONE, false, 1, 1, false)));
+        event.registerTest(CosmicPVE.id("godly_vkit_bundle_redemption"), new FunctionGameTestInstance(
+                ResourceKey.create(Registries.TEST_FUNCTION, CosmicPVE.id("godly_vkit_bundle_redemption")),
+                new TestData<>(environment, CosmicPVE.id("trial/development_room"), 100, 0, true,
                         Rotation.NONE, false, 1, 1, false)));
     }
 
@@ -174,6 +182,42 @@ public final class VKitGameTests {
         });
     }
 
+    private static void godlyBundleRedemption(GameTestHelper helper) {
+        var context = connectedTestPlayer(helper);
+        var player = context.player();
+        var testPosition = helper.absolutePos(new net.minecraft.core.BlockPos(1, 1, 1));
+        player.setPos(testPosition.getX() + 0.5D, testPosition.getY() + 1.0D, testPosition.getZ() + 0.5D);
+        var inventory = player.getInventory();
+        inventory.clearContent();
+        inventory.setSelectedSlot(0);
+        inventory.setItem(0, new net.minecraft.world.item.ItemStack(ModItems.GODLY_VKIT_BUNDLE.get()));
+        for (int slot = 1; slot < net.minecraft.world.entity.player.Inventory.INVENTORY_SIZE; slot++)
+            inventory.setItem(slot, new net.minecraft.world.item.ItemStack(Items.COBBLESTONE, 64));
+
+        int soundsBefore = context.connection().soundPackets().size();
+        int fireworksBefore = context.connection().celebrationPackets();
+        player.gameMode.useItem(player, helper.getLevel(), player.getMainHandItem(), InteractionHand.MAIN_HAND);
+        helper.assertTrue(player.getMainHandItem().is(ModItems.PHOENIX_VKIT_CRYSTAL.get()),
+                "Godly Bundle must use Phoenix as the authoritative transformed-hand result");
+        helper.runAfterDelay(2, () -> {
+            var dropped = helper.getLevel().getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class,
+                            player.getBoundingBox().inflate(8.0D)).stream()
+                    .map(net.minecraft.world.entity.item.ItemEntity::getItem).toList();
+            helper.assertTrue(dropped.size() == 3, "full inventory must overflow exactly three Godly Bundle rewards; saw "
+                    + dropped.size() + " near " + player.position() + " with " + dropped);
+            helper.assertTrue(dropped.stream().filter(stack -> stack.is(ModItems.OGRE_VKIT_CRYSTAL.get())).count() == 1
+                            && dropped.stream().filter(stack -> stack.is(ModItems.JUDGEMENT_VKIT_CRYSTAL.get())).count() == 1
+                            && dropped.stream().filter(stack -> stack.is(ModItems.SLAYER_VKIT_CRYSTAL.get())).count() == 1,
+                    "Godly Bundle overflow must contain exactly Ogre, Judgement, and Slayer Crystals");
+            helper.assertTrue(context.connection().soundPackets().size() == soundsBefore + 1
+                            && context.connection().soundPackets().getLast().getSound().value() == SoundEvents.PLAYER_LEVELUP,
+                    "Godly Bundle must send exactly one targeted level-up sound");
+            helper.assertTrue(context.connection().celebrationPackets() == fireworksBefore + 1,
+                    "Godly Bundle must request exactly one cosmetic firework");
+            helper.succeed();
+        });
+    }
+
     private static void assertOneSuccessSound(GameTestHelper helper, RecordingConnection connection, int before) {
         helper.assertTrue(connection.soundPackets().size() == before + 1,
                 "each successful redemption must emit exactly one sound packet");
@@ -197,19 +241,30 @@ public final class VKitGameTests {
 
     private static final class RecordingConnection extends Connection {
         private final List<ClientboundSoundPacket> soundPackets = new ArrayList<>();
+        private int celebrationPackets;
 
         private RecordingConnection() {
             super(PacketFlow.SERVERBOUND);
+            // NeoForge's attachment synchronization consults channel attributes when a full
+            // inventory overflows to an ItemEntity. Give this recording connection an in-memory
+            // channel and the standard mock payload negotiation while continuing to intercept
+            // outbound packets below.
+            new io.netty.channel.embedded.EmbeddedChannel(this);
+            net.neoforged.neoforge.network.registration.NetworkRegistry.configureMockConnection(this);
         }
 
         @Override
         public void send(Packet<?> packet, ChannelFutureListener listener, boolean flush) {
             if (packet instanceof ClientboundSoundPacket sound) soundPackets.add(sound);
+            if (packet instanceof ClientboundCustomPayloadPacket custom
+                    && custom.payload() instanceof TrialCelebrationPayload) celebrationPackets++;
         }
 
         private List<ClientboundSoundPacket> soundPackets() {
             return soundPackets;
         }
+
+        private int celebrationPackets() { return celebrationPackets; }
     }
 
     private static void verifyWeaponNormalization(GameTestHelper helper) {

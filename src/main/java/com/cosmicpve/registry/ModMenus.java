@@ -5,6 +5,7 @@ import com.cosmicpve.spacechest.SpaceChestMenu;
 import com.cosmicpve.trial.TrialDecisionMenu;
 import com.cosmicpve.tinkerer.TinkererMenu;
 import com.cosmicpve.personalvault.PersonalVaultMenu;
+import com.cosmicpve.reward.animation.SingleRewardAnimationMenu;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.inventory.MenuType;
 import net.neoforged.bus.api.IEventBus;
@@ -22,6 +23,8 @@ public final class ModMenus {
             "tinkerer", () -> IMenuTypeExtension.create(TinkererMenu::client));
     public static final DeferredHolder<MenuType<?>, MenuType<PersonalVaultMenu>> PERSONAL_VAULT = MENUS.register(
             "personal_vault", () -> IMenuTypeExtension.create(PersonalVaultMenu::client));
+    public static final DeferredHolder<MenuType<?>, MenuType<SingleRewardAnimationMenu>> SINGLE_REWARD_ANIMATION = MENUS.register(
+            "single_reward_animation", () -> IMenuTypeExtension.create(SingleRewardAnimationMenu::client));
     private ModMenus() {}
     public static void register(IEventBus bus) { MENUS.register(bus); }
 }

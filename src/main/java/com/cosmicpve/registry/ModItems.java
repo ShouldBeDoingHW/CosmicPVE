@@ -32,6 +32,7 @@ import com.cosmicpve.vkit.VKitCrystalItem;
 import com.cosmicpve.vkit.VKitDefinition;
 import com.cosmicpve.data.component.VKitCrystalData;
 import com.cosmicpve.personalvault.PersonalVaultUnlockItem;
+import com.cosmicpve.vkit.GodlyVKitBundleItem;
 
 public final class ModItems {
     private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(CosmicPVE.MOD_ID);
@@ -105,6 +106,9 @@ public final class ModItems {
             "judgement_vkit_crystal", VKitDefinition.JUDGEMENT);
     public static final DeferredItem<VKitCrystalItem> SLAYER_VKIT_CRYSTAL = vkitCrystal(
             "slayer_vkit_crystal", VKitDefinition.SLAYER);
+    public static final DeferredItem<GodlyVKitBundleItem> GODLY_VKIT_BUNDLE = ITEMS.registerItem(
+            "godly_vkit_bundle", GodlyVKitBundleItem::new,
+            properties -> properties.stacksTo(GodlyVKitBundleItem.MAX_STACK_SIZE));
 
     public static final DeferredItem<SpaceChestItem> SPACE_CHEST = ITEMS.registerItem(
             "space_chest", SpaceChestItem::new, properties -> properties.stacksTo(1));
