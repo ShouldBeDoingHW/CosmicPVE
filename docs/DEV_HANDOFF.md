@@ -465,6 +465,8 @@ Admin Abuse builds four exact typed reward outcomes: Ghostly Veil and Covert Clo
 
 Armor Set tint and tooltip presentation now resolve through one visual-only stack presentation seam. Genuine set pieces continue using their synchronized `ArmorSetIdentity`; a typed Omni piece instead resolves the display identity `Omni` and canonical `#061630` tint without writing a fake set identity or entering gameplay resolution. Both inventory/equipment tint consumers and the existing Armor Set tooltip composition use this seam. Omni displays the normal `Omni Armor` identity line but no invented independent full-set bonus, while all accepted two-anchor Omni gameplay rules remain unchanged.
 
+The accepted Step 8E implementation is closed in `43dde28` (`Add premium Cosmic reward lootboxes`).
+
 ## 3. Current Real Enchantments
 
 These are registered through Minecraft's enchantment infrastructure, use actual enchantment data on the item, and are not present in normal enchanting-table, librarian, random-loot, random-equipment, or mob-equipment acquisition pools.
