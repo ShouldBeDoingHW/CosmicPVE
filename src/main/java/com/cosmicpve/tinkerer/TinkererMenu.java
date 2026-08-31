@@ -2,6 +2,7 @@ package com.cosmicpve.tinkerer;
 
 import com.cosmicpve.equipment.enchantment.CosmicDustService;
 import com.cosmicpve.registry.ModMenus;
+import com.cosmicpve.reward.RewardDeliveryService;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -23,6 +24,7 @@ public final class TinkererMenu extends AbstractContainerMenu {
     public static final int MENU_SLOTS = 27;
     private final SimpleContainer input = new SimpleContainer(MENU_SLOTS);
     private final Player owner;
+    private boolean carriedFromTinkerer;
 
     public TinkererMenu(int id, Inventory inventory) {
         super(ModMenus.TINKERER.get(), id);
@@ -45,7 +47,21 @@ public final class TinkererMenu extends AbstractContainerMenu {
             if (player instanceof ServerPlayer serverPlayer) confirm(serverPlayer);
             return;
         }
+        boolean inputSlot = slotId > 0 && slotId < MENU_SLOTS;
+        boolean playerSlot = slotId >= MENU_SLOTS;
+        boolean fromPlayerInventory = !carriedFromTinkerer;
+        ItemStack slotBefore = inputSlot ? slots.get(slotId).getItem().copy() : ItemStack.EMPTY;
+        ItemStack carriedBefore = getCarried().copy();
         super.clicked(slotId, button, clickType, player);
+        if (clickType != ClickType.QUICK_MOVE && inputSlot
+                && TinkererInsertionFeedback.shouldPlay(slotBefore, slots.get(slotId).getItem(), carriedBefore,
+                        fromPlayerInventory, clickType)
+                && player instanceof ServerPlayer serverPlayer) {
+            TinkererInsertionFeedback.play(serverPlayer);
+        }
+        if (inputSlot && !slotBefore.isEmpty() && !getCarried().isEmpty()
+                && ItemStack.isSameItemSameComponents(getCarried(), slotBefore)) carriedFromTinkerer = true;
+        else if (playerSlot) carriedFromTinkerer = false;
     }
 
     public boolean confirm(ServerPlayer player) {
@@ -59,6 +75,7 @@ public final class TinkererMenu extends AbstractContainerMenu {
                 remaining -= portion;
             }
         });
+        new RewardDeliveryService().deliver(player, result.xpBottles());
         player.level().playSound(null, player.blockPosition(), SoundEvents.CHICKEN_EGG, SoundSource.PLAYERS, 1.0F, 1.0F);
         broadcastChanges();
         return true;
@@ -71,6 +88,10 @@ public final class TinkererMenu extends AbstractContainerMenu {
         ItemStack original = source.copy();
         if (index >= MENU_SLOTS) {
             if (!BookSlot.accepts(source) || !moveItemStackTo(source, 1, MENU_SLOTS, false)) return ItemStack.EMPTY;
+            if (player instanceof ServerPlayer serverPlayer
+                    && TinkererInsertionFeedback.shouldPlay(0, 1, true, ClickType.QUICK_MOVE)) {
+                TinkererInsertionFeedback.play(serverPlayer);
+            }
         } else if (index > 0) {
             if (!moveItemStackTo(source, MENU_SLOTS, slots.size(), true)) return ItemStack.EMPTY;
         } else return ItemStack.EMPTY;
@@ -102,7 +123,10 @@ public final class TinkererMenu extends AbstractContainerMenu {
 
     private static final class BookSlot extends Slot {
         BookSlot(Container container, int slot, int x, int y) { super(container, slot, x, y); }
-        static boolean accepts(ItemStack stack) { return CosmicDustService.bookTier(stack).isPresent(); }
+        static boolean accepts(ItemStack stack) {
+            return CosmicDustService.bookTier(stack).isPresent()
+                    || new GearSalvageService().storedXp(stack).isPresent();
+        }
         @Override public boolean mayPlace(ItemStack stack) { return accepts(stack); }
     }
 }

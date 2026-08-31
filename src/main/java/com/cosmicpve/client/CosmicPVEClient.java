@@ -39,6 +39,7 @@ public final class CosmicPVEClient {
         event.register(com.cosmicpve.registry.ModMenus.TINKERER.get(), TinkererScreen::new);
         event.register(com.cosmicpve.registry.ModMenus.PERSONAL_VAULT.get(), PersonalVaultScreen::new);
         event.register(com.cosmicpve.registry.ModMenus.SINGLE_REWARD_ANIMATION.get(), SingleRewardAnimationScreen::new);
+        event.register(com.cosmicpve.registry.ModMenus.ENCHANTED_BLACK_SCROLL.get(), EnchantedBlackScrollScreen::new);
     }
 
     private static void registerEntityRenderers(EntityRenderersEvent.RegisterRenderers event) {

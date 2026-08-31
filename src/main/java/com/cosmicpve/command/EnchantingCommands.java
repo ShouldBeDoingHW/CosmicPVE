@@ -62,6 +62,11 @@ public final class EnchantingCommands {
                         .then(Commands.argument("returned-success", IntegerArgumentType.integer(1, 100))
                                 .executes(c -> giveBlackScroll(EntityArgument.getPlayer(c, "player"),
                                         IntegerArgumentType.getInteger(c, "returned-success"))))));
+        var enchantedBlackScroll = Commands.literal("enchanted-black-scroll").then(Commands.literal("give")
+                .then(Commands.argument("player", EntityArgument.player())
+                        .then(Commands.argument("returned-success", IntegerArgumentType.integer(1, 100))
+                                .executes(c -> giveEnchantedBlackScroll(EntityArgument.getPlayer(c, "player"),
+                                        IntegerArgumentType.getInteger(c, "returned-success"))))));
         var unexamined = Commands.literal("unexamined").then(Commands.literal("give")
                 .then(Commands.argument("player", EntityArgument.player())
                         .then(Commands.argument("tier", StringArgumentType.word())
@@ -75,7 +80,7 @@ public final class EnchantingCommands {
                                                 StringArgumentType.getString(c, "tier"),
                                                 IntegerArgumentType.getInteger(c, "count")))))));
         return Commands.literal("enchant").then(Commands.literal("book").then(give).then(random))
-                .then(unexamined).then(scroll).then(blackScroll).then(transmog).then(orbs);
+                .then(unexamined).then(scroll).then(blackScroll).then(enchantedBlackScroll).then(transmog).then(orbs);
     }
     private static int giveBook(net.minecraft.commands.CommandSourceStack source, net.minecraft.server.level.ServerPlayer player,
             net.minecraft.resources.Identifier id,int level,int success,int destroy){
@@ -133,6 +138,12 @@ public final class EnchantingCommands {
     private static int giveBlackScroll(net.minecraft.server.level.ServerPlayer player, int returnedSuccessRate) {
         var stack = new EnchantingRewardItemFactory().blackScroll(returnedSuccessRate);
         player.getInventory().placeItemBackInInventory(stack);
+        return 1;
+    }
+
+    private static int giveEnchantedBlackScroll(net.minecraft.server.level.ServerPlayer player, int returnedSuccessRate) {
+        player.getInventory().placeItemBackInInventory(
+                new EnchantingRewardItemFactory().enchantedBlackScroll(returnedSuccessRate));
         return 1;
     }
 

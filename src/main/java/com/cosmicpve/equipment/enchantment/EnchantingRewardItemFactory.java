@@ -2,6 +2,7 @@ package com.cosmicpve.equipment.enchantment;
 
 import com.cosmicpve.data.component.BlackScrollData;
 import com.cosmicpve.data.component.EnchantmentOrbData;
+import com.cosmicpve.data.component.EnchantedBlackScrollData;
 import com.cosmicpve.registry.ModDataComponents;
 import com.cosmicpve.registry.ModItems;
 import net.minecraft.util.RandomSource;
@@ -13,6 +14,13 @@ public final class EnchantingRewardItemFactory {
         var stack = new ItemStack(ModItems.BLACK_SCROLL.get());
         stack.set(ModDataComponents.BLACK_SCROLL.get(), new BlackScrollData(
                 BlackScrollData.CURRENT_DATA_VERSION, returnedSuccessRate));
+        return stack;
+    }
+
+    public ItemStack enchantedBlackScroll(int returnedSuccessRate) {
+        var stack = new ItemStack(ModItems.ENCHANTED_BLACK_SCROLL.get());
+        stack.set(ModDataComponents.ENCHANTED_BLACK_SCROLL.get(), new EnchantedBlackScrollData(
+                EnchantedBlackScrollData.CURRENT_DATA_VERSION, returnedSuccessRate));
         return stack;
     }
 

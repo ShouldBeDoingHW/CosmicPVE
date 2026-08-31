@@ -22,6 +22,8 @@ import com.cosmicpve.data.component.CosmicDustData;
 import com.cosmicpve.data.component.MysterySpawnerData;
 import com.cosmicpve.data.component.VKitCrystalData;
 import com.cosmicpve.data.component.VKitEquipmentData;
+import com.cosmicpve.data.component.StoredXpBottleData;
+import com.cosmicpve.data.component.EnchantedBlackScrollData;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
@@ -140,6 +142,14 @@ public final class ModDataComponents {
             COMPONENTS.registerComponentType("vkit_equipment",
                     builder -> builder.persistent(VKitEquipmentData.CODEC)
                             .networkSynchronized(ByteBufCodecs.fromCodecWithRegistries(VKitEquipmentData.CODEC)).cacheEncoding());
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<StoredXpBottleData>> STORED_XP_BOTTLE =
+            COMPONENTS.registerComponentType("stored_xp_bottle",
+                    builder -> builder.persistent(StoredXpBottleData.CODEC)
+                            .networkSynchronized(ByteBufCodecs.fromCodecWithRegistries(StoredXpBottleData.CODEC)).cacheEncoding());
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<EnchantedBlackScrollData>> ENCHANTED_BLACK_SCROLL =
+            COMPONENTS.registerComponentType("enchanted_black_scroll",
+                    builder -> builder.persistent(EnchantedBlackScrollData.CODEC)
+                            .networkSynchronized(ByteBufCodecs.fromCodecWithRegistries(EnchantedBlackScrollData.CODEC)).cacheEncoding());
     private ModDataComponents() {}
 
     public static void register(IEventBus modBus) {

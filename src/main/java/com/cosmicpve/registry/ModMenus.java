@@ -6,6 +6,7 @@ import com.cosmicpve.trial.TrialDecisionMenu;
 import com.cosmicpve.tinkerer.TinkererMenu;
 import com.cosmicpve.personalvault.PersonalVaultMenu;
 import com.cosmicpve.reward.animation.SingleRewardAnimationMenu;
+import com.cosmicpve.equipment.enchantment.EnchantedBlackScrollMenu;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.inventory.MenuType;
 import net.neoforged.bus.api.IEventBus;
@@ -25,6 +26,8 @@ public final class ModMenus {
             "personal_vault", () -> IMenuTypeExtension.create(PersonalVaultMenu::client));
     public static final DeferredHolder<MenuType<?>, MenuType<SingleRewardAnimationMenu>> SINGLE_REWARD_ANIMATION = MENUS.register(
             "single_reward_animation", () -> IMenuTypeExtension.create(SingleRewardAnimationMenu::client));
+    public static final DeferredHolder<MenuType<?>, MenuType<EnchantedBlackScrollMenu>> ENCHANTED_BLACK_SCROLL = MENUS.register(
+            "enchanted_black_scroll", () -> IMenuTypeExtension.create(EnchantedBlackScrollMenu::client));
     private ModMenus() {}
     public static void register(IEventBus bus) { MENUS.register(bus); }
 }

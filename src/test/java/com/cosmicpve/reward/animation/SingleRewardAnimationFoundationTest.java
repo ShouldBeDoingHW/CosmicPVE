@@ -25,9 +25,17 @@ class SingleRewardAnimationFoundationTest {
         assertEquals(120, LootAnimationTimeline.CLOSE_TICK);
     }
 
-    @Test void previewPitchesAlternateAndRevealPitchUsesRequestedOverride() {
-        for (int ordinal = 0; ordinal < 20; ordinal++)
-            assertEquals(ordinal % 2 == 0 ? 1.0F : 1.3F, LootAnimationTimeline.previewPitch(ordinal));
+    @Test void previewAudioFiresTwicePerWindowAndRepeatsExactEightPitchPattern() {
+        var sounds = java.util.stream.IntStream.range(0, LootAnimationTimeline.REVEAL_TICK)
+                .filter(LootAnimationTimeline::previewSoundDue).boxed().toList();
+        assertEquals(40, sounds.size());
+        assertEquals(List.of(0, 2, 5, 7, 10, 12), sounds.subList(0, 6));
+        var expected = List.of(1.0F, 0.8F, 0.5F, 0.9F, 1.1F, 1.3F, 1.5F, 1.2F,
+                1.0F, 0.8F, 0.5F, 0.9F, 1.1F, 1.3F, 1.5F, 1.2F);
+        for (int ordinal = 0; ordinal < expected.size(); ordinal++)
+            assertEquals(expected.get(ordinal), LootAnimationTimeline.previewPitch(ordinal), 0.0001F);
+        for (int ordinal = 0; ordinal < 40; ordinal++)
+            assertEquals(expected.get(ordinal % 8), LootAnimationTimeline.previewPitch(ordinal), 0.0001F);
         assertEquals(0.1F, LootAnimationFeedback.REVEAL_PITCH);
     }
 

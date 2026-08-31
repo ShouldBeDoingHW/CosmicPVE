@@ -33,6 +33,8 @@ import com.cosmicpve.vkit.VKitDefinition;
 import com.cosmicpve.data.component.VKitCrystalData;
 import com.cosmicpve.personalvault.PersonalVaultUnlockItem;
 import com.cosmicpve.vkit.GodlyVKitBundleItem;
+import com.cosmicpve.tinkerer.SalvagedXpBottleItem;
+import com.cosmicpve.equipment.enchantment.EnchantedBlackScrollItem;
 
 public final class ModItems {
     private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(CosmicPVE.MOD_ID);
@@ -71,6 +73,12 @@ public final class ModItems {
     public static final DeferredItem<BlackScrollItem> BLACK_SCROLL = ITEMS.registerItem(
             "black_scroll", BlackScrollItem::new,
             properties -> properties.stacksTo(BlackScrollItem.MAX_STACK_SIZE));
+
+    public static final DeferredItem<EnchantedBlackScrollItem> ENCHANTED_BLACK_SCROLL = ITEMS.registerItem(
+            "enchanted_black_scroll", EnchantedBlackScrollItem::new, properties -> properties.stacksTo(1));
+
+    public static final DeferredItem<SalvagedXpBottleItem> SALVAGED_XP_BOTTLE = ITEMS.registerItem(
+            "salvaged_xp_bottle", SalvagedXpBottleItem::new, properties -> properties.stacksTo(1));
 
     public static final DeferredItem<WeaponSkinItem> WEAPON_SKIN = ITEMS.registerItem(
             "weapon_skin", WeaponSkinItem::new, properties -> properties.stacksTo(1));

@@ -8,5 +8,16 @@ public final class LootAnimationTimeline {
     public static int countdown(int elapsed) { return elapsed >= REVEAL_TICK ? 0 : Math.max(1, 5 - Math.max(0, elapsed) / 20); }
     public static boolean previewDue(int elapsed) { return elapsed >= 0 && elapsed < REVEAL_TICK && elapsed % PREVIEW_INTERVAL == 0; }
     public static int previewOrdinal(int elapsed) { return Math.max(0, elapsed) / PREVIEW_INTERVAL; }
-    public static float previewPitch(int ordinal) { return ordinal % 2 == 0 ? 1.0F : 1.3F; }
+    public static boolean previewSoundDue(int elapsed) {
+        int within = Math.floorMod(elapsed, PREVIEW_INTERVAL);
+        return elapsed >= 0 && elapsed < REVEAL_TICK && (within == 0 || within == 2);
+    }
+    public static int previewSoundOrdinal(int elapsed) {
+        int window = Math.max(0, elapsed) / PREVIEW_INTERVAL;
+        return window * 2 + (Math.floorMod(elapsed, PREVIEW_INTERVAL) >= 2 ? 1 : 0);
+    }
+    private static final float[] PREVIEW_PITCHES = {1.0F, 0.8F, 0.5F, 0.9F, 1.1F, 1.3F, 1.5F, 1.2F};
+    public static float previewPitch(int soundOrdinal) {
+        return PREVIEW_PITCHES[Math.floorMod(soundOrdinal, PREVIEW_PITCHES.length)];
+    }
 }

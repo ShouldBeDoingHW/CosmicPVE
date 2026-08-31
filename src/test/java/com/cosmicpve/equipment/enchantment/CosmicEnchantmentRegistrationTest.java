@@ -64,7 +64,8 @@ class CosmicEnchantmentRegistrationTest {
                 Map.entry("voodoo", 6),
                 Map.entry("sniper", 5),
                 Map.entry("snare", 4),
-                Map.entry("plague_carrier", 7));
+                Map.entry("plague_carrier", 7),
+                Map.entry("hex", 5));
         for (var entry : expected.entrySet()) {
             var resource = getClass().getClassLoader()
                     .getResourceAsStream("data/cosmicpve/enchantment/" + entry.getKey() + ".json");
@@ -115,7 +116,7 @@ class CosmicEnchantmentRegistrationTest {
                 }
             }
         }
-        assertEquals(51, CosmicEnchantmentSpecs.ALL.size());
+        assertEquals(52, CosmicEnchantmentSpecs.ALL.size());
         assertEquals(CosmicEnchantmentTier.ELITE, CosmicEnchantmentSpecs.EXECUTE.tier());
         assertEquals(CosmicEnchantmentTier.ULTIMATE, CosmicEnchantmentSpecs.ANGELIC.tier());
         assertEquals(CosmicEnchantmentTier.SIMPLE, CosmicEnchantmentSpecs.LIGHTNING.tier());

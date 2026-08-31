@@ -101,6 +101,7 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
             addSoulSiphon(event, result);
             addBlackout(event, result);
             addVoodoo(event, result);
+            addHex(event, result);
         } else if (event.hook() == ProcHook.ON_PROJECTILE_HIT) {
             addLightning(event, result);
             addVenom(event, result);
@@ -163,6 +164,19 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
                                 activation.event().tracePlayerId()), activation.event().serverTick()),
                 new ProcProvenance(ProcSourceKind.ACTUAL_ENCHANTMENT, CosmicPVE.id("actual_helmet")),
                 condition(CosmicPVE.id("voodoo_ordinary_hit"), CosmicEnchantmentBehaviorResolver::ordinaryAttack)));
+    }
+
+    private void addHex(ProcEvent event, List<ProcCandidate> result) {
+        int level = Math.min(5, event.effectiveEnchantments().level(ModEnchantments.HEX.identifier()));
+        if (level <= 0 || event.attacker() == null || event.target() == null) return;
+        result.add(candidate(ModEnchantments.HEX.identifier(), ProcHook.ON_VALID_HIT,
+                HexBehavior.chance(level), Optional.empty(), 0L, Optional.empty(),
+                ChildProcEligibility.LIMITED_OFFENSIVE_REROLL,
+                activation -> stacks.addStack(activation.event().target(), HexBehavior.STACK_ID, 1,
+                        StackApplication.ephemeral(Optional.of(activation.event().attacker().getUUID()),
+                                activation.event().tracePlayerId()), activation.event().serverTick()),
+                provenance(event, ModEnchantments.HEX.identifier()),
+                meleeCondition(CosmicPVE.id("hex_axe_hit"))));
     }
 
     private void addUndeadRuse(ProcEvent event, List<ProcCandidate> result) {

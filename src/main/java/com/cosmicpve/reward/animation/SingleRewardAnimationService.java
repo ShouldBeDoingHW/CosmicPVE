@@ -29,7 +29,6 @@ public final class SingleRewardAnimationService {
         var opened = player.openMenu(new SimpleMenuProvider((id, inventory, ignored) -> new SingleRewardAnimationMenu(id, inventory),
                 Component.translatable("container.cosmicpve.single_reward_animation")));
         if (opened.isEmpty()) { runtimes.remove(player.getUUID()); deliverPending(player); return false; }
-        LootAnimationFeedback.preview(player, LootAnimationTimeline.previewPitch(0));
         return true;
     }
 
@@ -47,7 +46,13 @@ public final class SingleRewardAnimationService {
             if (ordinal > state.lastPreviewOrdinal) {
                 state.lastPreviewOrdinal = ordinal;
                 state.shown = state.previews.next(player.getRandom());
-                LootAnimationFeedback.preview(player, LootAnimationTimeline.previewPitch(ordinal));
+            }
+        }
+        if (!state.revealed && LootAnimationTimeline.previewSoundDue(elapsed)) {
+            int soundOrdinal = LootAnimationTimeline.previewSoundOrdinal(elapsed);
+            if (soundOrdinal > state.lastSoundOrdinal) {
+                state.lastSoundOrdinal = soundOrdinal;
+                LootAnimationFeedback.preview(player, LootAnimationTimeline.previewPitch(soundOrdinal));
             }
         }
         menu.refresh(elapsed, state.shown, state.revealed);
@@ -72,9 +77,10 @@ public final class SingleRewardAnimationService {
 
     private static final class RuntimeState {
         final long startedAt; final LootAnimationPreviewProvider previews;
-        ItemStack shown; int lastPreviewOrdinal; boolean revealed;
+        ItemStack shown; int lastPreviewOrdinal; int lastSoundOrdinal; boolean revealed;
         RuntimeState(long startedAt, LootAnimationPreviewProvider previews, ItemStack shown) {
-            this.startedAt = startedAt; this.previews = previews; this.shown = shown; this.lastPreviewOrdinal = 0;
+            this.startedAt = startedAt; this.previews = previews; this.shown = shown;
+            this.lastPreviewOrdinal = 0; this.lastSoundOrdinal = -1;
         }
     }
 }

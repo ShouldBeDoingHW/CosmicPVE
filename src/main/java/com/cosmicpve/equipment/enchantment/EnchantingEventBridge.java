@@ -6,6 +6,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.inventory.ClickAction;
+import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.event.ItemStackedOnOtherEvent;
 
 public final class EnchantingEventBridge {
@@ -26,14 +27,16 @@ public final class EnchantingEventBridge {
         boolean transmog = event.getCarriedItem().is(ModItems.TRANSMOG_SCROLL.get());
         boolean orb = OrbType.fromStack(event.getCarriedItem()).isPresent();
         boolean blackScroll = event.getCarriedItem().is(ModItems.BLACK_SCROLL.get());
-        if (!book && !scroll && !transmog && !orb && !blackScroll) return;
+        boolean enchantedBlackScroll = event.getCarriedItem().is(ModItems.ENCHANTED_BLACK_SCROLL.get());
+        if (!book && !scroll && !transmog && !orb && !blackScroll && !enchantedBlackScroll) return;
         event.setCanceled(true);
         if (!(event.getPlayer() instanceof ServerPlayer player)) return;
         if (book) applyBook(event, player);
         else if (scroll) applyScroll(event, player);
         else if (transmog) applyTransmog(event, player);
         else if (orb) applyOrb(event, player);
-        else applyBlackScroll(event, player);
+        else if (blackScroll) applyBlackScroll(event, player);
+        else openEnchantedBlackScroll(event, player);
     }
 
     private void applyDust(ItemStackedOnOtherEvent event, ServerPlayer player) {
@@ -142,5 +145,27 @@ public final class EnchantingEventBridge {
         String key = result.outcome() == BlackScrollExtractionResult.Outcome.REJECTED_NO_ELIGIBLE_ENCHANTMENTS
                 ? "message.cosmicpve.black_scroll.no_eligible" : "message.cosmicpve.black_scroll.invalid";
         player.displayClientMessage(Component.translatable(key), true);
+    }
+
+    private void openEnchantedBlackScroll(ItemStackedOnOtherEvent event, ServerPlayer player) {
+        if (event.getStackedOnItem() != event.getSlot().getItem()) return;
+        var data = event.getCarriedItem().get(ModDataComponents.ENCHANTED_BLACK_SCROLL.get());
+        var candidates = new EnchantedBlackScrollExtractionService().candidates(event.getSlot().getItem());
+        if (data == null || candidates.isEmpty()) {
+            player.displayClientMessage(Component.translatable(data == null
+                    ? "message.cosmicpve.enchanted_black_scroll.invalid"
+                    : "message.cosmicpve.enchanted_black_scroll.no_eligible"), true);
+            return;
+        }
+        ItemStack target = event.getSlot().getItem();
+        ItemStack scrollStack = event.getCarriedItem();
+        int rows = candidates.size() <= 8 ? 1 : 2;
+        event.getSlot().set(ItemStack.EMPTY);
+        event.getCarriedSlotAccess().set(ItemStack.EMPTY);
+        var opened = player.openMenu(new net.minecraft.world.SimpleMenuProvider(
+                (id, inventory, ignored) -> new EnchantedBlackScrollMenu(id, inventory, rows, target, scrollStack),
+                EnchantedBlackScrollMenu.TITLE), buffer -> buffer.writeVarInt(rows));
+        if (opened.isEmpty()) new com.cosmicpve.reward.RewardDeliveryService().deliver(player,
+                java.util.List.of(target, scrollStack));
     }
 }

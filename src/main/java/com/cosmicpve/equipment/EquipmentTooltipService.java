@@ -100,6 +100,17 @@ public final class EquipmentTooltipService {
             event.getToolTip().add(Component.translatable("tooltip.cosmicpve.black_scroll.purpose"));
             event.getToolTip().add(Component.translatable("tooltip.cosmicpve.black_scroll.instruction"));
         }
+        var enchantedBlackScroll = stack.get(ModDataComponents.ENCHANTED_BLACK_SCROLL.get());
+        if (enchantedBlackScroll != null) {
+            event.getToolTip().add(Component.translatable("tooltip.cosmicpve.enchanted_black_scroll.rate",
+                    enchantedBlackScroll.returnedSuccessRate()).withColor(ItemApplicationColors.SUCCESS));
+            event.getToolTip().add(Component.translatable("tooltip.cosmicpve.enchanted_black_scroll.purpose"));
+            event.getToolTip().add(Component.translatable("tooltip.cosmicpve.enchanted_black_scroll.instruction"));
+        }
+        var storedXp = stack.get(ModDataComponents.STORED_XP_BOTTLE.get());
+        if (storedXp != null) event.getToolTip().add(Component.translatable(
+                "tooltip.cosmicpve.salvaged_xp_bottle", String.format(java.util.Locale.ROOT, "%,d", storedXp.storedXp()))
+                .withStyle(net.minecraft.ChatFormatting.YELLOW));
         var skinItem = stack.get(ModDataComponents.WEAPON_SKIN_ITEM.get());
         if (skinItem != null) {
             com.cosmicpve.equipment.skin.WeaponSkinDefinitions.find(skinItem.skinId()).ifPresent(definition ->
