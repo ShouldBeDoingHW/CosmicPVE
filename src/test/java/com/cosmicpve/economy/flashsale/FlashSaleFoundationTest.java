@@ -13,6 +13,8 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.HoverEvent;
 import org.junit.jupiter.api.Test;
 
 class FlashSaleFoundationTest {
@@ -100,5 +102,65 @@ class FlashSaleFoundationTest {
         FlashSaleStartAlert.forEach(recipients, ignored -> alerts.incrementAndGet());
         assertEquals(recipients.size(), alerts.get());
         assertEquals(net.minecraft.sounds.SoundEvents.ENDER_DRAGON_GROWL, FlashSaleStartAlert.sound());
+    }
+
+    @Test void reminderAlertTargetsEveryConnectedRecipientExactlyOnceWithBeacon() {
+        var recipients = List.of("one", "two", "three");
+        var alerts = new AtomicInteger();
+        FlashSaleReminderAlert.forEach(recipients, ignored -> alerts.incrementAndGet());
+        assertEquals(recipients.size(), alerts.get());
+        assertEquals(net.minecraft.sounds.SoundEvents.BEACON_ACTIVATE, FlashSaleReminderAlert.sound());
+    }
+
+    @Test void initialAndReminderOfferNamesKeepPresentationAndOpenCurrentPreview() {
+        var service = new FlashSaleService();
+        var entry = FlashSaleCatalog.find("heroic_crystal").orElseThrow();
+        var sale = new FlashSaleActive(entry.id(), FlashSalePriceTier.LOW, entry.lowPrice(), 100L, 6_100L, false, List.of());
+        for (var message : List.of(service.startMessage(entry, sale), service.reminder(entry, sale))) {
+            var clickable = findClickable(message).orElseThrow();
+            assertEquals("Heroic Crystal", clickable.getString());
+            assertEquals(com.cosmicpve.equipment.heroic.HeroicCrystalItem.NAME_COLOR,
+                    clickable.getStyle().getColor().getValue());
+            assertTrue(clickable.getStyle().isUnderlined());
+            assertEquals("/flashsale preview", ((ClickEvent.RunCommand) clickable.getStyle().getClickEvent()).command());
+            assertEquals("Click to preview this item",
+                    ((HoverEvent.ShowText) clickable.getStyle().getHoverEvent()).value().getString());
+        }
+    }
+
+    @Test void representativeOfferIsStableAndPreviewQuantityNeverChangesCanonicalReward() {
+        var service = new FlashSaleService();
+        var entry = FlashSaleCatalog.find("armor_orb_100").orElseThrow();
+        var sale = new FlashSaleActive(entry.id(), FlashSalePriceTier.LOW, entry.lowPrice(), 222L, 6_222L, false, List.of());
+        var first = service.resolveOffer(entry, sale).orElseThrow().getFirst();
+        var second = service.resolveOffer(entry, sale).orElseThrow().getFirst();
+        assertEquals(first.getComponents(), second.getComponents());
+        var portal = FlashSaleCatalog.find("trial_portal_2").orElseThrow().create(net.minecraft.util.RandomSource.create(1L))
+                .orElseThrow().getFirst();
+        var repair = FlashSaleCatalog.find("repair_scroll_5").orElseThrow().create(net.minecraft.util.RandomSource.create(1L))
+                .orElseThrow().getFirst();
+        assertEquals(2, FlashSalePreviewMenu.displayCopy(portal, 2).getCount());
+        assertEquals(5, FlashSalePreviewMenu.displayCopy(repair, 5).getCount());
+        assertEquals(2, portal.getCount());
+        assertEquals(5, repair.getCount());
+    }
+
+    @Test void nonStackableMultiQuantityPreviewUsesFooterWithoutIllegalStack() {
+        var source = new ItemStack(Items.DIAMOND_SWORD);
+        var shown = FlashSalePreviewMenu.displayCopy(source, 2);
+        assertEquals(1, shown.getCount());
+        assertEquals("Offered Quantity: 2", shown.get(net.minecraft.core.component.DataComponents.LORE).lines().getLast().getString());
+        assertTrue(shown.get(net.minecraft.core.component.DataComponents.LORE).lines().getLast().getStyle().isBold());
+        assertTrue(source.getOrDefault(net.minecraft.core.component.DataComponents.LORE,
+                net.minecraft.world.item.component.ItemLore.EMPTY).lines().isEmpty());
+    }
+
+    private static Optional<net.minecraft.network.chat.Component> findClickable(net.minecraft.network.chat.Component root) {
+        if (root.getStyle().getClickEvent() != null) return Optional.of(root);
+        for (var child : root.getSiblings()) {
+            var found = findClickable(child);
+            if (found.isPresent()) return found;
+        }
+        return Optional.empty();
     }
 }

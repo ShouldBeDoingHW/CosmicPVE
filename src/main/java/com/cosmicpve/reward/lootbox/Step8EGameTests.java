@@ -12,6 +12,8 @@ import net.minecraft.gametest.framework.TestEnvironmentDefinition;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Rotation;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.event.RegisterGameTestsEvent;
@@ -83,6 +85,27 @@ public final class Step8EGameTests {
                         access.lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(
                                 com.cosmicpve.registry.ModEnchantments.INSANITY), stack) == 0,
                         "Ashoka must not contain Insanity");
+            switch (outcome) {
+                case GHOSTLY_VEIL -> helper.assertTrue(level(access, stack,
+                        com.cosmicpve.registry.ModEnchantments.PALADIN_ARMORED) == 4
+                        && level(access, stack, com.cosmicpve.registry.ModEnchantments.ALIEN_IMPLANTS) == 3
+                        && level(access, stack, com.cosmicpve.registry.ModEnchantments.ARMORED) == 0
+                        && level(access, stack, com.cosmicpve.registry.ModEnchantments.IMPLANTS) == 0,
+                        "Ghostly Veil must use Paladin Armored IV and Alien Implants III");
+                case COVERT_CLOAK -> helper.assertTrue(level(access, stack,
+                        com.cosmicpve.registry.ModEnchantments.PALADIN_ARMORED) == 4
+                        && level(access, stack, com.cosmicpve.registry.ModEnchantments.ARMORED) == 0,
+                        "Covert Cloak must use Paladin Armored IV");
+                case NANKADA -> helper.assertTrue(level(access, stack,
+                        com.cosmicpve.registry.ModEnchantments.PERMANENT_EXECUTE) == 5
+                        && level(access, stack, com.cosmicpve.registry.ModEnchantments.EXECUTE) == 0,
+                        "Nankada must use Permanent Execute V");
+                case ASHOKA -> helper.assertTrue(level(access, stack,
+                        com.cosmicpve.registry.ModEnchantments.DEEP_BLEED) == 6
+                        && level(access, stack, com.cosmicpve.registry.ModEnchantments.BLEED) == 0
+                        && level(access, stack, com.cosmicpve.registry.ModEnchantments.PUMMEL) == 0,
+                        "Ashoka must use Deep Bleed VI without Pummel or ordinary Bleed");
+            }
         }
         var table = new CosmicEnchantmentTableRewards();
         var enchantments = access.lookupOrThrow(Registries.ENCHANTMENT);
@@ -97,6 +120,75 @@ public final class Step8EGameTests {
             helper.assertTrue(com.cosmicpve.equipment.enchantment.CosmicBookRateRules.allows(book, spec, data),
                     "Every generated Table book must be applicable under its scoped rate policy");
         }
+        var heroicTable = new HeroicCosmicEnchantmentTableRewards();
+        var seenHeroics = new java.util.HashSet<net.minecraft.resources.Identifier>();
+        for (int sample = 0; sample < 300; sample++) {
+            var book = heroicTable.create(enchantments, helper.getLevel().getRandom());
+            var data = book.get(ModDataComponents.COSMIC_ENCHANT_BOOK.get());
+            helper.assertTrue(data != null && HeroicCosmicEnchantmentTableRewards.POOL.contains(data.enchantmentId()),
+                    "Heroic Table reward must use one of the exact eight replacements");
+            helper.assertTrue(HeroicCosmicEnchantmentTableRewards.SUCCESS.contains(data.successRate())
+                    && data.destroyRate() >= 1 && data.destroyRate() <= 100,
+                    "Heroic Table rates must be 25/50/75 Success and 1-100 Destroy");
+            helper.assertTrue(data.level() == enchantments.get(data.enchantmentId()).orElseThrow().value().getMaxLevel(),
+                    "Heroic Table books must be maximum level");
+            seenHeroics.add(data.enchantmentId());
+        }
+        helper.assertTrue(seenHeroics.size() == 8, "Loaded-registry sampling must reach all eight Heroics");
+        verifyHeroicConversion(helper, enchantments);
         helper.succeed();
+    }
+
+    private static void verifyHeroicConversion(GameTestHelper helper,
+            net.minecraft.core.Registry<net.minecraft.world.item.enchantment.Enchantment> enchantments) {
+        ItemStack axe = new ItemStack(Items.NETHERITE_AXE);
+        EnchantmentHelper.updateEnchantments(axe, mutable -> {
+            mutable.set(enchantments.getOrThrow(com.cosmicpve.registry.ModEnchantments.BLEED), 6);
+            mutable.set(enchantments.getOrThrow(com.cosmicpve.registry.ModEnchantments.PUMMEL), 3);
+            mutable.set(enchantments.getOrThrow(com.cosmicpve.registry.ModEnchantments.INSANITY), 8);
+            mutable.set(enchantments.getOrThrow(com.cosmicpve.registry.ModEnchantments.DEVOUR), 4);
+            mutable.set(enchantments.getOrThrow(com.cosmicpve.registry.ModEnchantments.SOUL_TETHER), 3);
+        });
+        var service = new com.cosmicpve.equipment.enchantment.CosmicBookApplicationService(enchantments,
+                new com.cosmicpve.equipment.enchantment.CustomEnchantCapacityService(),
+                new com.cosmicpve.equipment.enchantment.WhiteScrollProtectionService(), () -> 1);
+        ItemStack heroicBook = book(com.cosmicpve.registry.ModEnchantments.DEEP_BLEED.identifier(), 6, 100, 100);
+        var converted = service.apply(heroicBook, axe, axe);
+        helper.assertTrue(converted.outcome()
+                == com.cosmicpve.equipment.enchantment.CosmicBookApplicationResult.Outcome.SUCCESS,
+                "Maximum ordinary enchantment must convert even at capacity");
+        var applied = EnchantmentHelper.getEnchantmentsForCrafting(axe);
+        helper.assertTrue(applied.getLevel(enchantments.getOrThrow(com.cosmicpve.registry.ModEnchantments.BLEED)) == 0
+                && applied.getLevel(enchantments.getOrThrow(com.cosmicpve.registry.ModEnchantments.DEEP_BLEED)) == 6,
+                "Conversion must remove the ordinary counterpart and write the real Heroic enchantment");
+
+        ItemStack missingPrerequisite = new ItemStack(Items.NETHERITE_AXE);
+        ItemStack rejectedHeroic = book(com.cosmicpve.registry.ModEnchantments.DEEP_BLEED.identifier(), 1, 100, 100);
+        helper.assertTrue(service.apply(rejectedHeroic, missingPrerequisite, missingPrerequisite).outcome()
+                == com.cosmicpve.equipment.enchantment.CosmicBookApplicationResult.Outcome.REJECTED_HEROIC_PREREQUISITE
+                && rejectedHeroic.getCount() == 1, "Missing max ordinary prerequisite must consume nothing");
+        ItemStack ordinaryBook = book(com.cosmicpve.registry.ModEnchantments.BLEED.identifier(), 6, 100, 100);
+        helper.assertTrue(service.apply(ordinaryBook, axe, axe).outcome()
+                == com.cosmicpve.equipment.enchantment.CosmicBookApplicationResult.Outcome.REJECTED_HEROIC_COUNTERPART
+                && ordinaryBook.getCount() == 1, "Ordinary counterpart cannot coexist with its Heroic replacement");
+        var blackScroll = new com.cosmicpve.equipment.enchantment.BlackScrollExtractionService(
+                enchantments, ignored -> 0, () -> 50);
+        helper.assertTrue(blackScroll.eligibleActualEnchantments(axe).stream()
+                .noneMatch(value -> value.id().equals(com.cosmicpve.registry.ModEnchantments.DEEP_BLEED.identifier())),
+                "Black Scrolls must exclude Heroic enchantments");
+    }
+
+    private static ItemStack book(net.minecraft.resources.Identifier id, int level, int success, int destroy) {
+        ItemStack stack = new ItemStack(com.cosmicpve.registry.ModItems.COSMIC_ENCHANTMENT_BOOK.get());
+        stack.set(ModDataComponents.COSMIC_ENCHANT_BOOK.get(), new com.cosmicpve.data.component.CosmicEnchantmentBookData(
+                com.cosmicpve.data.component.CosmicEnchantmentBookData.CURRENT_DATA_VERSION,
+                id, level, success, destroy));
+        return stack;
+    }
+
+    private static int level(net.minecraft.core.RegistryAccess access, ItemStack stack,
+            ResourceKey<net.minecraft.world.item.enchantment.Enchantment> key) {
+        return EnchantmentHelper.getItemEnchantmentLevel(
+                access.lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(key), stack);
     }
 }

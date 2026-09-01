@@ -94,6 +94,18 @@ public final class RewardCommands {
                                         .map(com.cosmicpve.reward.lootbox.AdminAbuseRewards.Outcome::serializedName), builder))
                         .executes(context -> forceAdmin(context.getSource(),
                                 StringArgumentType.getString(context, "outcome")))));
+        var heroicTable = Commands.literal("heroic-cosmic-enchantment-table")
+                .then(Commands.literal("give").then(Commands.argument("player", EntityArgument.player())
+                        .executes(context -> giveLootbox(context.getSource(), EntityArgument.getPlayer(context, "player"),
+                                com.cosmicpve.registry.ModItems.HEROIC_COSMIC_ENCHANTMENT_TABLE.get(), 1))))
+                .then(Commands.literal("force").then(Commands.argument("enchantment", StringArgumentType.word())
+                        .suggests((context, builder) -> SharedSuggestionProvider.suggest(
+                                com.cosmicpve.reward.lootbox.HeroicCosmicEnchantmentTableRewards.POOL.stream()
+                                        .map(Identifier::getPath), builder))
+                        .then(Commands.argument("success", IntegerArgumentType.integer(1, 100))
+                                .executes(context -> forceHeroicTable(context.getSource(),
+                                        StringArgumentType.getString(context, "enchantment"),
+                                        IntegerArgumentType.getInteger(context, "success"))))));
         return Commands.literal("reward")
                 .then(Commands.literal("list").executes(context -> list(context.getSource())))
                 .then(Commands.literal("inspect").then(tableId.executes(context -> inspect(
@@ -102,6 +114,7 @@ public final class RewardCommands {
                 .then(Commands.literal("animation-demo").executes(context -> animationDemo(context.getSource())))
                 .then(secretCache)
                 .then(cosmicTable)
+                .then(heroicTable)
                 .then(adminAbuse)
                 .then(Commands.literal("roll").then(Commands.argument("table", IdentifierArgument.id())
                         .suggests((context, builder) -> SharedSuggestionProvider.suggestResource(
@@ -224,6 +237,19 @@ public final class RewardCommands {
         if (outcome.isEmpty()) { source.sendFailure(Component.literal("Unknown Admin Abuse outcome.")); return 0; }
         return com.cosmicpve.reward.lootbox.Step8ELootboxService.INSTANCE.forceAdmin(
                 source.getPlayerOrException(), outcome.orElseThrow()) ? 1 : 0;
+    }
+
+    private static int forceHeroicTable(net.minecraft.commands.CommandSourceStack source, String name, int success)
+            throws com.mojang.brigadier.exceptions.CommandSyntaxException {
+        var id = com.cosmicpve.reward.lootbox.HeroicCosmicEnchantmentTableRewards.POOL.stream()
+                .filter(value -> value.getPath().equals(name)).findFirst();
+        if (id.isEmpty()) { source.sendFailure(Component.literal("Unknown Heroic Table entry.")); return 0; }
+        try {
+            return com.cosmicpve.reward.lootbox.Step8ELootboxService.INSTANCE.forceHeroicTable(
+                    source.getPlayerOrException(), id.orElseThrow(), success) ? 1 : 0;
+        } catch (IllegalArgumentException exception) {
+            source.sendFailure(Component.literal(exception.getMessage())); return 0;
+        }
     }
 
     private static int inspect(net.minecraft.commands.CommandSourceStack source, Identifier id) {

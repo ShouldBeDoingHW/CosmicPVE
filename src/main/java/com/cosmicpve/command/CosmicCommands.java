@@ -26,6 +26,7 @@ public final class CosmicCommands {
         MaskLimitCommands.register(event);
         TinkererCommands.registerPublic(event);
         PersonalVaultCommands.registerPublic(event);
+        VKitCommands.registerPublic(event);
         var combat = Commands.literal("combat")
                 .then(Commands.literal("trace")
                         .then(Commands.literal("on").executes(context -> setTrace(context.getSource(), true)))

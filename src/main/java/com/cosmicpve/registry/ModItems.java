@@ -124,6 +124,9 @@ public final class ModItems {
     public static final DeferredItem<AnimatedLootboxItem> COSMIC_ENCHANTMENT_TABLE = ITEMS.registerItem(
             "cosmic_enchantment_table", properties -> new AnimatedLootboxItem(properties,
                     AnimatedLootboxItem.Kind.COSMIC_ENCHANTMENT_TABLE), properties -> properties.stacksTo(1));
+    public static final DeferredItem<AnimatedLootboxItem> HEROIC_COSMIC_ENCHANTMENT_TABLE = ITEMS.registerItem(
+            "heroic_cosmic_enchantment_table", properties -> new AnimatedLootboxItem(properties,
+                    AnimatedLootboxItem.Kind.HEROIC_COSMIC_ENCHANTMENT_TABLE), properties -> properties.stacksTo(1));
     public static final DeferredItem<AnimatedLootboxItem> ADMIN_ABUSE = ITEMS.registerItem(
             "admin_abuse", properties -> new AnimatedLootboxItem(properties,
                     AnimatedLootboxItem.Kind.ADMIN_ABUSE), properties -> properties.stacksTo(1));

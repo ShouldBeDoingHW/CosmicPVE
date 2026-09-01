@@ -58,6 +58,16 @@ public final class ModEnchantments {
     public static final ResourceKey<Enchantment> OBSIDIAN_DESTROYER = createKey("obsidian_destroyer");
     public static final ResourceKey<Enchantment> DOMINATE = createKey("dominate");
     public static final ResourceKey<Enchantment> HEX = createKey("hex");
+    public static final ResourceKey<Enchantment> STORMCALLER = createKey("stormcaller");
+    public static final ResourceKey<Enchantment> SPIRIT_LINK = createKey("spirit_link");
+    public static final ResourceKey<Enchantment> DEEP_BLEED = createKey("deep_bleed");
+    public static final ResourceKey<Enchantment> MIGHTY_CACTUS = createKey("mighty_cactus");
+    public static final ResourceKey<Enchantment> PALADIN_ARMORED = createKey("paladin_armored");
+    public static final ResourceKey<Enchantment> BLIGHTED_VIRUS = createKey("blighted_virus");
+    public static final ResourceKey<Enchantment> ALIEN_IMPLANTS = createKey("alien_implants");
+    public static final ResourceKey<Enchantment> LETHAL_SNIPER = createKey("lethal_sniper");
+    public static final ResourceKey<Enchantment> ETERNAL_SNARE = createKey("eternal_snare");
+    public static final ResourceKey<Enchantment> PERMANENT_EXECUTE = createKey("permanent_execute");
 
     private ModEnchantments() {}
 

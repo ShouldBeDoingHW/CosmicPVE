@@ -42,7 +42,7 @@ public final class UndeadCorpseEntity extends Zombie implements OwnableEntity {
         return Zombie.createAttributes().add(Attributes.MAX_HEALTH, MAX_HEALTH)
                 .add(Attributes.MOVEMENT_SPEED, MOVEMENT_SPEED)
                 .add(Attributes.ATTACK_DAMAGE, 0.0D)
-                .add(Attributes.ARMOR, 0.0D).add(Attributes.ARMOR_TOUGHNESS, 0.0D);
+                .add(Attributes.ARMOR, 1.0D).add(Attributes.ARMOR_TOUGHNESS, 0.0D);
     }
 
     @Override protected void registerGoals() {

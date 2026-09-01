@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Optional;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -39,7 +41,10 @@ public final class FlashSaleService {
             }
             if (FlashSaleSchedule.reminderDue(sale, now)) {
                 data.setActive(Optional.of(sale.withReminderSent()));
-                FlashSaleCatalog.find(sale.entryId()).ifPresent(entry -> broadcast(server, reminder(entry, sale)));
+                FlashSaleCatalog.find(sale.entryId()).ifPresent(entry -> {
+                    broadcast(server, reminder(entry, sale));
+                    FlashSaleReminderAlert.play(server.getPlayerList().getPlayers());
+                });
             }
             return;
         }
@@ -51,6 +56,34 @@ public final class FlashSaleService {
     }
 
     public Optional<FlashSaleActive> active(MinecraftServer server) { return repository.data(server).active(); }
+
+    public boolean preview(ServerPlayer player) {
+        MinecraftServer server = player.level().getServer();
+        var active = repository.data(server).active();
+        if (active.isEmpty() || FlashSaleSchedule.expired(active.orElseThrow(), server.overworld().getGameTime())) {
+            player.sendSystemMessage(Component.literal("There is no current flash sale genius!"));
+            return false;
+        }
+        FlashSaleActive sale = active.orElseThrow();
+        FlashSaleEntry entry = FlashSaleCatalog.find(sale.entryId()).orElse(null);
+        var rewards = entry == null ? Optional.<List<ItemStack>>empty() : resolveOffer(entry, sale);
+        if (rewards.isEmpty() || rewards.orElseThrow().isEmpty()) {
+            player.sendSystemMessage(Component.literal("This Flash Sale reward is currently unavailable."));
+            return false;
+        }
+        ItemStack representative = rewards.orElseThrow().getFirst();
+        return player.openMenu(new net.minecraft.world.SimpleMenuProvider(
+                (id, inventory, ignored) -> new FlashSalePreviewMenu(id, inventory, representative,
+                        entry.quantity(), sale.entryId(), sale.startTick()), FlashSalePreviewMenu.TITLE)).isPresent();
+    }
+
+    boolean matches(MinecraftServer server, String entryId, long startTick) {
+        var active = repository.data(server).active();
+        if (active.isEmpty()) return false;
+        var sale = active.orElseThrow();
+        return sale.entryId().equals(entryId) && sale.startTick() == startTick
+                && !FlashSaleSchedule.expired(sale, server.overworld().getGameTime());
+    }
 
     public boolean startRandom(MinecraftServer server) {
         FlashSaleEntry entry = FlashSaleSchedule.select(FlashSaleCatalog.productionRows(), random::nextInt);
@@ -99,7 +132,7 @@ public final class FlashSaleService {
         FlashSaleEntry entry = FlashSaleCatalog.find(sale.entryId()).orElse(null);
         var outcome = FlashSalePurchaseTransaction.execute(true, sale.purchased(player.getUUID()),
                 money.balance(player), sale.priceCents(),
-                () -> entry == null ? Optional.empty() : entry.create(random),
+                () -> entry == null ? Optional.empty() : resolveOffer(entry, sale),
                 amount -> money.subtract(player, amount),
                 () -> repository.data(server).setActive(Optional.of(sale.withPurchaser(player.getUUID()))),
                 rewards -> delivery.deliver(player, rewards));
@@ -125,10 +158,10 @@ public final class FlashSaleService {
                 + " purchasers=" + sale.purchasers().size() + " next=" + data.nextStartTick();
     }
 
-    private Component startMessage(FlashSaleEntry entry, FlashSaleActive sale) {
+    Component startMessage(FlashSaleEntry entry, FlashSaleActive sale) {
         return commonMessage(entry, sale).append(Component.literal("\nType /buy to purchase!").withColor(0x55FFFF));
     }
-    private Component reminder(FlashSaleEntry entry, FlashSaleActive sale) {
+    Component reminder(FlashSaleEntry entry, FlashSaleActive sale) {
         return Component.literal("FLASH SALE! ").withStyle(style -> style.withColor(0xFFAA00).withBold(true))
                 .append(Component.literal("1 minute remaining!\n").withStyle(style -> style.withColor(0xFF5555).withBold(true)))
                 .append(offer(entry, sale)).append(Component.literal("\nType /buy to purchase!").withColor(0x55FFFF));
@@ -146,7 +179,14 @@ public final class FlashSaleService {
     private Component styledRewardName(FlashSaleEntry entry) {
         return entry.create(RandomSource.create(0L))
                 .filter(stacks -> !stacks.isEmpty()).map(stacks -> stacks.getFirst().getHoverName().copy())
-                .orElseGet(() -> entry.displayName().copy());
+                .orElseGet(() -> entry.displayName().copy())
+                .withStyle(style -> style.withUnderlined(true)
+                        .withClickEvent(new ClickEvent.RunCommand("/flashsale preview"))
+                        .withHoverEvent(new HoverEvent.ShowText(Component.literal("Click to preview this item"))));
+    }
+    Optional<List<ItemStack>> resolveOffer(FlashSaleEntry entry, FlashSaleActive sale) {
+        long seed = 31L * sale.entryId().hashCode() + sale.startTick();
+        return entry.create(RandomSource.create(seed));
     }
     private static void broadcast(MinecraftServer server, Component message) {
         server.getPlayerList().broadcastSystemMessage(message, false);

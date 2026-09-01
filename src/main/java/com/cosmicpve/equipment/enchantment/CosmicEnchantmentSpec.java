@@ -5,7 +5,12 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 
 public record CosmicEnchantmentSpec(
-        Identifier id, int maxLevel, CosmicEnchantmentTier tier, String equipmentApplicability) {
+        Identifier id, int maxLevel, CosmicEnchantmentTier tier, String equipmentApplicability,
+        boolean randomPoolEligible) {
+    public CosmicEnchantmentSpec(Identifier id, int maxLevel, CosmicEnchantmentTier tier,
+            String equipmentApplicability) {
+        this(id, maxLevel, tier, equipmentApplicability, true);
+    }
     public CosmicEnchantmentSpec {
         id = Objects.requireNonNull(id);
         if (maxLevel <= 0) {

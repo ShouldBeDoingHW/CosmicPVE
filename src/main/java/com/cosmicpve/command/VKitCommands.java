@@ -30,6 +30,16 @@ public final class VKitCommands {
 
     private VKitCommands() {}
 
+    public static void registerPublic(net.neoforged.neoforge.event.RegisterCommandsEvent event) {
+        event.getDispatcher().register(Commands.literal("vkit").executes(context -> {
+            var player = context.getSource().getPlayerOrException();
+            player.openMenu(new net.minecraft.world.SimpleMenuProvider(
+                    (id, inventory, ignored) -> new com.cosmicpve.vkit.VKitInfoMenu(id, inventory, player),
+                    com.cosmicpve.vkit.VKitInfoMenu.TITLE));
+            return 1;
+        }));
+    }
+
     public static com.mojang.brigadier.builder.LiteralArgumentBuilder<net.minecraft.commands.CommandSourceStack> create() {
         return Commands.literal("vkit")
                 .then(Commands.literal("inspect")

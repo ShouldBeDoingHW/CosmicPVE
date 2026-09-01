@@ -20,7 +20,9 @@ public final class CosmicEnchantmentTableRewards {
     public static final Identifier SOURCE_ID = CosmicPVE.id("cosmic_enchantment_table");
     public static final List<ResourceKey<Enchantment>> POOL = List.of(ModEnchantments.ARMORED, ModEnchantments.ANGELIC,
             ModEnchantments.RAGE, ModEnchantments.OBLITERATE, ModEnchantments.LEADERSHIP,
-            ModEnchantments.SOUL_SIPHON, ModEnchantments.LUCK);
+            ModEnchantments.SOUL_SIPHON, ModEnchantments.LUCK, ModEnchantments.EAGLE_EYE,
+            ModEnchantments.LIGHTNING, ModEnchantments.MOLTEN, ModEnchantments.SNIPER,
+            ModEnchantments.STORMCALLER, ModEnchantments.DOMINATE);
     public static final List<Integer> ORDINARY_SUCCESS = List.of(50, 75, 100);
     public static final List<Integer> MASTERY_SUCCESS = List.of(25, 50);
 

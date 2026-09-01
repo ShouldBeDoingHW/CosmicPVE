@@ -62,6 +62,17 @@ class CosmicDustFoundationTest {
         assertEquals(8, dust.getCount());
     }
 
+    @Test void heroicDustIsRarityLockedAndMayReachOneHundred() {
+        ItemStack book = book(CosmicPVE.id("deep_bleed"), 6, 97, 100);
+        ItemStack dust = CosmicDustService.dust(CosmicEnchantmentTier.HEROIC, 10);
+        var result = new CosmicDustService().apply(dust, book, book);
+        assertEquals(CosmicDustService.ApplicationOutcome.SUCCESS, result.outcome());
+        assertEquals(3, result.consumed());
+        assertEquals(100, book.get(ModDataComponents.COSMIC_ENCHANT_BOOK.get()).successRate());
+        assertEquals(CosmicDustService.ApplicationOutcome.REJECTED_CAPPED,
+                new CosmicDustService().apply(dust, book, book).outcome());
+    }
+
     @Test void wrongRarityAndStaleTargetsConsumeNothing() {
         ItemStack book = book(CosmicPVE.id("molten"), 4, 43, 80);
         ItemStack dust = CosmicDustService.dust(CosmicEnchantmentTier.ELITE, 7);
@@ -103,6 +114,8 @@ class CosmicDustFoundationTest {
                 CosmicDustService.bookTier(book(CosmicPVE.id("doublestrike"), 1, 25, 25)).orElseThrow());
         assertEquals(CosmicEnchantmentTier.MASTERY,
                 CosmicDustService.bookTier(book(CosmicPVE.id("death_pact"), 1, 25, 75)).orElseThrow());
+        assertEquals(CosmicEnchantmentTier.HEROIC,
+                CosmicDustService.bookTier(book(CosmicPVE.id("deep_bleed"), 1, 25, 75)).orElseThrow());
         assertTrue(CosmicDustService.bookTier(new ItemStack(net.minecraft.world.item.Items.DIAMOND_SWORD)).isEmpty());
         assertTrue(CosmicDustService.bookTier(new ItemStack(ModItems.WHITE_SCROLL.get())).isEmpty());
         assertTrue(CosmicDustService.bookTier(new ItemStack(ModItems.BLACK_SCROLL.get())).isEmpty());

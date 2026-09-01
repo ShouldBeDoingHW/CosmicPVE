@@ -60,7 +60,7 @@ public final class GearSalvageService {
             case ELITE -> 250;
             case ULTIMATE -> 475;
             case LEGENDARY -> 800;
-            case MASTERY -> 2500;
+            case MASTERY, HEROIC -> 2500;
         };
     }
 }

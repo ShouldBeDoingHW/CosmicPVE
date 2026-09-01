@@ -65,7 +65,8 @@ class CosmicEnchantmentRegistrationTest {
                 Map.entry("sniper", 5),
                 Map.entry("snare", 4),
                 Map.entry("plague_carrier", 7),
-                Map.entry("hex", 5));
+                Map.entry("hex", 5),
+                Map.entry("spirit_link", 7));
         for (var entry : expected.entrySet()) {
             var resource = getClass().getClassLoader()
                     .getResourceAsStream("data/cosmicpve/enchantment/" + entry.getKey() + ".json");
@@ -113,10 +114,14 @@ class CosmicEnchantmentRegistrationTest {
                 } else if (entry.getKey().equals("dominate")) {
                     assertEquals("#cosmicpve:enchantable/bow_or_crossbow", json.get("supported_items").getAsString());
                     assertEquals(4, json.get("max_level").getAsInt());
+                } else if (entry.getKey().equals("spirit_link")) {
+                    assertEquals("#cosmicpve:enchantable/helmet_or_chestplate", json.get("supported_items").getAsString());
+                    assertEquals("head", json.getAsJsonArray("slots").get(0).getAsString());
+                    assertEquals("chest", json.getAsJsonArray("slots").get(1).getAsString());
                 }
             }
         }
-        assertEquals(52, CosmicEnchantmentSpecs.ALL.size());
+        assertEquals(62, CosmicEnchantmentSpecs.ALL.size());
         assertEquals(CosmicEnchantmentTier.ELITE, CosmicEnchantmentSpecs.EXECUTE.tier());
         assertEquals(CosmicEnchantmentTier.ULTIMATE, CosmicEnchantmentSpecs.ANGELIC.tier());
         assertEquals(CosmicEnchantmentTier.SIMPLE, CosmicEnchantmentSpecs.LIGHTNING.tier());

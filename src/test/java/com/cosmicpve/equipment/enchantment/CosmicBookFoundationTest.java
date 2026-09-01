@@ -15,6 +15,8 @@ class CosmicBookFoundationTest {
         assertFalse(CosmicEnchantmentTier.MASTERY.allowsRates(50,51));
         assertFalse(CosmicEnchantmentTier.MASTERY.allowsRates(49,50));
         assertTrue(CosmicEnchantmentTier.ELITE.allowsRates(100,1));
+        assertTrue(CosmicEnchantmentTier.HEROIC.allowsRates(1,1));
+        assertTrue(CosmicEnchantmentTier.HEROIC.allowsRates(100,100));
     }
     @Test void deterministicSuccessNeverRollsDestroy() {
         var calls=new AtomicInteger();

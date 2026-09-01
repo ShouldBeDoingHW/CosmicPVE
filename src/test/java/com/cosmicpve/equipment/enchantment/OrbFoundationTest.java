@@ -26,7 +26,32 @@ class OrbFoundationTest {
     @Test void orbItemsAreNonStackingAndNeverForceGlint() {
         assertEquals(1, EnchantmentOrbItem.MAX_STACK_SIZE);
         assertFalse(EnchantmentOrbItem.FORCE_GLINT);
-        assertEquals(0x55FF55,EnchantmentOrbItem.NAME_COLOR);
+        assertEquals(0x55FFFF, EnchantmentOrbItem.ARMOR_NAME_COLOR);
+        assertEquals(0xFFAA00, EnchantmentOrbItem.WEAPON_NAME_COLOR);
+    }
+
+    @Test void orbPresentationUsesExactFamilyNamesColorsRatesAndMechanicLore() {
+        var factory = new EnchantingRewardItemFactory();
+        var armor = factory.orb(OrbType.ARMOR, 73, 41);
+        var weapon = factory.orb(OrbType.WEAPON, 64, 92);
+        assertEquals("Armor Enchantment Orb", armor.getHoverName().getString());
+        assertEquals(0x55FFFF, armor.getHoverName().getStyle().getColor().getValue());
+        assertTrue(armor.getHoverName().getStyle().isBold());
+        assertEquals("Weapon Enchantment Orb", weapon.getHoverName().getString());
+        assertEquals(0xFFAA00, weapon.getHoverName().getStyle().getColor().getValue());
+        assertTrue(weapon.getHoverName().getStyle().isBold());
+        var armorLore = EnchantmentOrbItem.lore(armor, armor.get(com.cosmicpve.registry.ModDataComponents.ENCHANTMENT_ORB.get()));
+        var weaponLore = EnchantmentOrbItem.lore(weapon, weapon.get(com.cosmicpve.registry.ModDataComponents.ENCHANTMENT_ORB.get()));
+        assertEquals("Expand the weave. Make room for one more enchantment.", armorLore.getFirst().getString());
+        assertTrue(armorLore.getFirst().getStyle().isItalic());
+        assertEquals("SUCCESS: 73%", armorLore.get(2).getString());
+        assertTrue(armorLore.get(2).getStyle().isBold());
+        assertEquals("DESTROY: 41%", armorLore.get(3).getString());
+        assertEquals("Armor capacity: 5 → 8 max", armorLore.get(5).getString());
+        assertEquals("Carve another channel for power.", weaponLore.getFirst().getString());
+        assertEquals("SUCCESS: 64%", weaponLore.get(2).getString());
+        assertEquals("DESTROY: 92%", weaponLore.get(3).getString());
+        assertEquals("Weapon capacity: 5 → 10 max", weaponLore.get(5).getString());
     }
 
     @Test void bothOrbModelsUseTheVanillaEyeOfEnderTexture() throws Exception {

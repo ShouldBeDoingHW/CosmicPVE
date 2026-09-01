@@ -20,7 +20,7 @@ public final class UnexaminedBookOpeningService {
     public Optional<Result> roll(CosmicEnchantmentTier tier, List<CosmicEnchantmentSpec> available,
             RandomSource random, @Nullable ServerPlayer opener) {
         List<CosmicEnchantmentSpec> eligible = available.stream()
-                .filter(spec -> spec.tier() == tier)
+                .filter(spec -> spec.tier() == tier && spec.randomPoolEligible())
                 .sorted(Comparator.comparing(spec -> spec.id().toString()))
                 .toList();
         if (eligible.isEmpty()) return Optional.empty();

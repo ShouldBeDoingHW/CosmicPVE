@@ -17,6 +17,12 @@ class WhiteScrollMetadataTest {
     }
 
     @Test void whiteScrollNameIsBold() {
-        assertTrue(new ItemStack(ModItems.WHITE_SCROLL.get()).getHoverName().getStyle().isBold());
+        var name = new ItemStack(ModItems.WHITE_SCROLL.get()).getHoverName();
+        assertTrue(name.getStyle().isBold());
+        assertEquals(0xFFFFFF, name.getStyle().getColor().getValue());
+        assertEquals("A thin veil between fortune and ruin.", WhiteScrollItem.lore().getFirst().getString());
+        assertTrue(WhiteScrollItem.lore().getFirst().getStyle().isItalic());
+        assertEquals("ONE-TIME PROTECTION", WhiteScrollItem.lore().get(2).getString());
+        assertTrue(WhiteScrollItem.lore().get(2).getStyle().isBold());
     }
 }

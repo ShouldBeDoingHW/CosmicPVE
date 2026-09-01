@@ -124,6 +124,12 @@ public final class CosmicCombat {
     private static final com.cosmicpve.combat.enchantment.DodgeProcResolver DODGE =
             new com.cosmicpve.combat.enchantment.DodgeProcResolver(MASKS);
     private static final SelfDestructEventBridge SELF_DESTRUCT_EVENTS = new SelfDestructEventBridge();
+    private static final com.cosmicpve.combat.enchantment.LethalSniperBehavior LETHAL_SNIPER =
+            new com.cosmicpve.combat.enchantment.LethalSniperBehavior(PROJECTILE_IMPACTS);
+    private static final com.cosmicpve.combat.enchantment.EternalSnareBehavior ETERNAL_SNARE =
+            new com.cosmicpve.combat.enchantment.EternalSnareBehavior(SNARE_ROOTS);
+    private static final com.cosmicpve.combat.enchantment.SpiritLinkBehavior SPIRIT_LINK =
+            new com.cosmicpve.combat.enchantment.SpiritLinkBehavior();
 
     private CosmicCombat() {}
 
@@ -132,10 +138,13 @@ public final class CosmicCombat {
         var permafrost = new PermafrostBehavior(STACKS);
         var hex = new com.cosmicpve.combat.enchantment.HexBehavior(STACKS);
         OUTGOING.register(new ExecuteBehavior());
+        OUTGOING.register(new com.cosmicpve.combat.enchantment.PermanentExecuteBehavior());
         OUTGOING.register(new GreatswordBehavior());
         OUTGOING.register(new InsanityBehavior());
         OUTGOING.register(new EagleEyeBehavior());
         OUTGOING.register(new com.cosmicpve.combat.enchantment.SniperBehavior(PROJECTILE_IMPACTS));
+        OUTGOING.register(LETHAL_SNIPER);
+        OUTGOING.register(ETERNAL_SNARE);
         OUTGOING.register(new RageBehavior(RECENT_COMBAT_MEMORY));
         OUTGOING.register(ARMOR_SET_COMBAT);
         OUTGOING.register(WEAPON_SKIN_COMBAT);
@@ -149,6 +158,7 @@ public final class CosmicCombat {
         OUTGOING.register(MASK_COMBAT);
         OUTGOING.register(new com.cosmicpve.combat.enchantment.DominateBehavior());
         OUTGOING.register(hex);
+        OUTGOING.register(SPIRIT_LINK);
         INCOMING.register(ARMOR_SET_COMBAT);
         INCOMING.register(WEAPON_SKIN_COMBAT);
         INCOMING.register(deathPact);
@@ -162,6 +172,8 @@ public final class CosmicCombat {
         PROC_SOURCES.register(ENCHANTMENT_BEHAVIORS);
         PROC_SOURCES.register(WEAPON_SKIN_COMBAT);
         PROC_SOURCES.register(DODGE);
+        PROC_SOURCES.register(LETHAL_SNIPER);
+        PROC_SOURCES.register(SPIRIT_LINK);
         NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, SELF_DESTRUCT_EVENTS::onIncomingDamage);
         NeoForge.EVENT_BUS.addListener(EVENTS::onIncomingDamage);
         NeoForge.EVENT_BUS.addListener(EVENTS::onDamageAccepted);
@@ -187,6 +199,7 @@ public final class CosmicCombat {
         NeoForge.EVENT_BUS.addListener(MASK_EVENTS::onEffectApplicable);
         NeoForge.EVENT_BUS.addListener(RECENT_COMBAT_MEMORY_EVENTS::onServerTick);
         NeoForge.EVENT_BUS.addListener(SELF_DESTRUCT_EVENTS::onExplosion);
+        NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, SPIRIT_LINK::onDeath);
     }
 
     public static CombatTraceService traces() {

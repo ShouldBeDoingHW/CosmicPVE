@@ -1,0 +1,11 @@
+{
+  "anvil_cost": 8,
+  "description": {"translate": "enchantment.cosmicpve.spirit_link"},
+  "effects": {},
+  "max_cost": {"base": 1, "per_level_above_first": 0},
+  "max_level": 7,
+  "min_cost": {"base": 1, "per_level_above_first": 0},
+  "slots": ["head", "chest"],
+  "supported_items": "#cosmicpve:enchantable/helmet_or_chestplate",
+  "weight": 1
+}

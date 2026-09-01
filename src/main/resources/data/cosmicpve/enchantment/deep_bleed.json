@@ -1,0 +1,12 @@
+{
+  "anvil_cost": 8,
+  "description": {"translate": "enchantment.cosmicpve.deep_bleed"},
+  "effects": {},
+  "max_cost": {"base": 1, "per_level_above_first": 0},
+  "max_level": 6,
+  "min_cost": {"base": 1, "per_level_above_first": 0},
+  "slots": ["mainhand"],
+  "supported_items": "#cosmicpve:enchantable/axe",
+  "weight": 1
+}
+

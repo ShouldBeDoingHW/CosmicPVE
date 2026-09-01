@@ -72,6 +72,8 @@ public final class EnchantingEventBridge {
             case FAILED_PROTECTED -> "message.cosmicpve.book.failed_protected";
             case REJECTED_CAPACITY -> "message.cosmicpve.book.capacity";
             case REJECTED_EXISTING_LEVEL -> "message.cosmicpve.book.existing";
+            case REJECTED_HEROIC_PREREQUISITE -> "message.cosmicpve.book.heroic_prerequisite";
+            case REJECTED_HEROIC_COUNTERPART -> "message.cosmicpve.book.heroic_counterpart";
             case REJECTED_TARGET -> "message.cosmicpve.book.incompatible";
             default -> "message.cosmicpve.book.invalid";
         };

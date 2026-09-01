@@ -28,6 +28,12 @@ public final class EquipmentTooltipService {
         event.getToolTip().addAll(armorSetPresentationLines(stack));
         if (stack.is(com.cosmicpve.registry.ModItems.SECRET_WEAPON_CACHE.get()))
             event.getToolTip().addAll(com.cosmicpve.reward.lootbox.AnimatedLootboxItem.secretWeaponCacheLore());
+        if (stack.is(com.cosmicpve.registry.ModItems.COSMIC_ENCHANTMENT_TABLE.get()))
+            event.getToolTip().add(Component.literal("Reach into the cosmos and see what answers.")
+                    .withStyle(net.minecraft.ChatFormatting.YELLOW, net.minecraft.ChatFormatting.ITALIC));
+        if (stack.is(com.cosmicpve.registry.ModItems.HEROIC_COSMIC_ENCHANTMENT_TABLE.get()))
+            event.getToolTip().add(Component.literal("Only the strongest powers answer this call.")
+                    .withStyle(net.minecraft.ChatFormatting.YELLOW, net.minecraft.ChatFormatting.ITALIC));
         var crystal = stack.get(ModDataComponents.ARMOR_SET_CRYSTAL.get());
         if (crystal != null) {
             int color = crystal.identity().color();
@@ -60,8 +66,7 @@ public final class EquipmentTooltipService {
                     .withColor(0xFFFFFF).withStyle(net.minecraft.ChatFormatting.BOLD));
         }
         if (stack.is(com.cosmicpve.registry.ModItems.WHITE_SCROLL.get())) {
-            event.getToolTip().add(Component.translatable("tooltip.cosmicpve.white_scroll.purpose"));
-            event.getToolTip().add(Component.translatable("tooltip.cosmicpve.white_scroll.instruction"));
+            event.getToolTip().addAll(com.cosmicpve.equipment.enchantment.WhiteScrollItem.lore());
         }
         if (stack.is(com.cosmicpve.registry.ModItems.TRANSMOG_SCROLL.get())) {
             event.getToolTip().add(Component.translatable("tooltip.cosmicpve.transmog.purpose"));
@@ -78,13 +83,7 @@ public final class EquipmentTooltipService {
                 com.cosmicpve.economy.MoneyAmount.format(banknote.valueCents())).withStyle(net.minecraft.ChatFormatting.YELLOW));
         var orb = stack.get(ModDataComponents.ENCHANTMENT_ORB.get());
         if (orb != null) {
-            boolean armor = stack.is(com.cosmicpve.registry.ModItems.ARMOR_ENCHANTMENT_ORB.get());
-            event.getToolTip().add(Component.translatable(armor
-                    ? "tooltip.cosmicpve.orb.armor_purpose" : "tooltip.cosmicpve.orb.weapon_purpose"));
-            event.getToolTip().add(Component.translatable("tooltip.cosmicpve.orb.success", orb.successRate()).withColor(ItemApplicationColors.SUCCESS));
-            event.getToolTip().add(Component.translatable("tooltip.cosmicpve.orb.destroy", orb.destroyRate()).withColor(ItemApplicationColors.DESTROY));
-            event.getToolTip().add(Component.translatable(armor
-                    ? "tooltip.cosmicpve.orb.armor_instruction" : "tooltip.cosmicpve.orb.weapon_instruction"));
+            event.getToolTip().addAll(com.cosmicpve.equipment.enchantment.EnchantmentOrbItem.lore(stack, orb));
         }
         var blackScroll = stack.get(ModDataComponents.BLACK_SCROLL.get());
         if (blackScroll != null) {

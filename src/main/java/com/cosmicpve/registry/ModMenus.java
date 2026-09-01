@@ -7,6 +7,8 @@ import com.cosmicpve.tinkerer.TinkererMenu;
 import com.cosmicpve.personalvault.PersonalVaultMenu;
 import com.cosmicpve.reward.animation.SingleRewardAnimationMenu;
 import com.cosmicpve.equipment.enchantment.EnchantedBlackScrollMenu;
+import com.cosmicpve.economy.flashsale.FlashSalePreviewMenu;
+import com.cosmicpve.vkit.VKitInfoMenu;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.inventory.MenuType;
 import net.neoforged.bus.api.IEventBus;
@@ -28,6 +30,10 @@ public final class ModMenus {
             "single_reward_animation", () -> IMenuTypeExtension.create(SingleRewardAnimationMenu::client));
     public static final DeferredHolder<MenuType<?>, MenuType<EnchantedBlackScrollMenu>> ENCHANTED_BLACK_SCROLL = MENUS.register(
             "enchanted_black_scroll", () -> IMenuTypeExtension.create(EnchantedBlackScrollMenu::client));
+    public static final DeferredHolder<MenuType<?>, MenuType<FlashSalePreviewMenu>> FLASH_SALE_PREVIEW = MENUS.register(
+            "flash_sale_preview", () -> IMenuTypeExtension.create(FlashSalePreviewMenu::client));
+    public static final DeferredHolder<MenuType<?>, MenuType<VKitInfoMenu>> VKIT_INFO = MENUS.register(
+            "vkit_info", () -> IMenuTypeExtension.create(VKitInfoMenu::client));
     private ModMenus() {}
     public static void register(IEventBus bus) { MENUS.register(bus); }
 }

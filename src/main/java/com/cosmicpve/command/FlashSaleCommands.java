@@ -14,7 +14,8 @@ public final class FlashSaleCommands {
 
     public static void registerPublic(RegisterCommandsEvent event) {
         event.getDispatcher().register(Commands.literal("flashsale")
-                .then(Commands.literal("buy").executes(context -> buy(context.getSource()))));
+                .then(Commands.literal("buy").executes(context -> buy(context.getSource())))
+                .then(Commands.literal("preview").executes(context -> preview(context.getSource()))));
         event.getDispatcher().register(Commands.literal("buy").executes(context -> buy(context.getSource())));
     }
 
@@ -41,6 +42,10 @@ public final class FlashSaleCommands {
             throws com.mojang.brigadier.exceptions.CommandSyntaxException {
         return FlashSaleRuntime.service().buy(source.getPlayerOrException())
                 == com.cosmicpve.economy.flashsale.FlashSalePurchaseTransaction.Outcome.SUCCESS ? 1 : 0;
+    }
+    private static int preview(net.minecraft.commands.CommandSourceStack source)
+            throws com.mojang.brigadier.exceptions.CommandSyntaxException {
+        return FlashSaleRuntime.service().preview(source.getPlayerOrException()) ? 1 : 0;
     }
     private static int status(net.minecraft.commands.CommandSourceStack source) {
         source.sendSuccess(() -> Component.literal(FlashSaleRuntime.service().status(source.getServer())), false); return 1;

@@ -35,17 +35,39 @@ public final class CosmicBookApplicationService {
         if (!enchantment.value().canEnchant(target)) return result(CosmicBookApplicationResult.Outcome.REJECTED_TARGET, id, data, 0, used, limit, protectedBefore);
         if (data.level() < 1 || data.level() > enchantment.value().getMaxLevel())
             return result(CosmicBookApplicationResult.Outcome.REJECTED_LEVEL, id, data, 0, used, limit, protectedBefore);
-        int existing = EnchantmentHelper.getEnchantmentsForCrafting(target).getLevel(enchantment);
+        var currentEnchantments = EnchantmentHelper.getEnchantmentsForCrafting(target);
+        int existing = currentEnchantments.getLevel(enchantment);
+        var ordinaryId = HeroicEnchantments.ordinaryFor(id);
+        var heroicId = HeroicEnchantments.heroicFor(id);
+        if (heroicId.isPresent()) {
+            var heroicHolder = enchantments.get(heroicId.orElseThrow());
+            if (heroicHolder.isPresent() && currentEnchantments.getLevel(heroicHolder.orElseThrow()) > 0)
+                return result(CosmicBookApplicationResult.Outcome.REJECTED_HEROIC_COUNTERPART, id, data, 0, used, limit, protectedBefore);
+        }
+        net.minecraft.core.Holder.Reference<Enchantment> ordinaryHolder = null;
+        boolean initialHeroicConversion = false;
+        if (ordinaryId.isPresent() && existing == 0) {
+            ordinaryHolder = enchantments.get(ordinaryId.orElseThrow()).orElse(null);
+            var ordinarySpec = CosmicEnchantmentSpecs.find(ordinaryId.orElseThrow()).orElse(null);
+            int ordinaryLevel = ordinaryHolder == null ? 0 : currentEnchantments.getLevel(ordinaryHolder);
+            if (ordinarySpec == null || ordinaryLevel != ordinarySpec.maxLevel())
+                return result(CosmicBookApplicationResult.Outcome.REJECTED_HEROIC_PREREQUISITE, id, data, 0, used, limit, protectedBefore);
+            initialHeroicConversion = true;
+        }
         int applied = data.level() == existing ? existing + 1 : data.level();
         if (data.level() < existing || applied > enchantment.value().getMaxLevel())
             return result(CosmicBookApplicationResult.Outcome.REJECTED_EXISTING_LEVEL, id, data, applied, used, limit, protectedBefore);
-        if (!capacity.canAdd(target, id)) return result(CosmicBookApplicationResult.Outcome.REJECTED_CAPACITY, id, data, applied, used, limit, protectedBefore);
+        if (!initialHeroicConversion && !capacity.canAdd(target, id)) return result(CosmicBookApplicationResult.Outcome.REJECTED_CAPACITY, id, data, applied, used, limit, protectedBefore);
 
         var decision = CosmicBookRollResolver.resolve(data.successRate(), data.destroyRate(), roll);
         int successRoll = decision.successRoll();
         book.shrink(1);
         if (decision.outcome() == CosmicBookRollResolver.Outcome.SUCCESS) {
-            EnchantmentHelper.updateEnchantments(target, mutable -> mutable.set(enchantment, applied));
+            var removeOrdinary = ordinaryHolder;
+            EnchantmentHelper.updateEnchantments(target, mutable -> {
+                if (removeOrdinary != null) mutable.removeIf(candidate -> candidate.equals(removeOrdinary));
+                mutable.set(enchantment, applied);
+            });
             return result(CosmicBookApplicationResult.Outcome.SUCCESS, id, data, applied, used, limit, protectedBefore, successRoll, null);
         }
         int destroyRoll = decision.destroyRoll().orElseThrow();

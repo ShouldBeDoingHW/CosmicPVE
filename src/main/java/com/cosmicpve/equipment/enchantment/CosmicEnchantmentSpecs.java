@@ -111,6 +111,26 @@ public final class CosmicEnchantmentSpecs {
             ModEnchantments.DOMINATE.identifier(), 4, CosmicEnchantmentTier.ULTIMATE, "bow_or_crossbow");
     public static final CosmicEnchantmentSpec HEX = new CosmicEnchantmentSpec(
             ModEnchantments.HEX.identifier(), 5, CosmicEnchantmentTier.LEGENDARY, "axe");
+    public static final CosmicEnchantmentSpec STORMCALLER = new CosmicEnchantmentSpec(
+            ModEnchantments.STORMCALLER.identifier(), 5, CosmicEnchantmentTier.ELITE, "boots_or_chestplate", false);
+    public static final CosmicEnchantmentSpec SPIRIT_LINK = new CosmicEnchantmentSpec(
+            ModEnchantments.SPIRIT_LINK.identifier(), 7, CosmicEnchantmentTier.ELITE, "helmet_or_chestplate");
+    public static final CosmicEnchantmentSpec DEEP_BLEED = new CosmicEnchantmentSpec(
+            ModEnchantments.DEEP_BLEED.identifier(), 6, CosmicEnchantmentTier.HEROIC, "axe");
+    public static final CosmicEnchantmentSpec MIGHTY_CACTUS = new CosmicEnchantmentSpec(
+            ModEnchantments.MIGHTY_CACTUS.identifier(), 2, CosmicEnchantmentTier.HEROIC, "leggings");
+    public static final CosmicEnchantmentSpec PALADIN_ARMORED = new CosmicEnchantmentSpec(
+            ModEnchantments.PALADIN_ARMORED.identifier(), 4, CosmicEnchantmentTier.HEROIC, "any_armor");
+    public static final CosmicEnchantmentSpec BLIGHTED_VIRUS = new CosmicEnchantmentSpec(
+            ModEnchantments.BLIGHTED_VIRUS.identifier(), 3, CosmicEnchantmentTier.HEROIC, "bow_or_crossbow");
+    public static final CosmicEnchantmentSpec ALIEN_IMPLANTS = new CosmicEnchantmentSpec(
+            ModEnchantments.ALIEN_IMPLANTS.identifier(), 3, CosmicEnchantmentTier.HEROIC, "helmet");
+    public static final CosmicEnchantmentSpec LETHAL_SNIPER = new CosmicEnchantmentSpec(
+            ModEnchantments.LETHAL_SNIPER.identifier(), 5, CosmicEnchantmentTier.HEROIC, "bow_or_crossbow");
+    public static final CosmicEnchantmentSpec ETERNAL_SNARE = new CosmicEnchantmentSpec(
+            ModEnchantments.ETERNAL_SNARE.identifier(), 4, CosmicEnchantmentTier.HEROIC, "crossbow");
+    public static final CosmicEnchantmentSpec PERMANENT_EXECUTE = new CosmicEnchantmentSpec(
+            ModEnchantments.PERMANENT_EXECUTE.identifier(), 5, CosmicEnchantmentTier.HEROIC, "sword");
 
     public static final List<CosmicEnchantmentSpec> ALL =
             List.of(EXECUTE, ANGELIC, LIGHTNING, ENDER_SHIFT, DOUBLESTRIKE, BLEED, LUCK, POISON, PUMMEL,
@@ -119,7 +139,9 @@ public final class CosmicEnchantmentSpecs {
                     GEARS, PERMAFROST, MORTAL_COIL, SELF_DESTRUCT, PHOENIX, DIVINE_IMMOLATION, VIRUS, DEVOUR,
                     UNDEAD_RUSE, OBLITERATE, SOUL_TETHER, DODGE, LEADERSHIP,
                     HERO_KILLER, SOUL_SIPHON, BLACKOUT, ENDER_WALKER, VOODOO,
-                    SNIPER, SNARE, PLAGUE_CARRIER, OBSIDIAN_DESTROYER, DOMINATE, HEX);
+                    SNIPER, SNARE, PLAGUE_CARRIER, OBSIDIAN_DESTROYER, DOMINATE, HEX, STORMCALLER, SPIRIT_LINK,
+                    DEEP_BLEED, MIGHTY_CACTUS, PALADIN_ARMORED, BLIGHTED_VIRUS, ALIEN_IMPLANTS,
+                    LETHAL_SNIPER, ETERNAL_SNARE, PERMANENT_EXECUTE);
 
     private CosmicEnchantmentSpecs() {}
 

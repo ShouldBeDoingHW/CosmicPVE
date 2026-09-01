@@ -10,7 +10,8 @@ public enum CosmicEnchantmentTier {
     ELITE(0xA3FFF5, 1, 100, 1, 100),
     ULTIMATE(0xFFFF55, 1, 100, 1, 100),
     LEGENDARY(0xFFAA00, 1, 100, 1, 100),
-    MASTERY(0xAA0000, 1, 49, 51, 100);
+    MASTERY(0xAA0000, 1, 49, 51, 100),
+    HEROIC(0xFF00A2, 1, 100, 1, 100);
 
     public static final Codec<CosmicEnchantmentTier> CODEC = Codec.STRING.comapFlatMap(name -> {
         try {
@@ -31,7 +32,7 @@ public enum CosmicEnchantmentTier {
     }
     public int tooltipColor() { return tooltipColor; }
     public String serializedName() { return name().toLowerCase(Locale.ROOT); }
-    public boolean extractableByBlackScroll() { return this != MASTERY; }
+    public boolean extractableByBlackScroll() { return this != MASTERY && this != HEROIC; }
     public boolean allowsRates(int success, int destroy) {
         return success >= minSuccess && success <= maxSuccess && destroy >= minDestroy && destroy <= maxDestroy;
     }

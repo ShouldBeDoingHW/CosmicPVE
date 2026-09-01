@@ -31,6 +31,8 @@ public final class CosmicPVEClient {
         NeoForge.EVENT_BUS.addListener(scrollingTooltips::onRender);
         NeoForge.EVENT_BUS.addListener(scrollingTooltips::onMouseScrolled);
         NeoForge.EVENT_BUS.addListener(scrollingTooltips::onScreenClosing);
+        NeoForge.EVENT_BUS.addListener(scrollingTooltips::onScreenRenderPre);
+        NeoForge.EVENT_BUS.addListener(scrollingTooltips::onScreenRenderPost);
     }
 
     private static void registerMenuScreens(RegisterMenuScreensEvent event) {
@@ -40,6 +42,8 @@ public final class CosmicPVEClient {
         event.register(com.cosmicpve.registry.ModMenus.PERSONAL_VAULT.get(), PersonalVaultScreen::new);
         event.register(com.cosmicpve.registry.ModMenus.SINGLE_REWARD_ANIMATION.get(), SingleRewardAnimationScreen::new);
         event.register(com.cosmicpve.registry.ModMenus.ENCHANTED_BLACK_SCROLL.get(), EnchantedBlackScrollScreen::new);
+        event.register(com.cosmicpve.registry.ModMenus.FLASH_SALE_PREVIEW.get(), FlashSalePreviewScreen::new);
+        event.register(com.cosmicpve.registry.ModMenus.VKIT_INFO.get(), VKitInfoScreen::new);
     }
 
     private static void registerEntityRenderers(EntityRenderersEvent.RegisterRenderers event) {

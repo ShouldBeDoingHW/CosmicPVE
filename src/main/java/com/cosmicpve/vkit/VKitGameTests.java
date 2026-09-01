@@ -51,6 +51,8 @@ public final class VKitGameTests {
             FUNCTIONS.register("vkit_crystal_redemption", ignored -> VKitGameTests::redemption);
     private static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> GODLY_BUNDLE =
             FUNCTIONS.register("godly_vkit_bundle_redemption", ignored -> VKitGameTests::godlyBundleRedemption);
+    private static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> INFO_MENU =
+            FUNCTIONS.register("vkit_info_menu", ignored -> VKitGameTests::infoMenu);
 
     private VKitGameTests() {}
 
@@ -72,6 +74,10 @@ public final class VKitGameTests {
                         Rotation.NONE, false, 1, 1, false)));
         event.registerTest(CosmicPVE.id("godly_vkit_bundle_redemption"), new FunctionGameTestInstance(
                 ResourceKey.create(Registries.TEST_FUNCTION, CosmicPVE.id("godly_vkit_bundle_redemption")),
+                new TestData<>(environment, CosmicPVE.id("trial/development_room"), 100, 0, true,
+                        Rotation.NONE, false, 1, 1, false)));
+        event.registerTest(CosmicPVE.id("vkit_info_menu"), new FunctionGameTestInstance(
+                ResourceKey.create(Registries.TEST_FUNCTION, CosmicPVE.id("vkit_info_menu")),
                 new TestData<>(environment, CosmicPVE.id("trial/development_room"), 100, 0, true,
                         Rotation.NONE, false, 1, 1, false)));
     }
@@ -216,6 +222,42 @@ public final class VKitGameTests {
                     "Godly Bundle must request exactly one cosmetic firework");
             helper.succeed();
         });
+    }
+
+    private static void infoMenu(GameTestHelper helper) {
+        var context = connectedTestPlayer(helper);
+        var player = context.player();
+        var progression = new VKitProgressionService();
+        progression.set(player, VKitDefinition.PHOENIX, 7);
+        progression.set(player, VKitDefinition.OGRE, 10);
+        progression.set(player, VKitDefinition.SLAYER, 0);
+        progression.set(player, VKitDefinition.JUDGEMENT, 1);
+        player.getInventory().setItem(0, new net.minecraft.world.item.ItemStack(Items.DIAMOND));
+
+        var menu = new VKitInfoMenu(71, player.getInventory(), player);
+        helper.assertTrue(menu.slots.size() == 9, "V-Kit menu must contain exactly one nine-slot display row");
+        helper.assertTrue(menu.displayedItem(1).is(Items.BLAZE_POWDER)
+                        && menu.displayedItem(3).is(Items.SLIME_BALL)
+                        && menu.displayedItem(5).is(Items.ECHO_SHARD)
+                        && menu.displayedItem(7).is(Items.HEAVY_CORE),
+                "V-Kit menu icon order/materials must be Phoenix, Ogre, Slayer, Judgement");
+        helper.assertTrue(menu.displayedItem(1).get(net.minecraft.core.component.DataComponents.LORE).lines().getFirst()
+                        .getString().equals("LEVEL: VII")
+                        && menu.displayedItem(3).get(net.minecraft.core.component.DataComponents.LORE).lines().getFirst()
+                                .getString().equals("LEVEL: X")
+                        && menu.displayedItem(5).get(net.minecraft.core.component.DataComponents.LORE).lines().getFirst()
+                                .getString().equals("LEVEL: LOCKED")
+                        && menu.displayedItem(7).get(net.minecraft.core.component.DataComponents.LORE).lines().getFirst()
+                                .getString().equals("LEVEL: I"),
+                "V-Kit menu must use current persisted levels and locked state");
+        menu.setCarried(new net.minecraft.world.item.ItemStack(Items.EMERALD));
+        menu.clicked(1, 0, net.minecraft.world.inventory.ClickType.PICKUP, player);
+        menu.clicked(-999, 0, net.minecraft.world.inventory.ClickType.THROW, player);
+        helper.assertTrue(menu.getCarried().is(Items.EMERALD)
+                        && player.getInventory().getItem(0).is(Items.DIAMOND)
+                        && menu.quickMoveStack(player, 1).isEmpty(),
+                "informational V-Kit gestures must not mutate cursor, inventory, or display rewards");
+        helper.succeed();
     }
 
     private static void assertOneSuccessSound(GameTestHelper helper, RecordingConnection connection, int before) {

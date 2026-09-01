@@ -29,9 +29,15 @@ public final class CombatStackService {
             int count,
             StackApplication application,
             long currentTick) {
+        return addStack(target, definitionId, count, application, currentTick, 0);
+    }
+
+    public StackAddResult addStack(
+            LivingEntity target, Identifier definitionId, int count, StackApplication application,
+            long currentTick, int durationOverrideTicks) {
         requireServer(target);
         var container = target.getData(ModAttachments.COMBAT_STACKS);
-        var result = addStack(container, definitionId, count, application, currentTick);
+        var result = addStack(container, definitionId, count, application, currentTick, durationOverrideTicks);
         removeAttachmentIfEmpty(target, container);
         return result;
     }
@@ -42,6 +48,12 @@ public final class CombatStackService {
             int count,
             StackApplication application,
             long currentTick) {
+        return addStack(container, definitionId, count, application, currentTick, 0);
+    }
+
+    public StackAddResult addStack(
+            CombatStackContainer container, Identifier definitionId, int count, StackApplication application,
+            long currentTick, int durationOverrideTicks) {
         if (count < 1) {
             throw new IllegalArgumentException("Stack add count must be positive");
         }
@@ -53,18 +65,19 @@ public final class CombatStackService {
         }
         var value = resolved.orElseThrow();
         var definition = value.definition();
+        int durationTicks = durationOverrideTicks > 0 ? durationOverrideTicks : definition.durationTicks();
         int added = 0;
         int refreshed = 0;
         for (int index = 0; index < count; index++) {
             switch (definition.refreshPolicy()) {
                 case INDEPENDENT -> {
                     if (container.count(definitionId) < definition.maximumStacks()) {
-                        container.addInternal(newInstance(value, application, currentTick, expiration(currentTick, definition.durationTicks())));
+                        container.addInternal(newInstance(value, application, currentTick, expiration(currentTick, durationTicks)));
                         added++;
                     }
                 }
                 case REFRESH_ALL -> {
-                    long expiry = expiration(currentTick, definition.durationTicks());
+                    long expiry = expiration(currentTick, durationTicks);
                     var existing = new ArrayList<>(container.existingInstances(definitionId));
                     if (!existing.isEmpty()) {
                         existing.replaceAll(stack -> stack.refreshed(value.revision(), currentTick, expiry));
@@ -79,13 +92,13 @@ public final class CombatStackService {
                 case REFRESH_ONE -> {
                     if (container.count(definitionId) < definition.maximumStacks()) {
                         container.addInternal(newInstance(
-                                value, application, currentTick, expiration(currentTick, definition.durationTicks())));
+                                value, application, currentTick, expiration(currentTick, durationTicks)));
                         added++;
                     } else {
                         var existing = new ArrayList<>(container.existingInstances(definitionId));
                         var selected = existing.stream().min(INSTANCE_ORDER).orElseThrow();
                         existing.set(existing.indexOf(selected), selected.refreshed(
-                                value.revision(), currentTick, expiration(currentTick, definition.durationTicks())));
+                                value.revision(), currentTick, expiration(currentTick, durationTicks)));
                         container.replaceInternal(definitionId, existing);
                         refreshed++;
                     }
@@ -94,7 +107,7 @@ public final class CombatStackService {
                     if (container.count(definitionId) < definition.maximumStacks()) {
                         long fixedExpiry = container.existingInstances(definitionId).stream()
                                 .mapToLong(CombatStackInstance::expirationTick).min()
-                                .orElseGet(() -> expiration(currentTick, definition.durationTicks()));
+                                .orElseGet(() -> expiration(currentTick, durationTicks));
                         container.addInternal(newInstance(value, application, currentTick, fixedExpiry));
                         added++;
                     }

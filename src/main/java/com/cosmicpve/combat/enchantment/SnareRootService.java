@@ -13,10 +13,14 @@ public final class SnareRootService {
     private final Map<UUID, RootState> roots = new HashMap<>();
 
     public void apply(LivingEntity target, long currentTick) {
+        apply(target, currentTick, DURATION_TICKS, 0.0);
+    }
+
+    public void apply(LivingEntity target, long currentTick, int durationTicks, double meleeVulnerability) {
         RootState existing = roots.get(target.getUUID());
         double ceilingY = existing == null ? target.getY() : Math.min(existing.ceilingY(), target.getY());
         roots.put(target.getUUID(), new RootState(target.getX(), target.getZ(), ceilingY,
-                currentTick + DURATION_TICKS));
+                currentTick + durationTicks, Math.max(existing == null ? 0.0 : existing.meleeVulnerability(), meleeVulnerability)));
     }
 
     public boolean isRooted(UUID entityId, long currentTick) {
@@ -34,6 +38,11 @@ public final class SnareRootService {
         return state == null ? 0L : Math.max(0L, state.expiresAtTick() - currentTick);
     }
 
+    public double meleeVulnerability(UUID entityId, long currentTick) {
+        RootState state = roots.get(entityId);
+        return state != null && currentTick < state.expiresAtTick() ? state.meleeVulnerability() : 0.0;
+    }
+
     public void tick(LivingEntity entity, long currentTick) {
         RootState state = roots.get(entity.getUUID());
         if (state == null) return;
@@ -45,7 +54,7 @@ public final class SnareRootService {
         if (Math.abs(entity.getX() - state.x()) > TELEPORT_DISPLACEMENT
                 || Math.abs(entity.getZ() - state.z()) > TELEPORT_DISPLACEMENT
                 || entity.getY() - state.ceilingY() > TELEPORT_DISPLACEMENT) {
-            state = new RootState(entity.getX(), entity.getZ(), entity.getY(), state.expiresAtTick());
+            state = new RootState(entity.getX(), entity.getZ(), entity.getY(), state.expiresAtTick(), state.meleeVulnerability());
             roots.put(entity.getUUID(), state);
         }
         double y = Math.min(entity.getY(), state.ceilingY());
@@ -53,7 +62,7 @@ public final class SnareRootService {
             entity.setPos(state.x(), y, state.z());
         }
         if (y < state.ceilingY()) {
-            roots.put(entity.getUUID(), new RootState(state.x(), state.z(), y, state.expiresAtTick()));
+            roots.put(entity.getUUID(), new RootState(state.x(), state.z(), y, state.expiresAtTick(), state.meleeVulnerability()));
         }
         var motion = entity.getDeltaMovement();
         entity.setDeltaMovement(0.0, Math.min(0.0, motion.y), 0.0);
@@ -66,5 +75,5 @@ public final class SnareRootService {
         roots.remove(entityId);
     }
 
-    private record RootState(double x, double z, double ceilingY, long expiresAtTick) {}
+    private record RootState(double x, double z, double ceilingY, long expiresAtTick, double meleeVulnerability) {}
 }

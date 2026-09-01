@@ -34,6 +34,8 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
     public static final Identifier MORTAL_COIL_ONCE_KEY = CosmicPVE.id("mortal_coil_once_per_damage");
     public static final Identifier SELF_DESTRUCT_ONCE_KEY = CosmicPVE.id("self_destruct_once_per_damage");
     public static final Identifier UNDEAD_RUSE_ONCE_KEY = CosmicPVE.id("undead_ruse_once_per_damage");
+    public static final Identifier MIGHTY_CACTUS_ONCE_KEY = CosmicPVE.id("mighty_cactus_once_per_damage");
+    public static final Identifier PALADIN_ARMORED_ONCE_KEY = CosmicPVE.id("paladin_armored_once_per_damage");
 
     private final ChildCombatActionService childActions;
     private final CombatStackService stacks;
@@ -102,12 +104,16 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
             addBlackout(event, result);
             addVoodoo(event, result);
             addHex(event, result);
+            addDeepBleed(event, result);
+            addPermanentExecute(event, result);
         } else if (event.hook() == ProcHook.ON_PROJECTILE_HIT) {
             addLightning(event, result);
             addVenom(event, result);
             addVirus(event, result);
             addSnare(event, result);
             addDominate(event, result);
+            addBlightedVirus(event, result);
+            addEternalSnare(event, result);
         } else if (event.hook() == ProcHook.ON_DAMAGE_TAKEN) {
             addAngelic(event, result);
             addEnderShift(event, result);
@@ -118,12 +124,92 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
             addSelfDestruct(event, result);
             addUndeadRuse(event, result);
             addPlagueCarrier(event, result);
+            addMightyCactus(event, result);
+            addPaladinArmored(event, result);
         } else if (event.hook() == ProcHook.ON_PRE_DEATH) {
             addPhoenix(event, result);
         } else if (event.hook() == ProcHook.ON_PRE_DAMAGE_CALCULATION) {
             addDevour(event, result);
         }
         return List.copyOf(result);
+    }
+
+    private void addDeepBleed(ProcEvent event, List<ProcCandidate> result) {
+        int level = Math.min(6, event.effectiveEnchantments().level(ModEnchantments.DEEP_BLEED.identifier()));
+        if (level <= 0) return;
+        result.add(candidate(ModEnchantments.DEEP_BLEED.identifier(), ProcHook.ON_VALID_HIT,
+                DeepBleedBehavior.chance(level), Optional.empty(), 0L, Optional.empty(),
+                ChildProcEligibility.LIMITED_OFFENSIVE_REROLL, activation -> {
+                    var target = activation.event().target(); var attacker = activation.event().attacker();
+                    if (target == null || attacker == null || target.isDeadOrDying()) return;
+                    var added = stacks.addStack(target, BleedBehavior.STACK_ID, 1,
+                            StackApplication.ephemeral(Optional.of(attacker.getUUID()), activation.event().tracePlayerId()),
+                            activation.event().serverTick(), DeepBleedBehavior.STACK_DURATION_TICKS);
+                    bleedRuntime.reconcileMovement(target, added.finalCount());
+                }, provenance(event, ModEnchantments.DEEP_BLEED.identifier()),
+                meleeCondition(CosmicPVE.id("deep_bleed_melee_hit"))));
+    }
+
+    private void addPermanentExecute(ProcEvent event, List<ProcCandidate> result) {
+        int level = Math.min(5, event.effectiveEnchantments().level(ModEnchantments.PERMANENT_EXECUTE.identifier()));
+        if (level <= 0 || event.attacker() == null || event.target() == null
+                || event.target().getMaxHealth() <= 0
+                || event.target().getHealth() / event.target().getMaxHealth() >= PermanentExecuteBehavior.blessThreshold(level)
+                || BlessedBehavior.eligible(event.attacker(), stacks, event.serverTick()).isEmpty()) return;
+        result.add(candidate(ModEnchantments.PERMANENT_EXECUTE.identifier(), ProcHook.ON_VALID_HIT,
+                PermanentExecuteBehavior.blessChance(level), Optional.empty(), 0L, Optional.empty(),
+                ChildProcEligibility.LIMITED_OFFENSIVE_REROLL,
+                activation -> BlessedBehavior.activate(activation.event(), stacks),
+                provenance(event, ModEnchantments.PERMANENT_EXECUTE.identifier()),
+                meleeCondition(CosmicPVE.id("permanent_execute_low_health"))));
+    }
+
+    private void addBlightedVirus(ProcEvent event, List<ProcCandidate> result) {
+        int level = Math.min(3, event.effectiveEnchantments().level(ModEnchantments.BLIGHTED_VIRUS.identifier()));
+        if (level <= 0 || event.target() == null || !event.target().hasEffect(net.minecraft.world.effect.MobEffects.POISON)) return;
+        result.add(deterministicCandidate(ModEnchantments.BLIGHTED_VIRUS.identifier(), ProcHook.ON_PROJECTILE_HIT,
+                1.0, Optional.empty(), 0L, Optional.empty(), ChildProcEligibility.ROOT_ONLY,
+                activation -> BlightedVirusBehavior.activate(activation, level, childActions),
+                provenance(event, ModEnchantments.BLIGHTED_VIRUS.identifier()),
+                condition(CosmicPVE.id("blighted_virus_poisoned_projectile"), procEvent ->
+                        procEvent.combatResult().map(hit -> hit.context().category()
+                                == com.cosmicpve.combat.api.AttackCategory.PROJECTILE).orElse(false))));
+    }
+
+    private void addEternalSnare(ProcEvent event, List<ProcCandidate> result) {
+        int level = Math.min(4, event.effectiveEnchantments().level(ModEnchantments.ETERNAL_SNARE.identifier()));
+        if (level <= 0 || !EternalSnareBehavior.eligible(event)) return;
+        var behavior = new EternalSnareBehavior(snareRoots);
+        result.add(candidate(ModEnchantments.ETERNAL_SNARE.identifier(), ProcHook.ON_PROJECTILE_HIT,
+                EternalSnareBehavior.chance(level), Optional.empty(), 0L, Optional.empty(), ChildProcEligibility.ROOT_ONLY,
+                activation -> behavior.activate(activation.event()),
+                provenance(event, ModEnchantments.ETERNAL_SNARE.identifier()),
+                condition(CosmicPVE.id("eternal_snare_crossbow"), EternalSnareBehavior::eligible)));
+    }
+
+    private void addMightyCactus(ProcEvent event, List<ProcCandidate> result) {
+        if (event.target() == null || event.attacker() == null || event.attacker() == event.target()) return;
+        int level = MightyCactusBehavior.equippedLevel(event.target());
+        if (level <= 0) return;
+        result.add(candidate(ModEnchantments.MIGHTY_CACTUS.identifier(), ProcHook.ON_DAMAGE_TAKEN,
+                MightyCactusBehavior.chance(level), Optional.empty(), 0L, Optional.of(MIGHTY_CACTUS_ONCE_KEY),
+                ChildProcEligibility.LIMITED_DEFENSIVE_REACTION, activation -> {
+                    var parent = activation.event().combatResult().orElse(null);
+                    if (parent != null && activation.event().attacker() != null) childActions.deliverTrue(parent.context(),
+                            activation.event().attacker(), MightyCactusBehavior.packet(), MightyCactusBehavior.RECURSION_POLICY);
+                }, provenance(event, ModEnchantments.MIGHTY_CACTUS.identifier())));
+    }
+
+    private void addPaladinArmored(ProcEvent event, List<ProcCandidate> result) {
+        if (event.target() == null || event.attacker() == null || event.attacker() == event.target()) return;
+        int total = PaladinArmoredBehavior.equippedLevelTotal(event.target());
+        if (total <= 0) return;
+        result.add(candidate(ModEnchantments.PALADIN_ARMORED.identifier(), ProcHook.ON_DAMAGE_TAKEN,
+                PaladinArmoredBehavior.chance(total), Optional.empty(), 0L, Optional.of(PALADIN_ARMORED_ONCE_KEY),
+                ChildProcEligibility.LIMITED_DEFENSIVE_REACTION,
+                activation -> PaladinArmoredBehavior.weaken(activation.event().attacker()),
+                new ProcProvenance(ProcSourceKind.ACTUAL_ENCHANTMENT, CosmicPVE.id("equipped_armor")),
+                condition(CosmicPVE.id("paladin_armored_ordinary_hit"), CosmicEnchantmentBehaviorResolver::ordinaryAttack)));
     }
 
     private void addSoulSiphon(ProcEvent event, List<ProcCandidate> result) {

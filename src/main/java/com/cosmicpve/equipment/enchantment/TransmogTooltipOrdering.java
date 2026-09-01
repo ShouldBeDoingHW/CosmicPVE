@@ -17,11 +17,12 @@ public final class TransmogTooltipOrdering {
         if (!key.cosmic()) return 0;
         return switch (key.tier()) {
             case MASTERY -> 1;
-            case LEGENDARY -> 2;
-            case ULTIMATE -> 3;
-            case ELITE -> 4;
-            case UNIQUE -> 5;
-            case SIMPLE -> 6;
+            case HEROIC -> 2;
+            case LEGENDARY -> 3;
+            case ULTIMATE -> 4;
+            case ELITE -> 5;
+            case UNIQUE -> 6;
+            case SIMPLE -> 7;
         };
     }
 }

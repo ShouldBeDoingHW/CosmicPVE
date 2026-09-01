@@ -37,6 +37,7 @@ import com.cosmicpve.reward.animation.LootAnimationEventBridge;
 import com.cosmicpve.reward.lootbox.Step8EGameTests;
 import com.cosmicpve.economy.flashsale.FlashSaleBootstrap;
 import com.cosmicpve.economy.flashsale.Step8FGameTests;
+import com.cosmicpve.combat.enchantment.Step8G2GameTests;
 import com.mojang.logging.LogUtils;
 import net.minecraft.resources.Identifier;
 import net.minecraft.network.chat.Component;
@@ -64,6 +65,7 @@ public final class CosmicPVE {
         VKitGameTests.register(modBus);
         Step8EGameTests.register(modBus);
         Step8FGameTests.register(modBus);
+        Step8G2GameTests.register(modBus);
         ModItems.register(modBus);
         ModEntities.register(modBus);
         ModMenus.register(modBus);

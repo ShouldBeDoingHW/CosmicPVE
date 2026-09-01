@@ -11,7 +11,7 @@ class UndeadCorpseFoundationTest {
         assertEquals(15.0D,attributes.getBaseValue(Attributes.MAX_HEALTH));
         assertEquals(0.4D,attributes.getBaseValue(Attributes.MOVEMENT_SPEED));
         assertEquals(0.0D,attributes.getBaseValue(Attributes.ATTACK_DAMAGE));
-        assertEquals(0.0D,attributes.getBaseValue(Attributes.ARMOR));
+        assertEquals(1.0D,attributes.getBaseValue(Attributes.ARMOR));
         assertEquals(0.0D,attributes.getBaseValue(Attributes.ARMOR_TOUGHNESS));
         assertEquals(0.9F,UndeadCorpseEntity.RENDER_SCALE);
     }

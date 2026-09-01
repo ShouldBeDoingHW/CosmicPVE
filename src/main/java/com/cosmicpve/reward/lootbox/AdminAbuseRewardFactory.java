@@ -52,15 +52,15 @@ public final class AdminAbuseRewardFactory {
             switch (outcome) {
                 case GHOSTLY_VEIL -> {
                     vanillaArmor(mutable, registry);
-                    set(mutable, registry, ModEnchantments.MORTAL_COIL, 2); set(mutable, registry, ModEnchantments.ARMORED, 4);
-                    set(mutable, registry, ModEnchantments.MOLTEN, 4); set(mutable, registry, ModEnchantments.IMPLANTS, 3);
+                    set(mutable, registry, ModEnchantments.MORTAL_COIL, 2); set(mutable, registry, ModEnchantments.PALADIN_ARMORED, 4);
+                    set(mutable, registry, ModEnchantments.MOLTEN, 4); set(mutable, registry, ModEnchantments.ALIEN_IMPLANTS, 3);
                     set(mutable, registry, ModEnchantments.VOODOO, 6); set(mutable, registry, ModEnchantments.ENDER_SHIFT, 3);
                     set(mutable, registry, ModEnchantments.GLOWING, 1);
                 }
                 case COVERT_CLOAK -> {
                     vanillaArmor(mutable, registry);
                     set(mutable, registry, ModEnchantments.DEATH_PACT, 5); set(mutable, registry, ModEnchantments.PERMAFROST, 6);
-                    set(mutable, registry, ModEnchantments.ARMORED, 4); set(mutable, registry, ModEnchantments.AEGIS, 6);
+                    set(mutable, registry, ModEnchantments.PALADIN_ARMORED, 4); set(mutable, registry, ModEnchantments.AEGIS, 6);
                     set(mutable, registry, ModEnchantments.ANGELIC, 5); set(mutable, registry, ModEnchantments.UNDEAD_RUSE, 10);
                 }
                 case NANKADA -> {
@@ -68,7 +68,7 @@ public final class AdminAbuseRewardFactory {
                     set(mutable, registry, Enchantments.MENDING, 1); set(mutable, registry, Enchantments.FIRE_ASPECT, 2);
                     set(mutable, registry, ModEnchantments.SOUL_SIPHON, 4); set(mutable, registry, ModEnchantments.BLACKOUT, 4);
                     set(mutable, registry, ModEnchantments.RAGE, 6); set(mutable, registry, ModEnchantments.DOUBLESTRIKE, 3);
-                    set(mutable, registry, ModEnchantments.EXECUTE, 5); set(mutable, registry, ModEnchantments.GREATSWORD, 4);
+                    set(mutable, registry, ModEnchantments.PERMANENT_EXECUTE, 5); set(mutable, registry, ModEnchantments.GREATSWORD, 4);
                     set(mutable, registry, ModEnchantments.POISON, 3);
                 }
                 case ASHOKA -> {
@@ -76,7 +76,7 @@ public final class AdminAbuseRewardFactory {
                     set(mutable, registry, Enchantments.MENDING, 1);
                     set(mutable, registry, ModEnchantments.HERO_KILLER, 3); set(mutable, registry, ModEnchantments.SOUL_TETHER, 3);
                     set(mutable, registry, ModEnchantments.SOUL_SIPHON, 4); set(mutable, registry, ModEnchantments.RAGE, 6);
-                    set(mutable, registry, ModEnchantments.DEVOUR, 4); set(mutable, registry, ModEnchantments.PUMMEL, 3);
+                    set(mutable, registry, ModEnchantments.DEEP_BLEED, 6); set(mutable, registry, ModEnchantments.DEVOUR, 4);
                 }
             }
         });

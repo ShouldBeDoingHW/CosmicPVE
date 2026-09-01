@@ -7,7 +7,7 @@ class ScrollableItemTooltipTest {
     @Test void onlyOverflowingTooltipsHaveScrollableDistance() {
         assertEquals(0,ScrollableItemTooltip.overflow(8,100,240));
         assertEquals(68,ScrollableItemTooltip.overflow(4,300,240));
-        assertEquals(118,ScrollableItemTooltip.overflow(54,300,240));
+        assertEquals(68,ScrollableItemTooltip.overflow(54,300,240));
         assertEquals(0,ScrollableItemTooltip.overflow(4,232,240));
     }
     @Test void scrollClampsAndIdentityOrScreenChangesResetOffset() {
@@ -26,6 +26,18 @@ class ScrollableItemTooltipTest {
         assertEquals(118,state.offsetPixels());
         for(int i=0;i<20;i++) assertTrue(state.scroll(screen,1));
         assertEquals(0,state.offsetPixels());
+    }
+    @Test void oversizedTooltipRangeMakesBothFirstAndLastLineReachableEvenFromClampedOrigin() {
+        var range = ScrollableItemTooltip.scrollRange(-30, 320, 180);
+        assertEquals(-34, range.minimumOffset());
+        assertEquals(114, range.maximumOffset());
+        assertEquals(4, -30 - range.minimumOffset());
+        assertEquals(176, -30 - range.maximumOffset() + 320);
+        var state = new ScrollableItemTooltip.State(); var screen = new Object();
+        state.update(screen, 7, range.minimumOffset(), range.maximumOffset());
+        assertEquals(range.minimumOffset(), state.offsetPixels());
+        for (int i = 0; i < 30; i++) assertTrue(state.scroll(screen, -1));
+        assertEquals(range.maximumOffset(), state.offsetPixels());
     }
     @Test void onlyMatchingMaskIdentityBecomesANonWrappingTooltipComponent() {
         var other=net.minecraft.network.chat.Component.literal("Other");

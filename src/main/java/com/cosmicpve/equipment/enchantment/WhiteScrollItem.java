@@ -12,6 +12,20 @@ public final class WhiteScrollItem extends Item {
 
     @Override
     public Component getName(ItemStack stack) {
-        return super.getName(stack).copy().withStyle(style -> style.withBold(true));
+        return Component.literal("White Scroll").withStyle(style -> style.withColor(0xFFFFFF).withBold(true));
+    }
+
+    public static java.util.List<Component> lore() {
+        return java.util.List.of(
+                Component.literal("A thin veil between fortune and ruin.")
+                        .withStyle(style -> style.withColor(0xFFFF55).withItalic(true)),
+                Component.empty(),
+                Component.literal("ONE-TIME PROTECTION")
+                        .withStyle(style -> style.withColor(0x55FFFF).withBold(true)),
+                Component.literal("Apply to eligible equipment.").withStyle(net.minecraft.ChatFormatting.GRAY),
+                Component.literal("Protects against one destructive failed application.")
+                        .withStyle(net.minecraft.ChatFormatting.GRAY),
+                Component.literal("Consumed only when it actually prevents destruction.")
+                        .withStyle(net.minecraft.ChatFormatting.GRAY));
     }
 }

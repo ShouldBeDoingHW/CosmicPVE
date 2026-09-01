@@ -62,6 +62,26 @@ class UnexaminedBookOpeningServiceTest {
                 .noneMatch(spec -> spec == CosmicEnchantmentSpecs.POISON));
     }
 
+    @Test void heroicPoolContainsAllEightReplacementsWithOrdinaryRateRanges() {
+        var seen = new java.util.HashSet<CosmicEnchantmentSpec>();
+        var random = RandomSource.create(8808L);
+        for (int i = 0; i < 400; i++) {
+            var result = service.roll(CosmicEnchantmentTier.HEROIC, CosmicEnchantmentSpecs.ALL,
+                    random, null).orElseThrow();
+            seen.add(result.enchantment());
+            assertTrue(result.level() >= 1 && result.level() <= result.enchantment().maxLevel());
+            assertTrue(result.rates().successRate() >= 1 && result.rates().successRate() <= 100);
+            assertTrue(result.rates().destroyRate() >= 1 && result.rates().destroyRate() <= 100);
+        }
+        assertEquals(new java.util.HashSet<>(java.util.List.of(CosmicEnchantmentSpecs.DEEP_BLEED,
+                CosmicEnchantmentSpecs.MIGHTY_CACTUS, CosmicEnchantmentSpecs.PALADIN_ARMORED,
+                CosmicEnchantmentSpecs.BLIGHTED_VIRUS, CosmicEnchantmentSpecs.ALIEN_IMPLANTS,
+                CosmicEnchantmentSpecs.LETHAL_SNIPER, CosmicEnchantmentSpecs.ETERNAL_SNARE,
+                CosmicEnchantmentSpecs.PERMANENT_EXECUTE)), seen);
+        assertTrue(service.roll(CosmicEnchantmentTier.ELITE, java.util.List.of(CosmicEnchantmentSpecs.STORMCALLER),
+                random, null).isEmpty());
+    }
+
     @Test void revealedBookUsesTheExistingActualCosmicBookComponentPath() {
         var result = service.roll(CosmicEnchantmentTier.UNIQUE, CosmicEnchantmentSpecs.ALL,
                 RandomSource.create(7L), null).orElseThrow();

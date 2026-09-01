@@ -2,7 +2,7 @@
 
 Current accepted baseline: Step 8F — Flash Sales + Standard Space Chest Loot Rebalance, including the Step 8F.1 corrective, is implemented, automated/runtime verified, manually verified/accepted, and closed in `4db71a7` (`Add Flash Sales and rebalance Space Chests`). Earlier accepted milestones remain recorded below.
 
-Repository state: Steps 6A–8F and the Conquest synchronization are implemented, verified, and manually accepted. Step 8G is the next bounded implementation milestone. The root `assets`, `drafts`, and `woodlands` development-source folders remain untouched and untracked. The canonical tracked `trial rooms/*.nbt` files are build inputs; the user has moved the future Cave Diving work outside that canonical directory.
+Repository state: Steps 6A–8F and the Conquest synchronization are implemented, verified, and manually accepted. Step 8G is implemented and automated/runtime verified, with manual acceptance pending. The root `assets`, `drafts`, and `woodlands` development-source folders remain untouched and untracked. The canonical tracked `trial rooms/*.nbt` files are build inputs; the user has moved the future Cave Diving work outside that canonical directory.
 
 Last handoff update: 2026-08-31
 
@@ -120,7 +120,7 @@ Implemented real Unique enchantments `cosmicpve:molten` IV and `cosmicpve:nutrit
 
 ### Step 6G — COMPLETE; MANUALLY VERIFIED AND ACCEPTED
 
-Implemented one versioned `HEROIC` item component and one generic non-stackable Heroic Crystal. Its displayed name uses `#AA00AA`, and its concise purpose/instruction lore uses the standard yellow effect-description style. A server-authoritative drag/drop transaction applies once to armor, pickaxes, or shovels, mutating the original stack in place and preserving wear and unrelated components. Successful application plays the standard player-level-up item-application cue. It raises the stack's real `MAX_DAMAGE` by exactly 250 while leaving its damage value unchanged. Heroic armor retains its registry item and defensive statistics but uses leather equipment/item presentation; Heroic pickaxes and shovels retain their underlying mining behavior but use gold-style item presentation. Heroic and armor-set identities compose in either application order. Heroic Dungeon Portal behavior remains designed and unimplemented.
+Implemented one versioned `HEROIC` item component and one generic non-stackable Heroic Crystal. Its bold displayed name and one-time-upgrade header use canonical Heroic `#FF00A2`; its refreshed lore has yellow italic flavor and concise gray armor/tool/portal conversion details. A server-authoritative drag/drop transaction applies once to armor, pickaxes, or shovels, mutating the original stack in place and preserving wear and unrelated components. Successful application plays the standard player-level-up item-application cue. It raises the stack's real `MAX_DAMAGE` by exactly 250 while leaving its damage value unchanged. Heroic armor retains its registry item and defensive statistics but uses leather equipment/item presentation; Heroic pickaxes and shovels retain their underlying mining behavior but use gold-style item presentation. Heroic and armor-set identities compose in either application order. Heroic Dungeon Portal behavior remains designed and unimplemented.
 
 Implemented real `cosmicpve:glowing` I (Simple, helmet) and `cosmicpve:obsidianshield` I (Ultimate, leggings), bringing the real enchantment count to 19 at that milestone. One LivingEntity-compatible equipped-effect service maintains hidden Night Vision or Fire Resistance leases while tracking only effects it created; external effects are not removed when equipment changes. Glowing's former short-lease visual flicker was resolved in Step 6J through the same shared ownership service.
 
@@ -132,7 +132,7 @@ Implemented the first reusable custom hostile-mob foundation and explicit entity
 
 Implemented real Simple enchantment `cosmicpve:oxygenate` II for pickaxes, bringing the registered real-enchantment count to 20. A completed underwater block break restores exactly one displayed air bubble (30 internal air units) per effective level and clamps to the normal maximum. It is deterministic and outside ProcEngine, Luck, cooldown, and stack handling. Oxygenate uses generic Books, capacity counting, Black Scroll extraction, Transmog, and remains absent from vanilla acquisition pools.
 
-The centralized Simple rarity color is now `#FFFFFF`; Cosmic Book effect-description bodies remain yellow while their tier name uses the tier color. Ancient's data-driven presentation color is now `#0A4A3D` with gameplay unchanged. Combat/proc trace output now lets a traced player inspect committed mob attacks, identifying the attacker, weapon/effective enchantments, outgoing contributors, and proc candidates/results through the existing trace systems.
+The centralized Simple rarity color is now `#FFFFFF`; Cosmic Book effect-description bodies remain yellow while their tier name uses the tier color. Ancient's data-driven presentation color is now `#0B9986` with gameplay unchanged. Combat/proc trace output now lets a traced player inspect committed mob attacks, identifying the attacker, weapon/effective enchantments, outgoing contributors, and proc candidates/results through the existing trace systems.
 
 ### Step 6I — IMPLEMENTED; AUTOMATED/RUNTIME VERIFIED; MANUALLY VERIFIED / ACCEPTED
 
@@ -272,7 +272,7 @@ Reward descriptors can now generate a random distinct Mask bundle or an exact-ra
 
 ### Step 6U — IMPLEMENTED; AUTOMATED/RUNTIME VERIFIED; MANUALLY VERIFIED / ACCEPTED
 
-Implemented `cosmicpve:undead_corpse` as a reusable hostile mob, not room-private logic. It uses Zombie AI/model/texture at 0.9 visual and collision scale, 15 HP, movement speed 0.4, zero innate attack/armor/toughness, and an Iron Axe whose Sharpness III, Bleed III, and Rage III rolls are independently 30%. Its axe remains the source of melee damage, and actual Cosmic enchantments resolve through the shared LivingEntity combat path. The canonical entity has no default loot; Trial variants additionally suppress XP and all equipment drops. Permissioned corpse spawn/inspection commands expose generated equipment without changing production behavior.
+Implemented `cosmicpve:undead_corpse` as a reusable hostile mob, not room-private logic. It uses Zombie AI/model/texture at 0.9 visual and collision scale, 15 HP, movement speed 0.4, exactly 1 innate armor and 0 toughness, and an Iron Axe whose Sharpness III, Bleed III, and Rage III rolls are independently 30%. Its axe remains the source of melee damage, and actual Cosmic enchantments resolve through the shared LivingEntity combat path. The canonical entity has no default loot; Trial variants additionally suppress XP and all equipment drops. Permissioned corpse spawn/inspection commands expose generated equipment without changing production behavior.
 
 Hidden Graveyard is the first production Demonic Trial room and uses the existing durable session, inventory, transition, protection, room weighting, and cleanup foundations. The supplied 40×18×43 structure is tracked as `trial/hidden_graveyard`; its exact spawn marker, eleven authored Coal chest markers, central well, and three exact six-grave block groups are resolved once from audited structure coordinates. A bounded room-local Pale Garden biome override is applied for the attempt and restored to the instance baseline during cleanup. The accepted post-room-eight Demonic transition now continues through the normal mixed Apprentice/Hardcore/Demonic selection pool instead of stopping at the former no-room development gate.
 
@@ -481,6 +481,26 @@ Repeat V-Kit Crystal redemption at an already-capped level X remains valid, leav
 
 The accepted Step 8F/8F.1 implementation is closed in `4db71a7` (`Add Flash Sales and rebalance Space Chests`).
 
+### Step 8G — IMPLEMENTED; AUTOMATED/RUNTIME VERIFIED; MANUALLY VERIFIED / ACCEPTED
+
+Heroic enchantments are now a real `#FF00A2` rarity with ordinary 1–100 Success and Destroy ranges. The eight exact replacement families are Bleed → Deep Bleed VI, Cactus → Mighty Cactus II, Armored → Paladin Armored IV, Virus → Blighted Virus III, Implants → Alien Implants III, Sniper → Lethal Sniper V, Snare → Eternal Snare IV, and Execute → Permanent Execute V. Initial player book conversion requires the maximum ordinary counterpart and rejects before RNG or mutation otherwise; success atomically removes the ordinary enchantment and installs the Heroic at the book level without consuming another capacity slot. Existing Heroics use the standard higher/equal/lower upgrade rules, and supported application paths reject ordinary/Heroic coexistence.
+
+All eight Heroics use the real Minecraft enchantment/book/capacity/Transmog/Tinkerer systems. Unexamined Heroic Books select uniformly among the eight, then select a uniformly random valid level and independent 1–100 rates. Heroic Dust is rarity-locked, follows the normal capped yield formula, and can raise Success to 100. Heroic gear salvages at 2,500 XP per enchantment level. Canonical Transmog order is vanilla, Mastery, Heroic, Legendary, Ultimate, Elite, Unique, Simple; same-rarity level/tie ordering is unchanged. Both Black Scroll variants exclude Heroics.
+
+Deep Bleed creates standard independently expiring Bleed stacks with a seven-second lifetime and 7–12% Luck-relative chance. Mighty Cactus rolls once per committed incoming hit at 4/8% and returns 3 standard true damage. Paladin Armored preserves the half-Protection-level-per-level equipment contribution and adds one aggregate equipped-level-percent defensive roll for Weakness I over 50 ticks. Blighted Virus uses the launch-time projectile snapshot, deals 1.25/1.50/1.75 standard true damage to poisoned targets, and grants Regeneration I for 100 ticks instead of Virus's instant heal. Alien Implants runs every 82/64/46 ticks, healing 1 HP and accumulating 0.25 persisted hunger per interval. Lethal Sniper uses the upper 25% hitbox, adds 8% ordinary projectile damage per level, and grants one refreshable 200-tick +10% committed ordinary-melee follow-up. Eternal Snare roots for 35 ticks and applies a coterminous +15% ordinary-melee vulnerability. Permanent Execute adds a fixed +12% ordinary damage below 60% health and a Luck-relative 2–10% shared Blessed cleanse chance below its 11–15% level threshold.
+
+The accepted ordinary Cosmic Enchantment Table now uses the exact 13-enchantment maximum-level pool and its established Success variants, with Soul Siphon retaining 25/50 Mastery variants. `cosmicpve:stormcaller` V is registered as an Elite Boots/Chestplate enchantment solely for this table; it can be applied, stored, sorted, and salvaged, is excluded from general Unexamined pools, and its combat effect remains deliberately deferred. The new non-stackable, forced-glint `cosmicpve:heroic_cosmic_enchantment_table` reuses the accepted single-reward animation and uniformly covers 24 outcomes: eight maximum-level Heroics at 25/50/75 Success, each with independent 1–100 Destroy. Both Tables have their canonical yellow italic flavor lines.
+
+Admin Abuse construction now uses Paladin Armored and Alien Implants on Ghostly Veil, Paladin Armored on Covert Cloak, Permanent Execute on Nankada, and Deep Bleed on Ashoka while preserving every accepted item identity, capacity, White Scroll, Transmog, Omni/Heroic item state, and presentation detail. Ashoka remains exactly six Cosmic enchantments and contains neither Pummel nor Insanity.
+
+The Step 8G.1 corrective standardized Heroic's direct presentation ecosystem without altering unrelated `#AA00AA` content; Step 8G.2 supersedes that interim color with the final canonical `#FF00A2` across books, equipment, Dust, Tables, Heroic Crystals, and shared rarity helpers. Flash Sale announcement/reminder item names retain their canonical component styling and are underlined/clickable through server-authoritative `/flashsale preview`. The registered one-row `FLASH SALE PREVIEW` menu shows one read-only center copy produced through the same deterministic active-offer factory used by purchase; it changes no money, purchaser, reward, or sale state, and closes when the authoritative sale expires or changes. Non-stackable multi-quantity previews use a display-only bold-gold quantity footer. The existing start growl is unchanged, while the one-minute reminder sends one player-targeted Beacon activation sound.
+
+Shared client tooltip scrolling now calculates a legal top-to-bottom offset range from the full tooltip and scaled screen height, clamps only that offset, permits the opposite end to move off-screen, advances ten GUI pixels per wheel notch, and resets on item/tooltip/screen loss. White Scroll, Heroic Crystal, and Armor/Weapon Enchantment Orb names and lore now use their canonical bold colors, yellow italic flavor, headers/rates, and concise gray mechanics; application behavior is unchanged.
+
+Step 8G.2 adds ordinary Elite `cosmicpve:spirit_link` VII for helmets and chestplates. Equipped levels sum to XIV and produce one 5% Luck-relative defensive candidate per committed incoming damaging hit only when a loaded, living, authoritatively owned non-player ally exists. A successful proc uniformly selects and heals one eligible ally by 0.5 HP per aggregate level and replaces the wearer's single transient charge with an aggregate-level-percent bonus for the next committed ordinary parent melee/projectile attack. Misses, canceled/zero-damage attempts, true-damage children, and unrelated packets do not consume or receive the charge; a committed qualifying hit consumes that exact charge once, and death clears it.
+
+The real Undead Corpse now has exactly 1 armor and 0 toughness with its other stats and behavior unchanged. Ancient's shared data-driven color is `#0B9986`. Public `/vkit` opens a read-only one-row informational menu with current persisted Phoenix, Ogre, Slayer, and Judgement levels in that order, exact canonical icon materials and reward-name previews, and no claim, generation, progression, or inventory mutation path.
+
 ## 3. Current Real Enchantments
 
 These are registered through Minecraft's enchantment infrastructure, use actual enchantment data on the item, and are not present in normal enchanting-table, librarian, random-loot, random-equipment, or mob-equipment acquisition pools.
@@ -530,6 +550,7 @@ These are registered through Minecraft's enchantment infrastructure, use actual 
 | `cosmicpve:soul_tether` | III | Axe | Mastery | Committed melee hits have a 10% Luck-modified chance to apply an owner-specific 6/7/8-second tether with a 600-tick cooldown. The target is slowed 20% and takes +5% ordinary damage per current distance block from that tether owner only. |
 | `cosmicpve:dodge` | V | Boots | Ultimate | An otherwise valid ordinary incoming hit has 0.5% per level to be rejected before health loss and committed proc dispatch. Turkey adds +2 flat percentage points to the same Luck-modified roll. |
 | `cosmicpve:leadership` | X | Chestplate/leggings | Legendary | Current equipped levels sum to at most 20; reliably owned allies gain that percentage in their ordinary outgoing bucket at attack time. |
+| `cosmicpve:spirit_link` | VII | Helmet/chestplate | Elite | Equipped levels sum to XIV. A committed incoming damaging hit with an eligible loaded owned mob ally produces one 5% Luck-relative roll; success heals one uniformly selected ally by 0.5 HP per aggregate level and stores one replacing aggregate-level-percent ordinary parent-attack charge. |
 | `cosmicpve:hero_killer` | III | Axe | Mastery | Deals 3% more ordinary damage per level against targets whose armor-set bonus is currently active. |
 | `cosmicpve:soul_siphon` | IV | Any weapon | Mastery | A committed hit that leaves its target below half health heals exactly 1 HP, with a `(7 - level)`-second cooldown. |
 | `cosmicpve:blackout` | IV | Sword | Mastery | Has 2% chance per level to suppress the target's active armor-set bonus for one second per level. |
@@ -544,7 +565,7 @@ These are registered through Minecraft's enchantment infrastructure, use actual 
 
 ### DESIGNED BUT NOT IMPLEMENTED
 
-The ordinary Cosmic enchantment pool currently contains exactly 52 implemented real enchantments. Death Pact, Permafrost, Mortal Coil, Phoenix, Divine Immolation, Soul Tether, Hero Killer, Soul Siphon, and Blackout are the implemented Mastery enchantments. Stormcaller and Inversion are the remaining newly designed ordinary gaps; Heroic enchantments and later balance work remain separate future scope and require explicit implementation instructions.
+The registry currently contains 62 real Cosmic enchantment definitions: 53 implemented ordinary enchantments, the registered/acquirable but combat-inert Stormcaller placeholder, and eight implemented Heroic replacements. Death Pact, Permafrost, Mortal Coil, Phoenix, Divine Immolation, Soul Tether, Hero Killer, Soul Siphon, and Blackout are the implemented Mastery enchantments. Stormcaller's combat effect and Inversion remain future implementation gaps.
 
 ## 4. Critical Combat Semantics
 
@@ -621,7 +642,7 @@ Implemented sets:
 
 - **Phantom** (`cosmicpve:phantom`, `#FF6969`): +25% additive ordinary outgoing damage, ×1.10 incoming damage, and a `×1.25` chance modifier for probabilistic Mastery procs. Deterministic Mastery effects remain deterministic.
 - **Yeti** (`cosmicpve:yeti`, `#A3FFF5`): +10% additive ordinary outgoing damage, ×0.90 incoming damage, and immunity IDs for freeze, frozen, permafrost, and ice aspect. Current vanilla integration clears freezing for players and mobs wearing the full set; the custom named effects do not exist yet.
-- **Ancient** (`cosmicpve:ancient`, `#0A4A3D`): at or above exactly 50% health, +5% ordinary outgoing damage, ×0.95 ordinary incoming damage, and ×0.90 received knockback. Strictly below 50%, these become +10%, ×0.90, and ×0.80. Standard true damage bypasses ordinary reduction.
+- **Ancient** (`cosmicpve:ancient`, `#0B9986`): at or above exactly 50% health, +5% ordinary outgoing damage, ×0.95 ordinary incoming damage, and ×0.90 received knockback. Strictly below 50%, these become +10%, ×0.90, and ×0.80. Standard true damage bypasses ordinary reduction.
 - **Yjiki** (`cosmicpve:yjiki`): +5% ordinary outgoing and ×0.85 ordinary incoming damage normally; while the authoritative activity context is Dungeon, these become +10% and ×0.70.
 - **Dimensional Traveler** (`cosmicpve:dimensional_traveler`, `#7D3F9E`): +7.5% ordinary outgoing damage, +10% movement speed, and a `×0.80` duration multiplier for centrally managed proc cooldowns.
 - **Engineer** (`cosmicpve:engineer`): +15% movement speed and +4 maximum health through stable, reconciled entity attributes.
@@ -821,11 +842,11 @@ The final post-Orb capacity is no longer unresolved for current target classes: 
 
 ## 16. Current Next Milestone
 
-**Immediate next action: Step 8G — Heroic Enchantments + Heroic Cosmic Enchantment Table.**
+**Immediate next action: Step 8H — Player Upgrades + Upgrade Crystals + Stormcaller + Conquest Chest Rebalance.**
 
 Current intended sequence:
 
-Steps 8A–8F and the Obsidian Destroyer + Dominate micro-milestone are manually verified and accepted. Step 8G is the next bounded milestone. Memory Chests, Cosmic Crate halves, Dungeon gameplay, `/upgrades`, Stormcaller's combat effect, Inversion, and later roadmap work remain deferred.
+Steps 8A–8G, including Step 8G.1/8G.2 and the Obsidian Destroyer + Dominate micro-milestone, are manually verified and accepted. Step 8H is the next bounded implementation milestone: `/upgrades`, Upgrade Crystals, Stormcaller activation, and the specified Conquest Chest rebalance. Memory Chests, Cosmic Crate halves, Dungeon gameplay, Holy White Scrolls, Inversion, `/enchanter`, `/sell`, and later roadmap work remain deferred.
 
 The ordinary-enchantment expansion remains split across bounded patches. Step 7C is the explicit instruction that made the current canonical Design Doc enchantment-table values implementation-authoritative; later design edits still require their own explicit implementation milestone.
 
@@ -843,6 +864,12 @@ The ordinary-enchantment expansion remains split across bounded patches. Step 7C
 Preserve unrelated dirty changes. Never change pinned versions as a side effect of gameplay work. Prefer service-level rules and typed data over one-off event logic, and keep client-only classes isolated from dedicated-server loading.
 
 ## 18. Verification Snapshot
+
+For the Step 8G candidate:
+
+- Focused Spirit Link, V-Kit menu, Heroic/Ancient presentation, Undead Corpse, registry, owned-ally, armor-set, and V-Kit regressions pass. The final `gradlew.bat cleanTest test build` succeeds with 552 tests across 138 suites and zero failures, errors, or skips. All 11 required loaded-registry GameTests pass, including real Spirit Link equipment aggregation, loaded owned-ally healing/Luck/charge behavior, exact Undead Corpse attributes, current persisted `/vkit` levels, read-only menu interaction, ordinary-to-Heroic conversion, Heroic Table results, and existing V-Kit/Conquest paths.
+- All 243 main-resource JSON files parse successfully. The dedicated server publishes the Step 8G.2 content, verifies progression recipe controls, and reaches `Done`. Fresh client startup completes ResourceManager reload, OpenAL/SoundEngine initialization, and particle, armor-trim, block, chest, item, and GUI atlas creation without relevant missing-model, missing-texture, localization, menu, command, codec, or sided-classloading errors.
+- `git diff --check` passes for Step 8G-owned files with only normal Windows line-ending notices. Minecraft 1.21.11, NeoForge 21.11.45, Java 21, Gradle 9.2.1, ModDevGradle 2.0.144, mod ID `cosmicpve`, and package `com.cosmicpve` remain unchanged. The user's live `docs/Cosmic_Design.md` and root `assets`, `drafts`, and `woodlands` directories remain outside Step 8G ownership.
 
 For the accepted Step 8F baseline:
 

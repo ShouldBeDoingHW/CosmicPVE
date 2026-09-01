@@ -49,8 +49,7 @@ public final class VKitEquipmentGenerator {
         result.set(ModDataComponents.VKIT_EQUIPMENT.get(), new VKitEquipmentData(
                 VKitEquipmentData.CURRENT_DATA_VERSION, definition.id(), level, type));
         result.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME,
-                Component.literal(reward.displayName() + " (" + roman(level) + ")")
-                        .withStyle(style -> style.withColor(definition.color()).withBold(true).withItalic(true)));
+                equipmentName(definition, reward, java.util.OptionalInt.of(level)));
 
         Map<CosmicEnchantmentSpec, Integer> cosmic = allocate(reward.pool(level), pointBudget(level), random);
         if (cosmic.size() > capacity.capacity(result)) {
@@ -128,5 +127,13 @@ public final class VKitEquipmentGenerator {
             case 6 -> "VI"; case 7 -> "VII"; case 8 -> "VIII"; case 9 -> "IX"; case 10 -> "X";
             default -> throw new IllegalArgumentException("V-Kit level must be 1-10");
         };
+    }
+
+    /** Canonical V-Kit equipment-name component, shared by generated gear and informational previews. */
+    public static Component equipmentName(VKitDefinition definition, VKitDefinition.EquipmentReward reward,
+            java.util.OptionalInt level) {
+        String suffix = level.isPresent() ? " (" + roman(level.getAsInt()) + ")" : "";
+        return Component.literal(reward.displayName() + suffix)
+                .withStyle(style -> style.withColor(definition.color()).withBold(true).withItalic(true));
     }
 }

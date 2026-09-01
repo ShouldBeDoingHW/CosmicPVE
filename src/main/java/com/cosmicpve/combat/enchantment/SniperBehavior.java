@@ -24,11 +24,15 @@ public final class SniperBehavior implements OutgoingDamageContributor {
     }
 
     public static boolean isHeadshot(AABB box, Vec3 impact) {
+        return isHeadshotAtFraction(box, impact, HEADSHOT_FRACTION);
+    }
+
+    public static boolean isHeadshotAtFraction(AABB box, Vec3 impact, double lowerFraction) {
         if (box == null || impact == null || box.getYsize() <= 0.0
                 || impact.x < box.minX || impact.x > box.maxX
                 || impact.y < box.minY || impact.y > box.maxY
                 || impact.z < box.minZ || impact.z > box.maxZ) return false;
-        return impact.y >= box.minY + box.getYsize() * HEADSHOT_FRACTION;
+        return impact.y >= box.minY + box.getYsize() * lowerFraction;
     }
 
     public static double bonus(int level, boolean headshot) {

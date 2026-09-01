@@ -11,5 +11,6 @@ class CosmicEnchantmentTierColorTest {
         assertEquals(0xFFFF55, CosmicEnchantmentTier.ULTIMATE.tooltipColor());
         assertEquals(0xFFAA00, CosmicEnchantmentTier.LEGENDARY.tooltipColor());
         assertEquals(0xAA0000, CosmicEnchantmentTier.MASTERY.tooltipColor());
+        assertEquals(0xFF00A2, CosmicEnchantmentTier.HEROIC.tooltipColor());
     }
 }

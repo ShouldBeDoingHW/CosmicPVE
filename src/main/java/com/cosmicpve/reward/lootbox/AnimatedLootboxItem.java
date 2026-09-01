@@ -23,6 +23,10 @@ public final class AnimatedLootboxItem extends Item {
             case SECRET_WEAPON_CACHE -> Component.literal("Secret Weapon Cache").withStyle(style -> style.withColor(0x00AAAA).withBold(true));
             case COSMIC_ENCHANTMENT_TABLE -> Component.literal("Cosmic Enchantment Table")
                     .withStyle(style -> style.withColor(0x32045C).withBold(true));
+            case HEROIC_COSMIC_ENCHANTMENT_TABLE -> Component.literal("Heroic")
+                    .withStyle(style -> style.withColor(com.cosmicpve.equipment.enchantment.CosmicEnchantmentTier.HEROIC.tooltipColor()).withBold(true))
+                    .append(Component.literal(" Cosmic Enchantment Table")
+                            .withStyle(style -> style.withColor(0x32045C).withBold(true)));
             case ADMIN_ABUSE -> adminName();
         };
     }
@@ -49,5 +53,5 @@ public final class AnimatedLootboxItem extends Item {
         }
         return result;
     }
-    public enum Kind { SECRET_WEAPON_CACHE, COSMIC_ENCHANTMENT_TABLE, ADMIN_ABUSE }
+    public enum Kind { SECRET_WEAPON_CACHE, COSMIC_ENCHANTMENT_TABLE, HEROIC_COSMIC_ENCHANTMENT_TABLE, ADMIN_ABUSE }
 }

@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.cosmicpve.combat.api.AttackCategory;
 import com.cosmicpve.data.component.SignatureWeaponIdentity;
 import com.cosmicpve.equipment.armor.ArmorSetIds;
+import com.cosmicpve.equipment.enchantment.HeroicEnchantments;
 import com.cosmicpve.registry.ModEnchantments;
 import com.google.gson.JsonParser;
 import java.io.InputStreamReader;
@@ -40,9 +41,18 @@ class Step8ELootboxTest {
     @Test void cosmicTablePoolAndRatesAreCanonical() {
         assertEquals(Set.of(ModEnchantments.ARMORED, ModEnchantments.ANGELIC, ModEnchantments.RAGE,
                 ModEnchantments.OBLITERATE, ModEnchantments.LEADERSHIP, ModEnchantments.SOUL_SIPHON,
-                ModEnchantments.LUCK), Set.copyOf(CosmicEnchantmentTableRewards.POOL));
+                ModEnchantments.LUCK, ModEnchantments.EAGLE_EYE, ModEnchantments.LIGHTNING,
+                ModEnchantments.MOLTEN, ModEnchantments.SNIPER, ModEnchantments.STORMCALLER,
+                ModEnchantments.DOMINATE), Set.copyOf(CosmicEnchantmentTableRewards.POOL));
         assertEquals(List.of(50, 75, 100), CosmicEnchantmentTableRewards.ORDINARY_SUCCESS);
         assertEquals(List.of(25, 50), CosmicEnchantmentTableRewards.MASTERY_SUCCESS);
+    }
+
+    @Test void heroicTableHasExactlyEightByThreeEqualOutcomes() {
+        assertEquals(HeroicEnchantments.PAIRS.stream().map(HeroicEnchantments.Pair::heroic).toList(),
+                HeroicCosmicEnchantmentTableRewards.POOL);
+        assertEquals(List.of(25, 50, 75), HeroicCosmicEnchantmentTableRewards.SUCCESS);
+        assertEquals(24, HeroicCosmicEnchantmentTableRewards.ENTRY_COUNT);
     }
 
     @Test void adminPoolIsExactlyFourEqualTwentyFiveWeights() {
@@ -78,6 +88,12 @@ class Step8ELootboxTest {
         assertEquals("Cosmic Enchantment Table", table.getString());
         assertEquals(0x32045C, color(table));
         assertTrue(table.getStyle().isBold());
+        var heroic = AnimatedLootboxItem.displayName(
+                AnimatedLootboxItem.Kind.HEROIC_COSMIC_ENCHANTMENT_TABLE);
+        assertEquals("Heroic Cosmic Enchantment Table", heroic.getString());
+        assertEquals(0xFF00A2, color(heroic));
+        assertEquals(0x32045C, color(heroic.getSiblings().getFirst()));
+        assertTrue(heroic.getStyle().isBold() && heroic.getSiblings().getFirst().getStyle().isBold());
         var lore = AnimatedLootboxItem.secretWeaponCacheLore();
         assertEquals(1, lore.size());
         assertEquals("The most devastating weapons known to life, all inside a single box...", lore.getFirst().getString());
@@ -88,6 +104,7 @@ class Step8ELootboxTest {
     @Test void itemDefinitionsReferenceCanonicalVanillaModels() {
         assertSpecialChest("secret_weapon_cache", "minecraft:item/ender_chest", "minecraft:ender");
         assertModel("cosmic_enchantment_table", "minecraft:block/enchanting_table");
+        assertModel("heroic_cosmic_enchantment_table", "minecraft:block/enchanting_table");
         assertModel("admin_abuse", "minecraft:block/end_portal_frame");
     }
 
