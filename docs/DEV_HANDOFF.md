@@ -529,6 +529,8 @@ Step 8I / 8I.1 is closed in `eab4c91bb9bbae0e4fab53578aac3ce1d3980885` (`Add Hol
 
 ### Step 8J / 8J.1 — IMPLEMENTED; AUTOMATED/RUNTIME VERIFIED; MANUALLY VERIFIED / ACCEPTED
 
+Step 8J/8J.1 is closed in `e9c189e` (`Add Enchanter, selling, and Impossible Trials`).
+
 Public `/enchanter` opens one read-only nine-offer-slot chest row over the normal player inventory. Alternating slots sell exactly one Unexamined Simple, Unique, Elite, Ultimate, or Legendary Book for 400/800/1,500/2,500/4,000 raw vanilla XP points. Mastery and Heroic are absent. Purchases authoritatively construct, debit once, safely deliver, refresh the exact raw-XP display, and play one player-local experience-orb pickup sound; rejected purchases mutate nothing.
 
 Public `/sell hand` and `/sell all` reuse the persistent cent-based `MoneyService`. The canonical stable-order registry contains the 40 named vanilla commodities plus all sixteen Wool blocks at exact live prices. Hand selling removes every eligible carried stack matching the held vanilla item; all selling removes every eligible carried commodity and reports compact per-type subtotals plus the exact total. Armor, vault/external contents, unsellable items, and stacks carrying recognized Cosmic identity data are excluded. Both paths plan and overflow-check the complete sale before item removal and one balance credit.
