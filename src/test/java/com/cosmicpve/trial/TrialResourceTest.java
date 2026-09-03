@@ -58,6 +58,31 @@ class TrialResourceTest {
         assertEquals(com.cosmicpve.trial.room.DeadeyeService.WEST_SPAWN_MARKER,
                 room.spawnMarkerPosition().orElseThrow());
     }
+    @Test void hiddenGraveyardDefinitionIsImpossible() throws Exception {
+        var stream=getClass().getClassLoader().getResourceAsStream(
+                "data/cosmicpve/cosmicpve/trial_rooms/trial/hidden_graveyard.json");
+        assertNotNull(stream);
+        var data=TrialRoomDefinitionData.CODEC.parse(JsonOps.INSTANCE,
+                JsonParser.parseReader(new InputStreamReader(stream,StandardCharsets.UTF_8))).getOrThrow();
+        assertEquals(com.cosmicpve.content.definition.trial.TrialRoomCategory.IMPOSSIBLE,
+                data.resolve(Identifier.parse("cosmicpve:trial/hidden_graveyard")).valueOrThrow().category());
+    }
+
+    @Test void impossibleProductionTableIsExactConstructibleSubset() throws Exception {
+        var stream=getClass().getClassLoader().getResourceAsStream(
+                "data/cosmicpve/cosmicpve/reward_tables/trial/impossible.json");
+        assertNotNull(stream);
+        var entries=JsonParser.parseReader(new InputStreamReader(stream,StandardCharsets.UTF_8))
+                .getAsJsonObject().getAsJsonArray("entries");
+        assertEquals(16, entries.size());
+        assertEquals(147, entries.asList().stream().mapToInt(value ->
+                value.getAsJsonObject().get("weight").getAsInt()).sum());
+        assertEquals(18, ImpossibleRewardCatalog.DECLARED.size());
+        assertEquals(163, ImpossibleRewardCatalog.DECLARED_WEIGHT);
+        assertEquals(147, ImpossibleRewardCatalog.ACTIVE_WEIGHT);
+        assertFalse(ImpossibleRewardCatalog.DECLARED.stream().filter(row -> row.name().contains("Fame")).findFirst().orElseThrow().active());
+        assertFalse(ImpossibleRewardCatalog.DECLARED.stream().filter(row -> row.name().contains("Abandoned")).findFirst().orElseThrow().active());
+    }
     @Test void demonicDevelopmentTableUsesOnlyCurrentRealRewardPrimitivesAtCanonicalWeights() throws Exception {
         var stream=getClass().getClassLoader().getResourceAsStream(
                 "data/cosmicpve/cosmicpve/reward_tables/trial/demonic_development.json");

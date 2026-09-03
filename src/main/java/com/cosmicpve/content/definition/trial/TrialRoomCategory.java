@@ -5,7 +5,7 @@ import net.minecraft.util.StringRepresentable;
 
 public enum TrialRoomCategory implements StringRepresentable {
     DECISION("decision"), DEVELOPMENT("development"), APPRENTICE("apprentice"),
-    HARDCORE("hardcore"), DEMONIC("demonic");
+    HARDCORE("hardcore"), IMPOSSIBLE("impossible"), DEMONIC("demonic");
 
     public static final Codec<TrialRoomCategory> CODEC = StringRepresentable.fromEnum(TrialRoomCategory::values);
     private final String serializedName;

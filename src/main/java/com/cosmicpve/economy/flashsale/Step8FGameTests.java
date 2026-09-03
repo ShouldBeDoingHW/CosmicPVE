@@ -76,6 +76,11 @@ public final class Step8FGameTests {
             table.entries().forEach(entry -> helper.assertTrue(generator.generate(entry.reward(), context).isPresent(),
                     tier + " reward must construct: " + entry.reward()));
         });
+        var impossible = CosmicContent.repository().requireRewardTable(CosmicPVE.id("trial/impossible"));
+        helper.assertTrue(impossible.entries().size() == 16 && impossible.totalWeight() == 147,
+                "Step 8J Impossible table must publish its exact active constructible subset");
+        impossible.entries().forEach(entry -> helper.assertTrue(generator.generate(entry.reward(), context).isPresent(),
+                "Impossible reward must construct: " + entry.reward()));
         helper.assertTrue(FlashSaleCatalog.CANONICAL_ROWS.size() == 21, "Canonical Flash Sale row count must remain 21");
         helper.assertTrue(FlashSaleCatalog.productionRows().size() == 20,
                 "Only the unresolved Abandoned Spaceship Portal row may be nonselectable");

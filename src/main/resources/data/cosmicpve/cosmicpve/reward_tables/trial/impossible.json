@@ -1,0 +1,20 @@
+{
+  "entries": [
+    {"weight":10,"reward":{"type":"static_item","item":"cosmicpve:heroic_crystal"}},
+    {"weight":10,"minimum_quantity":2,"maximum_quantity":2,"reward":{"type":"static_item","item":"cosmicpve:mystery_elite_spawner"}},
+    {"weight":10,"reward":{"type":"mask","mask_count":1}},
+    {"weight":10,"reward":{"type":"static_item","item":"cosmicpve:conquest_chest_flare"}},
+    {"weight":8,"reward":{"type":"static_item","item":"cosmicpve:trial_trinket_skip_2"}},
+    {"weight":8,"reward":{"type":"static_item","item":"cosmicpve:trial_trinket_time_3"}},
+    {"weight":8,"reward":{"type":"static_item","item":"cosmicpve:trial_trinket_insurance_2"}},
+    {"weight":12,"reward":{"type":"random_vkit_crystal"}},
+    {"weight":8,"reward":{"type":"armor_set_crystal","armor_set":"cosmicpve:dragonslayer","success_rate":25}},
+    {"weight":8,"reward":{"type":"armor_set_crystal","armor_set":"cosmicpve:dragonslayer","success_rate":40}},
+    {"weight":10,"reward":{"type":"space_chest","rarity":"legendary"}},
+    {"weight":5,"reward":{"type":"static_item","item":"cosmicpve:cosmic_enchantment_table"}},
+    {"weight":10,"reward":{"type":"black_scroll","success_rate":100}},
+    {"weight":10,"reward":{"type":"enchanted_black_scroll","success_rate":50}},
+    {"weight":10,"reward":{"type":"weapon_orb","success_rate":60}},
+    {"weight":10,"reward":{"type":"armor_orb","success_rate":60}}
+  ]
+}

@@ -3,6 +3,7 @@ package com.cosmicpve.command;
 import com.cosmicpve.economy.Banknotes;
 import com.cosmicpve.economy.MoneyAmount;
 import com.cosmicpve.economy.MoneyService;
+import com.cosmicpve.economy.SellService;
 import com.cosmicpve.registry.ModItems;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -16,6 +17,7 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 
 public final class EconomyCommands {
     private static final MoneyService MONEY = new MoneyService();
+    private static final SellService SELL = new SellService();
     private EconomyCommands() {}
 
     public static void registerPublic(RegisterCommandsEvent event) {
@@ -24,6 +26,9 @@ public final class EconomyCommands {
         event.getDispatcher().register(Commands.literal("withdraw")
                 .then(Commands.argument("amount", StringArgumentType.word())
                         .executes(c -> withdraw(c.getSource(), StringArgumentType.getString(c, "amount")))));
+        event.getDispatcher().register(Commands.literal("sell")
+                .then(Commands.literal("hand").executes(c -> sell(c.getSource(), true)))
+                .then(Commands.literal("all").executes(c -> sell(c.getSource(), false))));
     }
 
     public static com.mojang.brigadier.builder.LiteralArgumentBuilder<CommandSourceStack> create() {
@@ -58,8 +63,13 @@ public final class EconomyCommands {
 
     private static int balance(CommandSourceStack source) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
         var player = source.getPlayerOrException();
-        source.sendSuccess(() -> Component.translatable("command.cosmicpve.balance", MoneyAmount.format(MONEY.balance(player))), false);
+        source.sendSuccess(() -> balanceMessage(MONEY.balance(player)), false);
         return 1;
+    }
+
+    static Component balanceMessage(long cents) {
+        return Component.translatable("command.cosmicpve.balance", MoneyAmount.format(cents))
+                .withStyle(style -> style.withColor(0x55FF55).withBold(true));
     }
 
     private static int withdraw(CommandSourceStack source, String raw) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
@@ -78,6 +88,43 @@ public final class EconomyCommands {
     private static int inspect(CommandSourceStack source, net.minecraft.server.level.ServerPlayer target) {
         source.sendSuccess(() -> Component.literal(target.getScoreboardName() + ": "
                 + MoneyAmount.format(MONEY.balance(target))), false); return 1;
+    }
+    private static int sell(CommandSourceStack source, boolean hand)
+            throws com.mojang.brigadier.exceptions.CommandSyntaxException {
+        var result = hand ? SELL.sellHand(source.getPlayerOrException()) : SELL.sellAll(source.getPlayerOrException());
+        if (!result.succeeded()) {
+            String text = switch (result.status()) {
+                case INVALID_HAND -> "That item cannot be sold.";
+                case NONE_MATCHING -> "You have none of that item to sell.";
+                case NOTHING_TO_SELL -> "You have nothing to sell.";
+                case OVERFLOW -> "That sale could not be completed safely.";
+                case SUCCESS -> throw new IllegalStateException();
+            };
+            source.sendFailure(Component.literal(text).withColor(0xFF5555));
+            return 0;
+        }
+        if (hand) {
+            var line = result.lines().getFirst();
+            source.sendSuccess(() -> Component.literal("You sold ").withColor(0xAAAAAA)
+                    .append(Component.literal(Integer.toString(line.quantity()))
+                            .withStyle(style -> style.withColor(0xFFFFFF).withBold(true)))
+                    .append(Component.literal(" ").append(new net.minecraft.world.item.ItemStack(line.item()).getHoverName()))
+                    .append(Component.literal("! ").withColor(0xAAAAAA))
+                    .append(Component.literal(MoneyAmount.format(result.totalCents()))
+                            .withStyle(style -> style.withColor(0x55FF55).withBold(true)))
+                    .append(Component.literal(" has been added to your account!").withColor(0xAAAAAA)), false);
+        } else {
+            source.sendSuccess(() -> Component.literal("SOLD ITEMS").withStyle(style -> style.withColor(0xFFAA00).withBold(true)), false);
+            for (var line : result.lines()) source.sendSuccess(() -> Component.literal(line.quantity() + " × ")
+                    .withStyle(style -> style.withColor(0xFFFFFF).withBold(true))
+                    .append(new net.minecraft.world.item.ItemStack(line.item()).getHoverName())
+                    .append(Component.literal(" — ").withColor(0xAAAAAA))
+                    .append(Component.literal(MoneyAmount.format(line.subtotalCents()))
+                            .withStyle(style -> style.withColor(0x55FF55).withBold(true))), false);
+            source.sendSuccess(() -> Component.literal("TOTAL: " + MoneyAmount.format(result.totalCents()))
+                    .withStyle(style -> style.withColor(0x55FF55).withBold(true)), false);
+        }
+        return 1;
     }
     private static int giveNote(CommandSourceStack source, net.minecraft.server.level.ServerPlayer target, String raw) {
         long amount = parse(source, raw); if (amount <= 0) return 0;

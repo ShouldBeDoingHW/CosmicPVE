@@ -97,9 +97,10 @@ public final class TrialClientPresentation {
     static String tierHeading(String phase) {
         return "Tier (" + switch (phase) {
             case "Hardcore" -> 2;
-            case "Demonic" -> 3;
+            case "Impossible" -> 3;
+            case "Demonic" -> 4;
             default -> 1;
-        } + "/3)";
+        } + "/4)";
     }
 
     static String roomHeading(int ordinal) { return ordinal > 0 ? "Room (#" + ordinal + ")" : "Room"; }

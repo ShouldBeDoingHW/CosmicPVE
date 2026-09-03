@@ -35,16 +35,38 @@ class TrialProgressTest {
         assertEquals(5, progress.completeRoom(List.of(new ItemStack(Items.POTATO))).completedRooms());
     }
 
-    @Test void fourthHardcoreCompletionCrossesDemonicBoundaryExactlyOnce() {
+    @Test void fourthHardcoreCompletionCrossesImpossibleBoundaryExactlyOnce() {
         var progress = TrialProgress.EMPTY;
         for (int i=0;i<4;i++) progress=progress.completeRoom(List.of(new ItemStack(Items.APPLE)));
         for (int i=0;i<3;i++) progress=progress.completeRoom(List.of(new ItemStack(Items.CARROT)));
         assertEquals(7,progress.completedRooms()); assertEquals(TrialPhase.HARDCORE,progress.phase());
         var before=progress; var after=progress.completeRoom(List.of(new ItemStack(Items.POTATO)));
-        assertEquals(8,after.completedRooms()); assertEquals(TrialPhase.DEMONIC,after.phase());
-        assertTrue(after.demonicBonusApplied()); assertEquals(2_700,TrialSessionService.completionTimeBonus(before,after));
+        assertEquals(8,after.completedRooms()); assertEquals(TrialPhase.IMPOSSIBLE,after.phase());
+        assertFalse(after.demonicBonusApplied()); assertEquals(2_700,TrialSessionService.completionTimeBonus(before,after));
         assertEquals(0,TrialSessionService.completionTimeBonus(after,
                 after.completeRoom(List.of(new ItemStack(Items.BEETROOT)))));
+    }
+
+    @Test void fourthImpossibleCompletionCrossesDemonicBoundaryExactlyOnce() {
+        var progress = TrialProgress.EMPTY.debugSetCompletedRooms(11);
+        assertEquals(TrialPhase.IMPOSSIBLE, progress.phase());
+        var after = progress.completeRoom(List.of(new ItemStack(Items.DIAMOND)));
+        assertEquals(12, after.completedRooms());
+        assertEquals(TrialPhase.DEMONIC, after.phase());
+        assertTrue(after.demonicBonusApplied());
+        assertEquals(2_400, TrialSessionService.completionTimeBonus(progress, after));
+        assertEquals(0, TrialSessionService.completionTimeBonus(after,
+                after.completeRoom(List.of(new ItemStack(Items.EMERALD)))));
+    }
+
+    @Test void exactRoomBoundariesResolveFourPhases() {
+        assertEquals(TrialPhase.APPRENTICE, TrialProgress.phaseForCompletedRooms(0));
+        assertEquals(TrialPhase.APPRENTICE, TrialProgress.phaseForCompletedRooms(3));
+        assertEquals(TrialPhase.HARDCORE, TrialProgress.phaseForCompletedRooms(4));
+        assertEquals(TrialPhase.HARDCORE, TrialProgress.phaseForCompletedRooms(7));
+        assertEquals(TrialPhase.IMPOSSIBLE, TrialProgress.phaseForCompletedRooms(8));
+        assertEquals(TrialPhase.IMPOSSIBLE, TrialProgress.phaseForCompletedRooms(11));
+        assertEquals(TrialPhase.DEMONIC, TrialProgress.phaseForCompletedRooms(12));
     }
 
     @Test void ordinaryHardcoreCompletionAddsOnePotEntryAndExactlyThreeHundredTicks() {

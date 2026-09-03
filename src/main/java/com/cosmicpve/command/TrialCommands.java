@@ -70,7 +70,7 @@ public final class TrialCommands {
                                 .then(Commands.literal("countdown").executes(ctx -> sound(ctx.getSource(), false)))
                                 .then(Commands.literal("start").executes(ctx -> sound(ctx.getSource(), true))))
                         .then(Commands.literal("progress").then(Commands.literal("set")
-                                .then(Commands.argument("completed", IntegerArgumentType.integer(0, 8))
+                                .then(Commands.argument("completed", IntegerArgumentType.integer(0, 10_000))
                                         .executes(ctx -> send(ctx.getSource(), TrialRuntime.sessions().debugSetCompletedRooms(
                                                 ctx.getSource().getServer(), IntegerArgumentType.getInteger(ctx, "completed")))))))
                         .then(Commands.literal("pot").then(Commands.literal("fill")

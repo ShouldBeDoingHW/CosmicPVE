@@ -10,6 +10,7 @@ import com.cosmicpve.equipment.enchantment.EnchantedBlackScrollMenu;
 import com.cosmicpve.economy.flashsale.FlashSalePreviewMenu;
 import com.cosmicpve.vkit.VKitInfoMenu;
 import com.cosmicpve.upgrade.PlayerUpgradesMenu;
+import com.cosmicpve.enchanter.EnchanterMenu;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.inventory.MenuType;
 import net.neoforged.bus.api.IEventBus;
@@ -37,6 +38,8 @@ public final class ModMenus {
             "vkit_info", () -> IMenuTypeExtension.create(VKitInfoMenu::client));
     public static final DeferredHolder<MenuType<?>, MenuType<PlayerUpgradesMenu>> PLAYER_UPGRADES = MENUS.register(
             "player_upgrades", () -> IMenuTypeExtension.create(PlayerUpgradesMenu::client));
+    public static final DeferredHolder<MenuType<?>, MenuType<EnchanterMenu>> ENCHANTER = MENUS.register(
+            "enchanter", () -> IMenuTypeExtension.create(EnchanterMenu::client));
     private ModMenus() {}
     public static void register(IEventBus bus) { MENUS.register(bus); }
 }

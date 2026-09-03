@@ -22,6 +22,7 @@ public final class CosmicCommands {
 
     public static void register(RegisterCommandsEvent event) {
         EconomyCommands.registerPublic(event);
+        EnchanterCommands.registerPublic(event);
         FlashSaleCommands.registerPublic(event);
         MaskLimitCommands.register(event);
         TinkererCommands.registerPublic(event);

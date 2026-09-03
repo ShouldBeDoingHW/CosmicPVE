@@ -64,8 +64,11 @@ public record TrialProgress(List<TrialPotEntry> pot, List<TrialPlayerDecision> d
         var nextPot = new java.util.ArrayList<>(pot); nextPot.add(new TrialPotEntry(UUID.randomUUID(), reward));
         int completed = completedRooms + 1;
         boolean hardcoreBoundary = completed >= 4 && phase == TrialPhase.APPRENTICE;
-        boolean demonicBoundary = completed >= 8 && phase == TrialPhase.HARDCORE;
-        TrialPhase nextPhase = demonicBoundary ? TrialPhase.DEMONIC : hardcoreBoundary ? TrialPhase.HARDCORE : phase;
+        boolean impossibleBoundary = completed >= 8 && phase == TrialPhase.HARDCORE;
+        boolean demonicBoundary = completed >= 12 && phase == TrialPhase.IMPOSSIBLE;
+        TrialPhase nextPhase = demonicBoundary ? TrialPhase.DEMONIC
+                : impossibleBoundary ? TrialPhase.IMPOSSIBLE
+                : hardcoreBoundary ? TrialPhase.HARDCORE : phase;
         return copy(nextPot, decisions, appearances, completed, nextPhase,
                 hardcoreBonusApplied || hardcoreBoundary, demonicBonusApplied || demonicBoundary,
                 lastRoom, TrialEncounterState.EMPTY, portalModifiers, initialSkipProcessed);
@@ -86,9 +89,9 @@ public record TrialProgress(List<TrialPotEntry> pot, List<TrialPlayerDecision> d
                 portalModifiers, initialSkipProcessed);
     }
     public TrialProgress debugSetCompletedRooms(int rooms) {
-        if (rooms < 0 || rooms > 8) throw new IllegalArgumentException("rooms must be in [0,8]");
-        TrialPhase nextPhase = rooms >= 8 ? TrialPhase.DEMONIC : rooms >= 4 ? TrialPhase.HARDCORE : TrialPhase.APPRENTICE;
-        return copy(pot, decisions, appearances, rooms, nextPhase, rooms >= 4, rooms >= 8, lastRoom, encounter,
+        if (rooms < 0 || rooms > 10_000) throw new IllegalArgumentException("rooms must be in [0,10000]");
+        TrialPhase nextPhase = phaseForCompletedRooms(rooms);
+        return copy(pot, decisions, appearances, rooms, nextPhase, rooms >= 4, rooms >= 12, lastRoom, encounter,
                 portalModifiers, initialSkipProcessed);
     }
     public TrialProgress debugEnterPhase(TrialPhase target) {
@@ -114,5 +117,13 @@ public record TrialProgress(List<TrialPotEntry> pot, List<TrialPlayerDecision> d
             Optional<Identifier> last, TrialEncounterState encounter, TrialPortalModifiers modifiers, boolean skipProcessed) {
         return new TrialProgress(pot, decisions, appearances, rooms, phase, hardcoreBonus, demonicBonus, last, encounter,
                 modifiers, skipProcessed);
+    }
+
+    public static TrialPhase phaseForCompletedRooms(int completedRooms) {
+        if (completedRooms < 0) throw new IllegalArgumentException("completedRooms cannot be negative");
+        if (completedRooms >= 12) return TrialPhase.DEMONIC;
+        if (completedRooms >= 8) return TrialPhase.IMPOSSIBLE;
+        if (completedRooms >= 4) return TrialPhase.HARDCORE;
+        return TrialPhase.APPRENTICE;
     }
 }

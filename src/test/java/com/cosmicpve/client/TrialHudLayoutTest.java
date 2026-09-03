@@ -16,9 +16,10 @@ class TrialHudLayoutTest {
     }
 
     @Test void hierarchyFormatsTierRoomAndHumanReadableTimeWithoutIdentifiers() {
-        assertEquals("Tier (1/3)", TrialClientPresentation.tierHeading("Apprentice"));
-        assertEquals("Tier (2/3)", TrialClientPresentation.tierHeading("Hardcore"));
-        assertEquals("Tier (3/3)", TrialClientPresentation.tierHeading("Demonic"));
+        assertEquals("Tier (1/4)", TrialClientPresentation.tierHeading("Apprentice"));
+        assertEquals("Tier (2/4)", TrialClientPresentation.tierHeading("Hardcore"));
+        assertEquals("Tier (3/4)", TrialClientPresentation.tierHeading("Impossible"));
+        assertEquals("Tier (4/4)", TrialClientPresentation.tierHeading("Demonic"));
         assertEquals("Room (#1)", TrialClientPresentation.roomHeading(1));
         assertEquals("Room (#19)", TrialClientPresentation.roomHeading(19));
         assertEquals("9m 11s", TrialClientPresentation.formatSeconds(551));

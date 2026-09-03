@@ -1,5 +1,6 @@
 package com.cosmicpve.trial.persistence;
 
+import com.cosmicpve.economy.RawExperienceService;
 import com.cosmicpve.registry.ModAttachments;
 import com.cosmicpve.reward.RewardDeliveryService;
 import java.util.List;
@@ -20,6 +21,7 @@ public final class TrialInventoryTransactionService {
     private static final List<EquipmentSlot> ARMOR = List.of(
             EquipmentSlot.FEET, EquipmentSlot.LEGS, EquipmentSlot.CHEST, EquipmentSlot.HEAD);
     private final SafeReturnPositionService safeReturns = new SafeReturnPositionService();
+    private final RawExperienceService experience = new RawExperienceService();
 
     public boolean enter(ServerPlayer player, UUID sessionId) {
         TrialPlayerState existing = player.getExistingDataOrNull(ModAttachments.TRIAL_PLAYER_STATE);
@@ -30,7 +32,8 @@ public final class TrialInventoryTransactionService {
         var snapshot = new TrialOutsideSnapshot(TrialOutsideSnapshot.DATA_VERSION, UUID.randomUUID(), sessionId,
                 inventory, armor, player.getItemBySlot(EquipmentSlot.OFFHAND).copy(),
                 player.containerMenu.getCarried().copy(), player.getInventory().getSelectedSlot(),
-                player.level().dimension().identifier(), player.getX(), player.getY(), player.getZ(),
+                experience.balance(player), player.level().dimension().identifier(),
+                player.getX(), player.getY(), player.getZ(),
                 player.getYRot(), player.getXRot());
         try {
             player.setData(ModAttachments.TRIAL_PLAYER_STATE, TrialPlayerState.committed(snapshot));
@@ -92,6 +95,7 @@ public final class TrialInventoryTransactionService {
         player.setItemSlot(EquipmentSlot.OFFHAND, snapshot.offhand().copy());
         player.getInventory().setSelectedSlot(Math.max(0, Math.min(8, snapshot.selectedSlot())));
         player.containerMenu.setCarried(snapshot.carried().copy());
+        experience.restore(player, snapshot.experiencePoints());
         player.getInventory().setChanged();
 
         ResourceKey<Level> dimension = ResourceKey.create(Registries.DIMENSION, snapshot.dimension());

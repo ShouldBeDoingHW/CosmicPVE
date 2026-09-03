@@ -28,8 +28,10 @@ class TrialRoomSelectionServiceTest {
     }
     @Test void hardcorePoolUsesTheSharedWeightingServiceAndContainsOnlyProductionRooms() {
         var pool=TrialSessionService.roomPool(TrialPhase.HARDCORE);
-        assertEquals(List.of(TrialSessionService.FIRE_COLONY,TrialSessionService.BOMB_SQUAD,
-                TrialSessionService.HAZE_AND_SEEK),pool);
+        assertEquals(List.of(TrialSessionService.COLD_SNAP, TrialSessionService.CIRCUIT_CIRCUS,
+                TrialSessionService.RAIDING_RAINBOW, TrialSessionService.ZERO_G,
+                TrialSessionService.HAZE_AND_SEEK, TrialSessionService.BOMB_SQUAD,
+                TrialSessionService.FIRE_COLONY),pool);
         var service=new TrialRoomSelectionService(); var current=session(TrialProgress.EMPTY.debugEnterPhase(TrialPhase.HARDCORE));
         assertEquals(5,service.weight(current,TrialSessionService.FIRE_COLONY));
         assertEquals(5,service.weight(current,TrialSessionService.HAZE_AND_SEEK));
@@ -40,8 +42,8 @@ class TrialRoomSelectionServiceTest {
     }
     @Test void apprenticePoolContainsZeroGAndColdSnapUsesNormalWeighting() {
         var pool=TrialSessionService.roomPool(TrialPhase.APPRENTICE);
-        assertEquals(List.of(TrialSessionService.CIRCUIT_CIRCUS,TrialSessionService.RAIDING_RAINBOW,
-                TrialSessionService.COLD_SNAP, TrialSessionService.ZERO_G),pool);
+        assertEquals(List.of(TrialSessionService.COLD_SNAP, TrialSessionService.CIRCUIT_CIRCUS,
+                TrialSessionService.RAIDING_RAINBOW, TrialSessionService.ZERO_G),pool);
         var service=new TrialRoomSelectionService(); var current=session(TrialProgress.EMPTY);
         assertEquals(5,service.weight(current,TrialSessionService.COLD_SNAP));
         var afterCold=session(current.progress().beginRoom(TrialSessionService.COLD_SNAP,TrialEncounterState.EMPTY));
@@ -63,5 +65,16 @@ class TrialRoomSelectionServiceTest {
         assertEquals(3,service.weight(after,TrialSessionService.HIDDEN_GRAVEYARD));
         assertNotEquals(TrialSessionService.HIDDEN_GRAVEYARD,
                 service.select(after,pool,RandomSource.create(11)).orElseThrow());
+    }
+
+    @Test void impossiblePoolAddsOnlyProductionImpossibleRoomAndLowerTiers() {
+        var pool = TrialSessionService.roomPool(TrialPhase.IMPOSSIBLE);
+        assertEquals(8, pool.size());
+        assertTrue(pool.containsAll(TrialSessionService.roomPool(TrialPhase.HARDCORE)));
+        assertTrue(pool.contains(TrialSessionService.HIDDEN_GRAVEYARD));
+        assertFalse(pool.contains(TrialSessionService.DEADEYE));
+        assertFalse(pool.contains(TrialSessionService.WARZONE_GIANTS));
+        assertEquals(5, new TrialRoomSelectionService().weight(
+                session(TrialProgress.EMPTY.debugEnterPhase(TrialPhase.IMPOSSIBLE)), TrialSessionService.HIDDEN_GRAVEYARD));
     }
 }

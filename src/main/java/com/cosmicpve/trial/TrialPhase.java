@@ -6,6 +6,7 @@ import net.minecraft.util.StringRepresentable;
 public enum TrialPhase implements StringRepresentable {
     APPRENTICE("apprentice", "Apprentice", 0xE6E032),
     HARDCORE("hardcore", "Hardcore", 0xE6A732),
+    IMPOSSIBLE("impossible", "Impossible", 0xAA00AA),
     DEMONIC("demonic", "Demonic", 0xE65C32);
     public static final Codec<TrialPhase> CODEC = StringRepresentable.fromEnum(TrialPhase::values);
     private final String name;

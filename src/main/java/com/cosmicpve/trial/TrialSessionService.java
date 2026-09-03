@@ -73,12 +73,12 @@ public final class TrialSessionService {
     static final long HIDDEN_GRAVEYARD_WORLD_TIME = 18_000L;
     public static final Identifier APPRENTICE_REWARDS = CosmicPVE.id("trial/apprentice");
     public static final Identifier HARDCORE_REWARDS = CosmicPVE.id("trial/hardcore_development");
+    public static final Identifier IMPOSSIBLE_REWARDS = CosmicPVE.id("trial/impossible");
     public static final Identifier DEMONIC_REWARDS = CosmicPVE.id("trial/demonic_development");
-    private static final List<Identifier> APPRENTICE_ROOMS = List.of(CIRCUIT_CIRCUS, RAIDING_RAINBOW, COLD_SNAP, ZERO_G);
-    private static final List<Identifier> HARDCORE_ROOMS = List.of(FIRE_COLONY, BOMB_SQUAD, HAZE_AND_SEEK);
-    private static final List<Identifier> DEMONIC_ROOMS = java.util.stream.Stream.of(
-            APPRENTICE_ROOMS.stream(), HARDCORE_ROOMS.stream(), java.util.stream.Stream.of(HIDDEN_GRAVEYARD, DEADEYE, WARZONE_GIANTS))
-            .flatMap(java.util.function.Function.identity()).toList();
+    static final List<Identifier> APPRENTICE_NATIVE_ROOMS = List.of(COLD_SNAP, CIRCUIT_CIRCUS, RAIDING_RAINBOW, ZERO_G);
+    static final List<Identifier> HARDCORE_NATIVE_ROOMS = List.of(HAZE_AND_SEEK, BOMB_SQUAD, FIRE_COLONY);
+    static final List<Identifier> IMPOSSIBLE_NATIVE_ROOMS = List.of(HIDDEN_GRAVEYARD);
+    static final List<Identifier> DEMONIC_NATIVE_ROOMS = List.of(WARZONE_GIANTS, DEADEYE);
     static final int APPRENTICE_REWARD_TIME = 600;
     static final int HARDCORE_REWARD_TIME = 300;
     static final int PHASE_ENTRY_BONUS = 2_400;
@@ -327,6 +327,7 @@ public final class TrialSessionService {
             Identifier rewardTable = switch (session.progress().phase()) {
                 case APPRENTICE -> APPRENTICE_REWARDS;
                 case HARDCORE -> HARDCORE_REWARDS;
+                case IMPOSSIBLE -> IMPOSSIBLE_REWARDS;
                 case DEMONIC -> DEMONIC_REWARDS;
             };
             List<ItemStack> reward = rewards.roll(rewardTable, 1,
@@ -355,8 +356,7 @@ public final class TrialSessionService {
     static int completionTimeBonus(TrialProgress before, TrialProgress after) {
         int roomBonus = before.phase() == TrialPhase.APPRENTICE ? APPRENTICE_REWARD_TIME
                 : before.phase() == TrialPhase.HARDCORE ? HARDCORE_REWARD_TIME : 0;
-        int transition = after.hardcoreBonusApplied() && !before.hardcoreBonusApplied() ? PHASE_ENTRY_BONUS : 0;
-        if (after.demonicBonusApplied() && !before.demonicBonusApplied()) transition += PHASE_ENTRY_BONUS;
+        int transition = before.phase() != after.phase() ? PHASE_ENTRY_BONUS : 0;
         return roomBonus + transition;
     }
 
@@ -446,8 +446,11 @@ public final class TrialSessionService {
     }
 
     static List<Identifier> roomPool(TrialPhase phase) {
-        return phase == TrialPhase.DEMONIC ? DEMONIC_ROOMS
-                : phase == TrialPhase.HARDCORE ? HARDCORE_ROOMS : APPRENTICE_ROOMS;
+        var pool = new java.util.ArrayList<Identifier>(APPRENTICE_NATIVE_ROOMS);
+        if (phase != TrialPhase.APPRENTICE) pool.addAll(HARDCORE_NATIVE_ROOMS);
+        if (phase == TrialPhase.IMPOSSIBLE || phase == TrialPhase.DEMONIC) pool.addAll(IMPOSSIBLE_NATIVE_ROOMS);
+        if (phase == TrialPhase.DEMONIC) pool.addAll(DEMONIC_NATIVE_ROOMS);
+        return List.copyOf(pool);
     }
 
     private void beginRoom(MinecraftServer server, TrialSession session, Identifier room) {
@@ -869,11 +872,12 @@ public final class TrialSessionService {
         TrialSession session = active(server).orElse(null);
         if (session == null || session.state() != TrialLifecycleState.DECISION)
             return TrialOperationResult.rejected("Force-room requires an active Decision Box.");
-        if (!APPRENTICE_ROOMS.contains(room) && !HARDCORE_ROOMS.contains(room)
-                && !room.equals(HIDDEN_GRAVEYARD) && !room.equals(DEADEYE) && !room.equals(WARZONE_GIANTS))
+        if (!APPRENTICE_NATIVE_ROOMS.contains(room) && !HARDCORE_NATIVE_ROOMS.contains(room)
+                && !IMPOSSIBLE_NATIVE_ROOMS.contains(room) && !DEMONIC_NATIVE_ROOMS.contains(room))
             return TrialOperationResult.rejected("Unknown production Trial room: " + room);
-        TrialPhase phase = room.equals(HIDDEN_GRAVEYARD) || room.equals(DEADEYE) || room.equals(WARZONE_GIANTS) ? TrialPhase.DEMONIC
-                : HARDCORE_ROOMS.contains(room) ? TrialPhase.HARDCORE : TrialPhase.APPRENTICE;
+        TrialPhase phase = DEMONIC_NATIVE_ROOMS.contains(room) ? TrialPhase.DEMONIC
+                : IMPOSSIBLE_NATIVE_ROOMS.contains(room) ? TrialPhase.IMPOSSIBLE
+                : HARDCORE_NATIVE_ROOMS.contains(room) ? TrialPhase.HARDCORE : TrialPhase.APPRENTICE;
         TrialSession prepared = session.withProgress(session.progress().debugEnterPhase(phase));
         beginRoom(server, prepared, room);
         return TrialOperationResult.ok("Forced Trial room " + room + ".");

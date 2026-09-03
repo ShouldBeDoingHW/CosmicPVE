@@ -1,10 +1,10 @@
 # CosmicPVE Development Handoff
 
-Current accepted baseline: Step 8I / 8I.1 — Holy Whitescrolls + Space Dust Bundle + Inversion + presentation/Conquest alert corrections is implemented, automated/runtime verified, and manually verified/accepted. Earlier accepted milestones remain recorded below.
+Current accepted baseline: Step 8J / 8J.1 — Enchanter, selling, Impossible Trial tier/loot foundation, exact Trial XP restoration, and four-tier HUD is implemented, automated/runtime verified, and manually verified/accepted. Earlier accepted milestones remain recorded below.
 
-Repository state: Steps 6A–8I.1 and the earlier Conquest synchronization are implemented, verified, and manually accepted. The root `assets`, `drafts`, and `woodlands` development-source folders remain untouched and untracked.
+Repository state: Steps 6A–8J.1 and the earlier Conquest synchronization are implemented, verified, and manually accepted. The user-maintained `docs/Cosmic_Design.md` and root `assets`, `drafts`, and `woodlands` development-source folders remain outside closure ownership.
 
-Last handoff update: 2026-08-31
+Last handoff update: 2026-09-03
 
 Pinned environment:
 
@@ -525,6 +525,20 @@ Implemented ordinary Ultimate Sword enchantment `cosmicpve:inversion` IV. A vali
 
 The Step 8I.1 corrective synchronizes Dragon to its current canonical `#FFF24D` identity and exact Base64 texture while retaining +2% ordinary outgoing damage and changing its defensive benefit to 50% less ordinary Fire-tagged, Lava, and Poison damage. Holy Whitescroll names and the equipped `HOLY` marker now retain their established segmented colors while rendering fully bold; the marker remains underlined and `#C4394A`. Compact attached Mask/Multi-Mask and Weapon Skin identity lines are likewise fully bold without changing ordering or wrapping. Natural Conquest spawns and successful player-used Conquest Flares broadcast one global coordinate alert using the finalized X/Y/Z. Both normal player-facing origins receive the persisted, restart-safe red five-minute warning at the existing reminder boundary; failed/debug/reload paths remain silent, Flare lifetime behavior is otherwise unchanged, and all other reminder cadence is preserved.
 
+Step 8I / 8I.1 is closed in `eab4c91bb9bbae0e4fab53578aac3ce1d3980885` (`Add Holy gear, Inversion, and Space Dust rewards`).
+
+### Step 8J / 8J.1 — IMPLEMENTED; AUTOMATED/RUNTIME VERIFIED; MANUALLY VERIFIED / ACCEPTED
+
+Public `/enchanter` opens one read-only nine-offer-slot chest row over the normal player inventory. Alternating slots sell exactly one Unexamined Simple, Unique, Elite, Ultimate, or Legendary Book for 400/800/1,500/2,500/4,000 raw vanilla XP points. Mastery and Heroic are absent. Purchases authoritatively construct, debit once, safely deliver, refresh the exact raw-XP display, and play one player-local experience-orb pickup sound; rejected purchases mutate nothing.
+
+Public `/sell hand` and `/sell all` reuse the persistent cent-based `MoneyService`. The canonical stable-order registry contains the 40 named vanilla commodities plus all sixteen Wool blocks at exact live prices. Hand selling removes every eligible carried stack matching the held vanilla item; all selling removes every eligible carried commodity and reports compact per-type subtotals plus the exact total. Armor, vault/external contents, unsellable items, and stacks carrying recognized Cosmic identity data are excluded. Both paths plan and overflow-check the complete sale before item removal and one balance credit.
+
+Trials now resolve Apprentice for rooms 1–4, Hardcore for 5–8, Impossible for 9–12, and Demonic for 13 onward. Native classification is Apprentice: Cold Snap, Circuit Circus, Raiding Rainbow, Zero-G; Hardcore: Haze and Seek, Bomb Squad, Fire Colony; Impossible: Hidden Graveyard; Demonic: Warzone Giants, Deadeye. Selection pools expand to retain all lower-tier production rooms, appearances and the existing 5→3→1→ineligible weights persist for the entire run, and the immediately previous room remains excluded. Inventor and Cave Diving are not production-selectable.
+
+Room completion uses the phase active before completion to select rewards and timing. Apprentice grants 600 ticks, Hardcore 300, and Impossible/Demonic zero; crossing each 4/8/12-room phase boundary independently adds 2,400 ticks once. The Slow Mo creation bonus and initial Skip behavior are unchanged. The new active `cosmicpve:trial/impossible` pool has 16 constructible rows and total weight 147. The full canonical declaration remains 18 rows/weight 163: the +66% Fame Trinket and Abandoned Spaceship Portal rows are retained as explicit inactive dependencies, so no dead probability space or fake reward exists. Apprentice, Hardcore, and Demonic production reward resources are unchanged in this milestone.
+
+The Step 8J.1 corrective makes the shared `/bal` and `/balance` response entirely bold `#55FF55` without changing balance wording, formatting, or arithmetic. Trial outside-state snapshots are now version 2 and persist the player's exact total raw vanilla XP points alongside inventory and return state; the centralized idempotent restoration path reconstructs the matching level/progress state, so DEAL, death, timeout/failure, administrative exit, and reconnect/restart recovery all discard Trial-local XP changes and restore the pre-entry value exactly. The participant HUD now derives its tier display from the active phase label as Apprentice `1/4`, Hardcore `2/4`, Impossible `3/4`, and Demonic `4/4` on every normal payload refresh.
+
 ## 3. Current Real Enchantments
 
 These are registered through Minecraft's enchantment infrastructure, use actual enchantment data on the item, and are not present in normal enchanting-table, librarian, random-loot, random-equipment, or mob-equipment acquisition pools.
@@ -862,16 +876,17 @@ Commands call gameplay services or create the same typed components used by game
 - **Armorer trade policy:** Step 6I disables Diamond/Netherite armor recipes and replaces generated Diamond armor in the six audited chest tables. Vanilla Armorer villagers remain a separate Diamond-armor acquisition path because the current bounded rule did not specify trade replacement; settle whether those offers should be removed or replaced before declaring Iron the ceiling for every normal acquisition route.
 - **Remaining Trial reward dependencies:** Random Boss Spawn Egg, Dungeon Portal, and broader Demonic reward dependencies still require their own bounded systems. Existing supported reward rows must not be mistaken for those deferred primitives.
 - **Abandoned Spaceship Portal reward dependency:** the current design lists this item in Flash Sales and the Mastery Space Chest, but the repository has no production portal item or compatible Dungeon-portal foundation. Its catalog/table metadata is retained where useful for inspection, but it is excluded from production generation until a bounded Dungeon/portal milestone supplies the legitimate item.
+- **Bonus Fame Trial Trinket dependency:** the Impossible reward design declares a +66% Fame Trinket, but Fame does not yet exist. The row remains declared and inactive until the bounded Fame milestone provides a real effect and item.
 
 The final post-Orb capacity is no longer unresolved for current target classes: armor is 8 and swords/axes/bows/crossbows are 10. Do not reopen those limits incidentally during unrelated work.
 
 ## 16. Current Next Milestone
 
-**Immediate next action: Step 8J — `/enchanter` + `/sell` + Impossible Trial tier + room reshuffling.**
+**Immediate next action: Step 8K — Cave Diving + full Trial loot rebalance.**
 
 Current intended sequence:
 
-Steps 8A–8I.1, including Step 8G.1/8G.2 and the Obsidian Destroyer + Dominate micro-milestone, are manually verified and accepted. Step 8J is the next bounded implementation milestone. Fame, Memory Chests, Cosmic Crate halves, Dungeon gameplay, Deep Sea Dive, the wider Trial loot rebalance, and later roadmap work remain deferred.
+Step 8K adds production Cave Diving and synchronizes all four Trial reward pools. Fame, Memory Chests, Cosmic Crate halves, Dungeon gameplay, Inventor, and later roadmap work remain deferred.
 
 The ordinary-enchantment expansion remains split across bounded patches. Step 7C is the explicit instruction that made the current canonical Design Doc enchantment-table values implementation-authoritative; later design edits still require their own explicit implementation milestone.
 
@@ -889,6 +904,12 @@ The ordinary-enchantment expansion remains split across bounded patches. Step 7C
 Preserve unrelated dirty changes. Never change pinned versions as a side effect of gameplay work. Prefer service-level rules and typed data over one-off event logic, and keep client-only classes isolated from dedicated-server loading.
 
 ## 18. Verification Snapshot
+
+For the Step 8J candidate:
+
+- `gradlew.bat cleanTest test build` succeeds. All 587 automated tests across 147 suites pass with zero failures, errors, or skips; focused Enchanter, exact-price sell, bold-green balance presentation, raw-XP snapshot serialization/reconstruction, four-tier HUD presentation, four-phase progression, expanding pool, timer-boundary, room-classification, and Impossible-table coverage is green. All 11 loaded-registry GameTests pass.
+- All 251 main-resource JSON files decode successfully when empty blockstate variant keys are parsed as valid JSON objects. Loaded content publishes nine reward tables, including `cosmicpve:trial/impossible`, and twelve Trial rooms with Hidden Graveyard categorized as Impossible. The dedicated server loads 1,462 recipes and reaches `Done`; the fresh client completes ResourceManager reload, sound initialization, and item/block/chest/GUI atlas creation with the Enchanter menu registered and no relevant Step 8J model, menu, codec, registry, or sided-classloading errors. The separately installed Slightly Improved Font resource pack continues to emit its unrelated pack-format warning.
+- `git diff --check` passes for Step 8J-owned paths with only normal Windows line-ending notices. The user-maintained Design Doc retains unrelated Markdown trailing spaces and is excluded from that ownership check. Pinned Minecraft 1.21.11, NeoForge 21.11.45, Java 21, Gradle 9.2.1, ModDevGradle 2.0.144, mod ID `cosmicpve`, and package `com.cosmicpve` remain unchanged. Step 8J/8J.1 is manually verified/accepted.
 
 For the Step 8I/8I.1 candidate:
 

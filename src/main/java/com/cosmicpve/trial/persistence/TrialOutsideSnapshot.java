@@ -10,8 +10,9 @@ import net.minecraft.world.item.ItemStack;
 
 public record TrialOutsideSnapshot(int dataVersion, UUID transactionId, UUID sessionId,
         List<ItemStack> inventory, List<ItemStack> armor, ItemStack offhand, ItemStack carried,
-        int selectedSlot, Identifier dimension, double x, double y, double z, float yaw, float pitch) {
-    public static final int DATA_VERSION = 1;
+        int selectedSlot, int experiencePoints, Identifier dimension,
+        double x, double y, double z, float yaw, float pitch) {
+    public static final int DATA_VERSION = 2;
     public static final Codec<TrialOutsideSnapshot> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.INT.optionalFieldOf("data_version", DATA_VERSION).forGetter(TrialOutsideSnapshot::dataVersion),
             UUIDUtil.CODEC.fieldOf("transaction_id").forGetter(TrialOutsideSnapshot::transactionId),
@@ -21,6 +22,7 @@ public record TrialOutsideSnapshot(int dataVersion, UUID transactionId, UUID ses
             ItemStack.OPTIONAL_CODEC.fieldOf("offhand").forGetter(TrialOutsideSnapshot::offhand),
             ItemStack.OPTIONAL_CODEC.fieldOf("carried").forGetter(TrialOutsideSnapshot::carried),
             Codec.INT.fieldOf("selected_slot").forGetter(TrialOutsideSnapshot::selectedSlot),
+            Codec.INT.optionalFieldOf("experience_points", 0).forGetter(TrialOutsideSnapshot::experiencePoints),
             Identifier.CODEC.fieldOf("dimension").forGetter(TrialOutsideSnapshot::dimension),
             Codec.DOUBLE.fieldOf("x").forGetter(TrialOutsideSnapshot::x),
             Codec.DOUBLE.fieldOf("y").forGetter(TrialOutsideSnapshot::y),
@@ -34,5 +36,6 @@ public record TrialOutsideSnapshot(int dataVersion, UUID transactionId, UUID ses
         armor = armor.stream().map(ItemStack::copy).toList();
         offhand = offhand.copy();
         carried = carried.copy();
+        if (experiencePoints < 0) throw new IllegalArgumentException("Experience cannot be negative");
     }
 }
