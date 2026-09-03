@@ -1,6 +1,6 @@
 # CosmicPVE Development Handoff
 
-Current accepted baseline: Step 8H — Player Upgrades + Upgrade Crystals + Stormcaller + Conquest Chest Rebalance is implemented, automated/runtime verified, and manually verified/accepted. Earlier accepted milestones remain recorded below.
+Current accepted baseline: Step 8H — Player Upgrades + Upgrade Crystals + Stormcaller + Conquest Chest Rebalance is implemented, automated/runtime verified, manually verified/accepted, and closed in `49a6ffe` (`Add player upgrades and rebalance Conquest`). Earlier accepted milestones remain recorded below.
 
 Repository state: Steps 6A–8H and the earlier Conquest synchronization are implemented, verified, and manually accepted. The root `assets`, `drafts`, and `woodlands` development-source folders remain untouched and untracked.
 
@@ -503,6 +503,8 @@ The real Undead Corpse now has exactly 1 armor and 0 toughness with its other st
 
 ### Step 8H — IMPLEMENTED; AUTOMATED/RUNTIME VERIFIED; MANUALLY VERIFIED / ACCEPTED
 
+Step 8H and its accepted bounded hotfixes are closed in `49a6ffe` (`Add player upgrades and rebalance Conquest`).
+
 Implemented stackable, Quartz-presented, forced-glint `cosmicpve:upgrade_crystal`. Its bold italic teal name, yellow italic flavor, and gray instruction are item-owned. Right-click banks the complete held main/offhand stack in one server-authoritative transaction, then consumes that stack, sends one player-local level-up sound, and reports the increment and persistent total. A versioned copy-on-death player attachment stores banked crystals and all six permanent upgrade tiers by stable IDs.
 
 Public `/upgrades` opens a read-only 27-slot `PLAYER UPGRADES` menu with the exact six canonical icons at slots 11/13/15/20/22/24, inert black filler panes, forced icon glint, current tier plus only the next tier, and live crystal/money affordability. Purchases validate both resources before mutation, subtract exact fixed-point cents and banked crystals once, advance exactly one tier, refresh the menu, and provide player-local pitch-1.1 level-up feedback. More Damage contributes +1–5% to the ordinary additive outgoing bucket; Less Damage contributes ×0.99–×0.95 ordinary incoming; Dungeon Mastery exposes one reusable 2.5–10% key-preservation roll seam; Slow Mo applies the highest joined-party tier once at initial Trial setup (+20/+40/+60 seconds); Safety Net lowers only the effective examined-book Destroy Rate by 2–10 percentage points with a zero floor; Pure RNG adds exactly two levels into the existing total Luck aggregation.
@@ -879,7 +881,7 @@ Preserve unrelated dirty changes. Never change pinned versions as a side effect 
 
 For the Step 8H candidate:
 
-- Focused player-upgrade, Stormcaller, and Conquest suites pass. The full `gradlew.bat cleanTest test build` succeeds with 559 tests across 140 suites and zero failures, errors, or skips. All 11 required loaded-registry GameTests pass, including the real Conquest completion path with three table rolls, one exact Banknote, and one guaranteed 2–4 Upgrade Crystal stack.
+- Focused player-upgrade, Stormcaller, Conquest, Flash Sale, Hidden Graveyard world-time, and Fire Colony loadout suites pass. The final full `gradlew.bat cleanTest test build` succeeds with 560 tests across 140 suites and zero failures, errors, or skips. All 11 required loaded-registry GameTests pass, including the real Conquest completion path with three table rolls, one exact Banknote, and one guaranteed 2–4 Upgrade Crystal stack.
 - All 245 main-resource JSON files decode successfully, including the canonical empty blockstate variant keys. The loaded GameTest server publishes the Step 8H content and completes without relevant attachment, menu, command, enchantment, reward-table, or common-side classloading errors. Dedicated-server startup loads 1,462 recipes, publishes all eight reward tables, verifies progression controls, and reaches `Done`. Fresh-client startup completes ResourceManager reload, OpenAL/SoundEngine initialization, and item/block/GUI/chest atlas creation with the Upgrade Crystal model and player-upgrades menu registered and no relevant missing-model, missing-texture, menu, localization, or sided-classloading errors.
 - `git diff --check` passes for Step 8H-owned source, resource, test, and handoff paths with only normal Windows line-ending notices. The user's live `docs/Cosmic_Design.md` retains unrelated pre-existing Markdown whitespace and remains outside Step 8H ownership. Minecraft 1.21.11, NeoForge 21.11.45, Java 21, Gradle 9.2.1, ModDevGradle 2.0.144, mod ID `cosmicpve`, and package `com.cosmicpve` remain unchanged.
 
