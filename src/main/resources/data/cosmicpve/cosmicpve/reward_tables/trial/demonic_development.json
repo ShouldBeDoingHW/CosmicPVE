@@ -1,16 +1,17 @@
-{
-  "entries": [
-    {"weight":12,"reward":{"type":"static_item","item":"cosmicpve:heroic_crystal"}},
-    {"weight":6,"reward":{"type":"armor_set_crystal","armor_set":"cosmicpve:yeti","success_rate":75}},
-    {"weight":10,"minimum_quantity":2,"maximum_quantity":2,"reward":{"type":"mob_spawner","entity_type":"minecraft:iron_golem"}},
-    {"weight":10,"minimum_quantity":2,"maximum_quantity":2,"reward":{"type":"mob_spawner","entity_type":"minecraft:witch"}},
-    {"weight":10,"minimum_quantity":2,"maximum_quantity":2,"reward":{"type":"mob_spawner","entity_type":"minecraft:blaze"}},
-    {"weight":10,"minimum_quantity":2,"maximum_quantity":2,"reward":{"type":"mob_spawner","entity_type":"minecraft:wither_skeleton"}},
-    {"weight":5,"reward":{"type":"static_item","item":"cosmicpve:trial_trinket_time_5"}},
-    {"weight":5,"reward":{"type":"static_item","item":"cosmicpve:trial_trinket_skip_3"}},
-    {"weight":5,"reward":{"type":"static_item","item":"cosmicpve:trial_trinket_insurance_3"}},
-    {"weight":12,"reward":{"type":"unexamined_book","rarity":"mastery"}},
-    {"weight":10,"reward":{"type":"mask","mask_count":2}},
-    {"weight":6,"reward":{"type":"space_chest","rarity":"mastery"}}
-  ]
-}
+{"entries":[
+  {"weight":4,"reward":{"type":"static_item","item":"cosmicpve:secret_weapon_cache"}},
+  {"weight":10,"reward":{"type":"static_item","item":"cosmicpve:cosmic_enchantment_table"}},
+  {"weight":8,"reward":{"type":"space_chest","rarity":"mastery"}},
+  {"weight":10,"reward":{"type":"mask","mask_count":2}},
+  {"weight":4,"reward":{"type":"static_item","item":"cosmicpve:admin_abuse"}},
+  {"weight":8,"reward":{"type":"static_item","item":"cosmicpve:trial_trinket_skip_3"}},
+  {"weight":8,"reward":{"type":"static_item","item":"cosmicpve:trial_trinket_time_5"}},
+  {"weight":8,"reward":{"type":"static_item","item":"cosmicpve:trial_trinket_insurance_3"}},
+  {"weight":8,"reward":{"type":"armor_set_crystal","armor_set":"cosmicpve:dragonslayer","success_rate":75}},
+  {"weight":4,"reward":{"type":"armor_set_crystal","armor_set":"cosmicpve:dragonslayer","success_rate":100}},
+  {"weight":10,"reward":{"type":"enchanted_black_scroll","success_rate":100}},
+  {"weight":10,"reward":{"type":"space_chest","rarity":"legendary"}},
+  {"weight":12,"reward":{"type":"random_vkit_crystal"}},
+  {"weight":4,"reward":{"type":"static_item","item":"cosmicpve:godly_vkit_bundle"}},
+  {"weight":10,"minimum_quantity":3,"maximum_quantity":3,"reward":{"type":"static_item","item":"cosmicpve:white_scroll"}}
+]}

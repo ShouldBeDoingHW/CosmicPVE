@@ -24,6 +24,7 @@ class TrialStructurePipelineTest {
 
     static {
         STRUCTURES.put("bomb_squad.nbt", "cosmicpve:trial/bomb_squad");
+        STRUCTURES.put("cave_diving.nbt", "cosmicpve:trial/cave_diving");
         STRUCTURES.put("circuit_circus.nbt", "cosmicpve:trial/circuit_circus");
         STRUCTURES.put("cold_snap.nbt", "cosmicpve:trial/cold_snap");
         STRUCTURES.put("deadeye_east.nbt", "cosmicpve:trial/deadeye");

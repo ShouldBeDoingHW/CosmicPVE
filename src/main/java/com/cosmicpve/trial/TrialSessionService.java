@@ -23,6 +23,7 @@ import com.cosmicpve.trial.room.HiddenGraveyardService;
 import com.cosmicpve.trial.room.DeadeyeService;
 import com.cosmicpve.trial.room.HazeAndSeekService;
 import com.cosmicpve.trial.room.WarzoneGiantsService;
+import com.cosmicpve.trial.room.CaveDivingService;
 import com.cosmicpve.combat.CosmicCombat;
 import com.cosmicpve.combat.execution.ExecutionCause;
 import com.cosmicpve.entity.undeadcorpse.UndeadCorpseEntity;
@@ -70,6 +71,7 @@ public final class TrialSessionService {
     public static final Identifier DEADEYE = CosmicPVE.id("trial/deadeye");
     public static final Identifier HAZE_AND_SEEK = CosmicPVE.id("trial/haze_seek");
     public static final Identifier WARZONE_GIANTS = CosmicPVE.id("trial/warzone_giants");
+    public static final Identifier CAVE_DIVING = CosmicPVE.id("trial/cave_diving");
     static final long HIDDEN_GRAVEYARD_WORLD_TIME = 18_000L;
     public static final Identifier APPRENTICE_REWARDS = CosmicPVE.id("trial/apprentice");
     public static final Identifier HARDCORE_REWARDS = CosmicPVE.id("trial/hardcore_development");
@@ -77,7 +79,7 @@ public final class TrialSessionService {
     public static final Identifier DEMONIC_REWARDS = CosmicPVE.id("trial/demonic_development");
     static final List<Identifier> APPRENTICE_NATIVE_ROOMS = List.of(COLD_SNAP, CIRCUIT_CIRCUS, RAIDING_RAINBOW, ZERO_G);
     static final List<Identifier> HARDCORE_NATIVE_ROOMS = List.of(HAZE_AND_SEEK, BOMB_SQUAD, FIRE_COLONY);
-    static final List<Identifier> IMPOSSIBLE_NATIVE_ROOMS = List.of(HIDDEN_GRAVEYARD);
+    static final List<Identifier> IMPOSSIBLE_NATIVE_ROOMS = List.of(HIDDEN_GRAVEYARD, CAVE_DIVING);
     static final List<Identifier> DEMONIC_NATIVE_ROOMS = List.of(WARZONE_GIANTS, DEADEYE);
     static final int APPRENTICE_REWARD_TIME = 600;
     static final int HARDCORE_REWARD_TIME = 300;
@@ -104,6 +106,7 @@ public final class TrialSessionService {
     private final DeadeyeService deadeye = new DeadeyeService();
     private final HazeAndSeekService haze = new HazeAndSeekService();
     private final WarzoneGiantsService warzone = new WarzoneGiantsService();
+    private final CaveDivingService caveDiving = new CaveDivingService();
     private final TrialTimerDisplayService timerDisplay = new TrialTimerDisplayService();
     private final TrialCelebrationService celebrations = new TrialCelebrationService();
     private final TrialDecisionEntryService decisionEntries = new TrialDecisionEntryService();
@@ -194,6 +197,15 @@ public final class TrialSessionService {
                 Identifier room = session.currentRoom().orElse(null);
                 boolean maintenanceTick = server.getTickCount() % 10 == 0;
                 if (maintenanceTick && HIDDEN_GRAVEYARD.equals(room)) hiddenGraveyard.tick(level, session);
+                if (maintenanceTick && CAVE_DIVING.equals(room)) {
+                    CaveDivingService.ValidationResult caveResult = caveDiving.tick(level, session);
+                    if (caveResult == CaveDivingService.ValidationResult.REJECTED)
+                        forOnline(server, session, player -> player.playSound(
+                                CaveDivingService.REJECTION_SOUND, 1.0F, CaveDivingService.REJECTION_PITCH));
+                    else if (caveResult == CaveDivingService.ValidationResult.SOLVED) {
+                        completeProductionRoom(server); return;
+                    }
+                }
                 if (maintenanceTick && FIRE_COLONY.equals(room)) fireColony.tick(level, session);
                 TrialSession current = session;
                 if (HAZE_AND_SEEK.equals(room)) {
@@ -324,12 +336,8 @@ public final class TrialSessionService {
         TrialSession ending = session.withState(TrialLifecycleState.ENDING, 0, session.currentRoom(), false,
                 session.protectedBounds()); repository.publish(server, ending);
         try {
-            Identifier rewardTable = switch (session.progress().phase()) {
-                case APPRENTICE -> APPRENTICE_REWARDS;
-                case HARDCORE -> HARDCORE_REWARDS;
-                case IMPOSSIBLE -> IMPOSSIBLE_REWARDS;
-                case DEMONIC -> DEMONIC_REWARDS;
-            };
+            Identifier rewardTable = rewardTableFor(session.progress().phase());
+            /* The active run phase is authoritative even when a lower-tier native room was selected. */
             List<ItemStack> reward = rewards.roll(rewardTable, 1,
                     new RewardGenerationContext(server.registryAccess(), net.minecraft.util.RandomSource.create(), null));
             TrialProgress nextProgress = session.progress().completeRoom(reward).beginDecision(session.participants());
@@ -358,6 +366,15 @@ public final class TrialSessionService {
                 : before.phase() == TrialPhase.HARDCORE ? HARDCORE_REWARD_TIME : 0;
         int transition = before.phase() != after.phase() ? PHASE_ENTRY_BONUS : 0;
         return roomBonus + transition;
+    }
+
+    static Identifier rewardTableFor(TrialPhase phase) {
+        return switch (phase) {
+            case APPRENTICE -> APPRENTICE_REWARDS;
+            case HARDCORE -> HARDCORE_REWARDS;
+            case IMPOSSIBLE -> IMPOSSIBLE_REWARDS;
+            case DEMONIC -> DEMONIC_REWARDS;
+        };
     }
 
     private TrialSession processInitialSkip(MinecraftServer server, TrialSession session) {
@@ -476,6 +493,8 @@ public final class TrialSessionService {
                 level, session, ROOM_ORIGIN, participantSpawn.below(), placed.bounds());
         else if (room.equals(HAZE_AND_SEEK)) encounter = haze.initialize(level, session, placed.bounds(), net.minecraft.util.RandomSource.create());
         else if (room.equals(WARZONE_GIANTS)) encounter = warzone.initialize(level, session, placed.bounds(), net.minecraft.util.RandomSource.create());
+        else if (room.equals(CAVE_DIVING)) encounter = caveDiving.initialize(
+                level, session, ROOM_ORIGIN, placed.bounds(), net.minecraft.util.RandomSource.create()).encounter();
         else { fireColony.initialize(level, session, placed.bounds()); encounter = TrialEncounterState.EMPTY; }
         roomSpawns.put(session.sessionId(), participantSpawn);
         TrialProgress progress = session.progress().beginRoom(room, encounter);
@@ -494,6 +513,7 @@ public final class TrialSessionService {
             else if (room.equals(DEADEYE)) loadouts.applyDeadeye(player);
             else if (room.equals(HAZE_AND_SEEK)) loadouts.applyHazeAndSeek(player);
             else if (room.equals(WARZONE_GIANTS)) loadouts.applyWarzoneGiants(player);
+            else if (room.equals(CAVE_DIVING)) loadouts.applyCaveDiving(player);
             else loadouts.applyHiddenGraveyard(player);
             teleport(player, roomSpawns.get(session.sessionId()));
         });
@@ -598,6 +618,29 @@ public final class TrialSessionService {
         return allowsCircuitPlacement(player, placementPos, blockItem.getBlock().defaultBlockState());
     }
 
+    public boolean allowsCaveDivingPlacement(ServerPlayer player, BlockPos pos, ItemStack held) {
+        TrialSession session = active(player.level().getServer()).orElse(null);
+        return session != null && session.state() == TrialLifecycleState.ROOM_ACTIVE
+                && session.activeParticipant(player.getUUID())
+                && session.currentRoom().filter(CAVE_DIVING::equals).isPresent()
+                && caveDiving.allowsSolutionPlacement(session, pos, held);
+    }
+
+    public boolean allowsCaveDivingBreak(ServerPlayer player, BlockPos pos) {
+        TrialSession session = active(player.level().getServer()).orElse(null);
+        return session != null && session.state() == TrialLifecycleState.ROOM_ACTIVE
+                && session.activeParticipant(player.getUUID())
+                && session.currentRoom().filter(CAVE_DIVING::equals).isPresent()
+                && caveDiving.allowsBreak(session, pos);
+    }
+
+    public void onCaveDivingDrops(net.neoforged.neoforge.event.level.BlockDropsEvent event) {
+        TrialSession session = active(event.getLevel().getServer()).orElse(null);
+        if (session != null && session.state() == TrialLifecycleState.ROOM_ACTIVE
+                && session.currentRoom().filter(CAVE_DIVING::equals).isPresent())
+            caveDiving.replaceUnderwaterDrops(session, event);
+    }
+
     public void onCircuitPlaced(ServerPlayer player, BlockPos pos, BlockState state) {
         TrialSession session = active(player.level().getServer()).orElse(null);
         if (session == null || !allowsCircuitPlacement(player, pos, state)) return;
@@ -624,7 +667,16 @@ public final class TrialSessionService {
 
     public boolean allowsProtectedRoomUse(ServerPlayer player, BlockPos pos) {
         return allowsCircuitUse(player, pos) || allowsFireColonyUse(player, pos) || allowsColdSnapUse(player, pos)
-                || allowsHiddenGraveyardUse(player, pos) || allowsDeadeyeUse(player, pos);
+                || allowsHiddenGraveyardUse(player, pos) || allowsDeadeyeUse(player, pos)
+                || allowsCaveDivingUse(player, pos);
+    }
+
+    public boolean allowsCaveDivingUse(ServerPlayer player, BlockPos pos) {
+        TrialSession session = active(player.level().getServer()).orElse(null);
+        return session != null && session.state() == TrialLifecycleState.ROOM_ACTIVE
+                && session.activeParticipant(player.getUUID())
+                && session.currentRoom().filter(CAVE_DIVING::equals).isPresent()
+                && caveDiving.allowsCraftingTableUse(session, (ServerLevel) player.level(), pos);
     }
 
     public boolean allowsDeadeyeUse(ServerPlayer player, BlockPos pos) {
@@ -744,6 +796,9 @@ public final class TrialSessionService {
     }
     public String hazeStatus(UUID sessionId) { return haze.status(sessionId); }
     public String warzoneStatus(UUID sessionId) { return warzone.status(sessionId); }
+    public String caveDivingStatus(TrialSession session, ServerLevel level) {
+        return caveDiving.status(session.sessionId(), level);
+    }
     public String productionPoolStatus(TrialSession session) {
         return roomPool(session.progress().phase()).stream()
                 .map(room -> room.getPath().substring(room.getPath().lastIndexOf('/') + 1) + "=" + selection.weight(session, room))
@@ -904,6 +959,7 @@ public final class TrialSessionService {
             if (session.currentRoom().filter(DEADEYE::equals).isPresent()) deadeye.cleanup(session.sessionId());
             if (session.currentRoom().filter(HAZE_AND_SEEK::equals).isPresent()) haze.cleanup(instance, session);
             if (session.currentRoom().filter(WARZONE_GIANTS::equals).isPresent()) warzone.cleanup(instance, session.sessionId());
+            if (session.currentRoom().filter(CAVE_DIVING::equals).isPresent()) caveDiving.cleanup(session.sessionId());
             fireColony.cleanup(session.sessionId()); coldSnap.cleanup(session.sessionId());
             session.protectedBounds().forEach(bounds -> structures.cleanup(instance, bounds));
         }
@@ -918,6 +974,7 @@ public final class TrialSessionService {
         if (session.currentRoom().filter(DEADEYE::equals).isPresent()) deadeye.cleanup(session.sessionId());
         if (session.currentRoom().filter(HAZE_AND_SEEK::equals).isPresent()) haze.cleanup(level, session);
         if (session.currentRoom().filter(WARZONE_GIANTS::equals).isPresent()) warzone.cleanup(level, session.sessionId());
+        if (session.currentRoom().filter(CAVE_DIVING::equals).isPresent()) caveDiving.cleanup(session.sessionId());
         InstanceBounds decision = InstanceBounds.from(CosmicContent.repository().requireTrialRoom(DECISION_ROOM).bounds().at(DECISION_ORIGIN));
         session.protectedBounds().stream().filter(bounds -> !bounds.equals(decision)).forEach(bounds -> structures.cleanup(level, bounds));
     }

@@ -16,6 +16,7 @@ import com.cosmicpve.entity.undeadcorpse.UndeadCorpseEntity;
 import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 import net.minecraft.world.phys.BlockHitResult;
 import net.neoforged.neoforge.event.level.BlockEvent;
+import net.neoforged.neoforge.event.level.BlockDropsEvent;
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.minecraft.world.damagesource.DamageTypes;
@@ -61,6 +62,7 @@ public final class TrialEventBridge {
                 && com.cosmicpve.trial.room.BombSquadService.encounterCreeper(creeper)) event.setDroppedExperience(0);
         if (event.getEntity() instanceof UndeadCorpseEntity corpse && corpse.trialSession().isPresent()) event.setDroppedExperience(0);
     }
+    public void onBlockDrops(BlockDropsEvent event) { TrialRuntime.sessions().onCaveDivingDrops(event); }
     public void onProjectileImpact(ProjectileImpactEvent event) {
         if (event.getProjectile() instanceof AbstractArrow arrow && arrow.getOwner() instanceof ServerPlayer player
                 && event.getRayTraceResult() instanceof BlockHitResult hit) {

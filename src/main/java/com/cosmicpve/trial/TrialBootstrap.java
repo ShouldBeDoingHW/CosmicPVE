@@ -16,6 +16,7 @@ public final class TrialBootstrap {
         NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, trials::onDeath);
         NeoForge.EVENT_BUS.addListener(trials::onDrops);
         NeoForge.EVENT_BUS.addListener(trials::onExperience);
+        NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, trials::onBlockDrops);
         NeoForge.EVENT_BUS.addListener(trials::onProjectileImpact);
         NeoForge.EVENT_BUS.addListener(trials::onRightClickBlock);
         NeoForge.EVENT_BUS.addListener(trials::onNeighborNotify);

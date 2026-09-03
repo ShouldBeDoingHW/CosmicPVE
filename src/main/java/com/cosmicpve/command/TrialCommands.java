@@ -79,7 +79,7 @@ public final class TrialCommands {
                                                 ctx.getSource().getServer(), IntegerArgumentType.getInteger(ctx, "count")))))))
                         .then(Commands.literal("force-room").then(Commands.argument("room", StringArgumentType.word())
                                 .suggests((ctx, builder) -> net.minecraft.commands.SharedSuggestionProvider.suggest(
-                                        new String[]{"raiding_rainbow","circuit_circus","cold_snap","zero_g","fire_colony","bomb_squad","haze_seek","hidden_graveyard","deadeye","warzone_giants"}, builder))
+                                        new String[]{"raiding_rainbow","circuit_circus","cold_snap","zero_g","fire_colony","bomb_squad","haze_seek","hidden_graveyard","cave_diving","deadeye","warzone_giants"}, builder))
                                 .executes(ctx -> forceRoom(ctx.getSource(), StringArgumentType.getString(ctx, "room")))))
                         .then(Commands.literal("timer")
                                 .then(Commands.literal("set").then(Commands.argument("seconds", IntegerArgumentType.integer(0))
@@ -175,6 +175,10 @@ public final class TrialCommands {
         if (session.currentRoom().filter(com.cosmicpve.trial.TrialSessionService.HIDDEN_GRAVEYARD::equals).isPresent())
             source.sendSuccess(() -> Component.literal("  "
                     + TrialRuntime.sessions().hiddenGraveyardStatus(session.sessionId())), false);
+        if (session.currentRoom().filter(com.cosmicpve.trial.TrialSessionService.CAVE_DIVING::equals).isPresent()
+                && source.getServer().getLevel(com.cosmicpve.trial.TrialRuntime.INSTANCE_DIMENSION) != null)
+            source.sendSuccess(() -> Component.literal("  " + TrialRuntime.sessions().caveDivingStatus(session,
+                    source.getServer().getLevel(com.cosmicpve.trial.TrialRuntime.INSTANCE_DIMENSION))), false);
         if (session.currentRoom().filter(com.cosmicpve.trial.TrialSessionService.DEADEYE::equals).isPresent())
             source.sendSuccess(() -> Component.literal("  "
                     + TrialRuntime.sessions().deadeyeStatus(session)), false);

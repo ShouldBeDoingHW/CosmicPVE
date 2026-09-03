@@ -1,0 +1,8 @@
+{
+  "display_name": "Cave Diving",
+  "category": "impossible",
+  "pieces": [{"structure": "cosmicpve:trial/cave_diving"}],
+  "spawn_marker": "emerald_block",
+  "spawn_marker_position": [19, 30, 21],
+  "bounds": {"min": [0, 0, 0], "max": [33, 39, 30]}
+}

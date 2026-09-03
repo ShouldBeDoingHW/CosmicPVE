@@ -1,8 +1,8 @@
 # CosmicPVE Development Handoff
 
-Current accepted baseline: Step 8J / 8J.1 — Enchanter, selling, Impossible Trial tier/loot foundation, exact Trial XP restoration, and four-tier HUD is implemented, automated/runtime verified, and manually verified/accepted. Earlier accepted milestones remain recorded below.
+Current accepted baseline: Step 8K — Cave Diving + full Trial loot rebalance is implemented, automated/runtime verified, and manually verified/accepted. Earlier accepted milestones remain recorded below.
 
-Repository state: Steps 6A–8J.1 and the earlier Conquest synchronization are implemented, verified, and manually accepted. The user-maintained `docs/Cosmic_Design.md` and root `assets`, `drafts`, and `woodlands` development-source folders remain outside closure ownership.
+Repository state: Steps 6A–8K and the earlier Conquest synchronization are implemented, verified, and manually accepted. The user-maintained `docs/Cosmic_Design.md` and root `assets`, `drafts`, and `woodlands` development-source folders remain outside closure ownership.
 
 Last handoff update: 2026-09-03
 
@@ -541,6 +541,14 @@ Room completion uses the phase active before completion to select rewards and ti
 
 The Step 8J.1 corrective makes the shared `/bal` and `/balance` response entirely bold `#55FF55` without changing balance wording, formatting, or arithmetic. Trial outside-state snapshots are now version 2 and persist the player's exact total raw vanilla XP points alongside inventory and return state; the centralized idempotent restoration path reconstructs the matching level/progress state, so DEAL, death, timeout/failure, administrative exit, and reconnect/restart recovery all discard Trial-local XP changes and restore the pre-entry value exactly. The participant HUD now derives its tier display from the active phase label as Apprentice `1/4`, Hardcore `2/4`, Impossible `3/4`, and Demonic `4/4` on every normal payload refresh.
 
+### Step 8K — IMPLEMENTED; AUTOMATED/RUNTIME VERIFIED; MANUALLY VERIFIED / ACCEPTED
+
+Cave Diving is a production Impossible room sourced from the canonical `trial rooms/cave_diving.nbt` structure through the tracked Trial structure pipeline. Its six Brick markers become six underwater decorated pots, its Emerald marker is the party spawn, its Diamond marker anchors the protected model pot, and the top of the structure's two-block Gold pillar defines the exact solution placement. The model uses four independently selected sides from the fixed Angler/Archer/Arms Up/Blade/Brewer/Burn/Danger/Explorer/Friend sherd catalog, so duplicate sides are legal, and receives a uniformly random horizontal facing. The 24 underwater sides contain two shuffled copies of each model occurrence plus sixteen independent catalog rolls. Only the six underwater pots and exact solution target are interactable: each source pot drops its four component sherds exactly once, solution placement/removal supports retry, and a bounded ten-tick comparison requires exact four-side decoration and facing before invoking the existing exactly-once party completion transaction.
+
+The Cave Diving crafting table at authored local position `(13,32,22)` is explicitly usable only by active room participants through the scoped protection-policy exception. A wrong submitted pot plays `minecraft:block.anvil.destroy` at pitch `0.8` once when that distinct submission is rejected; the ten-tick validator does not repeat the sound for an unchanged pot, and removing the pot resets the rejection state for a later attempt.
+
+All four production Trial reward resources now match the declared catalogs exactly. Declared totals are Apprentice 12 rows/weight 89, Hardcore 18/102, Impossible 18/163, and Demonic 17/130. Active constructible totals are Apprentice 12/89, Hardcore 15/84, Impossible 16/147, and Demonic 15/118; only the unimplemented +66% Fame Trinket and Abandoned Spaceship Portal rows remain declared but inactive, and therefore create no dead runtime probability space. Rarity-only books remain Unexamined Books, row quantity remains within one acquired pot bundle, Random Mask is one mask, Random Double Mask is two distinct ordered mask powers, and Random V-Kit Crystal remains uniform across the four accepted V-Kits. Reward selection is keyed to the active run phase at room completion, not the completed room's native category, so lower-tier rooms retained in expanded pools award the current phase's table.
+
 ## 3. Current Real Enchantments
 
 These are registered through Minecraft's enchantment infrastructure, use actual enchantment data on the item, and are not present in normal enchanting-table, librarian, random-loot, random-equipment, or mob-equipment acquisition pools.
@@ -861,7 +869,7 @@ The following are confirmed in current source and permission-gated under `/cosmi
 - `/cosmic trial debug status|complete-room|continue|exit|abort`
 - `/cosmic trial debug timer set|add|remove <seconds>`
 - `/cosmic trial debug progress set <0..8>`
-- `/cosmic trial debug force-room <raiding_rainbow|circuit_circus|cold_snap|zero_g|fire_colony|bomb_squad|haze_seek|hidden_graveyard|deadeye|warzone_giants>`
+- `/cosmic trial debug force-room <raiding_rainbow|circuit_circus|cold_snap|zero_g|fire_colony|bomb_squad|haze_seek|hidden_graveyard|cave_diving|deadeye|warzone_giants>`
 - `/cosmic trial debug restore <player>`
 - `/feed`, `/heal`, and `/restore` are separate permission-gated development convenience commands.
 
@@ -876,7 +884,6 @@ Commands call gameplay services or create the same typed components used by game
 - **Activity key/portal terminology and acquisition:** Dungeons are intended as costly/keyed activities, but current design text primarily describes portals; reconcile this before item implementation.
 - **Seasonal crate finalization:** substantial draft tables and mechanics exist, but their exact balance, rewards, acquisition rates, prerequisites, and implementation details remain subject to a bounded reconciliation milestone.
 - **Armorer trade policy:** Step 6I disables Diamond/Netherite armor recipes and replaces generated Diamond armor in the six audited chest tables. Vanilla Armorer villagers remain a separate Diamond-armor acquisition path because the current bounded rule did not specify trade replacement; settle whether those offers should be removed or replaced before declaring Iron the ceiling for every normal acquisition route.
-- **Remaining Trial reward dependencies:** Random Boss Spawn Egg, Dungeon Portal, and broader Demonic reward dependencies still require their own bounded systems. Existing supported reward rows must not be mistaken for those deferred primitives.
 - **Abandoned Spaceship Portal reward dependency:** the current design lists this item in Flash Sales and the Mastery Space Chest, but the repository has no production portal item or compatible Dungeon-portal foundation. Its catalog/table metadata is retained where useful for inspection, but it is excluded from production generation until a bounded Dungeon/portal milestone supplies the legitimate item.
 - **Bonus Fame Trial Trinket dependency:** the Impossible reward design declares a +66% Fame Trinket, but Fame does not yet exist. The row remains declared and inactive until the bounded Fame milestone provides a real effect and item.
 
@@ -884,11 +891,11 @@ The final post-Orb capacity is no longer unresolved for current target classes: 
 
 ## 16. Current Next Milestone
 
-**Immediate next action: Step 8K — Cave Diving + full Trial loot rebalance.**
+**Immediate next action: Step 8L — Inventor + Fame System + Bonus Fame Trinket.**
 
 Current intended sequence:
 
-Step 8K adds production Cave Diving and synchronizes all four Trial reward pools. Fame, Memory Chests, Cosmic Crate halves, Dungeon gameplay, Inventor, and later roadmap work remain deferred.
+Step 8L adds production Inventor, persistent Fame, Trial Fame cash-out, Bonus Fame Trinkets, and the player-specific Fame Shop. Abandoned Spaceship Portal runtime and later roadmap work remain deferred.
 
 The ordinary-enchantment expansion remains split across bounded patches. Step 7C is the explicit instruction that made the current canonical Design Doc enchantment-table values implementation-authoritative; later design edits still require their own explicit implementation milestone.
 
@@ -906,6 +913,14 @@ The ordinary-enchantment expansion remains split across bounded patches. Step 7C
 Preserve unrelated dirty changes. Never change pinned versions as a side effect of gameplay work. Prefer service-level rules and typed data over one-off event logic, and keep client-only classes isolated from dedicated-server loading.
 
 ## 18. Verification Snapshot
+
+For the Step 8K candidate:
+
+- `gradlew.bat cleanTest test build` succeeds, and the final corrective `gradlew.bat test` passes all 597 automated tests across 150 suites with zero failures, errors, or skips. Focused Cave Diving structure/service, reward-catalog/resource, room-selection, phase-authority, and typed reward-factory coverage is green. All 11 loaded-registry GameTests pass.
+- Cave Diving is declared in the canonical structure pipeline and its room resource, structure dimensions, exact markers, bounded interactions, deterministic generation seams, and completion path validate. All 252 main-resource JSON files decode successfully. The runtime publishes nine reward tables and thirteen Trial rooms including Cave Diving; the four Trial catalogs have declared weights 89/102/163/130 and active runtime weights 89/84/147/118 for Apprentice/Hardcore/Impossible/Demonic respectively.
+- Dedicated-server startup loads 1,462 recipes, publishes the Step 8K content, verifies progression controls, and reaches `Done`. Fresh-client startup completes ResourceManager reload, OpenAL/SoundEngine initialization, and decorated-pot/block/item/chest/GUI atlas creation without a relevant Step 8K resource, model, codec, registry, or sided-classloading failure. The installed Slightly Improved Font pack retains its unrelated pack-format warning.
+- `git diff --check` passes for Step 8K-owned paths with only normal Windows line-ending notices. Pinned Minecraft 1.21.11, NeoForge 21.11.45, Java 21, Gradle 9.2.1, ModDevGradle 2.0.144, mod ID `cosmicpve`, and package `com.cosmicpve` remain unchanged.
+- Step 8K is manually verified/accepted. The user-maintained `docs/Cosmic_Design.md` and unrelated root `assets`, `drafts`, and `woodlands` development directories remain outside Step 8K ownership; `trial rooms/cave_diving.nbt` is the intentional canonical source promoted by this milestone.
 
 For the Step 8J candidate:
 

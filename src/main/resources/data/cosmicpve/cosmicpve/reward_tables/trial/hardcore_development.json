@@ -1,22 +1,17 @@
-{
-  "entries": [
-    {"weight":12,"reward":{"type":"static_item","item":"cosmicpve:trial_trinket_time_3"}},
-    {"weight":10,"reward":{"type":"black_scroll","success_rate":75}},
-    {"weight":8,"reward":{"type":"armor_orb"}},
-    {"weight":10,"reward":{"type":"mob_spawner","entity_type":"minecraft:blaze"}},
-    {"weight":10,"reward":{"type":"mob_spawner","entity_type":"minecraft:creeper"}},
-    {"weight":10,"reward":{"type":"unexamined_book","rarity":"legendary"}},
-    {"weight":3,"minimum_quantity":2,"maximum_quantity":2,"reward":{"type":"unexamined_book","rarity":"legendary"}},
-    {"weight":12,"reward":{"type":"static_item","item":"cosmicpve:trial_trinket_skip_1"}},
-    {"weight":6,"reward":{"type":"static_item","item":"cosmicpve:trial_trinket_skip_2"}},
-    {"weight":10,"reward":{"type":"unexamined_book","rarity":"ultimate"}},
-    {"weight":5,"minimum_quantity":2,"maximum_quantity":2,"reward":{"type":"unexamined_book","rarity":"ultimate"}},
-    {"weight":8,"reward":{"type":"weapon_orb"}},
-    {"weight":15,"reward":{"type":"static_item","item":"cosmicpve:white_scroll"}},
-    {"weight":10,"reward":{"type":"static_item","item":"cosmicpve:repair_scroll"}},
-    {"weight":8,"reward":{"type":"space_chest","rarity":"legendary"}},
-    {"weight":3,"reward":{"type":"mask","mask_count":1}},
-    {"weight":1,"reward":{"type":"static_item","item":"cosmicpve:mask_splicer"}},
-    {"weight":4,"reward":{"type":"armor_set_crystal","armor_set":"cosmicpve:yeti","success_rate":35}}
-  ]
-}
+{"entries":[
+  {"weight":5,"reward":{"type":"space_chest","rarity":"ultimate"}},
+  {"weight":5,"reward":{"type":"static_item","item":"cosmicpve:white_scroll"}},
+  {"weight":5,"reward":{"type":"static_item","item":"cosmicpve:space_dust_bundle"}},
+  {"weight":10,"reward":{"type":"static_item","item":"cosmicpve:trial_trinket_skip_1"}},
+  {"weight":10,"reward":{"type":"static_item","item":"cosmicpve:trial_trinket_time_1"}},
+  {"weight":10,"reward":{"type":"static_item","item":"cosmicpve:trial_trinket_insurance_1"}},
+  {"weight":3,"reward":{"type":"static_item","item":"cosmicpve:trial_trinket_skip_2"}},
+  {"weight":3,"reward":{"type":"static_item","item":"cosmicpve:trial_trinket_time_3"}},
+  {"weight":3,"reward":{"type":"static_item","item":"cosmicpve:trial_trinket_insurance_2"}},
+  {"weight":5,"reward":{"type":"unexamined_book","rarity":"heroic"}},
+  {"weight":5,"reward":{"type":"unexamined_book","rarity":"mastery"}},
+  {"weight":5,"reward":{"type":"static_item","item":"cosmicpve:conquest_chest_flare"}},
+  {"weight":5,"reward":{"type":"static_item","item":"cosmicpve:mystery_elite_spawner"}},
+  {"weight":5,"reward":{"type":"static_item","item":"cosmicpve:mask_splicer"}},
+  {"weight":5,"reward":{"type":"static_item","item":"cosmicpve:heroic_crystal"}}
+]}

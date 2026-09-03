@@ -64,6 +64,7 @@ public final class TrialRoomLoadoutService {
     private final TrialInventoryTransactionService inventories;
     public TrialRoomLoadoutService(TrialInventoryTransactionService inventories) { this.inventories = inventories; }
     public void clear(ServerPlayer player) { inventories.clearTrialInventory(player); }
+    public void applyCaveDiving(ServerPlayer player) { clear(player); }
     public void applyDevelopment(ServerPlayer player) {
         clear(player);
         ItemStack marker = new ItemStack(Items.STICK);

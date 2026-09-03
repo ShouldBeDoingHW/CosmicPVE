@@ -19,6 +19,8 @@ public final class InstanceProtectionEventBridge {
     public InstanceProtectionEventBridge(InstanceProtectionService service) { this.service = service; }
 
     public void onBreak(BlockEvent.BreakEvent event) {
+        if (event.getPlayer() instanceof ServerPlayer player
+                && TrialRuntime.sessions().allowsCaveDivingBreak(player, event.getPos())) return;
         if (event.getLevel() instanceof ServerLevel level
                 && service.denies(level, event.getPlayer(), event.getPos(), InstanceMutationCause.BREAK)) event.setCanceled(true);
     }
@@ -31,6 +33,10 @@ public final class InstanceProtectionEventBridge {
                 TrialRuntime.sessions().onCircuitPlaced(serverPlayer, event.getPos(), event.getPlacedBlock());
                 return;
             }
+            if (actor instanceof ServerPlayer serverPlayer
+                    && TrialRuntime.sessions().allowsCaveDivingPlacement(
+                            serverPlayer, event.getPos(), new net.minecraft.world.item.ItemStack(
+                                    event.getPlacedBlock().getBlock()))) return;
             if (service.denies(level, actor, event.getPos(), InstanceMutationCause.PLACE)) event.setCanceled(true);
         }
     }
@@ -40,9 +46,11 @@ public final class InstanceProtectionEventBridge {
             BlockPos intendedPlacement = new BlockPlaceContext(event.getUseOnContext()).getClickedPos();
             boolean circuitPlacement = TrialRuntime.sessions().allowsCircuitPlacementUse(
                     player, intendedPlacement, event.getItemStack());
+            boolean cavePlacement = TrialRuntime.sessions().allowsCaveDivingPlacement(
+                    player, intendedPlacement, event.getItemStack());
             boolean roomUse = TrialRuntime.sessions().allowsProtectedRoomUse(player, event.getPos());
             boolean bombEgg = TrialRuntime.sessions().allowsBombSquadEggUse(player, event.getPos(), event.getItemStack());
-            if (explicitAllowOverridesDefaultDeny(circuitPlacement, roomUse) || bombEgg) return;
+            if (explicitAllowOverridesDefaultDeny(circuitPlacement || cavePlacement, roomUse) || bombEgg) return;
         }
         if (event.getLevel() instanceof ServerLevel level
                 && service.denies(level, event.getPlayer(), event.getPos(), InstanceMutationCause.USE)) {

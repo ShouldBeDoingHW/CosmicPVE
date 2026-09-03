@@ -52,10 +52,11 @@ class TrialRoomSelectionServiceTest {
     }
     @Test void demonicPoolAddsAllProductionDemonicRoomsWithoutDiscardingEarlierEligibleRooms() {
         var pool=TrialSessionService.roomPool(TrialPhase.DEMONIC);
-        assertEquals(10,pool.size());
+        assertEquals(11,pool.size());
         assertTrue(pool.containsAll(TrialSessionService.roomPool(TrialPhase.APPRENTICE)));
         assertTrue(pool.containsAll(TrialSessionService.roomPool(TrialPhase.HARDCORE)));
         assertTrue(pool.contains(TrialSessionService.HIDDEN_GRAVEYARD));
+        assertTrue(pool.contains(TrialSessionService.CAVE_DIVING));
         assertTrue(pool.contains(TrialSessionService.DEADEYE));
         assertTrue(pool.contains(TrialSessionService.WARZONE_GIANTS));
         var service=new TrialRoomSelectionService(); var current=session(TrialProgress.EMPTY.debugEnterPhase(TrialPhase.DEMONIC));
@@ -67,11 +68,12 @@ class TrialRoomSelectionServiceTest {
                 service.select(after,pool,RandomSource.create(11)).orElseThrow());
     }
 
-    @Test void impossiblePoolAddsOnlyProductionImpossibleRoomAndLowerTiers() {
+    @Test void impossiblePoolAddsBothProductionImpossibleRoomsAndLowerTiers() {
         var pool = TrialSessionService.roomPool(TrialPhase.IMPOSSIBLE);
-        assertEquals(8, pool.size());
+        assertEquals(9, pool.size());
         assertTrue(pool.containsAll(TrialSessionService.roomPool(TrialPhase.HARDCORE)));
         assertTrue(pool.contains(TrialSessionService.HIDDEN_GRAVEYARD));
+        assertTrue(pool.contains(TrialSessionService.CAVE_DIVING));
         assertFalse(pool.contains(TrialSessionService.DEADEYE));
         assertFalse(pool.contains(TrialSessionService.WARZONE_GIANTS));
         assertEquals(5, new TrialRoomSelectionService().weight(
