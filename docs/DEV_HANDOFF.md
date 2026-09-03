@@ -543,6 +543,8 @@ The Step 8J.1 corrective makes the shared `/bal` and `/balance` response entirel
 
 ### Step 8K — IMPLEMENTED; AUTOMATED/RUNTIME VERIFIED; MANUALLY VERIFIED / ACCEPTED
 
+Step 8K is closed in `d6d940a` (`Add Cave Diving and rebalance Trial rewards`).
+
 Cave Diving is a production Impossible room sourced from the canonical `trial rooms/cave_diving.nbt` structure through the tracked Trial structure pipeline. Its six Brick markers become six underwater decorated pots, its Emerald marker is the party spawn, its Diamond marker anchors the protected model pot, and the top of the structure's two-block Gold pillar defines the exact solution placement. The model uses four independently selected sides from the fixed Angler/Archer/Arms Up/Blade/Brewer/Burn/Danger/Explorer/Friend sherd catalog, so duplicate sides are legal, and receives a uniformly random horizontal facing. The 24 underwater sides contain two shuffled copies of each model occurrence plus sixteen independent catalog rolls. Only the six underwater pots and exact solution target are interactable: each source pot drops its four component sherds exactly once, solution placement/removal supports retry, and a bounded ten-tick comparison requires exact four-side decoration and facing before invoking the existing exactly-once party completion transaction.
 
 The Cave Diving crafting table at authored local position `(13,32,22)` is explicitly usable only by active room participants through the scoped protection-policy exception. A wrong submitted pot plays `minecraft:block.anvil.destroy` at pitch `0.8` once when that distinct submission is rejected; the ten-tick validator does not repeat the sound for an unchanged pot, and removing the pot resets the rejection state for a later attempt.
