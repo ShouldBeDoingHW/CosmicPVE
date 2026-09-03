@@ -15,6 +15,14 @@ public final class EnchantingEventBridge {
 
     public void onStacked(ItemStackedOnOtherEvent event) {
         if (event.getClickAction() == ClickAction.PRIMARY
+                && event.getCarriedItem().is(ModItems.HOLY_WHITE_SCROLL.get())
+                && (HolyWhiteScrollService.eligible(event.getStackedOnItem())
+                    || EquipmentInteractionPolicy.isPotentialEquipment(event.getStackedOnItem()))) {
+            event.setCanceled(true);
+            if (event.getPlayer() instanceof ServerPlayer player) applyHolyScroll(event, player);
+            return;
+        }
+        if (event.getClickAction() == ClickAction.PRIMARY
                 && event.getCarriedItem().is(ModItems.COSMIC_DUST.get())
                 && event.getStackedOnItem().is(ModItems.COSMIC_ENCHANTMENT_BOOK.get())) {
             event.setCanceled(true);
@@ -37,6 +45,24 @@ public final class EnchantingEventBridge {
         else if (orb) applyOrb(event, player);
         else if (blackScroll) applyBlackScroll(event, player);
         else openEnchantedBlackScroll(event, player);
+    }
+
+    private void applyHolyScroll(ItemStackedOnOtherEvent event, ServerPlayer player) {
+        var outcome = new HolyWhiteScrollService().apply(
+                event.getCarriedItem(), event.getStackedOnItem(), event.getSlot().getItem());
+        event.getCarriedSlotAccess().set(event.getCarriedItem());
+        event.getSlot().set(event.getSlot().getItem());
+        if (outcome == HolyWhiteScrollService.Outcome.SUCCESS) {
+            ItemApplicationFeedback.play(player, ItemApplicationFeedback.Cue.SUCCESS);
+            player.displayClientMessage(Component.translatable("message.cosmicpve.holy_white_scroll.applied"), true);
+        } else {
+            String key = switch (outcome) {
+                case REJECTED_UNPROTECTED -> "message.cosmicpve.holy_white_scroll.unprotected";
+                case REJECTED_ALREADY_HOLY -> "message.cosmicpve.holy_white_scroll.already";
+                default -> "message.cosmicpve.holy_white_scroll.invalid";
+            };
+            player.displayClientMessage(Component.translatable(key), true);
+        }
     }
 
     private void applyDust(ItemStackedOnOtherEvent event, ServerPlayer player) {

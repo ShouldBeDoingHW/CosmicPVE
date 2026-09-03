@@ -37,6 +37,8 @@ import com.cosmicpve.tinkerer.SalvagedXpBottleItem;
 import com.cosmicpve.equipment.enchantment.EnchantedBlackScrollItem;
 import com.cosmicpve.reward.lootbox.AnimatedLootboxItem;
 import com.cosmicpve.upgrade.UpgradeCrystalItem;
+import com.cosmicpve.equipment.enchantment.HolyWhiteScrollItem;
+import com.cosmicpve.reward.lootbox.SpaceDustBundleItem;
 
 public final class ModItems {
     private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(CosmicPVE.MOD_ID);
@@ -63,6 +65,9 @@ public final class ModItems {
 
     public static final DeferredItem<WhiteScrollItem> WHITE_SCROLL = ITEMS.registerItem(
             "white_scroll", WhiteScrollItem::new, properties -> properties.stacksTo(64));
+
+    public static final DeferredItem<HolyWhiteScrollItem> HOLY_WHITE_SCROLL = ITEMS.registerItem(
+            "holy_white_scroll", HolyWhiteScrollItem::new, properties -> properties.stacksTo(64));
 
     public static final DeferredItem<BoldNameItem> TRANSMOG_SCROLL = ITEMS.registerItem(
             "transmog_scroll", BoldNameItem::new, properties -> properties.stacksTo(64));
@@ -134,6 +139,8 @@ public final class ModItems {
     public static final DeferredItem<AnimatedLootboxItem> ADMIN_ABUSE = ITEMS.registerItem(
             "admin_abuse", properties -> new AnimatedLootboxItem(properties,
                     AnimatedLootboxItem.Kind.ADMIN_ABUSE), properties -> properties.stacksTo(1));
+    public static final DeferredItem<SpaceDustBundleItem> SPACE_DUST_BUNDLE = ITEMS.registerItem(
+            "space_dust_bundle", SpaceDustBundleItem::new, properties -> properties.stacksTo(1));
 
     public static final DeferredItem<SpaceChestItem> SPACE_CHEST = ITEMS.registerItem(
             "space_chest", SpaceChestItem::new, properties -> properties.stacksTo(1));

@@ -34,6 +34,10 @@ class MaskFoundationTest {
         assertEquals(160,MaskRuntimeEventBridge.SCARECROW_INTERVAL_TICKS);
         assertEquals(.05,MaskRuntimeEventBridge.movementBonus(com.cosmicpve.content.definition.mask.MaskBehavior.REINDEER));
         assertEquals(.01,MaskRuntimeEventBridge.movementBonus(com.cosmicpve.content.definition.mask.MaskBehavior.PARTY));
+        assertTrue(MaskCombatResolver.dragonProtects(com.cosmicpve.combat.api.DamageChannel.ORDINARY,true,false));
+        assertTrue(MaskCombatResolver.dragonProtects(com.cosmicpve.combat.api.DamageChannel.ORDINARY,false,true));
+        assertFalse(MaskCombatResolver.dragonProtects(com.cosmicpve.combat.api.DamageChannel.ORDINARY,false,false));
+        assertFalse(MaskCombatResolver.dragonProtects(com.cosmicpve.combat.api.DamageChannel.TRUE,true,true));
     }
     @Test void attachedLoreIsCompactIdentityOnlyAndOrdered() {
         var masks=List.of(
@@ -54,6 +58,8 @@ class MaskFoundationTest {
         for(int count : List.of(1,3,5)) {
             var identity=MaskLore.attachedIdentity(masks.subList(0,count));
             assertFalse(identity.getString().contains("\n"));
+            assertTrue(identity.getStyle().isBold());
+            assertTrue(identity.getSiblings().stream().allMatch(part -> part.getStyle().isBold()));
             assertEquals(identity.getString(),MaskLore.attached(masks.subList(0,count)).getFirst().getString());
             assertEquals(2,MaskLore.attached(masks.subList(0,count)).size());
             assertFalse(MaskLore.attached(masks.subList(0,count)).stream()
@@ -65,8 +71,13 @@ class MaskFoundationTest {
                 getClass().getResourceAsStream("/assets/cosmicpve/lang/en_us.json")))).getAsJsonObject();
         assertEquals("Dragon",lang.get("mask.cosmicpve.dragon").getAsString());
         assertEquals("Gain +5% Movement Speed!",lang.get("mask.cosmicpve.reindeer.effect").getAsString());
-        assertEquals("Deal +2% Outgoing Damage and Become Immune to Fire and Lava Damage!",
+        assertEquals("Deal +2% outgoing damage and take 50% less damage from fire, lava, and poison damage!",
                 lang.get("mask.cosmicpve.dragon.effect").getAsString());
+        var dragon=JsonParser.parseReader(new java.io.InputStreamReader(java.util.Objects.requireNonNull(
+                getClass().getResourceAsStream("/data/cosmicpve/cosmicpve/masks/dragon.json")))).getAsJsonObject();
+        assertEquals("#FFF24D",dragon.get("color").getAsString());
+        assertEquals("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZjhhYTNjNTNlNDY3NTIzYzZjM2Q4MzNiYmJlZTM3YTY2ZmMxNGYzMDUzMGYzOWE2YTljMDQ1N2ZmZTgwNWMyNSJ9fX0=",
+                dragon.get("profile_texture").getAsString());
         assertEquals("Separates a Multi-Mask into its individual Masks.",
                 lang.get("tooltip.cosmicpve.mask_splicer.purpose").getAsString());
     }

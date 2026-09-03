@@ -110,6 +110,14 @@ public final class CosmicPVE {
         var lootAnimations = new LootAnimationEventBridge();
         NeoForge.EVENT_BUS.addListener(lootAnimations::onLogin);
         NeoForge.EVENT_BUS.addListener(lootAnimations::onRespawn);
+        var holyDeaths = new com.cosmicpve.equipment.enchantment.HolyDeathService();
+        NeoForge.EVENT_BUS.addListener(holyDeaths::onDrops);
+        NeoForge.EVENT_BUS.addListener((net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerRespawnEvent event) -> {
+            if (event.getEntity() instanceof net.minecraft.server.level.ServerPlayer player) holyDeaths.recover(player);
+        });
+        NeoForge.EVENT_BUS.addListener((net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent event) -> {
+            if (event.getEntity() instanceof net.minecraft.server.level.ServerPlayer player) holyDeaths.recover(player);
+        });
     }
 
     public static Identifier id(String path) {

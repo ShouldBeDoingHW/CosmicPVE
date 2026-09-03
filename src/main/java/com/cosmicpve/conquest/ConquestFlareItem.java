@@ -29,7 +29,7 @@ public final class ConquestFlareItem extends Item {
     InteractionResult useServer(ServerPlayer serverPlayer, InteractionHand hand, Consumer<Component> feedback) {
         ItemStack stack = serverPlayer.getItemInHand(hand);
         var result = ConquestRuntime.events().spawnNear(serverPlayer.level(), ConquestOrigin.FLARE,
-                serverPlayer.blockPosition(), ConquestEventService.FLARE_RADIUS, serverPlayer.getRandom(), false);
+                serverPlayer.blockPosition(), ConquestEventService.FLARE_RADIUS, serverPlayer.getRandom(), true);
         return finishUse(serverPlayer, stack, result, feedback);
     }
 

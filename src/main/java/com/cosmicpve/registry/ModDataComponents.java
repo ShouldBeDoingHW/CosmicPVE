@@ -133,6 +133,9 @@ public final class ModDataComponents {
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<Boolean>> OMNI_ARMOR =
             COMPONENTS.registerComponentType("omni_armor",
                     builder -> builder.persistent(Codec.BOOL).networkSynchronized(ByteBufCodecs.BOOL).cacheEncoding());
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Boolean>> HOLY =
+            COMPONENTS.registerComponentType("holy",
+                    builder -> builder.persistent(Codec.BOOL).networkSynchronized(ByteBufCodecs.BOOL).cacheEncoding());
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<MysterySpawnerData>> MYSTERY_SPAWNER =
             COMPONENTS.registerComponentType("mystery_spawner",
                     builder -> builder.persistent(MysterySpawnerData.CODEC)

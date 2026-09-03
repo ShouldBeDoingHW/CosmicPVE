@@ -24,15 +24,16 @@ public final class SingleRewardAnimationMenu extends AbstractContainerMenu {
         owner = inventory.player;
         for (int column = 0; column < SLOT_COUNT; column++) addSlot(new DisplaySlot(display, column, 8 + column * 18, 18));
         addStandardInventorySlots(inventory, 8, 49);
-        refresh(0, ItemStack.EMPTY, false);
+        refresh(0, java.util.List.of(), false);
     }
     public static SingleRewardAnimationMenu client(int id, Inventory inventory, RegistryFriendlyByteBuf ignored) {
         return new SingleRewardAnimationMenu(id, inventory);
     }
-    void refresh(int elapsed, ItemStack preview, boolean revealed) {
+    void refresh(int elapsed, java.util.List<ItemStack> previews, boolean revealed) {
         for (int slot = 0; slot < SLOT_COUNT; slot++) {
             ItemStack shown;
-            if (slot == 4) shown = preview.copy();
+            if (previews.size() == 1 && slot == 4) shown = previews.getFirst().copy();
+            else if (previews.size() == 3 && slot >= 3 && slot <= 5) shown = previews.get(slot - 3).copy();
             else if (slot == 0 || slot == 8) shown = countdown(revealed ? 0 : LootAnimationTimeline.countdown(elapsed));
             else shown = pane(Items.BLACK_STAINED_GLASS_PANE, " ");
             display.setItem(slot, shown);

@@ -237,6 +237,7 @@ class WeaponSkinFoundationTest {
                     lines.get(index).getStyle().getColor().getValue());
         }
         assertEquals(color, WeaponSkinLore.active(definition).getStyle().getColor().getValue());
+        assertTrue(WeaponSkinLore.active(definition).getStyle().isBold());
         assertEquals(effectLines, definition.effectDescription().size());
     }
 }

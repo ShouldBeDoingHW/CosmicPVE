@@ -11,6 +11,7 @@ import com.cosmicpve.combat.pipeline.OutgoingDamageContributor;
 import com.cosmicpve.content.definition.mask.MaskBehavior;
 import java.util.List;
 import net.minecraft.tags.DamageTypeTags;
+import net.neoforged.neoforge.common.NeoForgeMod;
 
 public final class MaskCombatResolver implements OutgoingDamageContributor, IncomingDamageContributor {
     /** Legacy diagnostic ID retained for compatibility; Turkey now contributes to Dodge's single roll. */
@@ -31,14 +32,19 @@ public final class MaskCombatResolver implements OutgoingDamageContributor, Inco
         var equipped = masks.resolve(context.target());
         if (context.damageSource() != null) {
             if (equipped.stream().anyMatch(d -> d.behavior() == MaskBehavior.DRAGON)
-                    && context.damageSource().is(DamageTypeTags.IS_FIRE))
-                return List.of(new IncomingDamageContribution(CosmicPVE.id("dragon_mask_fire_immunity"), 0.0));
+                    && dragonProtects(context.channel(), context.damageSource().is(DamageTypeTags.IS_FIRE),
+                            context.damageSource().is(NeoForgeMod.POISON_DAMAGE)))
+                return List.of(new IncomingDamageContribution(CosmicPVE.id("dragon_mask_category_reduction"), 0.5));
             if (equipped.stream().anyMatch(d -> d.behavior() == MaskBehavior.ZEUS)
                     && context.damageSource().is(net.minecraft.world.damagesource.DamageTypes.LIGHTNING_BOLT))
                 return List.of(new IncomingDamageContribution(CosmicPVE.id("zeus_mask_lightning_immunity"), 0.0));
         }
         return equipped.stream().anyMatch(d -> d.behavior() == MaskBehavior.PARTY) && context.channel() == DamageChannel.ORDINARY
                 ? List.of(new IncomingDamageContribution(CosmicPVE.id("party_mask"), .99)) : List.of();
+    }
+
+    static boolean dragonProtects(DamageChannel channel, boolean fire, boolean poison) {
+        return channel == DamageChannel.ORDINARY && (fire || poison);
     }
 
 }

@@ -112,6 +112,42 @@ public final class ProcEventService {
         return engine.evaluate(event, fixtures);
     }
 
+    /** Evaluates one defensive targeted candidate with the normal owner-side modifier pipeline. */
+    public ProcDispatchResult dispatchTargetedCandidate(
+            LivingEntity owner, LivingEntity attacker, LivingEntity target, ProcCandidate candidate) {
+        var sequence = sequences.nextRoot();
+        var event = create(ProcHook.ON_TARGETED, owner, attacker, target, sequence.id(), sequence.parentId(),
+                RecursionPolicy.NORMAL, tracePlayer(owner), enchantments.resolve(owner, List.of()), serverRandom(owner),
+                Set.of(), Optional.empty());
+        return engine.evaluate(event, List.of(candidate));
+    }
+
+    /** Dispatches the no-direct-damage virtual parent created by Inversion. */
+    public ProcDispatchResult dispatchInvertedOffense(
+            LivingEntity defender, LivingEntity originalAttacker, net.minecraft.world.item.ItemStack attackerWeapon,
+            double resolvedParentDamage, net.minecraft.world.damagesource.DamageSource originalSource) {
+        if (!(resolvedParentDamage > 0.0) || !(defender.level() instanceof ServerLevel level))
+            throw new IllegalArgumentException("Inversion requires positive server-side parent damage");
+        var sequence = sequences.nextRoot();
+        var snapshot = new com.cosmicpve.combat.api.WeaponSnapshot(attackerWeapon);
+        var effective = enchantments.resolve(attackerWeapon, List.of());
+        var context = new com.cosmicpve.combat.api.CombatContext(
+                defender, defender, defender, originalAttacker,
+                defender instanceof Player player ? Optional.of(player.getUUID()) : Optional.empty(),
+                originalSource, com.cosmicpve.combat.api.AttackCategory.MELEE,
+                com.cosmicpve.combat.api.DamageChannel.ORDINARY,
+                Set.of(com.cosmicpve.combat.api.CombatFlag.MELEE), snapshot, effective,
+                sequence.id(), sequence.parentId(), RecursionPolicy.NORMAL,
+                Set.of(com.cosmicpve.registry.ModEnchantments.INVERSION.identifier()));
+        var virtualParent = new com.cosmicpve.combat.pipeline.CombatEngine().calculate(context,
+                com.cosmicpve.combat.pipeline.CombatCalculationRequest.unchanged(resolvedParentDamage))
+                .commit(resolvedParentDamage);
+        var event = create(ProcHook.ON_VALID_HIT, defender, defender, originalAttacker,
+                sequence.id(), sequence.parentId(), RecursionPolicy.NORMAL, tracePlayer(defender), effective,
+                eventRandom(level), context.excludedProcEffectIds(), Optional.of(virtualParent));
+        return dispatch(event);
+    }
+
     public ProcDispatchResult dispatch(ProcEvent event) {
         return engine.evaluate(event, candidates.resolve(event));
     }

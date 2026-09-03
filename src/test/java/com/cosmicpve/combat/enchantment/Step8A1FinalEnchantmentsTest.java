@@ -66,7 +66,7 @@ class Step8A1FinalEnchantmentsTest {
 
     @Test
     void finalOrdinaryMetadataAndExtractionRulesAreGeneric() {
-        assertEquals(62, CosmicEnchantmentSpecs.ALL.size());
+        assertEquals(63, CosmicEnchantmentSpecs.ALL.size());
         assertEquals(CosmicEnchantmentTier.LEGENDARY, CosmicEnchantmentSpecs.SNIPER.tier());
         assertEquals(5, CosmicEnchantmentSpecs.SNIPER.maxLevel());
         assertEquals("bow_or_crossbow", CosmicEnchantmentSpecs.SNIPER.equipmentApplicability());

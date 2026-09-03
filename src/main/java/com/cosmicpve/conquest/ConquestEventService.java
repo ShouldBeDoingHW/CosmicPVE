@@ -88,16 +88,19 @@ public final class ConquestEventService {
     private void processActive(ServerLevel level) {
         long now = level.getGameTime();
         for (ConquestEvent event : repository.active(level.getServer())) {
+            long age = Math.max(0L, now - event.createdGameTime());
             if (event.origin() == ConquestOrigin.NATURAL) {
-                long age = Math.max(0L, now - event.createdGameTime());
                 if (shouldExpire(event.origin(), event.interacted(), age)) {
                     expire(level, event.id());
                     continue;
                 }
-                if (now - event.lastAnnouncementGameTime() >= ANNOUNCEMENT_INTERVAL_TICKS) {
-                    announce(level.getServer(), event, remainingMinutes(age));
-                    repository.publish(level.getServer(), event.announcedAt(now));
-                }
+            }
+            if (receivesLifetimeAnnouncements(event.origin(), age) && announcementDue(event, now)) {
+                int minutes = remainingMinutes(age);
+                broadcast(level.getServer(), minutes == 5
+                        ? fiveMinuteWarning(event.chestPosition())
+                        : reminderAnnouncement(event.chestPosition(), minutes));
+                repository.publish(level.getServer(), event.announcedAt(now));
             }
             if (level.hasChunkAt(event.chestPosition())
                     && level.getBlockState(event.chestPosition()).isAir()) {
@@ -180,7 +183,7 @@ public final class ConquestEventService {
                 event.id(), position.toShortString(), level.dimension().identifier(),
                 level.getBlockState(position).is(ModBlocks.CONQUEST_CHEST.get()),
                 repository.find(level.getServer(), event.id()).isPresent());
-        if (announce && origin == ConquestOrigin.NATURAL) announce(level.getServer(), event, 30);
+        if (announce) broadcast(level.getServer(), spawnAnnouncement(event.chestPosition()));
         return Optional.of(event);
     }
 
@@ -355,10 +358,34 @@ public final class ConquestEventService {
                 && level.getBlockState(pos.below()).isFaceSturdy(level, pos.below(), Direction.UP);
     }
 
-    private static void announce(MinecraftServer server, ConquestEvent event, int minutes) {
-        Component message = Component.literal("Look alive cosmonaut! A Conquest Chest has spawned at ("
-                + event.chestPosition().getX() + ", " + event.chestPosition().getZ()
-                + ") and will disappear in " + minutes + " minutes!");
+    static Component spawnAnnouncement(BlockPos position) {
+        return Component.literal("[CONQUEST]").withStyle(style -> style.withColor(0xFFAA00).withBold(true))
+                .append(Component.literal(" Chest spawned at ").withColor(0xAAAAAA))
+                .append(coordinates(position))
+                .append(Component.literal("!").withColor(0xAAAAAA));
+    }
+
+    static Component fiveMinuteWarning(BlockPos position) {
+        return Component.literal("[CONQUEST]").withStyle(style -> style.withColor(0xFFAA00).withBold(true))
+                .append(Component.literal(" 5 MINUTES LEFT").withStyle(style ->
+                        style.withColor(0xFF5555).withBold(true)))
+                .append(Component.literal(" — ").withColor(0xAAAAAA))
+                .append(coordinates(position))
+                .append(Component.literal("!").withColor(0xAAAAAA));
+    }
+
+    private static Component reminderAnnouncement(BlockPos position, int minutes) {
+        return Component.literal("Look alive cosmonaut! A Conquest Chest remains at ")
+                .append(coordinates(position))
+                .append(Component.literal(" and will disappear in " + minutes + " minutes!"));
+    }
+
+    private static Component coordinates(BlockPos position) {
+        return Component.literal(position.getX() + ", " + position.getY() + ", " + position.getZ())
+                .withStyle(style -> style.withColor(0x55FFFF).withBold(true));
+    }
+
+    private static void broadcast(MinecraftServer server, Component message) {
         server.getPlayerList().broadcastSystemMessage(message, false);
     }
 
@@ -375,6 +402,14 @@ public final class ConquestEventService {
     public static int remainingMinutes(long ageTicks) {
         long remaining = Math.max(0L, NATURAL_LIFETIME_TICKS - ageTicks);
         return (int) Math.ceil(remaining / 1200.0D);
+    }
+    static boolean announcementDue(ConquestEvent event, long gameTime) {
+        return event.state() == ConquestEventState.ACTIVE
+                && gameTime - event.lastAnnouncementGameTime() >= ANNOUNCEMENT_INTERVAL_TICKS;
+    }
+    static boolean receivesLifetimeAnnouncements(ConquestOrigin origin, long ageTicks) {
+        return (origin == ConquestOrigin.NATURAL || origin == ConquestOrigin.FLARE)
+                && ageTicks < NATURAL_LIFETIME_TICKS;
     }
     public static long randomBanknoteCents(RandomSource random) {
         return random.nextIntBetweenInclusive(10, 100) * BANKNOTE_STEP_CENTS;

@@ -112,6 +112,14 @@ public final class RewardCommands {
                         context.getSource(), IdentifierArgument.getId(context, "table")))))
                 .then(Commands.literal("reload").executes(context -> reload(context.getSource())))
                 .then(Commands.literal("animation-demo").executes(context -> animationDemo(context.getSource())))
+                .then(Commands.literal("space-dust-bundle").then(Commands.literal("give")
+                        .then(Commands.argument("player", EntityArgument.player())
+                                .executes(context -> giveLootbox(context.getSource(), EntityArgument.getPlayer(context, "player"),
+                                        com.cosmicpve.registry.ModItems.SPACE_DUST_BUNDLE.get(), 1)))))
+                .then(Commands.literal("holy-white-scroll").then(Commands.literal("give")
+                        .then(Commands.argument("player", EntityArgument.player())
+                                .executes(context -> giveLootbox(context.getSource(), EntityArgument.getPlayer(context, "player"),
+                                        com.cosmicpve.registry.ModItems.HOLY_WHITE_SCROLL.get(), 1)))))
                 .then(secretCache)
                 .then(cosmicTable)
                 .then(heroicTable)

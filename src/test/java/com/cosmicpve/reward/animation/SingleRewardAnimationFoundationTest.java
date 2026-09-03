@@ -60,4 +60,15 @@ class SingleRewardAnimationFoundationTest {
         assertEquals(Items.AMETHYST_SHARD, decoded.reward().orElseThrow().getItem());
         assertEquals(3, decoded.reward().orElseThrow().getCount());
     }
+
+    @Test void pendingThreeRewardPayloadRoundTripsAtomically() {
+        var pending = PendingLootAnimation.of(List.of(new ItemStack(Items.BRICK, 2),
+                new ItemStack(Items.FEATHER, 3), new ItemStack(Items.AMETHYST_SHARD, 4)));
+        var encoded = PendingLootAnimation.CODEC.codec().encodeStart(JsonOps.INSTANCE, pending).getOrThrow();
+        var decoded = PendingLootAnimation.CODEC.codec().parse(JsonOps.INSTANCE, encoded).getOrThrow();
+        assertTrue(decoded.valid());
+        assertEquals(3, decoded.allRewards().size());
+        assertEquals(List.of(2, 3, 4), decoded.allRewards().stream().map(ItemStack::getCount).toList());
+        assertTrue(decoded.reward().isEmpty());
+    }
 }

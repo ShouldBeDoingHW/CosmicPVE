@@ -66,6 +66,7 @@ class CosmicEnchantmentRegistrationTest {
                 Map.entry("snare", 4),
                 Map.entry("plague_carrier", 7),
                 Map.entry("hex", 5),
+                Map.entry("inversion", 4),
                 Map.entry("spirit_link", 7));
         for (var entry : expected.entrySet()) {
             var resource = getClass().getClassLoader()
@@ -121,7 +122,7 @@ class CosmicEnchantmentRegistrationTest {
                 }
             }
         }
-        assertEquals(62, CosmicEnchantmentSpecs.ALL.size());
+        assertEquals(63, CosmicEnchantmentSpecs.ALL.size());
         assertEquals(CosmicEnchantmentTier.ELITE, CosmicEnchantmentSpecs.EXECUTE.tier());
         assertEquals(CosmicEnchantmentTier.ULTIMATE, CosmicEnchantmentSpecs.ANGELIC.tier());
         assertEquals(CosmicEnchantmentTier.SIMPLE, CosmicEnchantmentSpecs.LIGHTNING.tier());

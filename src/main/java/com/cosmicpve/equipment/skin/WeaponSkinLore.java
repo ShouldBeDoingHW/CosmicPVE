@@ -25,6 +25,6 @@ public final class WeaponSkinLore {
 
     public static Component active(WeaponSkinDefinition definition) {
         return Component.translatable("tooltip.cosmicpve.skin.active", definition.displayName())
-                .withColor(definition.nameColor());
+                .withStyle(style -> style.withColor(definition.nameColor()).withBold(true));
     }
 }

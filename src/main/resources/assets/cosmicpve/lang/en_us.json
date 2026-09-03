@@ -1,6 +1,14 @@
 {
   "item.cosmicpve.foundation_token": "Foundation Token",
   "item.cosmicpve.secret_weapon_cache": "Secret Weapon Cache",
+  "item.cosmicpve.holy_white_scroll": "* Holy * Whitescroll",
+  "item.cosmicpve.space_dust_bundle": "Space Dust Bundle",
+  "enchantment.cosmicpve.inversion": "Inversion",
+  "enchantment.cosmicpve.inversion.description": "Chance to invert a melee attack and turn its offensive enchantments against the attacker.",
+  "message.cosmicpve.holy_white_scroll.applied": "That item is now Holy.",
+  "message.cosmicpve.holy_white_scroll.unprotected": "Apply a White Scroll to that item first.",
+  "message.cosmicpve.holy_white_scroll.already": "That item is already Holy.",
+  "message.cosmicpve.holy_white_scroll.invalid": "The Holy Whitescroll cannot be applied to that item.",
   "item.cosmicpve.cosmic_enchantment_table": "Cosmic Enchantment Table",
   "item.cosmicpve.admin_abuse": "Admin Abuse",
   "enchantment.cosmicpve.execute": "Execute",
@@ -318,7 +326,7 @@
   ,"mask.cosmicpve.scarecrow.effect":"Passively Restores Hunger and Saturation!"
   ,"mask.cosmicpve.zeus.effect":"Gives Full Immunity to Lightning Based Damage!"
   ,"mask.cosmicpve.turkey.effect":"Gain +2% Dodge Chance!"
-  ,"mask.cosmicpve.dragon.effect":"Deal +2% Outgoing Damage and Become Immune to Fire and Lava Damage!"
+  ,"mask.cosmicpve.dragon.effect":"Deal +2% outgoing damage and take 50% less damage from fire, lava, and poison damage!"
   ,"tooltip.cosmicpve.mask.contains":"This mask contains the powers of:"
   ,"tooltip.cosmicpve.mask.applies_to":"Applies to: Helmets"
   ,"tooltip.cosmicpve.mask.apply":"Drag n' Drop onto a helmet to apply."

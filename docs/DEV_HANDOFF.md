@@ -1,8 +1,8 @@
 # CosmicPVE Development Handoff
 
-Current accepted baseline: Step 8H — Player Upgrades + Upgrade Crystals + Stormcaller + Conquest Chest Rebalance is implemented, automated/runtime verified, manually verified/accepted, and closed in `49a6ffe` (`Add player upgrades and rebalance Conquest`). Earlier accepted milestones remain recorded below.
+Current accepted baseline: Step 8I / 8I.1 — Holy Whitescrolls + Space Dust Bundle + Inversion + presentation/Conquest alert corrections is implemented, automated/runtime verified, and manually verified/accepted. Earlier accepted milestones remain recorded below.
 
-Repository state: Steps 6A–8H and the earlier Conquest synchronization are implemented, verified, and manually accepted. The root `assets`, `drafts`, and `woodlands` development-source folders remain untouched and untracked.
+Repository state: Steps 6A–8I.1 and the earlier Conquest synchronization are implemented, verified, and manually accepted. The root `assets`, `drafts`, and `woodlands` development-source folders remain untouched and untracked.
 
 Last handoff update: 2026-08-31
 
@@ -515,6 +515,16 @@ The existing Conquest subsystem, mining calibration, protection, Flare behavior,
 
 The accepted micro-hotfix sets the Conquest White Scroll row to weight 18 and adds a one-item White Scroll Flash Sale at $100,000/$125,000/$175,000 for Low/Medium/High pricing.
 
+### Step 8I / 8I.1 — IMPLEMENTED; AUTOMATED/RUNTIME VERIFIED; MANUALLY VERIFIED / ACCEPTED
+
+Implemented forced-glint `cosmicpve:holy_white_scroll` with the canonical segmented `* Holy * Whitescroll` presentation. Its server-authoritative drag/drop transaction accepts only armor, swords, axes, bows, crossbows, and pickaxes; requires and consumes an active ordinary White Scroll; consumes exactly one Holy Whitescroll; and adds a separate persistent Holy component without preventing a later fresh White Scroll. Holy gear displays an underlined `HOLY` state line. On ordinary non-keep-inventory player drops, each Holy stack independently rolls 50%; a successful save is removed from drops, queued through a copy-on-death recovery attachment, delivered once after respawn/login, and loses only Holy, while a failed save drops once and remains Holy. Trial snapshot restoration and keep-inventory deaths bypass Holy. The probability resolver includes the settled future Monopoly +5-flat-point seam without implementing Monopoly.
+
+Implemented non-stackable forced-glint `cosmicpve:space_dust_bundle` using Suspicious Gravel presentation. Each opening preselects and persists exactly three independent real Cosmic Dust stacks, each with uniform quantity 1–10 and rarity weights Simple 20, Unique 18, Elite 16, Ultimate 14, Legendary 12, Heroic 8, Mastery 4. The accepted one-row reward animation now supports an atomic multi-stack payload: three previews/final results occupy positions 4/5/6, while reveal, early close, disconnect/login, respawn, and full-inventory delivery retain exactly-once recovery semantics.
+
+Implemented ordinary Ultimate Sword enchantment `cosmicpve:inversion` IV. A valid incoming melee parent checks Dodge first; successful Dodge cancels the hit, skips Inversion, and sends the defender-only yellow `* Dodge *` message. Inversion then rolls `level%` with defender-side relative Luck. Success cancels the original attack before commit, sends `You inverted the attack! Nice!`, and dispatches a no-direct-damage virtual offensive parent using the original attacker's weapon/enchantment snapshot, defender as logical source and Luck owner, original attacker as target, and the canceled parent's resolved ordinary value for child calculations. Generic offensive candidates are reused, including Doublestrike at 75% with its established peer rerolls, while scoped-child filtering prevents nested Inversion and Doublestrike continues excluding itself.
+
+The Step 8I.1 corrective synchronizes Dragon to its current canonical `#FFF24D` identity and exact Base64 texture while retaining +2% ordinary outgoing damage and changing its defensive benefit to 50% less ordinary Fire-tagged, Lava, and Poison damage. Holy Whitescroll names and the equipped `HOLY` marker now retain their established segmented colors while rendering fully bold; the marker remains underlined and `#C4394A`. Compact attached Mask/Multi-Mask and Weapon Skin identity lines are likewise fully bold without changing ordering or wrapping. Natural Conquest spawns and successful player-used Conquest Flares broadcast one global coordinate alert using the finalized X/Y/Z. Both normal player-facing origins receive the persisted, restart-safe red five-minute warning at the existing reminder boundary; failed/debug/reload paths remain silent, Flare lifetime behavior is otherwise unchanged, and all other reminder cadence is preserved.
+
 ## 3. Current Real Enchantments
 
 These are registered through Minecraft's enchantment infrastructure, use actual enchantment data on the item, and are not present in normal enchanting-table, librarian, random-loot, random-equipment, or mob-equipment acquisition pools.
@@ -576,10 +586,11 @@ These are registered through Minecraft's enchantment infrastructure, use actual 
 | `cosmicpve:obsidian_destroyer` | IV | Pickaxe | Unique | Adds 2 mining-speed points per level to the resolved break speed only while mining vanilla Obsidian. It is not Haste and does not affect Crying Obsidian. |
 | `cosmicpve:dominate` | IV | Bow/crossbow | Ultimate | Committed launch-snapshotted projectile hits have a flat 20% Luck-relative chance to apply one nonstacking harmful state for 1 second per level, reducing ordinary outgoing damage by 3% per level. Stronger reapplications are retained and duration is refreshed. |
 | `cosmicpve:hex` | V | Axe | Legendary | Committed valid melee hits have `1% × level`, modified relatively by Luck, to add an independent five-second negative stack. Each stack reduces ordinary outgoing damage by 2% and multiplies ordinary incoming damage by 1.02. |
+| `cosmicpve:inversion` | IV | Sword | Ultimate | After Dodge, incoming melee attacks have a `level%` defender-Luck-relative chance to be canceled and replay the attacker's offensive enchantment snapshot in reversed roles without directly reflecting base damage. |
 
 ### DESIGNED BUT NOT IMPLEMENTED
 
-The registry currently contains 62 real Cosmic enchantment definitions: 54 implemented ordinary enchantments and eight implemented Heroic replacements. Death Pact, Permafrost, Mortal Coil, Phoenix, Divine Immolation, Soul Tether, Hero Killer, Soul Siphon, and Blackout are the implemented Mastery enchantments. Inversion remains the newly designed ordinary implementation gap.
+The registry currently contains 63 real Cosmic enchantment definitions: 55 implemented ordinary enchantments and eight implemented Heroic replacements. Death Pact, Permafrost, Mortal Coil, Phoenix, Divine Immolation, Soul Tether, Hero Killer, Soul Siphon, and Blackout are the implemented Mastery enchantments.
 
 ## 4. Critical Combat Semantics
 
@@ -856,11 +867,11 @@ The final post-Orb capacity is no longer unresolved for current target classes: 
 
 ## 16. Current Next Milestone
 
-**Immediate next action: Step 8I — Holy Whitescrolls + Space Dust Bundle + Inversion + Dodge Combat Feedback.**
+**Immediate next action: Step 8J — `/enchanter` + `/sell` + Impossible Trial tier + room reshuffling.**
 
 Current intended sequence:
 
-Steps 8A–8H, including Step 8G.1/8G.2 and the Obsidian Destroyer + Dominate micro-milestone, are manually verified and accepted. Step 8I is the next bounded implementation milestone. Memory Chests, Cosmic Crate halves, Dungeon gameplay, `/enchanter`, `/sell`, and later roadmap work remain deferred.
+Steps 8A–8I.1, including Step 8G.1/8G.2 and the Obsidian Destroyer + Dominate micro-milestone, are manually verified and accepted. Step 8J is the next bounded implementation milestone. Fame, Memory Chests, Cosmic Crate halves, Dungeon gameplay, Deep Sea Dive, the wider Trial loot rebalance, and later roadmap work remain deferred.
 
 The ordinary-enchantment expansion remains split across bounded patches. Step 7C is the explicit instruction that made the current canonical Design Doc enchantment-table values implementation-authoritative; later design edits still require their own explicit implementation milestone.
 
@@ -878,6 +889,12 @@ The ordinary-enchantment expansion remains split across bounded patches. Step 7C
 Preserve unrelated dirty changes. Never change pinned versions as a side effect of gameplay work. Prefer service-level rules and typed data over one-off event logic, and keep client-only classes isolated from dedicated-server loading.
 
 ## 18. Verification Snapshot
+
+For the Step 8I/8I.1 candidate:
+
+- `gradlew.bat cleanTest test build` succeeds and passes all 570 automated tests across 143 suites with zero failures, errors, or skips. The 11 loaded-registry GameTests also pass. Focused coverage verifies Holy eligibility/probability/state transitions and presentation, three independent bounded Dust rewards, multi-reward animation persistence/layout, Inversion metadata/chance/registry integration, the 63-enchantment invariant, Dragon's current combat/resource contract, bold compact attachment identity lines, and exact/restart-safe Conquest spawn and five-minute alert semantics.
+- All 250 main-resource JSON files parse successfully. Dedicated-server startup loads 1,462 recipes, publishes the full Cosmic content snapshot, verifies progression controls, and reaches `Done`. Fresh-client startup completes ResourceManager reload, OpenAL/SoundEngine initialization, and item/block/GUI atlas creation with the Holy Whitescroll and Space Dust Bundle models present and no relevant missing-model, missing-texture, localization, component, registry, or sided-classloading errors.
+- `git diff --check` passes for Step 8I-owned source, resource, test, and handoff paths with only normal Windows line-ending notices. Minecraft 1.21.11, NeoForge 21.11.45, Java 21, Gradle 9.2.1, ModDevGradle 2.0.144, mod ID `cosmicpve`, and package `com.cosmicpve` remain unchanged. The user's live `docs/Cosmic_Design.md` edits and root `assets`, `drafts`, and `woodlands` directories remain outside Step 8I ownership.
 
 For the Step 8H candidate:
 

@@ -59,6 +59,7 @@ public final class ModEnchantments {
     public static final ResourceKey<Enchantment> DOMINATE = createKey("dominate");
     public static final ResourceKey<Enchantment> HEX = createKey("hex");
     public static final ResourceKey<Enchantment> STORMCALLER = createKey("stormcaller");
+    public static final ResourceKey<Enchantment> INVERSION = createKey("inversion");
     public static final ResourceKey<Enchantment> SPIRIT_LINK = createKey("spirit_link");
     public static final ResourceKey<Enchantment> DEEP_BLEED = createKey("deep_bleed");
     public static final ResourceKey<Enchantment> MIGHTY_CACTUS = createKey("mighty_cactus");

@@ -65,8 +65,17 @@ public final class EquipmentTooltipService {
             event.getToolTip().add(Component.translatable("tooltip.cosmicpve.protected")
                     .withColor(0xFFFFFF).withStyle(net.minecraft.ChatFormatting.BOLD));
         }
+        if (com.cosmicpve.equipment.enchantment.HolyWhiteScrollService.isHoly(stack)) {
+            event.getToolTip().add(holyMarker());
+        }
         if (stack.is(com.cosmicpve.registry.ModItems.WHITE_SCROLL.get())) {
             event.getToolTip().addAll(com.cosmicpve.equipment.enchantment.WhiteScrollItem.lore());
+        }
+        if (stack.is(com.cosmicpve.registry.ModItems.HOLY_WHITE_SCROLL.get())) {
+            event.getToolTip().addAll(com.cosmicpve.equipment.enchantment.HolyWhiteScrollItem.lore());
+        }
+        if (stack.is(com.cosmicpve.registry.ModItems.SPACE_DUST_BUNDLE.get())) {
+            event.getToolTip().addAll(com.cosmicpve.reward.lootbox.SpaceDustBundleItem.lore());
         }
         if (stack.is(com.cosmicpve.registry.ModItems.TRANSMOG_SCROLL.get())) {
             event.getToolTip().add(Component.translatable("tooltip.cosmicpve.transmog.purpose"));
@@ -150,6 +159,11 @@ public final class EquipmentTooltipService {
             event.getToolTip().add(capacityLine(capacity.capacity(stack)));
         sortTransmogEnchantments(event);
         recolorCosmicEnchantments(event);
+    }
+
+    public static Component holyMarker() {
+        return Component.literal("HOLY")
+                .withStyle(style -> style.withColor(0xC4394A).withUnderlined(true).withBold(true));
     }
 
     public static java.util.List<Component> armorSetPresentationLines(net.minecraft.world.item.ItemStack stack) {

@@ -181,6 +181,8 @@ public final class CosmicCombat {
         NeoForge.EVENT_BUS.addListener(EVENTS::onIncomingDamage);
         NeoForge.EVENT_BUS.addListener(EVENTS::onDamageAccepted);
         NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, MASK_EVENTS::onTargeted);
+        var inversion = new com.cosmicpve.combat.enchantment.InversionEventBridge(PROC_EVENTS, ENCHANTMENTS, EVENTS);
+        NeoForge.EVENT_BUS.addListener(EventPriority.HIGH, inversion::onTargeted);
         NeoForge.EVENT_BUS.addListener(EVENTS::onDamageCommitted);
         NeoForge.EVENT_BUS.addListener(PROC_HOOKS::onPreDeath);
         NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, PROC_HOOKS::onBlockBreak);

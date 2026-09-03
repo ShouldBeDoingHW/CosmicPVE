@@ -37,19 +37,22 @@ public final class MaskLore {
     public static Component attachedIdentity(List<MaskPresentation> presentations) {
         if (presentations.isEmpty()) return Component.empty();
         var identity = Component.translatable("tooltip.cosmicpve.mask.attached_prefix")
-                .withStyle(ChatFormatting.WHITE);
+                .withStyle(style -> style.withColor(ChatFormatting.WHITE).withBold(true));
         if (presentations.size() == 1) {
-            identity.append(presentations.getFirst().displayName().copy()
-                    .withColor(presentations.getFirst().color()));
+            identity.append(presentations.getFirst().displayName().copy().withStyle(style ->
+                    style.withColor(presentations.getFirst().color()).withBold(true)));
         } else {
             identity.append(Component.translatable("tooltip.cosmicpve.mask.multi_prefix")
-                    .withStyle(ChatFormatting.WHITE));
+                    .withStyle(style -> style.withColor(ChatFormatting.WHITE).withBold(true)));
             for (int i = 0; i < presentations.size(); i++) {
-                if (i > 0) identity.append(Component.literal(", ").withStyle(ChatFormatting.WHITE));
+                if (i > 0) identity.append(Component.literal(", ").withStyle(style ->
+                        style.withColor(ChatFormatting.WHITE).withBold(true)));
                 var presentation = presentations.get(i);
-                identity.append(presentation.displayName().copy().withColor(presentation.color()));
+                identity.append(presentation.displayName().copy().withStyle(style ->
+                        style.withColor(presentation.color()).withBold(true)));
             }
-            identity.append(Component.literal(")").withStyle(ChatFormatting.WHITE));
+            identity.append(Component.literal(")").withStyle(style ->
+                    style.withColor(ChatFormatting.WHITE).withBold(true)));
         }
         return identity;
     }

@@ -190,6 +190,12 @@ public final class CombatEventBridge {
         }
     }
 
+    /** Read-only pre-commit seam for defensive reactions that need the resolved ordinary parent value. */
+    public java.util.Optional<CombatResult> provisional(net.neoforged.neoforge.common.damagesource.DamageContainer container) {
+        PendingCombat pending = incomingCandidates.get(container);
+        return pending == null ? java.util.Optional.empty() : java.util.Optional.of(pending.result());
+    }
+
     public void onDamageCommitted(LivingDamageEvent.Post event) {
         Deque<PendingCombat> stack = acceptedDamageStack.get();
         PendingCombat pending = stack.poll();

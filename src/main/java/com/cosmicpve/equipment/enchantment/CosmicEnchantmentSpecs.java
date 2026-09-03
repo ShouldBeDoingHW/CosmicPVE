@@ -113,6 +113,8 @@ public final class CosmicEnchantmentSpecs {
             ModEnchantments.HEX.identifier(), 5, CosmicEnchantmentTier.LEGENDARY, "axe");
     public static final CosmicEnchantmentSpec STORMCALLER = new CosmicEnchantmentSpec(
             ModEnchantments.STORMCALLER.identifier(), 5, CosmicEnchantmentTier.ELITE, "boots_or_chestplate");
+    public static final CosmicEnchantmentSpec INVERSION = new CosmicEnchantmentSpec(
+            ModEnchantments.INVERSION.identifier(), 4, CosmicEnchantmentTier.ULTIMATE, "sword");
     public static final CosmicEnchantmentSpec SPIRIT_LINK = new CosmicEnchantmentSpec(
             ModEnchantments.SPIRIT_LINK.identifier(), 7, CosmicEnchantmentTier.ELITE, "helmet_or_chestplate");
     public static final CosmicEnchantmentSpec DEEP_BLEED = new CosmicEnchantmentSpec(
@@ -139,7 +141,7 @@ public final class CosmicEnchantmentSpecs {
                     GEARS, PERMAFROST, MORTAL_COIL, SELF_DESTRUCT, PHOENIX, DIVINE_IMMOLATION, VIRUS, DEVOUR,
                     UNDEAD_RUSE, OBLITERATE, SOUL_TETHER, DODGE, LEADERSHIP,
                     HERO_KILLER, SOUL_SIPHON, BLACKOUT, ENDER_WALKER, VOODOO,
-                    SNIPER, SNARE, PLAGUE_CARRIER, OBSIDIAN_DESTROYER, DOMINATE, HEX, STORMCALLER, SPIRIT_LINK,
+                    SNIPER, SNARE, PLAGUE_CARRIER, OBSIDIAN_DESTROYER, DOMINATE, HEX, STORMCALLER, INVERSION, SPIRIT_LINK,
                     DEEP_BLEED, MIGHTY_CACTUS, PALADIN_ARMORED, BLIGHTED_VIRUS, ALIEN_IMPLANTS,
                     LETHAL_SNIPER, ETERNAL_SNARE, PERMANENT_EXECUTE);
 

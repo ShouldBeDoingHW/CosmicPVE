@@ -113,6 +113,38 @@ class ConquestFoundationTest {
         assertEquals(3, ConquestEventService.REWARD_ROLLS);
     }
 
+    @Test void canonicalAlertsUseFinalThreeDimensionalCoordinatesAndSemanticStyles() {
+        BlockPos position = new BlockPos(125, 73, -42);
+        var spawn = ConquestEventService.spawnAnnouncement(position);
+        assertEquals("[CONQUEST] Chest spawned at 125, 73, -42!", spawn.getString());
+        assertTrue(spawn.getStyle().isBold());
+        assertEquals(0xFFAA00, spawn.getStyle().getColor().getValue());
+        assertEquals(0x55FFFF, spawn.getSiblings().get(1).getStyle().getColor().getValue());
+        assertTrue(spawn.getSiblings().get(1).getStyle().isBold());
+
+        var warning = ConquestEventService.fiveMinuteWarning(position);
+        assertEquals("[CONQUEST] 5 MINUTES LEFT — 125, 73, -42!", warning.getString());
+        assertEquals(0xFF5555, warning.getSiblings().getFirst().getStyle().getColor().getValue());
+        assertTrue(warning.getSiblings().getFirst().getStyle().isBold());
+        assertEquals(0x55FFFF, warning.getSiblings().get(2).getStyle().getColor().getValue());
+        assertTrue(warning.getSiblings().get(2).getStyle().isBold());
+    }
+
+    @Test void persistedAnnouncementReceiptPreventsDuplicateFiveMinuteWarning() {
+        ConquestEvent event = ConquestEvent.create(UUID.randomUUID(), ConquestOrigin.NATURAL,
+                new BlockPos(1, 70, 2), 0).announcedAt(24_000);
+        assertFalse(ConquestEventService.announcementDue(event, 29_999));
+        assertTrue(ConquestEventService.announcementDue(event, 30_000));
+        ConquestEvent warned = event.announcedAt(30_000);
+        var decoded = ConquestEvent.CODEC.parse(JsonOps.INSTANCE,
+                ConquestEvent.CODEC.encodeStart(JsonOps.INSTANCE, warned).getOrThrow()).getOrThrow();
+        assertFalse(ConquestEventService.announcementDue(decoded, 30_100));
+        assertFalse(ConquestEventService.announcementDue(decoded.withState(ConquestEventState.COMPLETED), 40_000));
+        assertTrue(ConquestEventService.receivesLifetimeAnnouncements(ConquestOrigin.NATURAL, 30_000));
+        assertTrue(ConquestEventService.receivesLifetimeAnnouncements(ConquestOrigin.FLARE, 30_000));
+        assertFalse(ConquestEventService.receivesLifetimeAnnouncements(ConquestOrigin.FLARE, 36_000));
+    }
+
     @Test void savedScheduleAndMultipleEventsRoundTripTogether() {
         ConquestSavedData data = new ConquestSavedData();
         data.setLastScheduledDay(21);

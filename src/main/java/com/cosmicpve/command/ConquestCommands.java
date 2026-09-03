@@ -51,7 +51,7 @@ public final class ConquestCommands {
         var level = source.getLevel();
         BlockPos center = BlockPos.containing(source.getPosition());
         var result = ConquestRuntime.events().spawnNear(level, origin, center,
-                ConquestEventService.FLARE_RADIUS, level.getRandom(), origin == ConquestOrigin.NATURAL);
+                ConquestEventService.FLARE_RADIUS, level.getRandom(), false);
         if (result.isEmpty()) {
             source.sendFailure(Component.literal("Unable to find and create a valid Conquest Chest after "
                     + ConquestEventService.PLACEMENT_ATTEMPTS + " attempts."));

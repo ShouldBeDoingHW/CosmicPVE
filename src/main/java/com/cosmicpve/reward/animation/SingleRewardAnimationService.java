@@ -18,10 +18,17 @@ public final class SingleRewardAnimationService {
     private SingleRewardAnimationService() {}
 
     public boolean open(ServerPlayer player, ItemStack finalReward, LootAnimationPreviewProvider previews, Runnable sourceCommit) {
-        if (finalReward.isEmpty() || pending(player).valid() || runtimes.containsKey(player.getUUID())) return false;
-        ItemStack firstPreview = previews.next(player.getRandom());
-        if (firstPreview.isEmpty()) return false;
-        player.setData(ModAttachments.LOOT_ANIMATION, PendingLootAnimation.of(finalReward));
+        return open(player, List.of(finalReward), previews, sourceCommit);
+    }
+
+    public boolean open(ServerPlayer player, List<ItemStack> finalRewards, LootAnimationPreviewProvider previews, Runnable sourceCommit) {
+        if (finalRewards.isEmpty() || finalRewards.stream().anyMatch(ItemStack::isEmpty)
+                || pending(player).valid() || runtimes.containsKey(player.getUUID())) return false;
+        var firstPreview = new java.util.ArrayList<ItemStack>(finalRewards.size());
+        for (int index = 0; index < finalRewards.size(); index++) firstPreview.add(previews.next(player.getRandom()));
+        if (firstPreview.stream().anyMatch(ItemStack::isEmpty)) return false;
+        player.setData(ModAttachments.LOOT_ANIMATION, finalRewards.size() == 1
+                ? PendingLootAnimation.of(finalRewards.getFirst()) : PendingLootAnimation.of(finalRewards));
         try { sourceCommit.run(); }
         catch (RuntimeException failure) { clear(player); throw failure; }
         RuntimeState runtime = new RuntimeState(player.level().getServer().getTickCount(), previews, firstPreview);
@@ -38,14 +45,16 @@ public final class SingleRewardAnimationService {
         int elapsed = (int)Math.max(0, player.level().getServer().getTickCount() - state.startedAt);
         if (!state.revealed && elapsed >= LootAnimationTimeline.REVEAL_TICK) {
             state.revealed = true;
-            state.shown = pending(player).reward().map(ItemStack::copy).orElse(ItemStack.EMPTY);
+            state.shown = pending(player).allRewards();
             deliverPending(player);
             LootAnimationFeedback.reveal(player);
         } else if (!state.revealed && LootAnimationTimeline.previewDue(elapsed)) {
             int ordinal = LootAnimationTimeline.previewOrdinal(elapsed);
             if (ordinal > state.lastPreviewOrdinal) {
                 state.lastPreviewOrdinal = ordinal;
-                state.shown = state.previews.next(player.getRandom());
+                var previews = new java.util.ArrayList<ItemStack>(state.shown.size());
+                for (int index = 0; index < state.shown.size(); index++) previews.add(state.previews.next(player.getRandom()));
+                state.shown = java.util.List.copyOf(previews);
             }
         }
         if (!state.revealed && LootAnimationTimeline.previewSoundDue(elapsed)) {
@@ -68,17 +77,20 @@ public final class SingleRewardAnimationService {
     PendingLootAnimation pending(ServerPlayer player) { return player.getData(ModAttachments.LOOT_ANIMATION); }
     private void deliverPending(ServerPlayer player) {
         PendingLootAnimation pending = pending(player);
-        if (!pending.valid()) { if (pending.reward().isPresent()) clear(player); return; }
-        ItemStack reward = pending.reward().orElseThrow().copy();
+        if (!pending.valid()) {
+            if (pending.reward().isPresent() || !pending.rewards().isEmpty()) clear(player);
+            return;
+        }
+        var rewards = pending.allRewards();
         clear(player);
-        delivery.deliver(player, List.of(reward));
+        delivery.deliver(player, rewards);
     }
     private static void clear(ServerPlayer player) { player.setData(ModAttachments.LOOT_ANIMATION, PendingLootAnimation.empty()); }
 
     private static final class RuntimeState {
         final long startedAt; final LootAnimationPreviewProvider previews;
-        ItemStack shown; int lastPreviewOrdinal; int lastSoundOrdinal; boolean revealed;
-        RuntimeState(long startedAt, LootAnimationPreviewProvider previews, ItemStack shown) {
+        java.util.List<ItemStack> shown; int lastPreviewOrdinal; int lastSoundOrdinal; boolean revealed;
+        RuntimeState(long startedAt, LootAnimationPreviewProvider previews, java.util.List<ItemStack> shown) {
             this.startedAt = startedAt; this.previews = previews; this.shown = shown;
             this.lastPreviewOrdinal = 0; this.lastSoundOrdinal = -1;
         }
