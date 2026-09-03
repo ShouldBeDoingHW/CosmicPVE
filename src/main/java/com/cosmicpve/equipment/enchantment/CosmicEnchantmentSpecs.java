@@ -112,7 +112,7 @@ public final class CosmicEnchantmentSpecs {
     public static final CosmicEnchantmentSpec HEX = new CosmicEnchantmentSpec(
             ModEnchantments.HEX.identifier(), 5, CosmicEnchantmentTier.LEGENDARY, "axe");
     public static final CosmicEnchantmentSpec STORMCALLER = new CosmicEnchantmentSpec(
-            ModEnchantments.STORMCALLER.identifier(), 5, CosmicEnchantmentTier.ELITE, "boots_or_chestplate", false);
+            ModEnchantments.STORMCALLER.identifier(), 5, CosmicEnchantmentTier.ELITE, "boots_or_chestplate");
     public static final CosmicEnchantmentSpec SPIRIT_LINK = new CosmicEnchantmentSpec(
             ModEnchantments.SPIRIT_LINK.identifier(), 7, CosmicEnchantmentTier.ELITE, "helmet_or_chestplate");
     public static final CosmicEnchantmentSpec DEEP_BLEED = new CosmicEnchantmentSpec(

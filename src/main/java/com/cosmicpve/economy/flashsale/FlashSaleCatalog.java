@@ -41,6 +41,7 @@ public final class FlashSaleCatalog {
                     random -> new ItemStack[]{MysterySpawners.create(MysterySpawnerTier.SIMPLE, 1)}),
             item("repair_scroll_1", "Repair Scroll", 1, 5_000_000L, 7_000_000L, 9_000_000L, ModItems.REPAIR_SCROLL.get()),
             item("repair_scroll_5", "Repair Scroll", 5, 20_000_000L, 40_000_000L, 60_000_000L, ModItems.REPAIR_SCROLL.get()),
+            item("white_scroll", "White Scroll", 1, 10_000_000L, 12_500_000L, 17_500_000L, ModItems.WHITE_SCROLL.get()),
             item("heroic_crystal", "Heroic Crystal", 1, 45_000_000L, 65_000_000L, 77_500_000L, ModItems.HEROIC_CRYSTAL.get()),
             item("godly_vkit_bundle", "Godly V-Kit Bundle", 1, 400_000_000L, 500_000_000L, 600_000_000L, ModItems.GODLY_VKIT_BUNDLE.get()),
             item("cosmic_enchantment_table", "Cosmic Enchantment Table", 1, 90_000_000L, 100_000_000L, 120_000_000L,

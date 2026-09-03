@@ -192,6 +192,13 @@ public final class ConquestGameTests {
                 "mining must remove the physical Conquest Chest");
         helper.assertTrue(delivered.stream().anyMatch(stack -> stack.is(ModItems.BANKNOTE.get())),
                 "completion must deliver the guaranteed Banknote");
+        var upgradeCrystals = delivered.stream().filter(stack -> stack.is(ModItems.UPGRADE_CRYSTAL.get())).toList();
+        helper.assertValueEqual(upgradeCrystals.size(), 1,
+                "completion must deliver exactly one guaranteed Upgrade Crystal stack");
+        helper.assertTrue(upgradeCrystals.getFirst().getCount() >= 2 && upgradeCrystals.getFirst().getCount() <= 4,
+                "guaranteed Upgrade Crystal quantity must be uniformly sourced from 2-4");
+        helper.assertValueEqual(delivered.size(), 5,
+                "Conquest completion must deliver three table rolls plus two guaranteed groups");
 
         ItemStack rejectedFlare = new ItemStack(ModItems.CONQUEST_CHEST_FLARE.get(), 2);
         helper.assertValueEqual(ConquestFlareItem.finishUse(player, rejectedFlare, java.util.Optional.empty(),

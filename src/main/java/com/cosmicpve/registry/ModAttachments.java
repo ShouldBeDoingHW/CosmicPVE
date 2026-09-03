@@ -8,6 +8,7 @@ import com.cosmicpve.trial.persistence.TrialPlayerState;
 import com.cosmicpve.data.attachment.VKitProgressionData;
 import com.cosmicpve.data.attachment.PersonalVaultData;
 import com.cosmicpve.reward.animation.PendingLootAnimation;
+import com.cosmicpve.data.attachment.PlayerUpgradeData;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.attachment.AttachmentType;
 import net.neoforged.neoforge.registries.DeferredHolder;
@@ -53,6 +54,10 @@ public final class ModAttachments {
     public static final DeferredHolder<AttachmentType<?>, AttachmentType<PendingLootAnimation>> LOOT_ANIMATION =
             ATTACHMENTS.register("loot_animation", () -> AttachmentType.builder(PendingLootAnimation::empty)
                     .serialize(PendingLootAnimation.CODEC).copyOnDeath().build());
+
+    public static final DeferredHolder<AttachmentType<?>, AttachmentType<PlayerUpgradeData>> PLAYER_UPGRADES =
+            ATTACHMENTS.register("player_upgrades", () -> AttachmentType.builder(PlayerUpgradeData::empty)
+                    .serialize(PlayerUpgradeData.CODEC).copyOnDeath().build());
 
     private ModAttachments() {}
 

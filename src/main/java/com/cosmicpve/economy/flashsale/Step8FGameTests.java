@@ -76,8 +76,8 @@ public final class Step8FGameTests {
             table.entries().forEach(entry -> helper.assertTrue(generator.generate(entry.reward(), context).isPresent(),
                     tier + " reward must construct: " + entry.reward()));
         });
-        helper.assertTrue(FlashSaleCatalog.CANONICAL_ROWS.size() == 20, "Canonical Flash Sale row count must remain 20");
-        helper.assertTrue(FlashSaleCatalog.productionRows().size() == 19,
+        helper.assertTrue(FlashSaleCatalog.CANONICAL_ROWS.size() == 21, "Canonical Flash Sale row count must remain 21");
+        helper.assertTrue(FlashSaleCatalog.productionRows().size() == 20,
                 "Only the unresolved Abandoned Spaceship Portal row may be nonselectable");
         FlashSaleCatalog.productionRows().forEach(entry -> helper.assertTrue(entry.create(random).isPresent(),
                 "Active Flash Sale reward must construct: " + entry.id()));

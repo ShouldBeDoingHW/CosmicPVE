@@ -36,6 +36,7 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
     public static final Identifier UNDEAD_RUSE_ONCE_KEY = CosmicPVE.id("undead_ruse_once_per_damage");
     public static final Identifier MIGHTY_CACTUS_ONCE_KEY = CosmicPVE.id("mighty_cactus_once_per_damage");
     public static final Identifier PALADIN_ARMORED_ONCE_KEY = CosmicPVE.id("paladin_armored_once_per_damage");
+    public static final Identifier STORMCALLER_ONCE_KEY = CosmicPVE.id("stormcaller_once_per_damage");
 
     private final ChildCombatActionService childActions;
     private final CombatStackService stacks;
@@ -126,6 +127,7 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
             addPlagueCarrier(event, result);
             addMightyCactus(event, result);
             addPaladinArmored(event, result);
+            addStormcaller(event, result);
         } else if (event.hook() == ProcHook.ON_PRE_DEATH) {
             addPhoenix(event, result);
         } else if (event.hook() == ProcHook.ON_PRE_DAMAGE_CALCULATION) {
@@ -210,6 +212,20 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
                 activation -> PaladinArmoredBehavior.weaken(activation.event().attacker()),
                 new ProcProvenance(ProcSourceKind.ACTUAL_ENCHANTMENT, CosmicPVE.id("equipped_armor")),
                 condition(CosmicPVE.id("paladin_armored_ordinary_hit"), CosmicEnchantmentBehaviorResolver::ordinaryAttack)));
+    }
+
+    private void addStormcaller(ProcEvent event, List<ProcCandidate> result) {
+        if (event.target() == null || event.attacker() == null || event.attacker() == event.target()
+                || event.attacker().isDeadOrDying() || StormcallerBehavior.immune(event.attacker())) return;
+        int total = StormcallerBehavior.equippedLevelTotal(event.target());
+        if (total <= 0) return;
+        result.add(candidate(ModEnchantments.STORMCALLER.identifier(), ProcHook.ON_DAMAGE_TAKEN,
+                StormcallerBehavior.chance(total), Optional.empty(), 0L, Optional.of(STORMCALLER_ONCE_KEY),
+                ChildProcEligibility.LIMITED_DEFENSIVE_REACTION,
+                activation -> StormcallerBehavior.activate(activation, total, childActions),
+                new ProcProvenance(ProcSourceKind.ACTUAL_ENCHANTMENT, CosmicPVE.id("equipped_armor")),
+                condition(CosmicPVE.id("stormcaller_ordinary_parent"), procEvent -> ordinaryAttack(procEvent)
+                        && procEvent.combatResult().map(hit -> hit.context().parentSequenceId().isEmpty()).orElse(false))));
     }
 
     private void addSoulSiphon(ProcEvent event, List<ProcCandidate> result) {

@@ -6,18 +6,21 @@
     {"weight":12,"reward":{"type":"unexamined_book","rarity":"ultimate"}},
     {"weight":8,"reward":{"type":"unexamined_book","rarity":"legendary"}},
     {"weight":15,"reward":{"type":"static_item","item":"cosmicpve:mystery_simple_spawner"}},
-    {"weight":10,"reward":{"type":"static_item","item":"cosmicpve:trial_portal"}},
-    {"weight":5,"minimum_quantity":2,"maximum_quantity":2,"reward":{"type":"static_item","item":"cosmicpve:trial_portal"}},
+    {"weight":15,"reward":{"type":"static_item","item":"cosmicpve:trial_portal"}},
+    {"weight":15,"minimum_quantity":2,"maximum_quantity":2,"reward":{"type":"static_item","item":"cosmicpve:trial_portal"}},
     {"weight":10,"reward":{"type":"static_item","item":"cosmicpve:transmog_scroll"}},
-    {"weight":9,"reward":{"type":"static_item","item":"cosmicpve:white_scroll"}},
+    {"weight":18,"reward":{"type":"static_item","item":"cosmicpve:white_scroll"}},
     {"weight":10,"reward":{"type":"black_scroll","success_rate":50}},
     {"weight":6,"reward":{"type":"black_scroll","success_rate":75}},
     {"weight":10,"reward":{"type":"static_item","item":"cosmicpve:repair_scroll"}},
-    {"weight":8,"reward":{"type":"space_chest","rarity":"legendary"}},
-    {"weight":10,"reward":{"type":"space_chest","rarity":"ultimate"}},
+    {"weight":10,"reward":{"type":"space_chest","rarity":"legendary"}},
+    {"weight":12,"reward":{"type":"space_chest","rarity":"ultimate"}},
     {"weight":5,"reward":{"type":"static_item","item":"cosmicpve:heroic_crystal"}},
     {"weight":3,"reward":{"type":"static_item","item":"cosmicpve:trial_trinket_time_1"}},
     {"weight":3,"reward":{"type":"static_item","item":"cosmicpve:trial_trinket_insurance_1"}},
-    {"weight":3,"reward":{"type":"static_item","item":"cosmicpve:trial_trinket_skip_1"}}
+    {"weight":3,"reward":{"type":"static_item","item":"cosmicpve:trial_trinket_skip_1"}},
+    {"weight":6,"reward":{"type":"enchanted_black_scroll","success_rate":50}},
+    {"weight":10,"reward":{"type":"static_item","item":"cosmicpve:personal_vault_unlock"}},
+    {"weight":6,"minimum_quantity":2,"maximum_quantity":2,"reward":{"type":"static_item","item":"cosmicpve:personal_vault_unlock"}}
   ]
 }

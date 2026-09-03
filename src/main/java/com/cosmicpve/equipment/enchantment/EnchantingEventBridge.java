@@ -60,7 +60,10 @@ public final class EnchantingEventBridge {
 
     private void applyBook(ItemStackedOnOtherEvent event, ServerPlayer player) {
         var service = new CosmicBookApplicationService(player.registryAccess().lookupOrThrow(Registries.ENCHANTMENT),
-                capacity, protection, () -> player.getRandom().nextInt(100) + 1);
+                capacity, protection, () -> player.getRandom().nextInt(100) + 1,
+                stored -> com.cosmicpve.upgrade.SafetyNetService.effectiveDestroyRate(stored,
+                        new com.cosmicpve.upgrade.PlayerUpgradeService().tier(
+                                player, com.cosmicpve.upgrade.PlayerUpgrade.SAFETY_NET)));
         var result = service.apply(event.getCarriedItem(), event.getStackedOnItem(), event.getSlot().getItem());
         event.getCarriedSlotAccess().set(event.getCarriedItem());
         event.getSlot().set(event.getSlot().getItem());

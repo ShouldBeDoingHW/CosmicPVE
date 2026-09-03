@@ -70,6 +70,7 @@ public final class TrialSessionService {
     public static final Identifier DEADEYE = CosmicPVE.id("trial/deadeye");
     public static final Identifier HAZE_AND_SEEK = CosmicPVE.id("trial/haze_seek");
     public static final Identifier WARZONE_GIANTS = CosmicPVE.id("trial/warzone_giants");
+    static final long HIDDEN_GRAVEYARD_WORLD_TIME = 18_000L;
     public static final Identifier APPRENTICE_REWARDS = CosmicPVE.id("trial/apprentice");
     public static final Identifier HARDCORE_REWARDS = CosmicPVE.id("trial/hardcore_development");
     public static final Identifier DEMONIC_REWARDS = CosmicPVE.id("trial/demonic_development");
@@ -368,7 +369,12 @@ public final class TrialSessionService {
                         new RewardGenerationContext(server.registryAccess(), net.minecraft.util.RandomSource.create(), null));
                 progress = progress.appendSkippedReward(reward);
             }
-            TrialSession processed = session.withProgress(progress.markInitialSkipProcessed());
+            int slowMoSeconds = session.participants().stream().map(server.getPlayerList()::getPlayer)
+                    .filter(java.util.Objects::nonNull).mapToInt(player ->
+                            new com.cosmicpve.upgrade.PlayerUpgradeService().tier(
+                                    player, com.cosmicpve.upgrade.PlayerUpgrade.SLOW_MO) * 20).max().orElse(0);
+            TrialSession processed = session.withTimerAndProgress(session.timerTicks() + slowMoSeconds * 20,
+                    progress.markInitialSkipProcessed());
             repository.publish(server, processed);
             return processed;
         } catch (RuntimeException exception) {
@@ -445,6 +451,8 @@ public final class TrialSessionService {
     }
 
     private void beginRoom(MinecraftServer server, TrialSession session, Identifier room) {
+        worldTimeAtRoomStart(room).ifPresent(time ->
+                server.getAllLevels().forEach(world -> world.setDayTime(time)));
         removePortal(server, session); ServerLevel level = server.getLevel(TrialRuntime.INSTANCE_DIMENSION);
         var placed = structures.place(level, CosmicContent.repository().requireTrialRoom(room), ROOM_ORIGIN);
         BlockPos participantSpawn = placed.participantSpawn();
@@ -486,6 +494,12 @@ public final class TrialSessionService {
             else loadouts.applyHiddenGraveyard(player);
             teleport(player, roomSpawns.get(session.sessionId()));
         });
+    }
+
+    static java.util.OptionalLong worldTimeAtRoomStart(Identifier room) {
+        return HIDDEN_GRAVEYARD.equals(room)
+                ? java.util.OptionalLong.of(HIDDEN_GRAVEYARD_WORLD_TIME)
+                : java.util.OptionalLong.empty();
     }
 
     public void onRainbowZombieDeath(Zombie zombie) {

@@ -137,6 +137,7 @@ public final class CosmicCombat {
         var deathPact = new DeathPactBehavior(ENCHANTMENTS);
         var permafrost = new PermafrostBehavior(STACKS);
         var hex = new com.cosmicpve.combat.enchantment.HexBehavior(STACKS);
+        var playerUpgrades = new com.cosmicpve.upgrade.PlayerUpgradeCombatContributor();
         OUTGOING.register(new ExecuteBehavior());
         OUTGOING.register(new com.cosmicpve.combat.enchantment.PermanentExecuteBehavior());
         OUTGOING.register(new GreatswordBehavior());
@@ -159,6 +160,7 @@ public final class CosmicCombat {
         OUTGOING.register(new com.cosmicpve.combat.enchantment.DominateBehavior());
         OUTGOING.register(hex);
         OUTGOING.register(SPIRIT_LINK);
+        OUTGOING.register(playerUpgrades);
         INCOMING.register(ARMOR_SET_COMBAT);
         INCOMING.register(WEAPON_SKIN_COMBAT);
         INCOMING.register(deathPact);
@@ -166,6 +168,7 @@ public final class CosmicCombat {
         INCOMING.register(permafrost);
         INCOMING.register(MASK_COMBAT);
         INCOMING.register(hex);
+        INCOMING.register(playerUpgrades);
         PRE_DEFENSE_BOUNDS.register(new AegisBehavior(ENCHANTMENTS));
         PROC_MODIFIERS.register(new LuckBehavior());
         PROC_MODIFIERS.register(new ArmorSetProcModifierResolver(ARMOR_SETS));

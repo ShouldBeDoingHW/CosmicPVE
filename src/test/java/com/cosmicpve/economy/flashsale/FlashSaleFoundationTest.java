@@ -18,9 +18,9 @@ import net.minecraft.network.chat.HoverEvent;
 import org.junit.jupiter.api.Test;
 
 class FlashSaleFoundationTest {
-    @Test void catalogPreservesTwentyCanonicalRowsAndExplicitDeferredDependencies() {
-        assertEquals(20, FlashSaleCatalog.CANONICAL_ROWS.size());
-        assertEquals(19, FlashSaleCatalog.productionRows().size());
+    @Test void catalogPreservesCanonicalRowsAndExplicitDeferredDependencies() {
+        assertEquals(21, FlashSaleCatalog.CANONICAL_ROWS.size());
+        assertEquals(20, FlashSaleCatalog.productionRows().size());
         assertFalse(FlashSaleCatalog.find("abandoned_spaceship_portal").orElseThrow().productionSelectable());
         assertEquals("memory_chest", FlashSaleCatalog.MEMORY_CHEST.id());
         assertTrue(FlashSaleCatalog.CANONICAL_ROWS.stream().noneMatch(row -> row.id().equals("memory_chest")));
@@ -32,6 +32,12 @@ class FlashSaleFoundationTest {
         assertEquals(1, portalOne.quantity()); assertEquals(2, portalTwo.quantity());
         assertEquals(20_000_000L, portalOne.lowPrice()); assertEquals(87_500_000L, portalTwo.highPrice());
         assertEquals(2, FlashSaleCatalog.CANONICAL_ROWS.stream().filter(row -> row.displayName().getString().equals("Repair Scroll")).count());
+        var whiteScroll = FlashSaleCatalog.find("white_scroll").orElseThrow();
+        assertEquals(1, whiteScroll.quantity());
+        assertEquals(10_000_000L, whiteScroll.lowPrice());
+        assertEquals(12_500_000L, whiteScroll.mediumPrice());
+        assertEquals(17_500_000L, whiteScroll.highPrice());
+        assertTrue(whiteScroll.create(net.minecraft.util.RandomSource.create(1L)).orElseThrow().getFirst().is(com.cosmicpve.registry.ModItems.WHITE_SCROLL.get()));
         assertEquals(120_000_000L, FlashSaleCatalog.find("cosmic_enchantment_table").orElseThrow().highPrice());
     }
 

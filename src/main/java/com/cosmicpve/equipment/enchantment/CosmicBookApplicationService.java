@@ -5,6 +5,7 @@ import com.cosmicpve.registry.ModDataComponents;
 import com.cosmicpve.registry.ModItems;
 import java.util.OptionalInt;
 import java.util.function.IntSupplier;
+import java.util.function.IntUnaryOperator;
 import net.minecraft.core.Registry;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -15,9 +16,15 @@ public final class CosmicBookApplicationService {
     private final CustomEnchantCapacityService capacity;
     private final WhiteScrollProtectionService protection;
     private final IntSupplier roll;
+    private final IntUnaryOperator destroyRateModifier;
     public CosmicBookApplicationService(Registry<Enchantment> enchantments, CustomEnchantCapacityService capacity,
             WhiteScrollProtectionService protection, IntSupplier roll) {
+        this(enchantments, capacity, protection, roll, IntUnaryOperator.identity());
+    }
+    public CosmicBookApplicationService(Registry<Enchantment> enchantments, CustomEnchantCapacityService capacity,
+            WhiteScrollProtectionService protection, IntSupplier roll, IntUnaryOperator destroyRateModifier) {
         this.enchantments = enchantments; this.capacity = capacity; this.protection = protection; this.roll = roll;
+        this.destroyRateModifier = destroyRateModifier;
     }
 
     public CosmicBookApplicationResult apply(ItemStack book, ItemStack expected, ItemStack target) {
@@ -59,7 +66,8 @@ public final class CosmicBookApplicationService {
             return result(CosmicBookApplicationResult.Outcome.REJECTED_EXISTING_LEVEL, id, data, applied, used, limit, protectedBefore);
         if (!initialHeroicConversion && !capacity.canAdd(target, id)) return result(CosmicBookApplicationResult.Outcome.REJECTED_CAPACITY, id, data, applied, used, limit, protectedBefore);
 
-        var decision = CosmicBookRollResolver.resolve(data.successRate(), data.destroyRate(), roll);
+        int effectiveDestroyRate = Math.max(0, Math.min(100, destroyRateModifier.applyAsInt(data.destroyRate())));
+        var decision = CosmicBookRollResolver.resolve(data.successRate(), effectiveDestroyRate, roll);
         int successRoll = decision.successRoll();
         book.shrink(1);
         if (decision.outcome() == CosmicBookRollResolver.Outcome.SUCCESS) {

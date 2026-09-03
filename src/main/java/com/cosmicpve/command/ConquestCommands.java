@@ -25,6 +25,7 @@ public final class ConquestCommands {
                         .then(Commands.literal("natural").executes(context -> spawn(context.getSource(), ConquestOrigin.NATURAL)))
                         .then(Commands.literal("flare").executes(context -> spawn(context.getSource(), ConquestOrigin.FLARE))))
                 .then(Commands.literal("spawn-here").executes(context -> spawnHere(context.getSource())))
+                .then(Commands.literal("scheduler").executes(context -> scheduler(context.getSource())))
                 .then(Commands.literal("list").executes(context -> list(context.getSource())))
                 .then(Commands.literal("inspect").then(eventArgument().executes(context -> inspect(
                         context.getSource(), StringArgumentType.getString(context, "event")))))
@@ -84,13 +85,25 @@ public final class ConquestCommands {
         return events.size();
     }
 
+    private static int scheduler(net.minecraft.commands.CommandSourceStack source) {
+        long currentDay = ConquestEventService.currentDay(source.getLevel().getDayTime());
+        long currentBoundary = ConquestEventService.latestThirdDay(currentDay);
+        long lastScheduled = ConquestRuntime.events().lastScheduledDay(source.getServer());
+        long nextEligible = ConquestEventService.shouldSchedule(currentBoundary, lastScheduled)
+                ? currentBoundary : Math.max(currentBoundary, lastScheduled) + 3L;
+        source.sendSuccess(() -> Component.literal("Conquest scheduler: currentDay=" + currentDay
+                + " currentThreeDayBoundary=" + currentBoundary + " lastScheduledDay=" + lastScheduled
+                + " nextEligibleBoundary=" + nextEligible), false);
+        return 1;
+    }
+
     private static int inspect(net.minecraft.commands.CommandSourceStack source, String text) {
         try {
             var event = ConquestRuntime.events().find(source.getServer(), UUID.fromString(text));
             if (event.isEmpty()) { source.sendFailure(Component.literal("Unknown Conquest event.")); return 0; }
             var value = event.orElseThrow();
             long age = Math.max(0L, source.getLevel().getGameTime() - value.createdGameTime());
-            String remaining = value.origin() == ConquestOrigin.NATURAL && !value.interacted()
+            String remaining = value.origin() == ConquestOrigin.NATURAL
                     ? ConquestEventService.remainingMinutes(age) + "m" : "disabled";
             var level = source.getServer().overworld();
             var actual = level.getBlockState(value.chestPosition());

@@ -79,7 +79,7 @@ class UnexaminedBookOpeningServiceTest {
                 CosmicEnchantmentSpecs.LETHAL_SNIPER, CosmicEnchantmentSpecs.ETERNAL_SNARE,
                 CosmicEnchantmentSpecs.PERMANENT_EXECUTE)), seen);
         assertTrue(service.roll(CosmicEnchantmentTier.ELITE, java.util.List.of(CosmicEnchantmentSpecs.STORMCALLER),
-                random, null).isEmpty());
+                random, null).isPresent());
     }
 
     @Test void revealedBookUsesTheExistingActualCosmicBookComponentPath() {

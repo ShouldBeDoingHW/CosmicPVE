@@ -28,7 +28,7 @@ class Step8GHeroicEnchantmentsTest {
         }
     }
 
-    @Test void heroicMetadataAndStormcallerPlaceholderAreCanonical() {
+    @Test void heroicMetadataAndActivatedStormcallerAreCanonical() {
         assertEquals(62, CosmicEnchantmentSpecs.ALL.size());
         assertEquals(8, CosmicEnchantmentSpecs.ALL.stream()
                 .filter(spec -> spec.tier() == CosmicEnchantmentTier.HEROIC).count());
@@ -44,7 +44,7 @@ class Step8GHeroicEnchantmentsTest {
         assertEquals(4, CosmicEnchantmentSpecs.ETERNAL_SNARE.maxLevel());
         assertEquals(5, CosmicEnchantmentSpecs.PERMANENT_EXECUTE.maxLevel());
         assertEquals(CosmicEnchantmentTier.ELITE, CosmicEnchantmentSpecs.STORMCALLER.tier());
-        assertFalse(CosmicEnchantmentSpecs.STORMCALLER.randomPoolEligible());
+        assertTrue(CosmicEnchantmentSpecs.STORMCALLER.randomPoolEligible());
     }
 
     @Test void deepBleedAndMightyCactusUseExactProcValues() {

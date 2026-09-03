@@ -45,6 +45,11 @@ class TrialSessionTest {
         assertEquals(99, TrialStateMachine.tickStateCountdown(intro).stateTicksRemaining());
         assertEquals(12_000, TrialStateMachine.tickGameplayTimer(intro).timerTicks());
     }
+    @Test void hiddenGraveyardRequestsNightWorldTimeWithoutChangingTrialTimer() {
+        assertEquals(18_000L, TrialSessionService.worldTimeAtRoomStart(TrialSessionService.HIDDEN_GRAVEYARD).orElseThrow());
+        assertTrue(TrialSessionService.worldTimeAtRoomStart(TrialSessionService.DEADEYE).isEmpty());
+        assertEquals(321, session().withTimer(321).timerTicks());
+    }
     @Test void onlyRoomActiveCanComplete() {
         assertFalse(TrialStateMachine.canCompleteRoom(session()));
         assertTrue(TrialStateMachine.canCompleteRoom(session().withState(TrialLifecycleState.ROOM_ACTIVE,0,Optional.empty(),false,session().protectedBounds())));

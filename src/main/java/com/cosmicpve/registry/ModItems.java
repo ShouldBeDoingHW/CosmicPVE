@@ -36,6 +36,7 @@ import com.cosmicpve.vkit.GodlyVKitBundleItem;
 import com.cosmicpve.tinkerer.SalvagedXpBottleItem;
 import com.cosmicpve.equipment.enchantment.EnchantedBlackScrollItem;
 import com.cosmicpve.reward.lootbox.AnimatedLootboxItem;
+import com.cosmicpve.upgrade.UpgradeCrystalItem;
 
 public final class ModItems {
     private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(CosmicPVE.MOD_ID);
@@ -43,6 +44,9 @@ public final class ModItems {
     public static final DeferredItem<Item> FOUNDATION_TOKEN = ITEMS.registerSimpleItem(
             "foundation_token",
             properties -> properties.stacksTo(1));
+
+    public static final DeferredItem<UpgradeCrystalItem> UPGRADE_CRYSTAL = ITEMS.registerItem(
+            "upgrade_crystal", UpgradeCrystalItem::new, properties -> properties.stacksTo(64));
 
     public static final DeferredItem<ArmorSetCrystalItem> ARMOR_SET_CRYSTAL = ITEMS.registerItem(
             "armor_set_crystal", ArmorSetCrystalItem::new,

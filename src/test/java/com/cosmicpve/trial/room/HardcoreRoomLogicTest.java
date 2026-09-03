@@ -18,6 +18,8 @@ class HardcoreRoomLogicTest {
         assertTrue(service.isFinalLever(origin.offset(43,20,7),origin));
         assertFalse(service.isFinalLever(origin.offset(42,20,7),origin));
         assertEquals(0xFF0000,TrialRoomLoadoutService.FIRE_COLONY_ARMOR_COLOR);
+        assertEquals(3,TrialRoomLoadoutService.FIRE_COLONY_GOLDEN_APPLES);
+        assertEquals(5,TrialRoomLoadoutService.FIRE_COLONY_BREAD);
     }
     @Test void zeroGHasTenDistinctObjectivesAndEightDistinctFixtures() {
         assertEquals(10,ZeroGService.OBJECTIVE_PLATES.size());

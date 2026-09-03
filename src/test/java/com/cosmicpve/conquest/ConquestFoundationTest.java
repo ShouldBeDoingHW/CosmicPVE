@@ -12,20 +12,21 @@ import net.minecraft.util.RandomSource;
 import org.junit.jupiter.api.Test;
 
 class ConquestFoundationTest {
-    @Test void seventhDayScheduleIsDeterministicAndSkipsOldTriggers() {
+    @Test void thirdDayScheduleIsDeterministicAndMigratesOldSevenDayReceiptsForward() {
         assertEquals(1, ConquestEventService.currentDay(0));
         assertEquals(6, ConquestEventService.currentDay(5 * 24_000L));
         assertEquals(7, ConquestEventService.currentDay(6 * 24_000L));
-        assertEquals(0, ConquestEventService.latestSeventhDay(6));
-        assertEquals(7, ConquestEventService.latestSeventhDay(7));
-        assertEquals(7, ConquestEventService.latestSeventhDay(13));
-        assertEquals(14, ConquestEventService.latestSeventhDay(20));
-        assertEquals(21, ConquestEventService.latestSeventhDay(21));
+        assertEquals(0, ConquestEventService.latestThirdDay(2));
+        assertEquals(3, ConquestEventService.latestThirdDay(3));
+        assertEquals(6, ConquestEventService.latestThirdDay(8));
+        assertEquals(9, ConquestEventService.latestThirdDay(9));
         assertFalse(ConquestEventService.shouldSchedule(0, 0));
         assertTrue(ConquestEventService.shouldSchedule(7, 0));
         assertFalse(ConquestEventService.shouldSchedule(7, 7));
         assertFalse(ConquestEventService.shouldSchedule(7, 14));
         assertTrue(ConquestEventService.shouldSchedule(21, 7));
+        assertFalse(ConquestEventService.shouldSchedule(6, 7));
+        assertTrue(ConquestEventService.shouldSchedule(9, 7));
     }
 
     @Test void eventIdentityAndAmbushReceiptRoundTrip() {
@@ -107,7 +108,7 @@ class ConquestFoundationTest {
         assertEquals(36_000, ConquestEventService.NATURAL_LIFETIME_TICKS);
         assertEquals(6_000, ConquestEventService.ANNOUNCEMENT_INTERVAL_TICKS);
         assertTrue(ConquestEventService.shouldExpire(ConquestOrigin.NATURAL, false, 36_000));
-        assertFalse(ConquestEventService.shouldExpire(ConquestOrigin.NATURAL, true, Long.MAX_VALUE));
+        assertTrue(ConquestEventService.shouldExpire(ConquestOrigin.NATURAL, true, 36_000));
         assertFalse(ConquestEventService.shouldExpire(ConquestOrigin.FLARE, false, Long.MAX_VALUE));
         assertEquals(3, ConquestEventService.REWARD_ROLLS);
     }

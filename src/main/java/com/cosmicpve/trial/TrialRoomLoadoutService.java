@@ -26,6 +26,8 @@ import java.util.List;
 
 public final class TrialRoomLoadoutService {
     public static final int FIRE_COLONY_ARMOR_COLOR = 0xFF0000;
+    public static final int FIRE_COLONY_GOLDEN_APPLES = 3;
+    public static final int FIRE_COLONY_BREAD = 5;
     public static final int ZERO_G_PROTECTION_LEVEL = 4;
     public static final int ZERO_G_ANGELIC_LEVEL = 5;
     public static final int ZERO_G_UNBREAKING_LEVEL = 3;
@@ -97,7 +99,8 @@ public final class TrialRoomLoadoutService {
         equipDyed(player, EquipmentSlot.CHEST, Items.LEATHER_CHESTPLATE);
         equipDyed(player, EquipmentSlot.LEGS, Items.LEATHER_LEGGINGS);
         equipDyed(player, EquipmentSlot.FEET, Items.LEATHER_BOOTS);
-        player.getInventory().setItem(0, new ItemStack(Items.GOLDEN_APPLE));
+        player.getInventory().setItem(0, new ItemStack(Items.GOLDEN_APPLE, FIRE_COLONY_GOLDEN_APPLES));
+        player.getInventory().setItem(1, new ItemStack(Items.BREAD, FIRE_COLONY_BREAD));
         player.getInventory().setSelectedSlot(0);
     }
     public void applyZeroG(ServerPlayer player) {

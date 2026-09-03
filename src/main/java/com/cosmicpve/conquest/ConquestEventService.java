@@ -88,7 +88,7 @@ public final class ConquestEventService {
     private void processActive(ServerLevel level) {
         long now = level.getGameTime();
         for (ConquestEvent event : repository.active(level.getServer())) {
-            if (event.origin() == ConquestOrigin.NATURAL && !event.interacted()) {
+            if (event.origin() == ConquestOrigin.NATURAL) {
                 long age = Math.max(0L, now - event.createdGameTime());
                 if (shouldExpire(event.origin(), event.interacted(), age)) {
                     expire(level, event.id());
@@ -107,7 +107,7 @@ public final class ConquestEventService {
     }
 
     private void scheduleNatural(ServerLevel level) {
-        long trigger = latestSeventhDay(currentDay(level.getDayTime()));
+        long trigger = latestThirdDay(currentDay(level.getDayTime()));
         if (!shouldSchedule(trigger, repository.lastScheduledDay(level.getServer()))) return;
         repository.setLastScheduledDay(level.getServer(), trigger);
         spawnNatural(level, level.getRandom());
@@ -117,7 +117,7 @@ public final class ConquestEventService {
     public Optional<ConquestEvent> spawnNatural(ServerLevel level, RandomSource random) {
         Optional<BlockPos> position = findNaturalPosition(level, random);
         if (position.isEmpty()) {
-            CosmicPVE.LOGGER.warn("Unable to find a valid bounded surface for seventh-day Conquest Chest");
+            CosmicPVE.LOGGER.warn("Unable to find a valid bounded surface for three-day Conquest Chest");
             return Optional.empty();
         }
         return createAt(level, ConquestOrigin.NATURAL, position.orElseThrow(), true);
@@ -221,6 +221,8 @@ public final class ConquestEventService {
         var rewards = new ArrayList<>(new RewardTableService(CosmicContent.repository(), new RewardGeneratorService())
                 .roll(REWARD_TABLE, REWARD_ROLLS, context));
         rewards.add(Banknotes.create(randomBanknoteCents(player.getRandom())));
+        rewards.add(new ItemStack(com.cosmicpve.registry.ModItems.UPGRADE_CRYSTAL.get(),
+                player.getRandom().nextIntBetweenInclusive(2, 4)));
         // Commit concrete stacks and recipient durably before delivery; recovery is idempotent after restart.
         repository.publish(server, event.committedTo(player.getUUID(), rewards));
         repository.flush(server);
@@ -362,11 +364,13 @@ public final class ConquestEventService {
 
     public static long currentDay(long dayTime) { return Math.floorDiv(dayTime, 24_000L) + 1L; }
     public static long latestSeventhDay(long currentDay) { return currentDay < 7 ? 0 : (currentDay / 7L) * 7L; }
+    public static long latestThirdDay(long currentDay) { return currentDay < 3 ? 0 : (currentDay / 3L) * 3L; }
+    public long lastScheduledDay(MinecraftServer server) { return repository.lastScheduledDay(server); }
     public static boolean shouldSchedule(long triggerDay, long lastScheduledDay) {
         return triggerDay > 0 && triggerDay > lastScheduledDay;
     }
     public static boolean shouldExpire(ConquestOrigin origin, boolean interacted, long ageTicks) {
-        return origin == ConquestOrigin.NATURAL && !interacted && ageTicks >= NATURAL_LIFETIME_TICKS;
+        return origin == ConquestOrigin.NATURAL && ageTicks >= NATURAL_LIFETIME_TICKS;
     }
     public static int remainingMinutes(long ageTicks) {
         long remaining = Math.max(0L, NATURAL_LIFETIME_TICKS - ageTicks);
