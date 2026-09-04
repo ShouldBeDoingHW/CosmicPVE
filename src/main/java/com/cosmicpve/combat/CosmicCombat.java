@@ -161,6 +161,7 @@ public final class CosmicCombat {
         OUTGOING.register(hex);
         OUTGOING.register(SPIRIT_LINK);
         OUTGOING.register(playerUpgrades);
+        OUTGOING.register(new com.cosmicpve.trial.room.InventorCombatContributor());
         INCOMING.register(ARMOR_SET_COMBAT);
         INCOMING.register(WEAPON_SKIN_COMBAT);
         INCOMING.register(deathPact);

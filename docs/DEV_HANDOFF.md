@@ -1,12 +1,12 @@
 # CosmicPVE Development Handoff
 
-Current accepted baseline: Step 8L / 8L.1 — Fame progression, Bonus Fame Trinkets, the Fame Shop, and Telekinesis I are implemented, automated/runtime verified, and manually verified/accepted. Earlier accepted milestones remain recorded below.
+Current accepted baseline: Step 8M — Inventor Trial and expanded `/withdraw` syntax are implemented, automated/runtime verified, and manually verified/accepted. Earlier accepted milestones remain recorded below.
 
-Repository state: Steps 6A–8L.1 and the earlier Conquest synchronization are implemented, verified, and manually accepted. The user-maintained `docs/Cosmic_Design.md` and root `assets`, `drafts`, and `woodlands` development-source folders remain outside closure ownership.
+Repository state: Steps 6A–8M and the earlier Conquest synchronization are implemented, verified, and manually accepted. The user-maintained `docs/Cosmic_Design.md` and root `assets`, `drafts`, and `woodlands` development-source folders remain outside closure ownership.
 
-Current uncommitted candidate: none. Inventor was not part of the accepted Step 8L implementation; it was explicitly deferred and is now the bounded Step 8M room milestone alongside `/withdraw` syntax improvements.
+Current uncommitted candidate: none at the Step 8M closure boundary.
 
-Last handoff update: 2026-09-03
+Last handoff update: 2026-09-04
 
 Pinned environment:
 
@@ -555,6 +555,8 @@ All four production Trial reward resources now match the declared catalogs exact
 
 ### Step 8L — IMPLEMENTED; AUTOMATED/RUNTIME VERIFIED; MANUALLY VERIFIED / ACCEPTED
 
+Step 8L / 8L.1 is closed in `0f5b1f695da7e21c93223e0d1eb7ca84b730afef` (`Add Fame progression and Telekinesis`).
+
 The Fame half of Step 8L is implemented as persistent nonnegative integral player progression alongside the existing cent-based Money profile. `FameService` is the sole mutation boundary and rejects negative results and arithmetic overflow. Trial room completion rolls base Fame from the phase active before completion: Apprentice 1–3, Hardcore 4–7, Impossible 8–11, and Demonic 12–15. Completed rooms append Fame atomically with the resolved pot reward; skipped rooms grant neither completion Fame nor extra Fame. DEAL restores the exact outside inventory first, then delivers the persisted pot payout and credits the persisted Fame payout exactly once through the existing restoration transaction.
 
 The shared Trial pot now retains base Fame independently of reward bundles. Decision panes show bold `#F4FF4A` base Fame and, when modified, the player's final deal value. Bonus Fame Trial Trinkets are typed Orange Dye items for +33%, +66%, and +100%; their portal component is versioned and applies whole-pot rounding exactly once at cash-out using `floor(base × 133 / 100)`, `floor(base × 166 / 100)`, or `base × 2`. The +66% Impossible dependency is now constructible, and the canonical Fame rows are active at their existing declared weights: Hardcore +33% weight 10 and +66% weight 3, Impossible +66% weight 8, and Demonic +100% weight 8. Active runtime totals are therefore Apprentice 12/89, Hardcore 17/97, Impossible 17/155, and Demonic 16/126; only the already-unimplemented portal dependencies remain inactive.
@@ -566,6 +568,16 @@ Inventor was not implemented or accepted as part of Step 8L. It was deferred to 
 ### Step 8L.1 — TELEKINESIS I: IMPLEMENTED; AUTOMATED/RUNTIME VERIFIED; MANUALLY VERIFIED / ACCEPTED
 
 `cosmicpve:telekinesis` is a real max-I Unique Pickaxe enchantment. It runs on the accepted `BlockDropsEvent` payload after ordinary loot resolution and after the existing Auto Smelt transformation, then attempts normal player-inventory insertion for each final stack. Fully inserted stacks are removed from the event drop list; partial or rejected insertion leaves the exact remainder on the original item entity at the block's normal drop location. It never scans nearby entities, manufactures drops, changes XP, or bypasses block protection/custom reward transactions. Fortune and Silk Touch remain authoritative upstream, Experience retains its independent finalized block-XP behavior, and Telekinesis enters the normal Unique book, Unexamined, Enchanter, Dust/Tinkerer, Black Scroll, Enchanted Black Scroll, salvage, Transmog, and capacity systems through the shared specification registry. The curated Cosmic Enchantment Table pool remains unchanged.
+
+### Step 8M — IMPLEMENTED; AUTOMATED/RUNTIME VERIFIED; MANUALLY VERIFIED / ACCEPTED
+
+`/withdraw` now accepts exact ordinary dollar values, conventionally grouped commas, case-insensitive `k`/`m` multipliers, and `all`/`max`. Parsing uses `BigDecimal` and exact integral cents only: `1.22m` is exactly 122,000,000 cents ($1,220,000), malformed grouping and unsupported suffixes reject without mutation, and fractional-cent results are never rounded. `all` and `max` resolve to the player's complete positive balance and reject at zero. A successful transaction constructs one typed Banknote before subtracting once, then uses the established inventory-or-world-drop delivery path so a full inventory cannot silently lose the note. Banknote redemption is unchanged.
+
+The production Inventor is the third native Impossible room. Its canonical 43×23×43 structure provides the player Emerald marker `(38,2,21)`, boss Diamond marker `(4,2,21)`, four authored controls, and four authored Beacons with stable control-to-Beacon associations. The generic structure lifecycle consumes only the two explicit metadata markers, preserves the controls, and makes each station's active state visible through its associated Beacon.
+
+The real Zombie-Villager-based Inventor has 100 HP per initial participant, no innate armor/toughness, 0.32 movement speed, 2 base attack damage, ordinary Zombie Villager AI, and no loot or XP. It receives the exact canonical Engineer/Heroic armor, enchantments, Stormbringer axe, and five axe capacity upgrades; its weapon is Diamond for parties of one or two and Netherite for parties of three or four. Players receive the exact production Admin Abuse/Ashoka, Ghostly Veil/Purge/Scarecrow, Covert Cloak, and Engineer/Heroic armor loadout.
+
+Station activation chooses one inactive station every uniformly random 300–400 ticks and never activates a fifth station. Every active station adds +5% to the Inventor's shared ordinary outgoing bucket and deals 1.5 HP standard Cosmic true damage to each participant every 30 ticks through a no-procs unattributed packet. Bell, polished-blackstone button, light weighted pressure plate, and lever progress are shared at 0/3; the player performing the third valid interaction deactivates that station, receives Speed I for 100 ticks, and refreshes one personal nonstacking +100% ordinary root-hit charge. Charges apply only to that player's next committed ordinary root attack against the Inventor, are not consumed by true/child/non-Inventor damage, and are cleared on room cleanup or participant removal. Killing the Inventor completes the room through the normal exactly-once reward/Fame/time transaction. Debug status exposes station progress, active count, activation countdown, boss state, and charge ownership; a permissioned command can activate the next station for testing.
 
 ## 3. Current Real Enchantments
 
@@ -904,17 +916,16 @@ Commands call gameplay services or create the same typed components used by game
 - **Seasonal crate finalization:** substantial draft tables and mechanics exist, but their exact balance, rewards, acquisition rates, prerequisites, and implementation details remain subject to a bounded reconciliation milestone.
 - **Armorer trade policy:** Step 6I disables Diamond/Netherite armor recipes and replaces generated Diamond armor in the six audited chest tables. Vanilla Armorer villagers remain a separate Diamond-armor acquisition path because the current bounded rule did not specify trade replacement; settle whether those offers should be removed or replaced before declaring Iron the ceiling for every normal acquisition route.
 - **Abandoned Spaceship Portal reward dependency:** the current design lists this item in Flash Sales and the Mastery Space Chest, but the repository has no production portal item or compatible Dungeon-portal foundation. Its catalog/table metadata is retained where useful for inspection, but it is excluded from production generation until a bounded Dungeon/portal milestone supplies the legitimate item.
-- **Inventor scope boundary:** Inventor was not part of the accepted Step 8L implementation. Its authored structure is now present at `trial rooms/the_inventor.nbt`, and production implementation belongs exclusively to Step 8M.
 
 The final post-Orb capacity is no longer unresolved for current target classes: armor is 8 and swords/axes/bows/crossbows are 10. Do not reopen those limits incidentally during unrelated work.
 
 ## 16. Current Next Milestone
 
-**Immediate next action: Step 8M — Inventor Trial Room + `/withdraw` improvements.**
+**Immediate next action: implement the bounded Step 8M.1 Cave Diving polish and Inventor balance hotfix, then manually verify it.**
 
 Current intended sequence:
 
-Step 8M uses the newly supplied canonical Inventor structure and expands `/withdraw` with `all`/`max`, validated comma grouping, and exact `k`/`m` shorthand. Masks and Weapon Skin additions remain deferred. Abandoned Spaceship Portal runtime remains deferred.
+Step 8M is accepted. Step 8M.1 is limited to Cave Diving food/pot/validation/startup cleanup and Inventor health/Bread changes. Masks and Weapon Skin additions remain deferred. Abandoned Spaceship Portal runtime remains deferred.
 
 The ordinary-enchantment expansion remains split across bounded patches. Step 7C is the explicit instruction that made the current canonical Design Doc enchantment-table values implementation-authoritative; later design edits still require their own explicit implementation milestone.
 
@@ -939,6 +950,13 @@ For the accepted Step 8L / 8L.1 baseline:
 - All 256 main-resource JSON files parse successfully. Runtime content publishes nine reward tables and thirteen Trial rooms. The Fame-enabled active Trial totals are Apprentice 12/89, Hardcore 17/97, Impossible 17/155, and Demonic 16/126.
 - Dedicated-server startup loads 1,462 recipes, publishes the updated content, verifies progression controls, and reaches `Done`. Fresh-client startup completes ResourceManager reload, OpenAL/SoundEngine initialization, and block/item/chest/GUI atlas construction with the Fame Shop menu/screen and all three Bonus Fame Trinket item definitions registered; no relevant component, attachment, codec, menu, model, resource, or sided-classloading failure was observed.
 - Step 8L/8L.1-owned paths pass `git diff --check`; the separately maintained `docs/Cosmic_Design.md` retains unrelated Markdown whitespace outside this candidate's ownership. Pinned versions and identifiers remain unchanged. Fame, Bonus Fame Trinkets, the Fame Shop, and Telekinesis I are manually verified/accepted. Inventor is explicitly excluded from this closure and begins in Step 8M.
+
+For the Step 8M candidate:
+
+- `gradlew.bat cleanTest test build` and the final `test build` pass. All 613 JUnit tests across 154 suites pass with zero failures, errors, or skips. Focused Inventor structure, service, room-selection/pipeline, and Money coverage is green. The structure audit proves the exact two markers, four controls, and four Beacon anchors; deterministic service coverage proves party health/weapon scaling, station scheduling, 1.5-HP hazards, +5% active-station damage, and the 30/300–400 tick timings.
+- All 13 loaded-registry GameTests pass, including construction of the real Inventor entity and exact production boss/player equipment with real Cosmic enchantments, Heroic/Engineer identities, Stormbringer, masks, and capacity data.
+- All 257 main-resource JSON files decode successfully. Dedicated-server startup publishes fourteen Trial rooms including Inventor and reaches `Done`; fresh-client startup completes resource reload, OpenAL/SoundEngine initialization, and all item/block/chest/GUI atlas construction with the vanilla Zombie Villager renderer registered for Inventor. No relevant codec, model/resource, entity-registration, or sided-classloading error was observed.
+- Step 8M-owned paths pass `git diff --check` (normal Windows line-ending notices only). The user-maintained `docs/Cosmic_Design.md` and unrelated root `assets/` and `woodlands/` remain outside Step 8M ownership. Pinned versions and identifiers remain unchanged.
 
 For the Step 8K candidate:
 

@@ -13,6 +13,7 @@ import net.minecraft.world.entity.monster.zombie.Zombie;
 import net.minecraft.world.entity.monster.Shulker;
 import net.minecraft.world.entity.monster.Creeper;
 import com.cosmicpve.entity.undeadcorpse.UndeadCorpseEntity;
+import com.cosmicpve.entity.inventor.InventorEntity;
 import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 import net.minecraft.world.phys.BlockHitResult;
 import net.neoforged.neoforge.event.level.BlockEvent;
@@ -38,6 +39,7 @@ public final class TrialEventBridge {
         if (event.getEntity() instanceof Zombie zombie) TrialRuntime.sessions().onRainbowZombieDeath(zombie);
         if (event.getEntity() instanceof Zombie zombie) TrialRuntime.sessions().onWarzoneGiantDeath(zombie);
         if (event.getEntity() instanceof UndeadCorpseEntity corpse) TrialRuntime.sessions().onUndeadCorpseDeath(corpse);
+        if (event.getEntity() instanceof InventorEntity inventor) TrialRuntime.sessions().onInventorDeath(inventor);
         if (event.getEntity() instanceof ServerPlayer player) TrialRuntime.sessions().onDeath(player);
     }
     public void onDrops(LivingDropsEvent event) {
@@ -50,6 +52,7 @@ public final class TrialEventBridge {
         if (event.getEntity() instanceof Creeper creeper
                 && com.cosmicpve.trial.room.BombSquadService.encounterCreeper(creeper)) event.getDrops().clear();
         if (event.getEntity() instanceof UndeadCorpseEntity corpse && corpse.trialSession().isPresent()) event.getDrops().clear();
+        if (event.getEntity() instanceof InventorEntity) event.getDrops().clear();
     }
     public void onExperience(LivingExperienceDropEvent event) {
         if (event.getEntity() instanceof Zombie zombie
@@ -61,6 +64,7 @@ public final class TrialEventBridge {
         if (event.getEntity() instanceof Creeper creeper
                 && com.cosmicpve.trial.room.BombSquadService.encounterCreeper(creeper)) event.setDroppedExperience(0);
         if (event.getEntity() instanceof UndeadCorpseEntity corpse && corpse.trialSession().isPresent()) event.setDroppedExperience(0);
+        if (event.getEntity() instanceof InventorEntity) event.setDroppedExperience(0);
     }
     public void onBlockDrops(BlockDropsEvent event) { TrialRuntime.sessions().onCaveDivingDrops(event); }
     public void onProjectileImpact(ProjectileImpactEvent event) {
@@ -77,12 +81,15 @@ public final class TrialEventBridge {
             TrialRuntime.sessions().onFireColonyLever(player, event.getPos());
             TrialRuntime.sessions().onColdSnapLever(player, event.getPos());
             TrialRuntime.sessions().onDeadeyeLever(player, event.getPos());
+            if (event.getHand() == net.minecraft.world.InteractionHand.MAIN_HAND)
+                TrialRuntime.sessions().onInventorControl(player, event.getPos());
         }
     }
     public void onNeighborNotify(BlockEvent.NeighborNotifyEvent event) {
         if (event.getLevel() instanceof net.minecraft.server.level.ServerLevel level) {
             TrialRuntime.sessions().onColdSnapPlate(level, event.getPos(), event.getState());
             TrialRuntime.sessions().onBombSquadPlate(level, event.getPos(), event.getState());
+            TrialRuntime.sessions().onInventorPlate(level, event.getPos(), event.getState());
         }
     }
     public void onEntityJoin(EntityJoinLevelEvent event) {

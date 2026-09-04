@@ -1,0 +1,8 @@
+{
+  "display_name": "Inventor",
+  "category": "impossible",
+  "pieces": [{"structure": "cosmicpve:trial/the_inventor"}],
+  "spawn_marker": "emerald_block",
+  "spawn_marker_position": [38, 2, 21],
+  "bounds": {"min": [0, 0, 0], "max": [42, 22, 42]}
+}

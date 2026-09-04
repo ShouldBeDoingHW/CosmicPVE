@@ -58,6 +58,8 @@ public final class TrialCommands {
                                 .then(Commands.literal("inspect").executes(ctx -> inspectCorpse(ctx.getSource()))))
                         .then(Commands.literal("complete-room").executes(ctx -> send(ctx.getSource(),
                                 TrialRuntime.sessions().completeRoom(ctx.getSource().getServer()))))
+                        .then(Commands.literal("inventor").then(Commands.literal("activate").executes(ctx -> send(
+                                ctx.getSource(), TrialRuntime.sessions().debugActivateInventor(ctx.getSource().getServer())))))
                         .then(Commands.literal("continue").executes(ctx -> send(ctx.getSource(),
                                 TrialRuntime.sessions().continueRoom(ctx.getSource().getServer()))))
                         .then(Commands.literal("exit").executes(ctx -> send(ctx.getSource(),
@@ -83,7 +85,7 @@ public final class TrialCommands {
                                                 ctx.getSource().getServer(), com.mojang.brigadier.arguments.LongArgumentType.getLong(ctx, "amount")))))))
                         .then(Commands.literal("force-room").then(Commands.argument("room", StringArgumentType.word())
                                 .suggests((ctx, builder) -> net.minecraft.commands.SharedSuggestionProvider.suggest(
-                                        new String[]{"raiding_rainbow","circuit_circus","cold_snap","zero_g","fire_colony","bomb_squad","haze_seek","hidden_graveyard","cave_diving","deadeye","warzone_giants"}, builder))
+                                        new String[]{"raiding_rainbow","circuit_circus","cold_snap","zero_g","fire_colony","bomb_squad","haze_seek","hidden_graveyard","cave_diving","inventor","deadeye","warzone_giants"}, builder))
                                 .executes(ctx -> forceRoom(ctx.getSource(), StringArgumentType.getString(ctx, "room")))))
                         .then(Commands.literal("timer")
                                 .then(Commands.literal("set").then(Commands.argument("seconds", IntegerArgumentType.integer(0))
@@ -192,6 +194,9 @@ public final class TrialCommands {
             source.sendSuccess(() -> Component.literal("  " + TrialRuntime.sessions().hazeStatus(session.sessionId())), false);
         if (session.currentRoom().filter(com.cosmicpve.trial.TrialSessionService.WARZONE_GIANTS::equals).isPresent())
             source.sendSuccess(() -> Component.literal("  " + TrialRuntime.sessions().warzoneStatus(session.sessionId())), false);
+        if (session.currentRoom().filter(com.cosmicpve.trial.TrialSessionService.INVENTOR::equals).isPresent())
+            source.sendSuccess(() -> Component.literal("  "
+                    + TrialRuntime.sessions().inventorStatus(source.getServer(), session.sessionId())), false);
         for (var id : session.participants()) {
             var player = source.getServer().getPlayerList().getPlayer(id);
             String snapshot = player == null ? "offline/preserved" : String.valueOf(player.getExistingDataOrNull(ModAttachments.TRIAL_PLAYER_STATE));

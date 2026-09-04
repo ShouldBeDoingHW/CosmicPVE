@@ -23,6 +23,11 @@ import com.cosmicpve.equipment.skin.WeaponSkinApplicationService;
 import com.cosmicpve.equipment.skin.WeaponSkinDefinitions;
 import com.cosmicpve.equipment.skin.WeaponSkinItemFactory;
 import java.util.List;
+import java.util.Map;
+import com.cosmicpve.reward.lootbox.AdminAbuseRewardFactory;
+import com.cosmicpve.reward.lootbox.AdminAbuseRewards;
+import com.cosmicpve.equipment.heroic.HeroicApplicationService;
+import com.cosmicpve.data.component.HeroicEquipmentKind;
 
 public final class TrialRoomLoadoutService {
     public static final int FIRE_COLONY_ARMOR_COLOR = 0xFF0000;
@@ -65,6 +70,39 @@ public final class TrialRoomLoadoutService {
     public TrialRoomLoadoutService(TrialInventoryTransactionService inventories) { this.inventories = inventories; }
     public void clear(ServerPlayer player) { inventories.clearTrialInventory(player); }
     public void applyCaveDiving(ServerPlayer player) { clear(player); }
+    public void applyInventor(ServerPlayer player) {
+        clear(player);
+        InventorLoadout loadout = inventorLoadout(player.registryAccess());
+        player.getInventory().setItem(0, loadout.weapon());
+        player.setItemSlot(EquipmentSlot.HEAD, loadout.helmet());
+        player.setItemSlot(EquipmentSlot.CHEST, loadout.chestplate());
+        player.setItemSlot(EquipmentSlot.LEGS, loadout.leggings());
+        player.setItemSlot(EquipmentSlot.FEET, loadout.boots());
+        player.getInventory().setSelectedSlot(0);
+    }
+
+    public static InventorLoadout inventorLoadout(net.minecraft.core.RegistryAccess access) {
+        var registry = access.lookupOrThrow(Registries.ENCHANTMENT);
+        var admin = new AdminAbuseRewardFactory();
+
+        ItemStack ashoka = admin.create(AdminAbuseRewards.Outcome.ASHOKA, access);
+        ItemStack chainsaw = WeaponSkinItemFactory.create(WeaponSkinDefinitions.BOOSTED_CHAINSAW);
+        if (new WeaponSkinApplicationService().apply(chainsaw, ashoka, chainsaw, ashoka)
+                != WeaponSkinApplicationService.ApplyOutcome.SUCCESS)
+            throw new IllegalStateException("Could not attach Boosted Chainsaw to Inventor Ashoka");
+        ItemStack veil = admin.create(AdminAbuseRewards.Outcome.GHOSTLY_VEIL, access);
+        ItemStack masks = MaskItemFactory.create(List.of(CosmicPVE.id("purge"), CosmicPVE.id("scarecrow")));
+        veil.set(ModDataComponents.MASK_LOADOUT.get(), masks.get(ModDataComponents.MASK_ITEM.get()));
+        ItemStack chestplate = admin.create(AdminAbuseRewards.Outcome.COVERT_CLOAK, access);
+        ItemStack leggings = inventorArmor(Items.IRON_LEGGINGS, registry, Map.of(
+                ModEnchantments.ARMORED, 4, ModEnchantments.LUCK, 10, ModEnchantments.ANGELIC, 5,
+                ModEnchantments.OBSIDIANSHIELD, 2, ModEnchantments.PLAGUE_CARRIER, 7));
+        ItemStack boots = inventorArmor(Items.IRON_BOOTS, registry, Map.of(
+                ModEnchantments.ARMORED, 4, ModEnchantments.LUCK, 10, ModEnchantments.ANGELIC, 5,
+                ModEnchantments.DODGE, 5, ModEnchantments.STORMCALLER, 5));
+        return new InventorLoadout(ashoka, veil, chestplate, leggings, boots);
+    }
+    public record InventorLoadout(ItemStack weapon, ItemStack helmet, ItemStack chestplate, ItemStack leggings, ItemStack boots) {}
     public void applyDevelopment(ServerPlayer player) {
         clear(player);
         ItemStack marker = new ItemStack(Items.STICK);
@@ -273,6 +311,18 @@ public final class TrialRoomLoadoutService {
     private static void equipDyed(ServerPlayer player, EquipmentSlot slot, net.minecraft.world.item.Item item) {
         ItemStack stack = new ItemStack(item); stack.set(DataComponents.DYED_COLOR, new DyedItemColor(FIRE_COLONY_ARMOR_COLOR));
         player.setItemSlot(slot, stack);
+    }
+    private static ItemStack inventorArmor(net.minecraft.world.item.Item item,
+            net.minecraft.core.Registry<net.minecraft.world.item.enchantment.Enchantment> registry,
+            java.util.Map<net.minecraft.resources.ResourceKey<net.minecraft.world.item.enchantment.Enchantment>, Integer> levels) {
+        ItemStack stack = new ItemStack(item);
+        stack.set(ModDataComponents.ARMOR_SET_ID.get(), ArmorSetIdentity.from(
+                CosmicContent.repository().requireArmorSetDefinition(ArmorSetIds.ENGINEER)));
+        HeroicApplicationService.applyState(stack, HeroicEquipmentKind.ARMOR);
+        EnchantmentHelper.updateEnchantments(stack, mutable -> levels.forEach((key, level) ->
+                mutable.set(registry.getOrThrow(key), level)));
+        stack.set(ModDataComponents.CUSTOM_ENCHANT_META.get(), CustomEnchantMetadata.DEFAULT.withTransmogSorted(true));
+        return stack;
     }
     private static void equipZeroG(ServerPlayer player, EquipmentSlot slot, net.minecraft.world.item.Item item) {
         ItemStack stack = new ItemStack(item);

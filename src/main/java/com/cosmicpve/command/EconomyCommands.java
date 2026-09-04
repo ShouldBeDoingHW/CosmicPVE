@@ -4,6 +4,7 @@ import com.cosmicpve.economy.Banknotes;
 import com.cosmicpve.economy.MoneyAmount;
 import com.cosmicpve.economy.MoneyService;
 import com.cosmicpve.economy.SellService;
+import com.cosmicpve.economy.WithdrawalService;
 import com.cosmicpve.registry.ModItems;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -18,6 +19,7 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 public final class EconomyCommands {
     private static final MoneyService MONEY = new MoneyService();
     private static final SellService SELL = new SellService();
+    private static final WithdrawalService WITHDRAWALS = new WithdrawalService();
     private EconomyCommands() {}
 
     public static void registerPublic(RegisterCommandsEvent event) {
@@ -74,14 +76,14 @@ public final class EconomyCommands {
 
     private static int withdraw(CommandSourceStack source, String raw) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
         var player = source.getPlayerOrException();
-        long amount = parse(source, raw);
-        if (amount <= 0 || amount > MONEY.balance(player)) {
-            source.sendFailure(Component.translatable("command.cosmicpve.withdraw.insufficient")); return 0;
+        var result = WITHDRAWALS.withdraw(player, raw);
+        if (!result.succeeded()) {
+            source.sendFailure(Component.translatable(result.status() == WithdrawalService.Status.INVALID
+                    ? "command.cosmicpve.money.invalid" : "command.cosmicpve.withdraw.insufficient"));
+            return 0;
         }
-        var note = Banknotes.create(amount);
-        if (note.isEmpty() || !MONEY.subtract(player, amount)) return 0;
-        player.getInventory().placeItemBackInInventory(note);
-        source.sendSuccess(() -> Component.translatable("command.cosmicpve.withdraw.success", MoneyAmount.format(amount)), false);
+        source.sendSuccess(() -> Component.translatable("command.cosmicpve.withdraw.success",
+                MoneyAmount.format(result.cents())), false);
         return 1;
     }
 

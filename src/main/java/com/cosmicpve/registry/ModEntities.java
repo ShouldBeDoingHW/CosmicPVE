@@ -4,6 +4,7 @@ import com.cosmicpve.CosmicPVE;
 import com.cosmicpve.entity.spacepirate.SpacePirateVariant1;
 import com.cosmicpve.entity.spacepirate.SpacePirateVariant2;
 import com.cosmicpve.entity.undeadcorpse.UndeadCorpseEntity;
+import com.cosmicpve.entity.inventor.InventorEntity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.neoforged.bus.api.IEventBus;
@@ -27,6 +28,10 @@ public final class ModEntities {
                     builder -> builder.sized(0.6F * UndeadCorpseEntity.RENDER_SCALE,
                                     1.95F * UndeadCorpseEntity.RENDER_SCALE)
                             .clientTrackingRange(8).noLootTable().notInPeaceful());
+    public static final DeferredHolder<EntityType<?>, EntityType<InventorEntity>> INVENTOR =
+            ENTITIES.registerEntityType("inventor", InventorEntity::new, MobCategory.MONSTER,
+                    builder -> builder.sized(0.6F * InventorEntity.SCALE, 1.95F * InventorEntity.SCALE)
+                            .clientTrackingRange(8).noLootTable().notInPeaceful());
 
     private ModEntities() {}
 
@@ -39,5 +44,6 @@ public final class ModEntities {
         event.put(SPACE_PIRATE_VARIANT_1.get(), SpacePirateVariant1.createAttributes().build());
         event.put(SPACE_PIRATE_VARIANT_2.get(), SpacePirateVariant2.createAttributes().build());
         event.put(UNDEAD_CORPSE.get(), UndeadCorpseEntity.createAttributes().build());
+        event.put(INVENTOR.get(), InventorEntity.createAttributes().build());
     }
 }

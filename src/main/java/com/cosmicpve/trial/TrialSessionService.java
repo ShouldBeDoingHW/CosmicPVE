@@ -24,6 +24,8 @@ import com.cosmicpve.trial.room.DeadeyeService;
 import com.cosmicpve.trial.room.HazeAndSeekService;
 import com.cosmicpve.trial.room.WarzoneGiantsService;
 import com.cosmicpve.trial.room.CaveDivingService;
+import com.cosmicpve.trial.room.InventorService;
+import com.cosmicpve.entity.inventor.InventorEntity;
 import com.cosmicpve.combat.CosmicCombat;
 import com.cosmicpve.combat.execution.ExecutionCause;
 import com.cosmicpve.entity.undeadcorpse.UndeadCorpseEntity;
@@ -72,6 +74,7 @@ public final class TrialSessionService {
     public static final Identifier HAZE_AND_SEEK = CosmicPVE.id("trial/haze_seek");
     public static final Identifier WARZONE_GIANTS = CosmicPVE.id("trial/warzone_giants");
     public static final Identifier CAVE_DIVING = CosmicPVE.id("trial/cave_diving");
+    public static final Identifier INVENTOR = CosmicPVE.id("trial/inventor");
     static final long HIDDEN_GRAVEYARD_WORLD_TIME = 18_000L;
     public static final Identifier APPRENTICE_REWARDS = CosmicPVE.id("trial/apprentice");
     public static final Identifier HARDCORE_REWARDS = CosmicPVE.id("trial/hardcore_development");
@@ -79,7 +82,7 @@ public final class TrialSessionService {
     public static final Identifier DEMONIC_REWARDS = CosmicPVE.id("trial/demonic_development");
     static final List<Identifier> APPRENTICE_NATIVE_ROOMS = List.of(COLD_SNAP, CIRCUIT_CIRCUS, RAIDING_RAINBOW, ZERO_G);
     static final List<Identifier> HARDCORE_NATIVE_ROOMS = List.of(HAZE_AND_SEEK, BOMB_SQUAD, FIRE_COLONY);
-    static final List<Identifier> IMPOSSIBLE_NATIVE_ROOMS = List.of(HIDDEN_GRAVEYARD, CAVE_DIVING);
+    static final List<Identifier> IMPOSSIBLE_NATIVE_ROOMS = List.of(HIDDEN_GRAVEYARD, CAVE_DIVING, INVENTOR);
     static final List<Identifier> DEMONIC_NATIVE_ROOMS = List.of(WARZONE_GIANTS, DEADEYE);
     static final int APPRENTICE_REWARD_TIME = 600;
     static final int HARDCORE_REWARD_TIME = 300;
@@ -107,6 +110,7 @@ public final class TrialSessionService {
     private final HazeAndSeekService haze = new HazeAndSeekService();
     private final WarzoneGiantsService warzone = new WarzoneGiantsService();
     private final CaveDivingService caveDiving = new CaveDivingService();
+    private final InventorService inventor = new InventorService();
     private final TrialTimerDisplayService timerDisplay = new TrialTimerDisplayService();
     private final TrialCelebrationService celebrations = new TrialCelebrationService();
     private final TrialDecisionEntryService decisionEntries = new TrialDecisionEntryService();
@@ -208,6 +212,7 @@ public final class TrialSessionService {
                     }
                 }
                 if (maintenanceTick && FIRE_COLONY.equals(room)) fireColony.tick(level, session);
+                if (INVENTOR.equals(room)) inventor.tick(level, session);
                 TrialSession current = session;
                 if (HAZE_AND_SEEK.equals(room)) {
                     var result = haze.tick(level, session);
@@ -293,6 +298,8 @@ public final class TrialSessionService {
                 zeroG.activate(server.getLevel(TrialRuntime.INSTANCE_DIMENSION), active);
             if (active.currentRoom().filter(HAZE_AND_SEEK::equals).isPresent())
                 haze.activate(server.getLevel(TrialRuntime.INSTANCE_DIMENSION), active);
+            if (active.currentRoom().filter(INVENTOR::equals).isPresent())
+                inventor.activate(server.getLevel(TrialRuntime.INSTANCE_DIMENSION), active);
         } else publishTick(server, session.withStateTicks(next));
     }
 
@@ -518,6 +525,10 @@ public final class TrialSessionService {
         else if (room.equals(WARZONE_GIANTS)) encounter = warzone.initialize(level, session, placed.bounds(), net.minecraft.util.RandomSource.create());
         else if (room.equals(CAVE_DIVING)) encounter = caveDiving.initialize(
                 level, session, ROOM_ORIGIN, placed.bounds(), net.minecraft.util.RandomSource.create()).encounter();
+        else if (room.equals(INVENTOR)) {
+            inventor.initialize(level, session, ROOM_ORIGIN, placed.bounds(), net.minecraft.util.RandomSource.create());
+            encounter = TrialEncounterState.EMPTY;
+        }
         else { fireColony.initialize(level, session, placed.bounds()); encounter = TrialEncounterState.EMPTY; }
         roomSpawns.put(session.sessionId(), participantSpawn);
         TrialProgress progress = session.progress().beginRoom(room, encounter);
@@ -537,6 +548,7 @@ public final class TrialSessionService {
             else if (room.equals(HAZE_AND_SEEK)) loadouts.applyHazeAndSeek(player);
             else if (room.equals(WARZONE_GIANTS)) loadouts.applyWarzoneGiants(player);
             else if (room.equals(CAVE_DIVING)) loadouts.applyCaveDiving(player);
+            else if (room.equals(INVENTOR)) loadouts.applyInventor(player);
             else loadouts.applyHiddenGraveyard(player);
             teleport(player, roomSpawns.get(session.sessionId()));
         });
@@ -582,6 +594,14 @@ public final class TrialSessionService {
                 || session.currentRoom().filter(WARZONE_GIANTS::equals).isEmpty()) return;
         var result = warzone.onDeath(zombie);
         if (result.accepted() && result.complete()) completeProductionRoom(level.getServer());
+    }
+
+    public void onInventorDeath(InventorEntity boss) {
+        if (!(boss.level() instanceof ServerLevel level) || !inventor.bossDeath(boss)) return;
+        TrialSession session = active(level.getServer()).orElse(null);
+        if (session == null || session.state() != TrialLifecycleState.ROOM_ACTIVE
+                || session.currentRoom().filter(INVENTOR::equals).isEmpty()) return;
+        completeProductionRoom(level.getServer());
     }
 
     public boolean allowsWarzoneGiantDamage(Zombie zombie) {
@@ -691,7 +711,26 @@ public final class TrialSessionService {
     public boolean allowsProtectedRoomUse(ServerPlayer player, BlockPos pos) {
         return allowsCircuitUse(player, pos) || allowsFireColonyUse(player, pos) || allowsColdSnapUse(player, pos)
                 || allowsHiddenGraveyardUse(player, pos) || allowsDeadeyeUse(player, pos)
-                || allowsCaveDivingUse(player, pos);
+                || allowsCaveDivingUse(player, pos) || allowsInventorUse(player, pos);
+    }
+
+    public boolean allowsInventorUse(ServerPlayer player, BlockPos pos) {
+        TrialSession session = active(player.level().getServer()).orElse(null);
+        if (session == null || session.state() != TrialLifecycleState.ROOM_ACTIVE
+                || !session.activeParticipant(player.getUUID()) || session.currentRoom().filter(INVENTOR::equals).isEmpty()) return false;
+        return java.util.Arrays.stream(InventorService.Station.values())
+                .anyMatch(station -> pos.equals(ROOM_ORIGIN.offset(station.controlLocal)));
+    }
+
+    public void onInventorControl(ServerPlayer player, BlockPos pos) {
+        if (allowsInventorUse(player, pos)) inventor.interact(player, pos);
+    }
+
+    public void onInventorPlate(ServerLevel level, BlockPos pos, BlockState state) {
+        TrialSession session = active(level.getServer()).orElse(null);
+        if (session == null || session.state() != TrialLifecycleState.ROOM_ACTIVE
+                || session.currentRoom().filter(INVENTOR::equals).isEmpty()) return;
+        inventor.plate(level, session, pos, state);
     }
 
     public boolean allowsCaveDivingUse(ServerPlayer player, BlockPos pos) {
@@ -819,6 +858,20 @@ public final class TrialSessionService {
     }
     public String hazeStatus(UUID sessionId) { return haze.status(sessionId); }
     public String warzoneStatus(UUID sessionId) { return warzone.status(sessionId); }
+    public String inventorStatus(MinecraftServer server, UUID sessionId) {
+        ServerLevel level = server.getLevel(TrialRuntime.INSTANCE_DIMENSION);
+        return level == null ? "Inventor level unavailable" : inventor.status(level, sessionId);
+    }
+    public TrialOperationResult debugActivateInventor(MinecraftServer server) {
+        TrialSession session = active(server).orElse(null);
+        ServerLevel level = server.getLevel(TrialRuntime.INSTANCE_DIMENSION);
+        if (session == null || level == null || session.state() != TrialLifecycleState.ROOM_ACTIVE
+                || session.currentRoom().filter(INVENTOR::equals).isEmpty())
+            return TrialOperationResult.rejected("Inventor is not active.");
+        return inventor.forceActivation(level, session.sessionId())
+                ? TrialOperationResult.ok("Activated one inactive Inventor workstation.")
+                : TrialOperationResult.rejected("All Inventor workstations are already active.");
+    }
     public String caveDivingStatus(TrialSession session, ServerLevel level) {
         return caveDiving.status(session.sessionId(), level);
     }
@@ -864,6 +917,7 @@ public final class TrialSessionService {
     public TrialOperationResult exit(ServerPlayer player) {
         TrialSession session = active(player.level().getServer()).orElse(null);
         if (session == null || !session.activeParticipant(player.getUUID())) return TrialOperationResult.rejected("You are not an active Trial participant.");
+        clearInventorCharge(player.level().getServer(), session, player.getUUID());
         loadouts.clear(player); if (!inventories.restore(player)) return TrialOperationResult.rejected("Your outside snapshot could not be restored safely.");
         timerDisplay.hide(player);
         TrialSession next = session.removeParticipant(player.getUUID());
@@ -898,6 +952,7 @@ public final class TrialSessionService {
         celebrations.cancel(player.getUUID());
         active(player.level().getServer()).filter(session -> session.activeParticipant(player.getUUID())).ifPresent(session -> {
             if (session.currentRoom().filter(HAZE_AND_SEEK::equals).isPresent()) haze.removeParticipant(player, session.sessionId());
+            clearInventorCharge(player.level().getServer(), session, player.getUUID());
             timerDisplay.hide(player);
             TrialSession next = session.removeParticipant(player.getUUID());
             if (next.participants().isEmpty()) cleanupAndClose(player.level().getServer(), next); else repository.publish(player.level().getServer(), next);
@@ -913,6 +968,7 @@ public final class TrialSessionService {
     public void onDeath(ServerPlayer player) {
         active(player.level().getServer()).filter(session -> session.activeParticipant(player.getUUID())).ifPresent(session -> {
             if (session.currentRoom().filter(HAZE_AND_SEEK::equals).isPresent()) haze.removeParticipant(player, session.sessionId());
+            clearInventorCharge(player.level().getServer(), session, player.getUUID());
             int level = session.progress().portalModifiers().insuranceLevel();
             if (level > 0 && !prepareInsurance(player, session, net.minecraft.util.RandomSource.create()))
                 CosmicPVE.LOGGER.error("Could not durably prepare insured Trial recovery for {}", player.getUUID());
@@ -983,6 +1039,7 @@ public final class TrialSessionService {
             if (session.currentRoom().filter(HAZE_AND_SEEK::equals).isPresent()) haze.cleanup(instance, session);
             if (session.currentRoom().filter(WARZONE_GIANTS::equals).isPresent()) warzone.cleanup(instance, session.sessionId());
             if (session.currentRoom().filter(CAVE_DIVING::equals).isPresent()) caveDiving.cleanup(session.sessionId());
+            if (session.currentRoom().filter(INVENTOR::equals).isPresent()) inventor.cleanup(instance, session.sessionId());
             fireColony.cleanup(session.sessionId()); coldSnap.cleanup(session.sessionId());
             session.protectedBounds().forEach(bounds -> structures.cleanup(instance, bounds));
         }
@@ -998,6 +1055,7 @@ public final class TrialSessionService {
         if (session.currentRoom().filter(HAZE_AND_SEEK::equals).isPresent()) haze.cleanup(level, session);
         if (session.currentRoom().filter(WARZONE_GIANTS::equals).isPresent()) warzone.cleanup(level, session.sessionId());
         if (session.currentRoom().filter(CAVE_DIVING::equals).isPresent()) caveDiving.cleanup(session.sessionId());
+        if (session.currentRoom().filter(INVENTOR::equals).isPresent()) inventor.cleanup(level, session.sessionId());
         InstanceBounds decision = InstanceBounds.from(CosmicContent.repository().requireTrialRoom(DECISION_ROOM).bounds().at(DECISION_ORIGIN));
         session.protectedBounds().stream().filter(bounds -> !bounds.equals(decision)).forEach(bounds -> structures.cleanup(level, bounds));
     }
@@ -1027,5 +1085,10 @@ public final class TrialSessionService {
     }
     private void publishTick(MinecraftServer server, TrialSession session) {
         repository.publishVolatile(server, session); if (server.getTickCount() % 100 == 0) repository.flush(server);
+    }
+    private void clearInventorCharge(MinecraftServer server, TrialSession session, UUID player) {
+        if (session.currentRoom().filter(INVENTOR::equals).isEmpty()) return;
+        ServerLevel level = server.getLevel(TrialRuntime.INSTANCE_DIMENSION);
+        if (level != null) inventor.removeParticipantCharge(level, session.sessionId(), player);
     }
 }

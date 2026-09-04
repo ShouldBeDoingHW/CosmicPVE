@@ -221,6 +221,14 @@ public final class CombatEventBridge {
             DevourBehavior.commit(player);
         }
         com.cosmicpve.personalvault.PersonalVaultRuntime.combatTags().onCommitted(committed);
+        if (committed.isCommittedDamagingHit()
+                && committed.context().channel() == DamageChannel.ORDINARY
+                && committed.context().parentSequenceId().isEmpty()
+                && committed.context().recursionPolicy() == RecursionPolicy.NORMAL
+                && committed.context().attacker() instanceof net.minecraft.world.entity.player.Player player
+                && committed.context().target() instanceof com.cosmicpve.entity.inventor.InventorEntity inventor) {
+            inventor.consumeStrikeCharge(player.getUUID());
+        }
         procEvents.onCommittedDamage(committed);
     }
 
