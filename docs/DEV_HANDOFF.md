@@ -571,6 +571,8 @@ Inventor was not implemented or accepted as part of Step 8L. It was deferred to 
 
 ### Step 8M — IMPLEMENTED; AUTOMATED/RUNTIME VERIFIED; MANUALLY VERIFIED / ACCEPTED
 
+Step 8M is closed in `fc87fae` (`Add Inventor Trial and improve withdrawals`).
+
 `/withdraw` now accepts exact ordinary dollar values, conventionally grouped commas, case-insensitive `k`/`m` multipliers, and `all`/`max`. Parsing uses `BigDecimal` and exact integral cents only: `1.22m` is exactly 122,000,000 cents ($1,220,000), malformed grouping and unsupported suffixes reject without mutation, and fractional-cent results are never rounded. `all` and `max` resolve to the player's complete positive balance and reject at zero. A successful transaction constructs one typed Banknote before subtracting once, then uses the established inventory-or-world-drop delivery path so a full inventory cannot silently lose the note. Banknote redemption is unchanged.
 
 The production Inventor is the third native Impossible room. Its canonical 43×23×43 structure provides the player Emerald marker `(38,2,21)`, boss Diamond marker `(4,2,21)`, four authored controls, and four authored Beacons with stable control-to-Beacon associations. The generic structure lifecycle consumes only the two explicit metadata markers, preserves the controls, and makes each station's active state visible through its associated Beacon.
