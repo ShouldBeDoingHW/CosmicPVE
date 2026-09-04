@@ -11,9 +11,9 @@ import org.junit.jupiter.api.Test;
 class TrialRewardCatalogsTest {
     @Test void canonicalDeclaredAndActiveTotalsArePinned() {
         assertCatalog(TrialRewardCatalogs.APPRENTICE,12,89,89);
-        assertCatalog(TrialRewardCatalogs.HARDCORE,18,102,84);
-        assertCatalog(TrialRewardCatalogs.IMPOSSIBLE,18,163,147);
-        assertCatalog(TrialRewardCatalogs.DEMONIC,17,130,118);
+        assertCatalog(TrialRewardCatalogs.HARDCORE,18,102,97);
+        assertCatalog(TrialRewardCatalogs.IMPOSSIBLE,18,163,155);
+        assertCatalog(TrialRewardCatalogs.DEMONIC,17,130,126);
     }
 
     @Test void runtimeTablesExactlyEqualTheirActiveCanonicalRows() throws Exception {
@@ -23,11 +23,11 @@ class TrialRewardCatalogsTest {
         assertRuntime("demonic_development",TrialRewardCatalogs.DEMONIC);
     }
 
-    @Test void onlyFameAndUnavailablePortalRowsAreInactive() {
+    @Test void onlyUnavailablePortalRowsAreInactive() {
         for(var catalog:List.of(TrialRewardCatalogs.APPRENTICE,TrialRewardCatalogs.HARDCORE,
                 TrialRewardCatalogs.IMPOSSIBLE,TrialRewardCatalogs.DEMONIC))
             assertTrue(catalog.declared().stream().filter(row->!row.active()).allMatch(row->
-                    row.name().contains("Fame")||row.name().contains("Abandoned Spaceship Portal")));
+                    row.name().contains("Abandoned Spaceship Portal")));
     }
 
     @Test void activeRunPhaseAloneSelectsTheRewardTable() {
@@ -85,6 +85,9 @@ class TrialRewardCatalogsTest {
         case "trial_trinket_insurance_1"->"+1 Insurance Trial Trinket";
         case "trial_trinket_insurance_2"->"+2 Insurance Trial Trinket";
         case "trial_trinket_insurance_3"->"+3 Insurance Trial Trinket";
+        case "trial_trinket_fame_33"->"+33% Fame Trial Trinket";
+        case "trial_trinket_fame_66"->"+66% Fame Trial Trinket";
+        case "trial_trinket_fame_100"->"+100% Fame Trial Trinket";
         case "conquest_chest_flare"->"Conquest Chest Flare"; case "mask_splicer"->"Mask Splicer";
         case "heroic_crystal"->"Heroic Crystal"; case "cosmic_enchantment_table"->"Cosmic Enchantment Table";
         case "secret_weapon_cache"->"Secret Weapon Cache"; case "admin_abuse"->"Admin Abuse";

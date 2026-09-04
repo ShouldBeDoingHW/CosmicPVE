@@ -38,6 +38,12 @@ public final class TrialTrinkets {
                 case 3 -> ModItems.TRIAL_TRINKET_INSURANCE_3.get();
                 default -> throw new IllegalArgumentException("Insurance Trinket must be level 1, 2, or 3");
             };
+            case FAME -> switch (value) {
+                case 33 -> ModItems.TRIAL_TRINKET_FAME_33.get();
+                case 66 -> ModItems.TRIAL_TRINKET_FAME_66.get();
+                case 100 -> ModItems.TRIAL_TRINKET_FAME_100.get();
+                default -> throw new IllegalArgumentException("Fame Trinket must be 33, 66, or 100 percent");
+            };
         };
     }
 }

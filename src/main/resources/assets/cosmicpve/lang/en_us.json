@@ -237,6 +237,8 @@
   ,"enchantment.cosmicpve.auto_smelt.description":"Automatically smelts block drops."
   ,"enchantment.cosmicpve.experience":"Experience"
   ,"enchantment.cosmicpve.experience.description":"Increases experience gained from breaking blocks."
+  ,"enchantment.cosmicpve.telekinesis":"Telekinesis"
+  ,"enchantment.cosmicpve.telekinesis.description":"Sends final block drops directly to your inventory."
   ,"item.cosmicpve.mob_spawner":"Mob Spawner"
   ,"item.cosmicpve.mob_spawner.named":"%s Spawner"
   ,"item.cosmicpve.mystery_spawner.simple":"Mystery Simple Spawner"
@@ -464,4 +466,9 @@
   ,"enchantment.cosmicpve.eternal_snare.description":"Crossbow hits may root targets and increase melee damage against them."
   ,"enchantment.cosmicpve.permanent_execute":"Permanent Execute"
   ,"enchantment.cosmicpve.permanent_execute.description":"Deal more damage to wounded enemies and sometimes cleanse yourself near execution."
+  ,"item.cosmicpve.trial_trinket_fame_33":"+33% Fame Trial Trinket"
+  ,"item.cosmicpve.trial_trinket_fame_66":"+66% Fame Trial Trinket"
+  ,"item.cosmicpve.trial_trinket_fame_100":"+100% Fame Trial Trinket"
+  ,"tooltip.cosmicpve.trial_portal.fame":"Bonus Fame: +%s%%"
+  ,"tooltip.cosmicpve.trial_portal.fame_description":"Increases total Fame when you DEAL by %s%%."
 }

@@ -11,7 +11,7 @@ public final class MoneyService {
     public boolean set(ServerPlayer player, long cents) {
         if (cents < 0) return false;
         var old = player.getData(ModAttachments.PLAYER_PROFILE);
-        player.setData(ModAttachments.PLAYER_PROFILE, new PlayerProfileData(old.dataVersion(), cents));
+        player.setData(ModAttachments.PLAYER_PROFILE, new PlayerProfileData(old.dataVersion(), cents, old.fame()));
         return true;
     }
 

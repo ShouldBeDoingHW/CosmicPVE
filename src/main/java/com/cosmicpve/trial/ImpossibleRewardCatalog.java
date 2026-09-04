@@ -7,7 +7,7 @@ public final class ImpossibleRewardCatalog {
     public static final List<Row> DECLARED = List.of(
             row("Heroic Crystal", 10, 1, true), row("Mystery Elite Spawner", 10, 2, true),
             row("Random Mask", 10, 1, true), row("Conquest Chest Flare", 10, 1, true),
-            row("Skip 2 Room Trial Trinket", 8, 1, true), row("+66% Fame Trial Trinket", 8, 1, false),
+            row("Skip 2 Room Trial Trinket", 8, 1, true), row("+66% Fame Trial Trinket", 8, 1, true),
             row("+3 Minute Trial Trinket", 8, 1, true), row("+2 Insurance Trial Trinket", 8, 1, true),
             row("Random V-Kit Unlock", 12, 1, true), row("25% Dragonslayer Crystal", 8, 1, true),
             row("40% Dragonslayer Crystal", 8, 1, true), row("Legendary Space Chest", 10, 1, true),

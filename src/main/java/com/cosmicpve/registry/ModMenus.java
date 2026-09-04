@@ -11,6 +11,7 @@ import com.cosmicpve.economy.flashsale.FlashSalePreviewMenu;
 import com.cosmicpve.vkit.VKitInfoMenu;
 import com.cosmicpve.upgrade.PlayerUpgradesMenu;
 import com.cosmicpve.enchanter.EnchanterMenu;
+import com.cosmicpve.economy.fame.FameShopMenu;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.inventory.MenuType;
 import net.neoforged.bus.api.IEventBus;
@@ -40,6 +41,8 @@ public final class ModMenus {
             "player_upgrades", () -> IMenuTypeExtension.create(PlayerUpgradesMenu::client));
     public static final DeferredHolder<MenuType<?>, MenuType<EnchanterMenu>> ENCHANTER = MENUS.register(
             "enchanter", () -> IMenuTypeExtension.create(EnchanterMenu::client));
+    public static final DeferredHolder<MenuType<?>, MenuType<FameShopMenu>> FAME_SHOP = MENUS.register(
+            "fame_shop", () -> IMenuTypeExtension.create(FameShopMenu::client));
     private ModMenus() {}
     public static void register(IEventBus bus) { MENUS.register(bus); }
 }

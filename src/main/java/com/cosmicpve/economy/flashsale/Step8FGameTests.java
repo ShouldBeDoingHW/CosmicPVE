@@ -77,8 +77,8 @@ public final class Step8FGameTests {
                     tier + " reward must construct: " + entry.reward()));
         });
         var impossible = CosmicContent.repository().requireRewardTable(CosmicPVE.id("trial/impossible"));
-        helper.assertTrue(impossible.entries().size() == 16 && impossible.totalWeight() == 147,
-                "Step 8J Impossible table must publish its exact active constructible subset");
+        helper.assertTrue(impossible.entries().size() == 17 && impossible.totalWeight() == 155,
+                "Step 8L Impossible table must include the now-constructible Fame Trinket row");
         impossible.entries().forEach(entry -> helper.assertTrue(generator.generate(entry.reward(), context).isPresent(),
                 "Impossible reward must construct: " + entry.reward()));
         helper.assertTrue(FlashSaleCatalog.CANONICAL_ROWS.size() == 21, "Canonical Flash Sale row count must remain 21");

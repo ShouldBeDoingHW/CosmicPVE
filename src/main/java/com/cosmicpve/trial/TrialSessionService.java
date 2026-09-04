@@ -111,6 +111,7 @@ public final class TrialSessionService {
     private final TrialCelebrationService celebrations = new TrialCelebrationService();
     private final TrialDecisionEntryService decisionEntries = new TrialDecisionEntryService();
     private final TrialInsuranceService insurance = new TrialInsuranceService();
+    private final TrialFameService fame = new TrialFameService();
     private final TrialPerformanceTracker performance = new TrialPerformanceTracker();
     private final Map<UUID, BlockPos> decisionSpawns = new HashMap<>();
     private final Map<UUID, BlockPos> roomSpawns = new HashMap<>();
@@ -329,6 +330,13 @@ public final class TrialSessionService {
 
     public TrialOperationResult completeRoom(MinecraftServer server) { return completeProductionRoom(server); }
 
+    public TrialOperationResult debugSetBaseFame(MinecraftServer server, long value) {
+        TrialSession session = active(server).orElse(null);
+        if (session == null || value < 0) return TrialOperationResult.rejected("No active Trial or invalid Fame value.");
+        repository.publish(server, session.withProgress(session.progress().debugSetBaseFame(value)));
+        return TrialOperationResult.ok("Trial base Fame set to " + value + ".");
+    }
+
     public TrialOperationResult completeProductionRoom(MinecraftServer server) {
         TrialSession session = active(server).orElse(null);
         if (session == null || session.state() != TrialLifecycleState.ROOM_ACTIVE)
@@ -340,7 +348,8 @@ public final class TrialSessionService {
             /* The active run phase is authoritative even when a lower-tier native room was selected. */
             List<ItemStack> reward = rewards.roll(rewardTable, 1,
                     new RewardGenerationContext(server.registryAccess(), net.minecraft.util.RandomSource.create(), null));
-            TrialProgress nextProgress = session.progress().completeRoom(reward).beginDecision(session.participants());
+            long fameAward = fame.roll(session.progress().phase(), net.minecraft.util.RandomSource.create());
+            TrialProgress nextProgress = session.progress().completeRoom(reward, fameAward).beginDecision(session.participants());
             int bonus = completionTimeBonus(session.progress(), nextProgress);
             cleanupCurrentRoom(server.getLevel(TrialRuntime.INSTANCE_DIMENSION), session);
             var decision = CosmicContent.repository().requireTrialRoom(DECISION_ROOM);
@@ -418,11 +427,25 @@ public final class TrialSessionService {
             return TrialOperationResult.rejected("Your Trial decision is already committed.");
         if (decision == TrialDecision.DEAL) {
             List<ItemStack> payout = session.progress().pot().stream().flatMap(entry -> entry.items().stream()).map(ItemStack::copy).toList();
-            if (!inventories.prepareCashout(player, payout)) return TrialOperationResult.rejected("Could not durably prepare your Trial payout.");
+            long fameAward;
+            try { fameAward = fame.cashout(session.progress().baseFame(), session.progress().portalModifiers()); }
+            catch (ArithmeticException overflow) { return TrialOperationResult.rejected("Your Fame payout could not be represented safely."); }
+            long currentFame = new com.cosmicpve.economy.FameService().balance(player);
+            if (fameAward > 0 && !com.cosmicpve.economy.FameService.canAdd(currentFame, fameAward))
+                return TrialOperationResult.rejected("Your Fame payout would exceed the supported balance.");
+            if (!inventories.prepareCashout(player, payout, fameAward)) return TrialOperationResult.rejected("Could not durably prepare your Trial payout.");
             TrialProgress decided = session.progress().decide(player.getUUID(), TrialDecision.DEAL);
             TrialSession next = session.withProgress(decided).removeParticipant(player.getUUID());
             repository.publish(server, next); player.closeContainer();
             if (!inventories.restoreCashout(player, delivery)) return TrialOperationResult.rejected("Payout is safely pending recovery.");
+            if (fameAward > 0) {
+                long total = new com.cosmicpve.economy.FameService().balance(player);
+                player.sendSystemMessage(Component.literal("+" + fameAward + " FAME")
+                        .withStyle(style -> style.withColor(com.cosmicpve.economy.FameService.COLOR).withBold(true)));
+                player.sendSystemMessage(Component.literal("Total Fame: ").withColor(0xAAAAAA)
+                        .append(Component.literal(Long.toString(total)).withStyle(style -> style
+                                .withColor(com.cosmicpve.economy.FameService.COLOR).withBold(true))));
+            }
             timerDisplay.hide(player);
             celebrations.schedule(player, session.progress().completedRooms(), server.getTickCount());
             if (next.participants().isEmpty()) cleanupAndClose(server, next); else resolveIfReady(server, next);

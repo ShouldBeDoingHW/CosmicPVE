@@ -46,6 +46,7 @@ public final class CosmicPVEClient {
         event.register(com.cosmicpve.registry.ModMenus.VKIT_INFO.get(), VKitInfoScreen::new);
         event.register(com.cosmicpve.registry.ModMenus.PLAYER_UPGRADES.get(), PlayerUpgradesScreen::new);
         event.register(com.cosmicpve.registry.ModMenus.ENCHANTER.get(), EnchanterScreen::new);
+        event.register(com.cosmicpve.registry.ModMenus.FAME_SHOP.get(), FameShopScreen::new);
     }
 
     private static void registerEntityRenderers(EntityRenderersEvent.RegisterRenderers event) {

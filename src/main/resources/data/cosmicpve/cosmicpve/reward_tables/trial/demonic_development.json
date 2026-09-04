@@ -5,6 +5,7 @@
   {"weight":10,"reward":{"type":"mask","mask_count":2}},
   {"weight":4,"reward":{"type":"static_item","item":"cosmicpve:admin_abuse"}},
   {"weight":8,"reward":{"type":"static_item","item":"cosmicpve:trial_trinket_skip_3"}},
+  {"weight":8,"reward":{"type":"static_item","item":"cosmicpve:trial_trinket_fame_100"}},
   {"weight":8,"reward":{"type":"static_item","item":"cosmicpve:trial_trinket_time_5"}},
   {"weight":8,"reward":{"type":"static_item","item":"cosmicpve:trial_trinket_insurance_3"}},
   {"weight":8,"reward":{"type":"armor_set_crystal","armor_set":"cosmicpve:dragonslayer","success_rate":75}},

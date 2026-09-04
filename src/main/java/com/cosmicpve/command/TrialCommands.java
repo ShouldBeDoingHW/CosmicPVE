@@ -40,8 +40,8 @@ public final class TrialCommands {
                         .then(Commands.argument("player", EntityArgument.player())
                                 .then(Commands.argument("type", StringArgumentType.word())
                                         .suggests((ctx, builder) -> net.minecraft.commands.SharedSuggestionProvider.suggest(
-                                                new String[]{"time", "skip", "insurance"}, builder))
-                                        .then(Commands.argument("value", IntegerArgumentType.integer(1, 5))
+                                                new String[]{"time", "skip", "insurance", "fame"}, builder))
+                                        .then(Commands.argument("value", IntegerArgumentType.integer(1, 100))
                                                 .executes(ctx -> giveTrinket(ctx.getSource(), EntityArgument.getPlayer(ctx, "player"),
                                                         StringArgumentType.getString(ctx, "type"),
                                                         IntegerArgumentType.getInteger(ctx, "value"), 1))
@@ -77,6 +77,10 @@ public final class TrialCommands {
                                 .then(Commands.argument("count", IntegerArgumentType.integer(0, 1000))
                                         .executes(ctx -> send(ctx.getSource(), TrialRuntime.sessions().debugFillPot(
                                                 ctx.getSource().getServer(), IntegerArgumentType.getInteger(ctx, "count")))))))
+                        .then(Commands.literal("fame").then(Commands.literal("set")
+                                .then(Commands.argument("amount", com.mojang.brigadier.arguments.LongArgumentType.longArg(0))
+                                        .executes(ctx -> send(ctx.getSource(), TrialRuntime.sessions().debugSetBaseFame(
+                                                ctx.getSource().getServer(), com.mojang.brigadier.arguments.LongArgumentType.getLong(ctx, "amount")))))))
                         .then(Commands.literal("force-room").then(Commands.argument("room", StringArgumentType.word())
                                 .suggests((ctx, builder) -> net.minecraft.commands.SharedSuggestionProvider.suggest(
                                         new String[]{"raiding_rainbow","circuit_circus","cold_snap","zero_g","fire_colony","bomb_squad","haze_seek","hidden_graveyard","cave_diving","deadeye","warzone_giants"}, builder))
@@ -101,7 +105,7 @@ public final class TrialCommands {
 
     private static int giveModifiedPortal(net.minecraft.commands.CommandSourceStack source, ServerPlayer player,
                                           int time, int skip, int insurance) {
-        TrialPortalModifiers modifiers = new TrialPortalModifiers(TrialPortalModifiers.DATA_VERSION, time, skip, insurance);
+        TrialPortalModifiers modifiers = new TrialPortalModifiers(TrialPortalModifiers.DATA_VERSION, time, skip, insurance, 0);
         if (!modifiers.valid()) {
             source.sendFailure(Component.literal("Time must be 0, 1, 3, or 5; Skip and Insurance must be 0-3."));
             return 0;
@@ -123,6 +127,7 @@ public final class TrialCommands {
         var modifiers = held.getOrDefault(ModDataComponents.TRIAL_PORTAL_MODIFIERS.get(), TrialPortalModifiers.EMPTY);
         source.sendSuccess(() -> Component.literal("Trial Portal modifiers: time=" + modifiers.timeMinutes()
                 + " skip=" + modifiers.skipRooms() + " insurance=" + modifiers.insuranceLevel()), false);
+        source.sendSuccess(() -> Component.literal("  fame=" + modifiers.famePercent() + "%"), false);
         return 1;
     }
 
@@ -151,6 +156,7 @@ public final class TrialCommands {
                 + session.currentRoom().map(Object::toString).orElse("none") + " transition=" + session.transitionSerial()
                 + " phase=" + session.progress().phase() + " completed=" + session.progress().completedRooms()
                 + " pot=" + session.progress().pot().size() + " modifiers=" + session.progress().portalModifiers()
+                + " baseFame=" + session.progress().baseFame()
                 + " skipProcessed=" + session.progress().initialSkipProcessed()), false);
         source.sendSuccess(() -> Component.literal("  eligible pool weights: "
                 + TrialRuntime.sessions().productionPoolStatus(session)), false);

@@ -4,8 +4,10 @@ import com.cosmicpve.registry.ModEnchantments;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.Consumer;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
@@ -22,8 +24,12 @@ public final class MiningEnchantmentService {
         ItemStack tool = event.getTool();
         int autoSmelt = enchantments.resolve(tool, List.of()).level(ModEnchantments.AUTO_SMELT.identifier());
         int experience = enchantments.resolve(tool, List.of()).level(ModEnchantments.EXPERIENCE.identifier());
+        int telekinesis = enchantments.resolve(tool, List.of()).level(ModEnchantments.TELEKINESIS.identifier());
         if (autoSmelt > 0 && event.getLevel() instanceof ServerLevel level) {
             transformDrops(event.getDrops(), stack -> smeltingResult(level, stack));
+        }
+        if (telekinesis > 0 && event.getBreaker() instanceof ServerPlayer player) {
+            routeFinalDrops(event.getDrops(), player);
         }
         if (experience > 0) event.setDroppedExperience(scaleBlockExperience(event.getDroppedExperience(), experience));
     }
@@ -87,6 +93,21 @@ public final class MiningEnchantmentService {
             }
         }
         return List.copyOf(transformed);
+    }
+
+    /** Routes only the final entities belonging to this exact accepted BlockDropsEvent. */
+    static void routeFinalDrops(List<ItemEntity> drops, ServerPlayer player) {
+        for (ItemEntity entity : List.copyOf(drops)) {
+            ItemStack overflow = overflowAfterInsertion(entity.getItem(), player.getInventory()::add);
+            if (overflow.isEmpty()) drops.remove(entity);
+            else entity.setItem(overflow);
+        }
+    }
+
+    static ItemStack overflowAfterInsertion(ItemStack finalDrop, Consumer<ItemStack> insertion) {
+        ItemStack remainder = finalDrop.copy();
+        insertion.accept(remainder);
+        return remainder;
     }
 
     public static int scaleBlockExperience(int vanillaExperience, int level) {

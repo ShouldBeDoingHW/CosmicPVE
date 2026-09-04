@@ -53,14 +53,22 @@ public final class TrialInventoryTransactionService {
     }
 
     public boolean prepareCashout(ServerPlayer player, List<ItemStack> rewards) {
-        return prepareRewardedRestore(player, rewards);
+        return prepareRewardedRestore(player, rewards, 0L);
+    }
+
+    public boolean prepareCashout(ServerPlayer player, List<ItemStack> rewards, long fame) {
+        return prepareRewardedRestore(player, rewards, fame);
     }
 
     public boolean prepareRewardedRestore(ServerPlayer player, List<ItemStack> rewards) {
+        return prepareRewardedRestore(player, rewards, 0L);
+    }
+
+    private boolean prepareRewardedRestore(ServerPlayer player, List<ItemStack> rewards, long fame) {
         TrialPlayerState state = player.getExistingDataOrNull(ModAttachments.TRIAL_PLAYER_STATE);
         if (state == null || state.phase() == TrialSnapshotPhase.RESTORED || state.snapshot().isEmpty()
-                || state.rewardRestorePrepared()) return false;
-        player.setData(ModAttachments.TRIAL_PLAYER_STATE, state.withPreparedRewards(rewards));
+                || state.rewardRestorePrepared() || fame < 0) return false;
+        player.setData(ModAttachments.TRIAL_PLAYER_STATE, state.withPreparedRewards(rewards, fame));
         persistPlayer(player);
         return true;
     }
@@ -112,7 +120,10 @@ public final class TrialInventoryTransactionService {
                     fallback.getZ() + 0.5, Set.<Relative>of(), snapshot.yaw(), snapshot.pitch(), false);
         }
         if (!teleported) return false; // snapshot remains retryable; the inventory rewrite is idempotent
-        if (cashout) delivery.deliver(player, state.pendingRewards());
+        if (cashout) {
+            delivery.deliver(player, state.pendingRewards());
+            if (state.pendingFame() > 0 && !new com.cosmicpve.economy.FameService().add(player, state.pendingFame())) return false;
+        }
         player.setData(ModAttachments.TRIAL_PLAYER_STATE, TrialPlayerState.restored());
         persistPlayer(player); // restored inventory and consumed snapshot share one player-file save
         return true;

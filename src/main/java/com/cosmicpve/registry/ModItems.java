@@ -165,6 +165,9 @@ public final class ModItems {
     public static final DeferredItem<TrialTrinketItem> TRIAL_TRINKET_INSURANCE_1 = trinket("trial_trinket_insurance_1", TrialTrinketType.INSURANCE, 1);
     public static final DeferredItem<TrialTrinketItem> TRIAL_TRINKET_INSURANCE_2 = trinket("trial_trinket_insurance_2", TrialTrinketType.INSURANCE, 2);
     public static final DeferredItem<TrialTrinketItem> TRIAL_TRINKET_INSURANCE_3 = trinket("trial_trinket_insurance_3", TrialTrinketType.INSURANCE, 3);
+    public static final DeferredItem<TrialTrinketItem> TRIAL_TRINKET_FAME_33 = trinket("trial_trinket_fame_33", TrialTrinketType.FAME, 33);
+    public static final DeferredItem<TrialTrinketItem> TRIAL_TRINKET_FAME_66 = trinket("trial_trinket_fame_66", TrialTrinketType.FAME, 66);
+    public static final DeferredItem<TrialTrinketItem> TRIAL_TRINKET_FAME_100 = trinket("trial_trinket_fame_100", TrialTrinketType.FAME, 100);
 
     private static DeferredItem<TrialTrinketItem> trinket(String name, TrialTrinketType type, int value) {
         return ITEMS.registerItem(name, TrialTrinketItem::new, properties -> properties.stacksTo(64)

@@ -40,6 +40,7 @@ class CosmicEnchantmentRegistrationTest {
                 Map.entry("death_pact", 5),
                 Map.entry("auto_smelt", 1),
                 Map.entry("experience", 3),
+                Map.entry("telekinesis", 1),
                 Map.entry("blessed", 4),
                 Map.entry("implants", 3),
                 Map.entry("trap", 3),
@@ -122,7 +123,7 @@ class CosmicEnchantmentRegistrationTest {
                 }
             }
         }
-        assertEquals(63, CosmicEnchantmentSpecs.ALL.size());
+        assertEquals(64, CosmicEnchantmentSpecs.ALL.size());
         assertEquals(CosmicEnchantmentTier.ELITE, CosmicEnchantmentSpecs.EXECUTE.tier());
         assertEquals(CosmicEnchantmentTier.ULTIMATE, CosmicEnchantmentSpecs.ANGELIC.tier());
         assertEquals(CosmicEnchantmentTier.SIMPLE, CosmicEnchantmentSpecs.LIGHTNING.tier());
@@ -154,6 +155,10 @@ class CosmicEnchantmentRegistrationTest {
         assertEquals(CosmicEnchantmentTier.UNIQUE, CosmicEnchantmentSpecs.EXPERIENCE.tier());
         assertEquals("pickaxe", CosmicEnchantmentSpecs.AUTO_SMELT.equipmentApplicability());
         assertEquals("pickaxe", CosmicEnchantmentSpecs.EXPERIENCE.equipmentApplicability());
+        assertEquals(CosmicEnchantmentTier.UNIQUE, CosmicEnchantmentSpecs.TELEKINESIS.tier());
+        assertEquals("pickaxe", CosmicEnchantmentSpecs.TELEKINESIS.equipmentApplicability());
+        assertEquals(1, CosmicEnchantmentSpecs.TELEKINESIS.maxLevel());
+        assertTrue(CosmicEnchantmentSpecs.TELEKINESIS.tier().extractableByBlackScroll());
         assertEquals(CosmicEnchantmentTier.ULTIMATE, CosmicEnchantmentSpecs.BLESSED.tier());
         assertEquals("axe", CosmicEnchantmentSpecs.BLESSED.equipmentApplicability());
         assertEquals(4, CosmicEnchantmentSpecs.BLESSED.maxLevel());

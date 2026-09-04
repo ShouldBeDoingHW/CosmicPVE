@@ -82,6 +82,10 @@ public final class TrialPortalItem extends Item {
                 Component.translatable(modifiers.insuranceLevel() == 1
                         ? "tooltip.cosmicpve.trial_portal.insurance_description_one"
                         : "tooltip.cosmicpve.trial_portal.insurance_description", modifiers.insuranceLevel()));
+        if (modifiers.famePercent() > 0) addModifier(lines,
+                Component.translatable("tooltip.cosmicpve.trial_portal.fame", modifiers.famePercent()),
+                com.cosmicpve.data.component.TrialTrinketType.FAME.presentationColor(),
+                Component.translatable("tooltip.cosmicpve.trial_portal.fame_description", modifiers.famePercent()));
         if (lines.isEmpty()) lines.add(Component.translatable("tooltip.cosmicpve.trial_portal.none").withColor(0x777777));
         return List.copyOf(lines);
     }

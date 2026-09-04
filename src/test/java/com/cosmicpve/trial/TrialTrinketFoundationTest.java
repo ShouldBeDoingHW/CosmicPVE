@@ -17,22 +17,26 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.network.chat.contents.TranslatableContents;
 
 class TrialTrinketFoundationTest {
-    @Test void allNineCanonicalVariantsValidate() {
+    @Test void allTwelveCanonicalVariantsValidate() {
         for (int value : new int[]{1,3,5}) assertTrue(new TrialTrinketData(TrialTrinketType.TIME, value).valid());
         for (int value=1; value<=3; value++) {
             assertTrue(new TrialTrinketData(TrialTrinketType.SKIP, value).valid());
             assertTrue(new TrialTrinketData(TrialTrinketType.INSURANCE, value).valid());
         }
+        for (int value : new int[]{33,66,100}) assertTrue(new TrialTrinketData(TrialTrinketType.FAME, value).valid());
         assertFalse(new TrialTrinketData(TrialTrinketType.TIME, 2).valid());
         assertFalse(new TrialTrinketData(TrialTrinketType.SKIP, 4).valid());
+        assertFalse(new TrialTrinketData(TrialTrinketType.FAME, 50).valid());
     }
 
     @Test void maxPortalStoresThreeIndependentCategoriesAndRoundTrips() {
         var portal = TrialPortalModifiers.EMPTY
                 .with(new TrialTrinketData(TrialTrinketType.TIME, 5))
                 .with(new TrialTrinketData(TrialTrinketType.SKIP, 3))
-                .with(new TrialTrinketData(TrialTrinketType.INSURANCE, 3));
+                .with(new TrialTrinketData(TrialTrinketType.INSURANCE, 3))
+                .with(new TrialTrinketData(TrialTrinketType.FAME, 100));
         assertEquals(5, portal.timeMinutes()); assertEquals(3, portal.skipRooms()); assertEquals(3, portal.insuranceLevel());
+        assertEquals(100, portal.famePercent());
         var json=TrialPortalModifiers.CODEC.encodeStart(JsonOps.INSTANCE, portal).getOrThrow();
         assertEquals(portal, TrialPortalModifiers.CODEC.parse(JsonOps.INSTANCE, json).getOrThrow());
     }
@@ -51,9 +55,9 @@ class TrialTrinketFoundationTest {
         assertEquals(18_000,new TrialPortalModifiers(1,5,0,0).initialTimerTicks());
     }
 
-    @Test void allNineItemsUseOrangeDyePresentation() throws Exception {
+    @Test void allTwelveItemsUseOrangeDyePresentation() throws Exception {
         for (String id : new String[]{"time_1","time_3","time_5","skip_1","skip_2","skip_3",
-                "insurance_1","insurance_2","insurance_3"}) {
+                "insurance_1","insurance_2","insurance_3","fame_33","fame_66","fame_100"}) {
             try (var reader=new InputStreamReader(java.util.Objects.requireNonNull(getClass().getResourceAsStream(
                     "/assets/cosmicpve/items/trial_trinket_"+id+".json")))) {
                 assertEquals("minecraft:item/orange_dye",com.google.gson.JsonParser.parseReader(reader).getAsJsonObject()
@@ -91,20 +95,22 @@ class TrialTrinketFoundationTest {
         assertEquals(0x2BC2B8, TrialTrinketType.SKIP.presentationColor());
         assertEquals(0x0A5751, TrialTrinketType.TIME.presentationColor());
         assertEquals(0x0A5721, TrialTrinketType.INSURANCE.presentationColor());
+        assertEquals(0xF4FF4A, TrialTrinketType.FAME.presentationColor());
         for (var type : TrialTrinketType.values()) {
-            int value = type == TrialTrinketType.TIME ? 5 : 3;
+            int value = type == TrialTrinketType.TIME ? 5 : type == TrialTrinketType.FAME ? 100 : 3;
             var stack = TrialTrinkets.create(type, value, 1);
             assertEquals(type.presentationColor(), stack.getHoverName().getStyle().getColor().getValue());
             assertTrue(stack.getHoverName().getStyle().isBold());
             assertEquals(value, stack.get(ModDataComponents.TRIAL_TRINKET.get()).value());
         }
         var lines = com.cosmicpve.trial.portal.TrialPortalItem.modifierLines(
-                new TrialPortalModifiers(1, 5, 3, 3));
-        assertEquals(6, lines.size());
+                new TrialPortalModifiers(2, 5, 3, 3, 100));
+        assertEquals(8, lines.size());
         assertEquals(0xFFAA00, lines.get(0).getStyle().getColor().getValue());
         assertEquals(0x2BC2B8, lines.get(0).getSiblings().getFirst().getStyle().getColor().getValue());
         assertEquals(0x0A5751, lines.get(2).getSiblings().getFirst().getStyle().getColor().getValue());
         assertEquals(0x0A5721, lines.get(4).getSiblings().getFirst().getStyle().getColor().getValue());
+        assertEquals(0xF4FF4A, lines.get(6).getSiblings().getFirst().getStyle().getColor().getValue());
         assertTrue(lines.get(0).getSiblings().getFirst().getStyle().isBold());
         assertTrue(lines.get(2).getSiblings().getFirst().getStyle().isBold());
         assertTrue(lines.get(4).getSiblings().getFirst().getStyle().isBold());
@@ -119,16 +125,17 @@ class TrialTrinketFoundationTest {
         assertEquals(0x777777, empty.get(4).getStyle().getColor().getValue());
         assertFalse(empty.toString().contains("/trials"));
 
-        var modifiers = new TrialPortalModifiers(1, 5, 3, 3);
+        var modifiers = new TrialPortalModifiers(2, 5, 3, 3, 100);
         var before = modifiers;
         var full = com.cosmicpve.trial.portal.TrialPortalItem.tooltipLines(modifiers);
-        assertEquals(10, full.size());
+        assertEquals(12, full.size());
         assertEquals(0x2BC2B8, full.get(4).getSiblings().getFirst().getStyle().getColor().getValue());
         assertEquals(0x0A5751, full.get(6).getSiblings().getFirst().getStyle().getColor().getValue());
         assertEquals(0x0A5721, full.get(8).getSiblings().getFirst().getStyle().getColor().getValue());
         assertTrue(full.get(4).toString().contains("skip"));
         assertTrue(full.get(6).toString().contains("time"));
         assertTrue(full.get(8).toString().contains("insurance"));
+        assertTrue(full.get(10).toString().contains("fame"));
         assertFalse(full.toString().contains("/trials"));
         assertEquals(before, modifiers);
     }

@@ -1,8 +1,10 @@
 # CosmicPVE Development Handoff
 
-Current accepted baseline: Step 8K — Cave Diving + full Trial loot rebalance is implemented, automated/runtime verified, and manually verified/accepted. Earlier accepted milestones remain recorded below.
+Current accepted baseline: Step 8L / 8L.1 — Fame progression, Bonus Fame Trinkets, the Fame Shop, and Telekinesis I are implemented, automated/runtime verified, and manually verified/accepted. Earlier accepted milestones remain recorded below.
 
-Repository state: Steps 6A–8K and the earlier Conquest synchronization are implemented, verified, and manually accepted. The user-maintained `docs/Cosmic_Design.md` and root `assets`, `drafts`, and `woodlands` development-source folders remain outside closure ownership.
+Repository state: Steps 6A–8L.1 and the earlier Conquest synchronization are implemented, verified, and manually accepted. The user-maintained `docs/Cosmic_Design.md` and root `assets`, `drafts`, and `woodlands` development-source folders remain outside closure ownership.
+
+Current uncommitted candidate: none. Inventor was not part of the accepted Step 8L implementation; it was explicitly deferred and is now the bounded Step 8M room milestone alongside `/withdraw` syntax improvements.
 
 Last handoff update: 2026-09-03
 
@@ -551,6 +553,20 @@ The Cave Diving crafting table at authored local position `(13,32,22)` is explic
 
 All four production Trial reward resources now match the declared catalogs exactly. Declared totals are Apprentice 12 rows/weight 89, Hardcore 18/102, Impossible 18/163, and Demonic 17/130. Active constructible totals are Apprentice 12/89, Hardcore 15/84, Impossible 16/147, and Demonic 15/118; only the unimplemented +66% Fame Trinket and Abandoned Spaceship Portal rows remain declared but inactive, and therefore create no dead runtime probability space. Rarity-only books remain Unexamined Books, row quantity remains within one acquired pot bundle, Random Mask is one mask, Random Double Mask is two distinct ordered mask powers, and Random V-Kit Crystal remains uniform across the four accepted V-Kits. Reward selection is keyed to the active run phase at room completion, not the completed room's native category, so lower-tier rooms retained in expanded pools award the current phase's table.
 
+### Step 8L — IMPLEMENTED; AUTOMATED/RUNTIME VERIFIED; MANUALLY VERIFIED / ACCEPTED
+
+The Fame half of Step 8L is implemented as persistent nonnegative integral player progression alongside the existing cent-based Money profile. `FameService` is the sole mutation boundary and rejects negative results and arithmetic overflow. Trial room completion rolls base Fame from the phase active before completion: Apprentice 1–3, Hardcore 4–7, Impossible 8–11, and Demonic 12–15. Completed rooms append Fame atomically with the resolved pot reward; skipped rooms grant neither completion Fame nor extra Fame. DEAL restores the exact outside inventory first, then delivers the persisted pot payout and credits the persisted Fame payout exactly once through the existing restoration transaction.
+
+The shared Trial pot now retains base Fame independently of reward bundles. Decision panes show bold `#F4FF4A` base Fame and, when modified, the player's final deal value. Bonus Fame Trial Trinkets are typed Orange Dye items for +33%, +66%, and +100%; their portal component is versioned and applies whole-pot rounding exactly once at cash-out using `floor(base × 133 / 100)`, `floor(base × 166 / 100)`, or `base × 2`. The +66% Impossible dependency is now constructible, and the canonical Fame rows are active at their existing declared weights: Hardcore +33% weight 10 and +66% weight 3, Impossible +66% weight 8, and Demonic +100% weight 8. Active runtime totals are therefore Apprentice 12/89, Hardcore 17/97, Impossible 17/155, and Demonic 16/126; only the already-unimplemented portal dependencies remain inactive.
+
+Public `/fame` and `/fameshop` open the same player-specific nine-offer Fame Shop. A catalog is generated once per ten Overworld Minecraft days, stores nine distinct exact reward payloads, and persists source tier, source-row identity, price, payload, purchase state, and refresh state per player. Offers are selected directly from the four currently constructible Trial reward tables with their existing raw row weights; source-tier prices are Apprentice 20, Hardcore 35, Impossible 55, and Demonic 75 Fame. Preview generation materializes and stores the exact stack/bundle payload once, so reopening or purchasing does not reroll contents. Purchased offers become persistent red `PURCHASED` panes. Purchases validate the persisted offer and balance server-authoritatively, subtract exact Fame, mark the offer purchased, and use safe reward delivery with natural overflow dropping. Permissioned `/cosmic fame` commands inspect/set/add balances and inspect/force-refresh shop catalogs.
+
+Inventor was not implemented or accepted as part of Step 8L. It was deferred to Step 8M so the accepted Fame work could be closed without falsely claiming a production room. The authored `trial rooms/the_inventor.nbt` source is now available for that separate milestone.
+
+### Step 8L.1 — TELEKINESIS I: IMPLEMENTED; AUTOMATED/RUNTIME VERIFIED; MANUALLY VERIFIED / ACCEPTED
+
+`cosmicpve:telekinesis` is a real max-I Unique Pickaxe enchantment. It runs on the accepted `BlockDropsEvent` payload after ordinary loot resolution and after the existing Auto Smelt transformation, then attempts normal player-inventory insertion for each final stack. Fully inserted stacks are removed from the event drop list; partial or rejected insertion leaves the exact remainder on the original item entity at the block's normal drop location. It never scans nearby entities, manufactures drops, changes XP, or bypasses block protection/custom reward transactions. Fortune and Silk Touch remain authoritative upstream, Experience retains its independent finalized block-XP behavior, and Telekinesis enters the normal Unique book, Unexamined, Enchanter, Dust/Tinkerer, Black Scroll, Enchanted Black Scroll, salvage, Transmog, and capacity systems through the shared specification registry. The curated Cosmic Enchantment Table pool remains unchanged.
+
 ## 3. Current Real Enchantments
 
 These are registered through Minecraft's enchantment infrastructure, use actual enchantment data on the item, and are not present in normal enchanting-table, librarian, random-loot, random-equipment, or mob-equipment acquisition pools.
@@ -583,6 +599,7 @@ These are registered through Minecraft's enchantment infrastructure, use actual 
 | `cosmicpve:death_pact` | V | Chestplate | Mastery | Reduces outgoing ordinary damage by `(7.5 - level)%` and incoming ordinary damage by `(1 + level)%`. True damage and execution bypass the ordinary pipeline. |
 | `cosmicpve:auto_smelt` | I | Pickaxe | Ultimate | Converts each finalized block-drop stack through one ordinary smelting recipe, preserving the vanilla-generated quantity and awarding no furnace XP. |
 | `cosmicpve:experience` | III | Pickaxe | Unique | Multiplies finalized player block-break XP by `1 + 0.5 × level` and floors the integral result. Other XP sources are unaffected. |
+| `cosmicpve:telekinesis` | I | Pickaxe | Unique | Routes the exact final accepted block-drop payload into the miner's inventory after Fortune, Silk Touch, Auto Smelt, and other drop modifiers. XP is unchanged and partial/full-inventory overflow remains at the normal block-drop location. |
 | `cosmicpve:blessed` | IV | Axe | Ultimate | On a committed melee hit, has 2% per level to uniformly remove either one eligible negative Cosmic stack instance or one entire harmful vanilla effect from the attacker. Luck modifies the chance relatively. |
 | `cosmicpve:implants` | III | Helmet | Ultimate | While continuously equipped, heals exactly 1 HP every 85/70/55 ticks at levels I/II/III, without overhealing or catch-up bursts. |
 | `cosmicpve:trap` | III | Sword | Elite | Each committed positive-health-loss melee hit has a flat 4% Luck-modified chance to apply Slowness V for 25/30/35 ticks. Eligible Doublestrike child hits may reroll it. |
@@ -616,7 +633,7 @@ These are registered through Minecraft's enchantment infrastructure, use actual 
 
 ### DESIGNED BUT NOT IMPLEMENTED
 
-The registry currently contains 63 real Cosmic enchantment definitions: 55 implemented ordinary enchantments and eight implemented Heroic replacements. Death Pact, Permafrost, Mortal Coil, Phoenix, Divine Immolation, Soul Tether, Hero Killer, Soul Siphon, and Blackout are the implemented Mastery enchantments.
+The registry currently contains 64 real Cosmic enchantment definitions: 56 implemented ordinary enchantments and eight implemented Heroic replacements. Death Pact, Permafrost, Mortal Coil, Phoenix, Divine Immolation, Soul Tether, Hero Killer, Soul Siphon, and Blackout are the implemented Mastery enchantments.
 
 ## 4. Critical Combat Semantics
 
@@ -887,17 +904,17 @@ Commands call gameplay services or create the same typed components used by game
 - **Seasonal crate finalization:** substantial draft tables and mechanics exist, but their exact balance, rewards, acquisition rates, prerequisites, and implementation details remain subject to a bounded reconciliation milestone.
 - **Armorer trade policy:** Step 6I disables Diamond/Netherite armor recipes and replaces generated Diamond armor in the six audited chest tables. Vanilla Armorer villagers remain a separate Diamond-armor acquisition path because the current bounded rule did not specify trade replacement; settle whether those offers should be removed or replaced before declaring Iron the ceiling for every normal acquisition route.
 - **Abandoned Spaceship Portal reward dependency:** the current design lists this item in Flash Sales and the Mastery Space Chest, but the repository has no production portal item or compatible Dungeon-portal foundation. Its catalog/table metadata is retained where useful for inspection, but it is excluded from production generation until a bounded Dungeon/portal milestone supplies the legitimate item.
-- **Bonus Fame Trial Trinket dependency:** the Impossible reward design declares a +66% Fame Trinket, but Fame does not yet exist. The row remains declared and inactive until the bounded Fame milestone provides a real effect and item.
+- **Inventor scope boundary:** Inventor was not part of the accepted Step 8L implementation. Its authored structure is now present at `trial rooms/the_inventor.nbt`, and production implementation belongs exclusively to Step 8M.
 
 The final post-Orb capacity is no longer unresolved for current target classes: armor is 8 and swords/axes/bows/crossbows are 10. Do not reopen those limits incidentally during unrelated work.
 
 ## 16. Current Next Milestone
 
-**Immediate next action: Step 8L — Inventor + Fame System + Bonus Fame Trinket.**
+**Immediate next action: Step 8M — Inventor Trial Room + `/withdraw` improvements.**
 
 Current intended sequence:
 
-Step 8L adds production Inventor, persistent Fame, Trial Fame cash-out, Bonus Fame Trinkets, and the player-specific Fame Shop. Abandoned Spaceship Portal runtime and later roadmap work remain deferred.
+Step 8M uses the newly supplied canonical Inventor structure and expands `/withdraw` with `all`/`max`, validated comma grouping, and exact `k`/`m` shorthand. Masks and Weapon Skin additions remain deferred. Abandoned Spaceship Portal runtime remains deferred.
 
 The ordinary-enchantment expansion remains split across bounded patches. Step 7C is the explicit instruction that made the current canonical Design Doc enchantment-table values implementation-authoritative; later design edits still require their own explicit implementation milestone.
 
@@ -915,6 +932,13 @@ The ordinary-enchantment expansion remains split across bounded patches. Step 7C
 Preserve unrelated dirty changes. Never change pinned versions as a side effect of gameplay work. Prefer service-level rules and typed data over one-off event logic, and keep client-only classes isolated from dedicated-server loading.
 
 ## 18. Verification Snapshot
+
+For the accepted Step 8L / 8L.1 baseline:
+
+- `gradlew.bat cleanTest test build` succeeds. All 606 JUnit tests across 152 suites pass with zero failures, errors, or skips; focused Fame, Trial modifier/cash-out, shop catalog, reward-catalog/resource, persistence, Telekinesis registry, inventory insertion/overflow, and Auto Smelt ordering coverage is green. All 12 required loaded-registry GameTests pass, including a real accepted Survival block break proving exact-once Telekinesis insertion without vacuuming an unrelated nearby item entity.
+- All 256 main-resource JSON files parse successfully. Runtime content publishes nine reward tables and thirteen Trial rooms. The Fame-enabled active Trial totals are Apprentice 12/89, Hardcore 17/97, Impossible 17/155, and Demonic 16/126.
+- Dedicated-server startup loads 1,462 recipes, publishes the updated content, verifies progression controls, and reaches `Done`. Fresh-client startup completes ResourceManager reload, OpenAL/SoundEngine initialization, and block/item/chest/GUI atlas construction with the Fame Shop menu/screen and all three Bonus Fame Trinket item definitions registered; no relevant component, attachment, codec, menu, model, resource, or sided-classloading failure was observed.
+- Step 8L/8L.1-owned paths pass `git diff --check`; the separately maintained `docs/Cosmic_Design.md` retains unrelated Markdown whitespace outside this candidate's ownership. Pinned versions and identifiers remain unchanged. Fame, Bonus Fame Trinkets, the Fame Shop, and Telekinesis I are manually verified/accepted. Inventor is explicitly excluded from this closure and begins in Step 8M.
 
 For the Step 8K candidate:
 

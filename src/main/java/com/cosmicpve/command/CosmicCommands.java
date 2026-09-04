@@ -29,6 +29,7 @@ public final class CosmicCommands {
         PersonalVaultCommands.registerPublic(event);
         VKitCommands.registerPublic(event);
         PlayerUpgradeCommands.registerPublic(event);
+        FameCommands.registerPublic(event);
         var combat = Commands.literal("combat")
                 .then(Commands.literal("trace")
                         .then(Commands.literal("on").executes(context -> setTrace(context.getSource(), true)))
@@ -96,7 +97,9 @@ public final class CosmicCommands {
                 .then(MaskCommands.create())
                 .then(VKitCommands.create())
                 .then(PersonalVaultCommands.create())
-                .then(PlayerUpgradeCommands.create()));
+                .then(PlayerUpgradeCommands.create())
+                .then(FameCommands.create()));
+
 
 
 

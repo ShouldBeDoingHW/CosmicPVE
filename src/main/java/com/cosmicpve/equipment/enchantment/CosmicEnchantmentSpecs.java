@@ -55,6 +55,8 @@ public final class CosmicEnchantmentSpecs {
             ModEnchantments.AUTO_SMELT.identifier(), 1, CosmicEnchantmentTier.ULTIMATE, "pickaxe");
     public static final CosmicEnchantmentSpec EXPERIENCE = new CosmicEnchantmentSpec(
             ModEnchantments.EXPERIENCE.identifier(), 3, CosmicEnchantmentTier.UNIQUE, "pickaxe");
+    public static final CosmicEnchantmentSpec TELEKINESIS = new CosmicEnchantmentSpec(
+            ModEnchantments.TELEKINESIS.identifier(), 1, CosmicEnchantmentTier.UNIQUE, "pickaxe");
     public static final CosmicEnchantmentSpec BLESSED = new CosmicEnchantmentSpec(
             ModEnchantments.BLESSED.identifier(), 4, CosmicEnchantmentTier.ULTIMATE, "axe");
     public static final CosmicEnchantmentSpec IMPLANTS = new CosmicEnchantmentSpec(
@@ -137,7 +139,8 @@ public final class CosmicEnchantmentSpecs {
     public static final List<CosmicEnchantmentSpec> ALL =
             List.of(EXECUTE, ANGELIC, LIGHTNING, ENDER_SHIFT, DOUBLESTRIKE, BLEED, LUCK, POISON, PUMMEL,
                     GREATSWORD, INSANITY, VENOM, AEGIS, EAGLE_EYE, RAGE, MOLTEN, NUTRITION, GLOWING,
-                    OBSIDIANSHIELD, OXYGENATE, ARMORED, DEATH_PACT, AUTO_SMELT, EXPERIENCE, BLESSED, IMPLANTS, TRAP, CACTUS,
+                    OBSIDIANSHIELD, OXYGENATE, ARMORED, DEATH_PACT, AUTO_SMELT, EXPERIENCE, TELEKINESIS,
+                    BLESSED, IMPLANTS, TRAP, CACTUS,
                     GEARS, PERMAFROST, MORTAL_COIL, SELF_DESTRUCT, PHOENIX, DIVINE_IMMOLATION, VIRUS, DEVOUR,
                     UNDEAD_RUSE, OBLITERATE, SOUL_TETHER, DODGE, LEADERSHIP,
                     HERO_KILLER, SOUL_SIPHON, BLACKOUT, ENDER_WALKER, VOODOO,

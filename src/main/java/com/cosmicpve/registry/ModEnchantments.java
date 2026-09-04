@@ -30,6 +30,7 @@ public final class ModEnchantments {
     public static final ResourceKey<Enchantment> DEATH_PACT = createKey("death_pact");
     public static final ResourceKey<Enchantment> AUTO_SMELT = createKey("auto_smelt");
     public static final ResourceKey<Enchantment> EXPERIENCE = createKey("experience");
+    public static final ResourceKey<Enchantment> TELEKINESIS = createKey("telekinesis");
     public static final ResourceKey<Enchantment> BLESSED = createKey("blessed");
     public static final ResourceKey<Enchantment> IMPLANTS = createKey("implants");
     public static final ResourceKey<Enchantment> TRAP = createKey("trap");

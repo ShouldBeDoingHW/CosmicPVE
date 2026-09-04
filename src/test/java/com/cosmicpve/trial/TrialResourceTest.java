@@ -76,13 +76,13 @@ class TrialResourceTest {
         assertNotNull(stream);
         var entries=JsonParser.parseReader(new InputStreamReader(stream,StandardCharsets.UTF_8))
                 .getAsJsonObject().getAsJsonArray("entries");
-        assertEquals(16, entries.size());
-        assertEquals(147, entries.asList().stream().mapToInt(value ->
+        assertEquals(17, entries.size());
+        assertEquals(155, entries.asList().stream().mapToInt(value ->
                 value.getAsJsonObject().get("weight").getAsInt()).sum());
         assertEquals(18, ImpossibleRewardCatalog.DECLARED.size());
         assertEquals(163, ImpossibleRewardCatalog.DECLARED_WEIGHT);
-        assertEquals(147, ImpossibleRewardCatalog.ACTIVE_WEIGHT);
-        assertFalse(ImpossibleRewardCatalog.DECLARED.stream().filter(row -> row.name().contains("Fame")).findFirst().orElseThrow().active());
+        assertEquals(155, ImpossibleRewardCatalog.ACTIVE_WEIGHT);
+        assertTrue(ImpossibleRewardCatalog.DECLARED.stream().filter(row -> row.name().contains("Fame")).findFirst().orElseThrow().active());
         assertFalse(ImpossibleRewardCatalog.DECLARED.stream().filter(row -> row.name().contains("Abandoned")).findFirst().orElseThrow().active());
     }
     @Test void demonicDevelopmentTableUsesOnlyCurrentRealRewardPrimitivesAtCanonicalWeights() throws Exception {
@@ -91,8 +91,8 @@ class TrialResourceTest {
         assertNotNull(stream);
         var entries=JsonParser.parseReader(new InputStreamReader(stream,StandardCharsets.UTF_8))
                 .getAsJsonObject().getAsJsonArray("entries");
-        assertEquals(15,entries.size());
-        assertEquals(118,entries.asList().stream().mapToInt(value->value.getAsJsonObject().get("weight").getAsInt()).sum());
+        assertEquals(16,entries.size());
+        assertEquals(126,entries.asList().stream().mapToInt(value->value.getAsJsonObject().get("weight").getAsInt()).sum());
         assertTrue(entries.asList().stream().map(value->value.getAsJsonObject().getAsJsonObject("reward"))
                 .anyMatch(reward->reward.get("type").getAsString().equals("mask")
                         && reward.get("mask_count").getAsInt()==2));
@@ -103,8 +103,8 @@ class TrialResourceTest {
         assertNotNull(stream);
         var entries=JsonParser.parseReader(new InputStreamReader(stream,StandardCharsets.UTF_8))
                 .getAsJsonObject().getAsJsonArray("entries");
-        assertEquals(15,entries.size());
-        assertEquals(84,entries.asList().stream().mapToInt(value -> value.getAsJsonObject().get("weight").getAsInt()).sum());
+        assertEquals(17,entries.size());
+        assertEquals(97,entries.asList().stream().mapToInt(value -> value.getAsJsonObject().get("weight").getAsInt()).sum());
         assertEquals(2,entries.asList().stream().map(value->value.getAsJsonObject().getAsJsonObject("reward"))
                 .filter(reward->reward.get("type").getAsString().equals("unexamined_book")).count());
         assertTrue(entries.asList().stream().map(value->value.getAsJsonObject().getAsJsonObject("reward"))

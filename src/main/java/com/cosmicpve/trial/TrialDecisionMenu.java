@@ -39,7 +39,7 @@ public final class TrialDecisionMenu extends AbstractContainerMenu {
         TrialSession session = owner instanceof ServerPlayer player
                 ? TrialRuntime.sessions().active(player.level().getServer()).orElse(null) : null;
         for (int slot = 0; slot < SLOT_COUNT; slot++) {
-            if (slot < 4) display.setItem(slot, pane(Items.GREEN_STAINED_GLASS_PANE, "DEAL", 0x55FF55));
+            if (slot < 4) display.setItem(slot, dealPane(session));
             else if (slot == 4) display.setItem(slot, pageControl(session));
             else if (slot < 9) display.setItem(slot, pane(Items.RED_STAINED_GLASS_PANE, "NO DEAL", 0xFF5555));
             else {
@@ -69,6 +69,20 @@ public final class TrialDecisionMenu extends AbstractContainerMenu {
     private static ItemStack pane(net.minecraft.world.item.Item item, String label, int color) {
         ItemStack stack = new ItemStack(item);
         stack.set(DataComponents.CUSTOM_NAME, Component.literal(label).withStyle(style -> style.withColor(color)));
+        return stack;
+    }
+    static ItemStack dealPane(TrialSession session) {
+        ItemStack stack = pane(Items.GREEN_STAINED_GLASS_PANE, "DEAL", 0x55FF55);
+        if (session == null) return stack;
+        var lines = new java.util.ArrayList<Component>();
+        lines.add(Component.literal("BASE FAME: " + session.progress().baseFame())
+                .withStyle(style -> style.withColor(com.cosmicpve.economy.FameService.COLOR).withBold(true)));
+        if (session.progress().portalModifiers().famePercent() > 0) {
+            long payout = session.progress().portalModifiers().cashoutFame(session.progress().baseFame());
+            lines.add(Component.literal("YOUR DEAL: " + payout + " FAME")
+                    .withStyle(style -> style.withColor(com.cosmicpve.economy.FameService.COLOR).withBold(true)));
+        }
+        stack.set(DataComponents.LORE, new ItemLore(List.copyOf(lines)));
         return stack;
     }
     static ItemStack preview(List<ItemStack> bundle) {
