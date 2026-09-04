@@ -8,6 +8,9 @@ import com.cosmicpve.registry.ModEnchantments;
 import com.cosmicpve.registry.ModEntities;
 import com.cosmicpve.trial.TrialRoomLoadoutService;
 import com.cosmicpve.trial.persistence.TrialInventoryTransactionService;
+import com.cosmicpve.instance.InstanceBounds;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.FunctionGameTestInstance;
@@ -17,22 +20,31 @@ import net.minecraft.gametest.framework.TestEnvironmentDefinition;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.Blocks;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.event.RegisterGameTestsEvent;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 import java.util.function.Consumer;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 public final class InventorGameTests {
     private static final DeferredRegister<Consumer<GameTestHelper>> FUNCTIONS =
             DeferredRegister.create(Registries.TEST_FUNCTION, CosmicPVE.MOD_ID);
     private static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> LOADOUTS =
             FUNCTIONS.register("inventor_loadouts", ignored -> InventorGameTests::loadouts);
+    private static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> CAVE_STARTUP_CLEANUP =
+            FUNCTIONS.register("cave_startup_cleanup", ignored -> InventorGameTests::caveStartupCleanup);
     private InventorGameTests() {}
     public static void register(IEventBus bus) { FUNCTIONS.register(bus); bus.addListener(InventorGameTests::registerTests); }
     private static void registerTests(RegisterGameTestsEvent event) {
@@ -40,6 +52,10 @@ public final class InventorGameTests {
                 CosmicPVE.id("inventor_environment"), new TestEnvironmentDefinition.AllOf());
         event.registerTest(CosmicPVE.id("inventor_loadouts"), new FunctionGameTestInstance(
                 ResourceKey.create(Registries.TEST_FUNCTION, CosmicPVE.id("inventor_loadouts")),
+                new TestData<>(environment, CosmicPVE.id("trial/development_room"), 100, 0, true,
+                        Rotation.NONE, false, 1, 1, false)));
+        event.registerTest(CosmicPVE.id("cave_startup_cleanup"), new FunctionGameTestInstance(
+                ResourceKey.create(Registries.TEST_FUNCTION, CosmicPVE.id("cave_startup_cleanup")),
                 new TestData<>(environment, CosmicPVE.id("trial/development_room"), 100, 0, true,
                         Rotation.NONE, false, 1, 1, false)));
     }
@@ -76,6 +92,46 @@ public final class InventorGameTests {
         helper.assertTrue(player.leggings().has(ModDataComponents.HEROIC.get())
                 && player.leggings().get(ModDataComponents.CUSTOM_ENCHANT_META.get()).transmogSorted(),
                 "Player leggings must be Heroic and Transmogged");
+        helper.assertTrue(player.bread().is(Items.BREAD)
+                        && player.bread().getCount() == TrialRoomLoadoutService.INVENTOR_BREAD
+                        && TrialRoomLoadoutService.INVENTOR_BREAD_SLOT == 8,
+                "Inventor loadout must reserve 16 Bread for Hotbar Slot 9");
+        helper.succeed();
+    }
+
+    private static void caveStartupCleanup(GameTestHelper helper) {
+        var level = helper.getLevel();
+        BlockPos min = helper.absolutePos(new BlockPos(1, 1, 1));
+        BlockPos max = helper.absolutePos(new BlockPos(4, 4, 4));
+        BlockPos inside = helper.absolutePos(new BlockPos(2, 2, 2));
+        BlockPos outside = helper.absolutePos(new BlockPos(6, 2, 2));
+        var answer = new CaveDivingService.PotAnswer(List.of(Items.ANGLER_POTTERY_SHERD,
+                Items.ARCHER_POTTERY_SHERD, Items.BLADE_POTTERY_SHERD, Items.BREWER_POTTERY_SHERD),
+                Direction.NORTH);
+        var attempt = new CaveDivingService.Attempt(UUID.randomUUID(), new InstanceBounds(min, max), inside,
+                inside, answer, Map.of(), new LinkedHashSet<>(), false);
+        var startupDrop = new ItemEntity(level, inside.getX() + 0.5D, inside.getY() + 0.5D,
+                inside.getZ() + 0.5D, new ItemStack(Items.BRICK));
+        var outsideDrop = new ItemEntity(level, outside.getX() + 0.5D, outside.getY() + 0.5D,
+                outside.getZ() + 0.5D, new ItemStack(Items.BRICK));
+        level.addFreshEntity(startupDrop);
+        level.addFreshEntity(outsideDrop);
+        level.setBlock(inside.above(), Blocks.DECORATED_POT.defaultBlockState(), 3);
+        var zombie = helper.spawn(EntityType.ZOMBIE, new BlockPos(3, 2, 3));
+
+        helper.assertTrue(CaveDivingService.cleanupStartupItems(level, attempt) == 1,
+                "Startup cleanup must remove exactly the loose item inside the room bounds");
+        helper.assertTrue(startupDrop.isRemoved() && !outsideDrop.isRemoved(),
+                "Startup cleanup must be bounded to the active Cave Diving room");
+        helper.assertTrue(!zombie.isRemoved() && level.getBlockState(inside.above()).is(Blocks.DECORATED_POT)
+                        && level.getBlockEntity(inside.above()) != null,
+                "Startup cleanup must preserve living entities, blocks, and block entities");
+
+        var laterDrop = new ItemEntity(level, inside.getX() + 0.5D, inside.getY() + 0.5D,
+                inside.getZ() + 0.5D, new ItemStack(Items.ANGLER_POTTERY_SHERD));
+        level.addFreshEntity(laterDrop);
+        helper.assertTrue(CaveDivingService.cleanupStartupItems(level, attempt) == 0 && !laterDrop.isRemoved(),
+                "The one-shot startup cleanup must never vacuum later puzzle drops");
         helper.succeed();
     }
 

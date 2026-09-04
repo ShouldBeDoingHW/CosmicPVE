@@ -44,6 +44,15 @@ public final class InstanceProtectionEventBridge {
     public void onUseItem(UseItemOnBlockEvent event) {
         if (event.getPlayer() instanceof ServerPlayer player) {
             BlockPos intendedPlacement = new BlockPlaceContext(event.getUseOnContext()).getClickedPos();
+            if (event.getUsePhase() == UseItemOnBlockEvent.UsePhase.ITEM_BEFORE_BLOCK
+                    && TrialRuntime.sessions().rejectsCaveDivingPotPlacement(
+                            player, intendedPlacement, event.getItemStack())) {
+                event.cancelWithResult(InteractionResult.FAIL);
+                // The server never consumes the stack. Force the authoritative slot state back to the
+                // client immediately so rejected placement cannot appear to eat a decorated pot.
+                player.containerMenu.sendAllDataToRemote();
+                return;
+            }
             boolean circuitPlacement = TrialRuntime.sessions().allowsCircuitPlacementUse(
                     player, intendedPlacement, event.getItemStack());
             boolean cavePlacement = TrialRuntime.sessions().allowsCaveDivingPlacement(

@@ -39,7 +39,7 @@ public final class CaveDivingService {
             Items.ANGLER_POTTERY_SHERD, Items.ARCHER_POTTERY_SHERD, Items.ARMS_UP_POTTERY_SHERD,
             Items.BLADE_POTTERY_SHERD, Items.BREWER_POTTERY_SHERD, Items.BURN_POTTERY_SHERD,
             Items.DANGER_POTTERY_SHERD, Items.EXPLORER_POTTERY_SHERD, Items.FRIEND_POTTERY_SHERD);
-    public static final int VALIDATION_INTERVAL_TICKS = 10;
+    public static final int VALIDATION_INTERVAL_TICKS = 5;
     public static final SoundEvent REJECTION_SOUND = SoundEvents.ANVIL_DESTROY;
     public static final float REJECTION_PITCH = 0.8F;
 
@@ -82,6 +82,34 @@ public final class CaveDivingService {
     public boolean allowsSolutionPlacement(TrialSession session, BlockPos pos, ItemStack stack) {
         Attempt attempt = attempts.get(session.sessionId());
         return attempt != null && attempt.solutionPosition().equals(pos) && stack.is(Items.DECORATED_POT);
+    }
+
+    public boolean rejectsPotPlacement(TrialSession session, BlockPos pos, ItemStack stack) {
+        Attempt attempt = attempts.get(session.sessionId());
+        return rejectsPotPlacement(attempt, pos, stack);
+    }
+
+    static boolean rejectsPotPlacement(Attempt attempt, BlockPos pos, ItemStack stack) {
+        return attempt != null && attempt.bounds().contains(pos) && stack.is(Items.DECORATED_POT)
+                && !attempt.solutionPosition().equals(pos);
+    }
+
+    /** One-shot sweep after structure updates and before ROOM_ACTIVE; later puzzle drops are never vacuumed. */
+    public int cleanupStartupItems(ServerLevel level, TrialSession session) {
+        Attempt attempt = attempts.get(session.sessionId());
+        return cleanupStartupItems(level, attempt);
+    }
+
+    static int cleanupStartupItems(ServerLevel level, Attempt attempt) {
+        if (attempt == null || attempt.startupItemsCleaned()) return 0;
+        attempt.startupItemsCleaned(true);
+        var min = attempt.bounds().min();
+        var max = attempt.bounds().max();
+        var area = new net.minecraft.world.phys.AABB(min.getX(), min.getY(), min.getZ(),
+                max.getX() + 1.0D, max.getY() + 1.0D, max.getZ() + 1.0D);
+        var items = level.getEntitiesOfClass(ItemEntity.class, area);
+        items.forEach(ItemEntity::discard);
+        return items.size();
     }
 
     public boolean allowsCraftingTableUse(TrialSession session, ServerLevel level, BlockPos pos) {
@@ -217,6 +245,7 @@ public final class CaveDivingService {
         private final UUID sessionId; private final InstanceBounds bounds; private final BlockPos modelPosition;
         private final BlockPos solutionPosition; private final PotAnswer model; private final Map<BlockPos, PotAnswer> underwater;
         private final Set<BlockPos> harvested; private boolean solved; private PotAnswer lastRejected;
+        private boolean startupItemsCleaned;
         Attempt(UUID sessionId, InstanceBounds bounds, BlockPos modelPosition, BlockPos solutionPosition, PotAnswer model,
                 Map<BlockPos, PotAnswer> underwater, Set<BlockPos> harvested, boolean solved) {
             this.sessionId=sessionId; this.bounds=bounds; this.modelPosition=modelPosition; this.solutionPosition=solutionPosition;
@@ -227,5 +256,6 @@ public final class CaveDivingService {
         public PotAnswer model(){return model;} public Map<BlockPos,PotAnswer> underwater(){return underwater;}
         public Set<BlockPos> harvested(){return harvested;} public boolean solved(){return solved;} void solved(boolean value){solved=value;}
         PotAnswer lastRejected(){return lastRejected;} void lastRejected(PotAnswer value){lastRejected=value;}
+        boolean startupItemsCleaned(){return startupItemsCleaned;} void startupItemsCleaned(boolean value){startupItemsCleaned=value;}
     }
 }

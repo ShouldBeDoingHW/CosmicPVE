@@ -1,10 +1,10 @@
 # CosmicPVE Development Handoff
 
-Current accepted baseline: Step 8M — Inventor Trial and expanded `/withdraw` syntax are implemented, automated/runtime verified, and manually verified/accepted. Earlier accepted milestones remain recorded below.
+Current accepted baseline: Step 8M.1 — the Cave Diving polish and Inventor balance hotfix is implemented, automated/runtime verified, and manually verified/accepted. Earlier accepted milestones remain recorded below.
 
-Repository state: Steps 6A–8M and the earlier Conquest synchronization are implemented, verified, and manually accepted. The user-maintained `docs/Cosmic_Design.md` and root `assets`, `drafts`, and `woodlands` development-source folders remain outside closure ownership.
+Repository state: Steps 6A–8M.1 and the earlier Conquest synchronization are implemented, verified, and manually accepted. The user-maintained `docs/Cosmic_Design.md` and root `assets`, `drafts`, and `woodlands` development-source folders remain outside closure ownership.
 
-Current uncommitted candidate: none at the Step 8M closure boundary.
+Current uncommitted candidate: none at the Step 8M.1 closure boundary.
 
 Last handoff update: 2026-09-04
 
@@ -577,9 +577,15 @@ Step 8M is closed in `fc87fae` (`Add Inventor Trial and improve withdrawals`).
 
 The production Inventor is the third native Impossible room. Its canonical 43×23×43 structure provides the player Emerald marker `(38,2,21)`, boss Diamond marker `(4,2,21)`, four authored controls, and four authored Beacons with stable control-to-Beacon associations. The generic structure lifecycle consumes only the two explicit metadata markers, preserves the controls, and makes each station's active state visible through its associated Beacon.
 
-The real Zombie-Villager-based Inventor has 100 HP per initial participant, no innate armor/toughness, 0.32 movement speed, 2 base attack damage, ordinary Zombie Villager AI, and no loot or XP. It receives the exact canonical Engineer/Heroic armor, enchantments, Stormbringer axe, and five axe capacity upgrades; its weapon is Diamond for parties of one or two and Netherite for parties of three or four. Players receive the exact production Admin Abuse/Ashoka, Ghostly Veil/Purge/Scarecrow, Covert Cloak, and Engineer/Heroic armor loadout.
+The real Zombie-Villager-based Inventor has 250 HP plus 200 HP per additional room-start participant (250/450/650/850), no innate armor/toughness, 0.32 movement speed, 2 base attack damage, ordinary Zombie Villager AI, and no loot or XP. It receives the exact canonical Engineer/Heroic armor, enchantments, Stormbringer axe, and five axe capacity upgrades; its weapon is Diamond for parties of one or two and Netherite for parties of three or four. Players receive the exact production Admin Abuse/Ashoka, Ghostly Veil/Purge/Scarecrow, Covert Cloak, and Engineer/Heroic armor loadout plus 16 room-local Bread in Hotbar Slot 9.
 
 Station activation chooses one inactive station every uniformly random 300–400 ticks and never activates a fifth station. Every active station adds +5% to the Inventor's shared ordinary outgoing bucket and deals 1.5 HP standard Cosmic true damage to each participant every 30 ticks through a no-procs unattributed packet. Bell, polished-blackstone button, light weighted pressure plate, and lever progress are shared at 0/3; the player performing the third valid interaction deactivates that station, receives Speed I for 100 ticks, and refreshes one personal nonstacking +100% ordinary root-hit charge. Charges apply only to that player's next committed ordinary root attack against the Inventor, are not consumed by true/child/non-Inventor damage, and are cleared on room cleanup or participant removal. Killing the Inventor completes the room through the normal exactly-once reward/Fame/time transaction. Debug status exposes station progress, active count, activation countdown, boss state, and charge ownership; a permissioned command can activate the next station for testing.
+
+### Step 8M.1 — IMPLEMENTED; AUTOMATED/RUNTIME VERIFIED; MANUALLY VERIFIED / ACCEPTED
+
+Cave Diving now gives every participant 15 Cooked Cod through the room-local loadout lifecycle. Decorated Pot placement anywhere inside the active room except the designated solution position is rejected before vanilla item use and immediately resynchronized from the authoritative server inventory, so repeated invalid attempts neither consume nor duplicate the pot; valid solution placement and recovery remain unchanged. Exact solution validation runs every five ticks. A bounded one-shot ItemEntity sweep runs after structure updates settle and immediately before `ROOM_ACTIVE`, removing popped decorative drops without touching players, living entities, blocks, block entities, or any sherd drops created later during active puzzle play.
+
+Inventor maximum health is snapshotted from initial party size as `250 + 200 × (players - 1)`, producing exactly 250/450/650/850 HP. Each player's room-local loadout additionally reserves Hotbar Slot 9 for 16 Bread. All other accepted boss equipment, behavior, station scheduling, hazards, damage charges, completion, and cleanup remain unchanged.
 
 ## 3. Current Real Enchantments
 
@@ -923,11 +929,11 @@ The final post-Orb capacity is no longer unresolved for current target classes: 
 
 ## 16. Current Next Milestone
 
-**Immediate next action: implement the bounded Step 8M.1 Cave Diving polish and Inventor balance hotfix, then manually verify it.**
+**Immediate next action: implement Step 8N — Thanos / Monopoly / Gucci Masks plus the Season's Beatings Weapon Skin, then manually verify it.**
 
 Current intended sequence:
 
-Step 8M is accepted. Step 8M.1 is limited to Cave Diving food/pot/validation/startup cleanup and Inventor health/Bread changes. Masks and Weapon Skin additions remain deferred. Abandoned Spaceship Portal runtime remains deferred.
+Steps 8M and 8M.1 are accepted. Step 8N is bounded to the three named Masks, their existing-system integrations, the minimal Gucci Dungeon-parkour context seam, and the single Season's Beatings Weapon Skin. The broader Dungeon milestone and all other Masks/Skins remain deferred. Abandoned Spaceship Portal runtime remains deferred.
 
 The ordinary-enchantment expansion remains split across bounded patches. Step 7C is the explicit instruction that made the current canonical Design Doc enchantment-table values implementation-authoritative; later design edits still require their own explicit implementation milestone.
 
@@ -959,6 +965,13 @@ For the Step 8M candidate:
 - All 13 loaded-registry GameTests pass, including construction of the real Inventor entity and exact production boss/player equipment with real Cosmic enchantments, Heroic/Engineer identities, Stormbringer, masks, and capacity data.
 - All 257 main-resource JSON files decode successfully. Dedicated-server startup publishes fourteen Trial rooms including Inventor and reaches `Done`; fresh-client startup completes resource reload, OpenAL/SoundEngine initialization, and all item/block/chest/GUI atlas construction with the vanilla Zombie Villager renderer registered for Inventor. No relevant codec, model/resource, entity-registration, or sided-classloading error was observed.
 - Step 8M-owned paths pass `git diff --check` (normal Windows line-ending notices only). The user-maintained `docs/Cosmic_Design.md` and unrelated root `assets/` and `woodlands/` remain outside Step 8M ownership. Pinned versions and identifiers remain unchanged.
+
+For the accepted Step 8M.1 hotfix:
+
+- `gradlew.bat cleanTest test build` succeeds. All 614 JUnit tests across 154 suites pass with zero failures or errors; focused Cave Diving policy/validation and Inventor balance coverage is green.
+- All 14 loaded-registry GameTests pass. The added Cave Diving startup-cleanup test proves the sweep is bounded and one-shot, removes only loose in-room ItemEntities, preserves living entities and Decorated Pot block entities, and does not remove a later sherd drop.
+- All 257 main-resource JSON files decode under the runtime resource loader. Dedicated-server startup publishes fourteen Trial rooms and reaches `Done`; no relevant component, room, entity, or sided-classloading error was observed.
+- Step 8M.1-owned paths pass `git diff --check` (normal Windows line-ending notices only). The separately maintained `docs/Cosmic_Design.md` retains unrelated Markdown trailing whitespace outside this candidate's ownership. Pinned versions and identifiers remain unchanged.
 
 For the Step 8K candidate:
 

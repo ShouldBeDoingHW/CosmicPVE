@@ -8,6 +8,26 @@ import net.minecraft.world.item.Items;
 import org.junit.jupiter.api.Test;
 
 class CaveDivingServiceTest {
+    @Test void hotfixUsesFiveTickValidationAndRejectsOnlyWrongInRoomPotPlacements() {
+        assertEquals(5, CaveDivingService.VALIDATION_INTERVAL_TICKS);
+        var answer = new CaveDivingService.PotAnswer(java.util.List.of(Items.ANGLER_POTTERY_SHERD,
+                Items.ARCHER_POTTERY_SHERD, Items.BLADE_POTTERY_SHERD, Items.BREWER_POTTERY_SHERD), Direction.NORTH);
+        var solution = new net.minecraft.core.BlockPos(9, 9, 9);
+        var bounds = new com.cosmicpve.instance.InstanceBounds(net.minecraft.core.BlockPos.ZERO,
+                new net.minecraft.core.BlockPos(20, 20, 20));
+        var attempt = new CaveDivingService.Attempt(java.util.UUID.randomUUID(), bounds,
+                new net.minecraft.core.BlockPos(5, 5, 5), solution, answer, java.util.Map.of(),
+                new java.util.LinkedHashSet<>(), false);
+        assertTrue(CaveDivingService.rejectsPotPlacement(attempt, new net.minecraft.core.BlockPos(2, 2, 2),
+                new net.minecraft.world.item.ItemStack(Items.DECORATED_POT)));
+        assertFalse(CaveDivingService.rejectsPotPlacement(attempt, solution,
+                new net.minecraft.world.item.ItemStack(Items.DECORATED_POT)));
+        assertFalse(CaveDivingService.rejectsPotPlacement(attempt, new net.minecraft.core.BlockPos(21, 2, 2),
+                new net.minecraft.world.item.ItemStack(Items.DECORATED_POT)));
+        assertFalse(CaveDivingService.rejectsPotPlacement(attempt, new net.minecraft.core.BlockPos(2, 2, 2),
+                new net.minecraft.world.item.ItemStack(Items.STONE)));
+    }
+
     @Test void canonicalPoolIsTheSettledNineAndModelAllowsIndependentDuplicates() {
         assertEquals(9, CaveDivingService.CANONICAL_SHERDS.size());
         assertEquals(9, new java.util.HashSet<>(CaveDivingService.CANONICAL_SHERDS).size());

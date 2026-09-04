@@ -296,7 +296,7 @@ public final class InventorService {
     }
     public static double bossHealth(int partySize) {
         if (partySize < 1 || partySize > 4) throw new IllegalArgumentException("party size must be 1-4");
-        return partySize * 100.0D;
+        return 250.0D + (partySize - 1) * 200.0D;
     }
     public static net.minecraft.world.item.Item bossAxe(int partySize) {
         if (partySize < 1 || partySize > 4) throw new IllegalArgumentException("party size must be 1-4");

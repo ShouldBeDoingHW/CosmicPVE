@@ -13,10 +13,10 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class InventorServiceTest {
     @Test void partyScalingAndAxeThresholdAreExact() {
-        assertEquals(100.0, InventorService.bossHealth(1));
-        assertEquals(200.0, InventorService.bossHealth(2));
-        assertEquals(300.0, InventorService.bossHealth(3));
-        assertEquals(400.0, InventorService.bossHealth(4));
+        assertEquals(250.0, InventorService.bossHealth(1));
+        assertEquals(450.0, InventorService.bossHealth(2));
+        assertEquals(650.0, InventorService.bossHealth(3));
+        assertEquals(850.0, InventorService.bossHealth(4));
         assertSame(Items.DIAMOND_AXE, InventorService.bossAxe(1));
         assertSame(Items.DIAMOND_AXE, InventorService.bossAxe(2));
         assertSame(Items.NETHERITE_AXE, InventorService.bossAxe(3));

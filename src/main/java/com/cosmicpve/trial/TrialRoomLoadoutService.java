@@ -64,12 +64,19 @@ public final class TrialRoomLoadoutService {
     public static final int DEADEYE_LIGHTNING = 4;
     public static final int DEADEYE_EAGLE_EYE = 5;
     public static final int HAZE_PUMPKIN_PIES = 32;
+    public static final int CAVE_DIVING_COOKED_COD = 15;
+    public static final int INVENTOR_BREAD = 16;
+    public static final int INVENTOR_BREAD_SLOT = 8;
     public static final java.util.List<net.minecraft.world.item.Item> RAIDING_RAINBOW_ARMOR = java.util.List.of(
             Items.NETHERITE_HELMET, Items.NETHERITE_CHESTPLATE, Items.NETHERITE_LEGGINGS, Items.NETHERITE_BOOTS);
     private final TrialInventoryTransactionService inventories;
     public TrialRoomLoadoutService(TrialInventoryTransactionService inventories) { this.inventories = inventories; }
     public void clear(ServerPlayer player) { inventories.clearTrialInventory(player); }
-    public void applyCaveDiving(ServerPlayer player) { clear(player); }
+    public void applyCaveDiving(ServerPlayer player) {
+        clear(player);
+        player.getInventory().setItem(0, new ItemStack(Items.COOKED_COD, CAVE_DIVING_COOKED_COD));
+        player.getInventory().setSelectedSlot(0);
+    }
     public void applyInventor(ServerPlayer player) {
         clear(player);
         InventorLoadout loadout = inventorLoadout(player.registryAccess());
@@ -78,6 +85,9 @@ public final class TrialRoomLoadoutService {
         player.setItemSlot(EquipmentSlot.CHEST, loadout.chestplate());
         player.setItemSlot(EquipmentSlot.LEGS, loadout.leggings());
         player.setItemSlot(EquipmentSlot.FEET, loadout.boots());
+        if (!player.getInventory().getItem(INVENTOR_BREAD_SLOT).isEmpty())
+            throw new IllegalStateException("Inventor Hotbar Slot 9 is already occupied");
+        player.getInventory().setItem(INVENTOR_BREAD_SLOT, loadout.bread());
         player.getInventory().setSelectedSlot(0);
     }
 
@@ -100,9 +110,11 @@ public final class TrialRoomLoadoutService {
         ItemStack boots = inventorArmor(Items.IRON_BOOTS, registry, Map.of(
                 ModEnchantments.ARMORED, 4, ModEnchantments.LUCK, 10, ModEnchantments.ANGELIC, 5,
                 ModEnchantments.DODGE, 5, ModEnchantments.STORMCALLER, 5));
-        return new InventorLoadout(ashoka, veil, chestplate, leggings, boots);
+        return new InventorLoadout(ashoka, veil, chestplate, leggings, boots,
+                new ItemStack(Items.BREAD, INVENTOR_BREAD));
     }
-    public record InventorLoadout(ItemStack weapon, ItemStack helmet, ItemStack chestplate, ItemStack leggings, ItemStack boots) {}
+    public record InventorLoadout(ItemStack weapon, ItemStack helmet, ItemStack chestplate, ItemStack leggings,
+                                  ItemStack boots, ItemStack bread) {}
     public void applyDevelopment(ServerPlayer player) {
         clear(player);
         ItemStack marker = new ItemStack(Items.STICK);

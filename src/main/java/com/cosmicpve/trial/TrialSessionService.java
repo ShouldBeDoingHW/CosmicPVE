@@ -202,7 +202,8 @@ public final class TrialSessionService {
                 Identifier room = session.currentRoom().orElse(null);
                 boolean maintenanceTick = server.getTickCount() % 10 == 0;
                 if (maintenanceTick && HIDDEN_GRAVEYARD.equals(room)) hiddenGraveyard.tick(level, session);
-                if (maintenanceTick && CAVE_DIVING.equals(room)) {
+                if (server.getTickCount() % CaveDivingService.VALIDATION_INTERVAL_TICKS == 0
+                        && CAVE_DIVING.equals(room)) {
                     CaveDivingService.ValidationResult caveResult = caveDiving.tick(level, session);
                     if (caveResult == CaveDivingService.ValidationResult.REJECTED)
                         forOnline(server, session, player -> player.playSound(
@@ -290,7 +291,12 @@ public final class TrialSessionService {
         int next = Math.max(0, current - 1);
         if (next == 0) {
             TrialSession active = session.withState(TrialLifecycleState.ROOM_ACTIVE, 0, session.currentRoom(), false,
-                    session.protectedBounds()); repository.publish(server, active);
+                    session.protectedBounds());
+            if (active.currentRoom().filter(CAVE_DIVING::equals).isPresent()) {
+                ServerLevel level = server.getLevel(TrialRuntime.INSTANCE_DIMENSION);
+                if (level != null) caveDiving.cleanupStartupItems(level, active);
+            }
+            repository.publish(server, active);
             forOnline(server, active, player -> titles.roomStarted(player));
             if (active.currentRoom().filter(RAIDING_RAINBOW::equals).isPresent())
                 rainbow.activate(server.getLevel(TrialRuntime.INSTANCE_DIMENSION), active, roomBounds(active));
@@ -667,6 +673,14 @@ public final class TrialSessionService {
                 && session.activeParticipant(player.getUUID())
                 && session.currentRoom().filter(CAVE_DIVING::equals).isPresent()
                 && caveDiving.allowsSolutionPlacement(session, pos, held);
+    }
+
+    public boolean rejectsCaveDivingPotPlacement(ServerPlayer player, BlockPos pos, ItemStack held) {
+        TrialSession session = active(player.level().getServer()).orElse(null);
+        return session != null && session.state() == TrialLifecycleState.ROOM_ACTIVE
+                && session.activeParticipant(player.getUUID())
+                && session.currentRoom().filter(CAVE_DIVING::equals).isPresent()
+                && caveDiving.rejectsPotPlacement(session, pos, held);
     }
 
     public boolean allowsCaveDivingBreak(ServerPlayer player, BlockPos pos) {
