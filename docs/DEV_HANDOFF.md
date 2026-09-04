@@ -583,6 +583,8 @@ Station activation chooses one inactive station every uniformly random 300–400
 
 ### Step 8M.1 — IMPLEMENTED; AUTOMATED/RUNTIME VERIFIED; MANUALLY VERIFIED / ACCEPTED
 
+Step 8M.1 is closed in `fd50696d277340c6164f0ca8f3bb415d464db4f1` (`Polish Cave Diving and rebalance Inventor`).
+
 Cave Diving now gives every participant 15 Cooked Cod through the room-local loadout lifecycle. Decorated Pot placement anywhere inside the active room except the designated solution position is rejected before vanilla item use and immediately resynchronized from the authoritative server inventory, so repeated invalid attempts neither consume nor duplicate the pot; valid solution placement and recovery remain unchanged. Exact solution validation runs every five ticks. A bounded one-shot ItemEntity sweep runs after structure updates settle and immediately before `ROOM_ACTIVE`, removing popped decorative drops without touching players, living entities, blocks, block entities, or any sherd drops created later during active puzzle play.
 
 Inventor maximum health is snapshotted from initial party size as `250 + 200 × (players - 1)`, producing exactly 250/450/650/850 HP. Each player's room-local loadout additionally reserves Hotbar Slot 9 for 16 Bread. All other accepted boss equipment, behavior, station scheduling, hazards, damage charges, completion, and cleanup remain unchanged.
