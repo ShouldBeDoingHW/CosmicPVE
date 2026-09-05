@@ -20,7 +20,7 @@ import java.util.UUID;
 public final class InventorEntity extends ZombieVillager {
     public static final float SCALE = 0.88F;
     public static final double MOVEMENT_SPEED = 0.32D;
-    public static final double ATTACK_DAMAGE = 2.0D;
+    public static final double ATTACK_DAMAGE = 3.5D;
     private static final String ACTIVE_STATIONS = "CosmicInventorActiveStations";
     private static final String STRIKE_CHARGES = "CosmicInventorStrikeCharges";
 

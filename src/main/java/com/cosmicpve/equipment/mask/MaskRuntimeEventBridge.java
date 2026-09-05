@@ -25,12 +25,19 @@ public final class MaskRuntimeEventBridge {
     public static final int SCARECROW_INTERVAL_TICKS = 160;
     public static final Identifier MAX_HEALTH_ID = CosmicPVE.id("mask_max_health");
     public static final Identifier MOVEMENT_ID = CosmicPVE.id("mask_movement_speed");
+    public static final int GUCCI_LEASE_TICKS = 60;
+    public static final int GUCCI_REFRESH_AT = 20;
     private final MaskResolver masks;
     private final ProcEventService procs;
     private final EffectiveEnchantmentsResolver enchantments;
+    private final com.cosmicpve.activity.ActivityContextService activities;
+    private final com.cosmicpve.combat.enchantment.EquippedPersistentEffectService equippedEffects;
     private final Map<LivingEntity, Schedule> schedules = Collections.synchronizedMap(new WeakHashMap<>());
-    public MaskRuntimeEventBridge(MaskResolver masks, ProcEventService procs, EffectiveEnchantmentsResolver enchantments) {
+    public MaskRuntimeEventBridge(MaskResolver masks, ProcEventService procs, EffectiveEnchantmentsResolver enchantments,
+            com.cosmicpve.activity.ActivityContextService activities,
+            com.cosmicpve.combat.enchantment.EquippedPersistentEffectService equippedEffects) {
         this.masks = masks; this.procs = procs; this.enchantments = enchantments;
+        this.activities = activities; this.equippedEffects = equippedEffects;
     }
 
     public void onPlayerTick(PlayerTickEvent.Post event) { tick(event.getEntity()); }
@@ -40,6 +47,10 @@ public final class MaskRuntimeEventBridge {
     private void tick(LivingEntity entity) {
         if (entity.level().isClientSide()) return;
         var equipped = masks.resolve(entity);
+        equippedEffects.reconcileLease(entity, MobEffects.JUMP_BOOST,
+                equipped.stream().anyMatch(d -> d.behavior() == MaskBehavior.GUCCI)
+                        && activities.isDungeonParkour(entity),
+                GUCCI_LEASE_TICKS, GUCCI_REFRESH_AT);
         double health = equipped.stream().anyMatch(d -> d.behavior() == MaskBehavior.SANTA) ? 2.0 : 0.0;
         reconcile(entity, Attributes.MAX_HEALTH, MAX_HEALTH_ID, health, AttributeModifier.Operation.ADD_VALUE);
         boolean lover = equipped.stream().anyMatch(d -> d.behavior() == MaskBehavior.LOVER);

@@ -1,10 +1,10 @@
 # CosmicPVE Development Handoff
 
-Current accepted baseline: Step 8M.1 — the Cave Diving polish and Inventor balance hotfix is implemented, automated/runtime verified, and manually verified/accepted. Earlier accepted milestones remain recorded below.
+Current accepted baseline: Step 8N — Thanos, Monopoly, and Gucci Masks plus the Season's Beatings Weapon Skin and the bounded Inventor follow-up are implemented, automated/runtime verified, and manually verified/accepted. Earlier accepted milestones remain recorded below.
 
-Repository state: Steps 6A–8M.1 and the earlier Conquest synchronization are implemented, verified, and manually accepted. The user-maintained `docs/Cosmic_Design.md` and root `assets`, `drafts`, and `woodlands` development-source folders remain outside closure ownership.
+Repository state: Steps 6A–8N and the earlier Conquest synchronization are implemented, verified, and manually accepted. The user-maintained `docs/Cosmic_Design.md` and root `assets`, `drafts`, and `woodlands` development-source folders remain outside closure ownership.
 
-Current uncommitted candidate: none at the Step 8M.1 closure boundary.
+Current uncommitted candidate: none at the Step 8N closure boundary.
 
 Last handoff update: 2026-09-04
 
@@ -589,6 +589,16 @@ Cave Diving now gives every participant 15 Cooked Cod through the room-local loa
 
 Inventor maximum health is snapshotted from initial party size as `250 + 200 × (players - 1)`, producing exactly 250/450/650/850 HP. Each player's room-local loadout additionally reserves Hotbar Slot 9 for 16 Bread. All other accepted boss equipment, behavior, station scheduling, hazards, damage charges, completion, and cleanup remain unchanged.
 
+### Step 8N — IMPLEMENTED; AUTOMATED/RUNTIME VERIFIED; MANUALLY VERIFIED / ACCEPTED
+
+Thanos, Monopoly, and Gucci are production Mask definitions using their canonical names, Base64 head textures, and colors (`#5A118F`, `#43C5F0`, and `#3AE305`). They inherit the established single-Mask, Multi-Mask, Mask Splicer, attached-item lore, typed-data, and generic random-Mask reward paths. Thanos contributes one binary +6% ordinary outgoing modifier when the target's current main hand or equipped armor contains at least one actual Mastery enchantment. Monopoly contributes +1% ordinary outgoing per Holy item across those same five combat-gear positions, capped naturally at five items, and raises its wearer's Holy death-preservation chance from 50% to 55% using state snapshotted at the start of the death transaction. Virtual enchantments do not satisfy Thanos, and non-combat inventory does not contribute to either count.
+
+Gucci grants a hidden, Cosmic-owned Jump Boost I lease only while the Mask is equipped and the server-authoritative activity context is specifically Dungeon parkour. The shared equipped-effect lease service preserves stronger or external effects and removes only its own lease. Step 8N adds only the narrow activity-context seam and permissioned development selection needed to verify this behavior; it does not implement a Dungeon, Dungeon portal, key, challenge, or reward system.
+
+Season's Beatings is a canonical `#1B943A` Sword Weapon Skin. While the skinned sword is the authoritative held/launch-context weapon, it reduces ordinary incoming damage by 5% and adds 10% ordinary outgoing damage against targets currently affected by Slowness. It does not affect standard Cosmic true damage, execution, unrelated equipment, or the three previously accepted Weapon Skins. The supplied source artwork remains untouched in root `assets/`; the tracked runtime texture was produced through the built-in image-editing pipeline and a deterministic high-quality conversion to a transparent 32×32 item texture, with standard item-definition/model resources.
+
+The accepted closure also includes three bounded Inventor adjustments: each participant receives two separate stacks of four Healing I splash potions, every newly activated station Beacon sends one chat notification to each active participant, and the Inventor's base attack-damage attribute is 3.5 instead of 2.0. All other accepted Inventor loadout, station, hazard, equipment, health-scaling, and combat behavior remains unchanged.
+
 ## 3. Current Real Enchantments
 
 These are registered through Minecraft's enchantment infrastructure, use actual enchantment data on the item, and are not present in normal enchanting-table, librarian, random-loot, random-equipment, or mob-equipment acquisition pools.
@@ -931,11 +941,11 @@ The final post-Orb capacity is no longer unresolved for current target classes: 
 
 ## 16. Current Next Milestone
 
-**Immediate next action: implement Step 8N — Thanos / Monopoly / Gucci Masks plus the Season's Beatings Weapon Skin, then manually verify it.**
+**Immediate next action: implement Step 8O — Dense Woodlands Adventure Prototype plus Dimensional Traveler rebalance and Cave Diving pot corrective, then manually verify it.**
 
 Current intended sequence:
 
-Steps 8M and 8M.1 are accepted. Step 8N is bounded to the three named Masks, their existing-system integrations, the minimal Gucci Dungeon-parkour context seam, and the single Season's Beatings Weapon Skin. The broader Dungeon milestone and all other Masks/Skins remain deferred. Abandoned Spaceship Portal runtime remains deferred.
+Steps 8M, 8M.1, and 8N are accepted. Step 8O is bounded to the first Dense Woodlands Adventure loop, its reusable Adventure/session/worldgen foundations, the authored woodland assets and loot, Dimensional Traveler's settled Adventure rebalance, the two Cave Diving pot corrections, and the explicitly requested Inventor base-health adjustment. Cosmic Ranger, Desecrated Tombs, other Adventure dimensions, additional Masks/Skins, and the broader Dungeon milestone remain deferred.
 
 The ordinary-enchantment expansion remains split across bounded patches. Step 7C is the explicit instruction that made the current canonical Design Doc enchantment-table values implementation-authoritative; later design edits still require their own explicit implementation milestone.
 
@@ -974,6 +984,13 @@ For the accepted Step 8M.1 hotfix:
 - All 14 loaded-registry GameTests pass. The added Cave Diving startup-cleanup test proves the sweep is bounded and one-shot, removes only loose in-room ItemEntities, preserves living entities and Decorated Pot block entities, and does not remove a later sherd drop.
 - All 257 main-resource JSON files decode under the runtime resource loader. Dedicated-server startup publishes fourteen Trial rooms and reaches `Done`; no relevant component, room, entity, or sided-classloading error was observed.
 - Step 8M.1-owned paths pass `git diff --check` (normal Windows line-ending notices only). The separately maintained `docs/Cosmic_Design.md` retains unrelated Markdown trailing whitespace outside this candidate's ownership. Pinned versions and identifiers remain unchanged.
+
+For the Step 8N candidate:
+
+- `gradlew.bat cleanTest test build` succeeds. All 619 JUnit tests across 155 suites pass with zero failures or errors; focused Mask data/combat, activity-context, owned-effect lease, and Weapon Skin presentation/combat coverage is green.
+- All 14 required loaded-registry GameTests pass. Runtime content publishes twelve Mask definitions, including Thanos, Monopoly, and Gucci, and verifies the new production definitions through the same reload pipeline used by generic Mask rewards.
+- All 262 main-resource JSON files parse successfully. Dedicated-server startup publishes the Step 8N content and reaches `Done`; fresh-client startup completes ResourceManager reload, SoundEngine initialization, and item texture-atlas construction with the Season's Beatings resources present. No relevant model, texture, codec, registry, or sided-classloading failure was observed.
+- Step 8N-owned paths pass `git diff --check` (normal Windows line-ending notices only). The user-maintained `docs/Cosmic_Design.md` and unrelated root `assets/` and `woodlands/` remain outside Step 8N ownership. Pinned versions and identifiers remain unchanged.
 
 For the Step 8K candidate:
 

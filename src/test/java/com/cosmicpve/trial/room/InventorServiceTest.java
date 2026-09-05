@@ -13,6 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class InventorServiceTest {
     @Test void partyScalingAndAxeThresholdAreExact() {
+        assertEquals(3.5D, com.cosmicpve.entity.inventor.InventorEntity.ATTACK_DAMAGE);
         assertEquals(250.0, InventorService.bossHealth(1));
         assertEquals(450.0, InventorService.bossHealth(2));
         assertEquals(650.0, InventorService.bossHealth(3));

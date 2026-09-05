@@ -882,7 +882,7 @@ public final class TrialSessionService {
         if (session == null || level == null || session.state() != TrialLifecycleState.ROOM_ACTIVE
                 || session.currentRoom().filter(INVENTOR::equals).isEmpty())
             return TrialOperationResult.rejected("Inventor is not active.");
-        return inventor.forceActivation(level, session.sessionId())
+        return inventor.forceActivation(level, session)
                 ? TrialOperationResult.ok("Activated one inactive Inventor workstation.")
                 : TrialOperationResult.rejected("All Inventor workstations are already active.");
     }

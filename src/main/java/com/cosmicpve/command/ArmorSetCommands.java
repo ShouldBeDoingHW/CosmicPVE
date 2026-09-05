@@ -30,7 +30,7 @@ public final class ArmorSetCommands {
                         .then(Commands.literal("unmark").executes(context -> setOmni(context.getSource(), false)));
         var activityName = Commands.argument("activity", StringArgumentType.word())
                 .suggests((context, builder) -> SharedSuggestionProvider.suggest(
-                        java.util.List.of("none", "trial", "dungeon", "invasion"), builder))
+                        java.util.List.of("none", "trial", "dungeon", "dungeon_parkour", "invasion"), builder))
                 .executes(context -> setActivity(context.getSource(), EntityArgument.getPlayer(context, "player"),
                         StringArgumentType.getString(context, "activity")));
         var activity = Commands.literal("activity").then(Commands.literal("set")
@@ -68,6 +68,14 @@ public final class ArmorSetCommands {
 
     private static int setActivity(net.minecraft.commands.CommandSourceStack source,
             net.minecraft.server.level.ServerPlayer player, String value) {
+        if (value.equalsIgnoreCase("dungeon_parkour")) {
+            com.cosmicpve.combat.CosmicCombat.activities().setDungeonParkour(player.getUUID(), true);
+            com.cosmicpve.personalvault.PersonalVaultRuntime.access().onActivityEntered(
+                    player, com.cosmicpve.activity.ActivityType.DUNGEON);
+            source.sendSuccess(() -> Component.literal("Set " + player.getName().getString()
+                    + " activity to DUNGEON parkour."), true);
+            return 1;
+        }
         com.cosmicpve.activity.ActivityType type;
         try { type = com.cosmicpve.activity.ActivityType.valueOf(value.toUpperCase(java.util.Locale.ROOT)); }
         catch (IllegalArgumentException exception) { source.sendFailure(Component.literal("Unknown activity: " + value)); return 0; }

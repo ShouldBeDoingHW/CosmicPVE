@@ -48,6 +48,11 @@ public final class HolyDeathService {
         new RewardDeliveryService().deliver(player, items);
     }
 
-    /** Monopoly is prospective design data; this seam intentionally returns false until that mask exists. */
-    boolean monopolyActive(ServerPlayer player) { return false; }
+    /** Snapshotted once before any death-drop mutation so the complete transaction uses one stable rate. */
+    boolean monopolyActive(ServerPlayer player) {
+        return new com.cosmicpve.equipment.mask.MaskResolver(
+                com.cosmicpve.content.CosmicContent.repository()).resolve(player).stream()
+                .anyMatch(mask -> mask.behavior()
+                        == com.cosmicpve.content.definition.mask.MaskBehavior.MONOPOLY);
+    }
 }

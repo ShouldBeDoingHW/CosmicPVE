@@ -58,9 +58,10 @@ public final class CosmicCombat {
     private static final DamageAttributionService ATTRIBUTION = new DamageAttributionService();
     private static final CombatTraceService TRACES = new CombatTraceService();
     private static final EffectiveEnchantmentsResolver ENCHANTMENTS = new EffectiveEnchantmentsResolver();
+    private static final com.cosmicpve.combat.enchantment.EquippedPersistentEffectService EQUIPPED_EFFECTS =
+            new com.cosmicpve.combat.enchantment.EquippedPersistentEffectService(ENCHANTMENTS);
     private static final com.cosmicpve.combat.enchantment.EquippedPersistentEffectEventBridge PERSISTENT_EFFECTS =
-            new com.cosmicpve.combat.enchantment.EquippedPersistentEffectEventBridge(
-                    new com.cosmicpve.combat.enchantment.EquippedPersistentEffectService(ENCHANTMENTS));
+            new com.cosmicpve.combat.enchantment.EquippedPersistentEffectEventBridge(EQUIPPED_EFFECTS);
     private static final CooldownService COOLDOWNS = new CooldownService();
     private static final ProcTraceService PROC_TRACES = new ProcTraceService();
     private static final ProcCandidateSourceRegistry PROC_SOURCES = new ProcCandidateSourceRegistry();
@@ -120,7 +121,8 @@ public final class CosmicCombat {
             new ProcHookEventBridge(PROC_EVENTS, EXECUTIONS, NUTRITION, SOUL_TETHERS);
     private static final CombatStackEventBridge STACK_EVENTS = new CombatStackEventBridge(STACKS, BLEED_RUNTIME);
     private static final MaskCombatResolver MASK_COMBAT = new MaskCombatResolver(MASKS);
-    private static final MaskRuntimeEventBridge MASK_EVENTS = new MaskRuntimeEventBridge(MASKS, PROC_EVENTS, ENCHANTMENTS);
+    private static final MaskRuntimeEventBridge MASK_EVENTS = new MaskRuntimeEventBridge(
+            MASKS, PROC_EVENTS, ENCHANTMENTS, ACTIVITIES, EQUIPPED_EFFECTS);
     private static final com.cosmicpve.combat.enchantment.DodgeProcResolver DODGE =
             new com.cosmicpve.combat.enchantment.DodgeProcResolver(MASKS);
     private static final SelfDestructEventBridge SELF_DESTRUCT_EVENTS = new SelfDestructEventBridge();

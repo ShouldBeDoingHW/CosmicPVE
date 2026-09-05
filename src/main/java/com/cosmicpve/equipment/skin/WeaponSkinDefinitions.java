@@ -17,6 +17,7 @@ public final class WeaponSkinDefinitions {
     public static final Identifier BOOSTED_CHAINSAW = CosmicPVE.id("boosted_chainsaw");
     public static final Identifier MAUIS_HOOK = CosmicPVE.id("mauis_hook");
     public static final Identifier STORMBRINGER = CosmicPVE.id("stormbringer");
+    public static final Identifier SEASONS_BEATINGS = CosmicPVE.id("seasons_beatings");
 
     private static final Map<Identifier, WeaponSkinDefinition> DEFINITIONS = List.of(
             definition(BOOSTED_CHAINSAW, 0xCCA00A, WeaponSkinDefinition.WeaponKind.AXE,
@@ -28,7 +29,10 @@ public final class WeaponSkinDefinitions {
                             Component.translatable("weapon_skin.cosmicpve.mauis_hook.effect.steal")), List.of()),
             definition(STORMBRINGER, 0x224B57, WeaponSkinDefinition.WeaponKind.AXE,
                     List.of(Component.translatable("weapon_skin.cosmicpve.stormbringer.effect.lightning"),
-                            Component.translatable("weapon_skin.cosmicpve.stormbringer.effect.defense")), List.of())
+                            Component.translatable("weapon_skin.cosmicpve.stormbringer.effect.defense")), List.of()),
+            definition(SEASONS_BEATINGS, 0x1B943A, WeaponSkinDefinition.WeaponKind.SWORD,
+                    List.of(Component.translatable("weapon_skin.cosmicpve.seasons_beatings.effect.defense"),
+                            Component.translatable("weapon_skin.cosmicpve.seasons_beatings.effect.slowness")), List.of())
     ).stream().collect(Collectors.toUnmodifiableMap(WeaponSkinDefinition::id, Function.identity()));
 
     private WeaponSkinDefinitions() {}

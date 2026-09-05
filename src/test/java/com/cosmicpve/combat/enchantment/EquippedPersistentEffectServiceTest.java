@@ -25,4 +25,16 @@ class EquippedPersistentEffectServiceTest {
                 new MobEffectInstance(MobEffects.NIGHT_VISION, 600, 0, false, true, true),
                 EquippedPersistentEffectService.GLOWING_LEASE_TICKS));
     }
+
+    @Test void genericLeaseSupportsInvisibleJumpBoostWithoutChangingGlowingPolicy() {
+        var lease=EquippedPersistentEffectService.managed(MobEffects.JUMP_BOOST,60);
+        assertEquals(60,lease.getDuration());
+        assertEquals(0,lease.getAmplifier());
+        assertTrue(EquippedPersistentEffectService.isManaged(lease,60));
+        assertTrue(lease.isAmbient());
+        assertFalse(lease.isVisible());
+        assertFalse(lease.showIcon());
+        assertEquals(600,EquippedPersistentEffectService.GLOWING_LEASE_TICKS);
+        assertEquals(300,EquippedPersistentEffectService.GLOWING_REFRESH_AT);
+    }
 }

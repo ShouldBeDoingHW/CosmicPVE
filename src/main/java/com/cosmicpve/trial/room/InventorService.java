@@ -109,10 +109,11 @@ public final class InventorService {
         Attempt attempt = attempts.get(session.sessionId());
         if (attempt == null) return;
         if (--attempt.activationTicks <= 0) {
-            activateRandomStation(attempt);
+            boolean activated = activateRandomStation(attempt);
             attempt.activationTicks = nextActivation(attempt.random);
             syncBeacons(level, attempt);
             syncBoss(level, attempt);
+            if (activated) announceBeacon(level, session);
         }
         if (--attempt.hazardTicks <= 0) {
             attempt.hazardTicks = HAZARD_INTERVAL_TICKS;
@@ -172,10 +173,14 @@ public final class InventorService {
         player.sendSystemMessage(net.minecraft.network.chat.Component.literal(station.name() + " workstation shut down!"));
     }
 
-    public boolean forceActivation(ServerLevel level, UUID sessionId) {
-        Attempt attempt = attempts.get(sessionId);
+    public boolean forceActivation(ServerLevel level, TrialSession session) {
+        Attempt attempt = attempts.get(session.sessionId());
         if (attempt == null) return false;
-        boolean changed = activateRandomStation(attempt); syncBeacons(level, attempt); syncBoss(level, attempt); return changed;
+        boolean changed = activateRandomStation(attempt);
+        syncBeacons(level, attempt);
+        syncBoss(level, attempt);
+        if (changed) announceBeacon(level, session);
+        return changed;
     }
 
     static boolean activateRandomStation(Attempt attempt) {
@@ -314,6 +319,15 @@ public final class InventorService {
     private static void syncBeacons(ServerLevel level, Attempt attempt) {
         attempt.stations.values().forEach(state -> level.setBlock(state.beacon,
                 state.active ? Blocks.BEACON.defaultBlockState() : Blocks.AIR.defaultBlockState(), 3));
+    }
+
+    private static void announceBeacon(ServerLevel level, TrialSession session) {
+        for (UUID participant : session.participants()) {
+            if (!session.activeParticipant(participant)) continue;
+            ServerPlayer player = level.getServer().getPlayerList().getPlayer(participant);
+            if (player != null) player.sendSystemMessage(net.minecraft.network.chat.Component.translatable(
+                    "message.cosmicpve.trial.inventor.beacon_spawned"));
+        }
     }
 
     static final class Attempt {

@@ -34,7 +34,7 @@ class WeaponSkinFoundationTest {
 
     @Test void definitionsAreStableDiscoverableAndApplicableToMultipleVanillaTiers() {
         assertEquals(List.of(WeaponSkinDefinitions.BOOSTED_CHAINSAW, WeaponSkinDefinitions.MAUIS_HOOK,
-                WeaponSkinDefinitions.STORMBRINGER), WeaponSkinDefinitions.ids());
+                WeaponSkinDefinitions.SEASONS_BEATINGS, WeaponSkinDefinitions.STORMBRINGER), WeaponSkinDefinitions.ids());
         assertTrue(WeaponSkinDefinitions.find(WeaponSkinDefinitions.BOOSTED_CHAINSAW).orElseThrow()
                 .accepts(new ItemStack(Items.WOODEN_AXE)));
         assertTrue(WeaponSkinDefinitions.find(WeaponSkinDefinitions.STORMBRINGER).orElseThrow()
@@ -42,6 +42,10 @@ class WeaponSkinFoundationTest {
         assertTrue(WeaponSkinDefinitions.find(WeaponSkinDefinitions.MAUIS_HOOK).orElseThrow()
                 .accepts(new ItemStack(Items.IRON_SWORD)));
         assertFalse(WeaponSkinDefinitions.find(WeaponSkinDefinitions.MAUIS_HOOK).orElseThrow()
+                .accepts(new ItemStack(Items.DIAMOND_AXE)));
+        assertTrue(WeaponSkinDefinitions.find(WeaponSkinDefinitions.SEASONS_BEATINGS).orElseThrow()
+                .accepts(new ItemStack(Items.DIAMOND_SWORD)));
+        assertFalse(WeaponSkinDefinitions.find(WeaponSkinDefinitions.SEASONS_BEATINGS).orElseThrow()
                 .accepts(new ItemStack(Items.DIAMOND_AXE)));
     }
 
@@ -52,6 +56,8 @@ class WeaponSkinFoundationTest {
                 WeaponSkinDefinition.WeaponKind.SWORD, 2);
         assertSkinLore(WeaponSkinDefinitions.STORMBRINGER, 0x224B57,
                 WeaponSkinDefinition.WeaponKind.AXE, 2);
+        assertSkinLore(WeaponSkinDefinitions.SEASONS_BEATINGS, 0x1B943A,
+                WeaponSkinDefinition.WeaponKind.SWORD, 2);
     }
 
     @Test void typedDataCodecsRejectInvalidVersions() {
@@ -157,6 +163,8 @@ class WeaponSkinFoundationTest {
         assertEquals(30, WeaponSkinCombatResolver.STORM_SLOWNESS_TICKS);
         assertEquals(1, WeaponSkinCombatResolver.STORM_SLOWNESS_AMPLIFIER);
         assertEquals(0.98, WeaponSkinCombatResolver.STORM_INCOMING_MULTIPLIER);
+        assertEquals(0.10, WeaponSkinCombatResolver.SEASONS_OUTGOING);
+        assertEquals(0.95, WeaponSkinCombatResolver.SEASONS_INCOMING_MULTIPLIER);
         assertEquals(1.0F, WeaponSkinFeedback.ATTACH_PITCH);
         assertTrue(WeaponSkinFeedback.REMOVE_PITCH < WeaponSkinFeedback.ATTACH_PITCH);
         var packet = WeaponSkinCombatResolver.stormPacket();
@@ -195,12 +203,16 @@ class WeaponSkinFoundationTest {
     }
 
     @Test void suppliedTexturesAreUsableTransparentThirtyTwoPixelResources() throws Exception {
-        for (String name : List.of("boosted_chainsaw", "mauis_hook", "stormbringer")) {
+        for (String name : List.of("boosted_chainsaw", "mauis_hook", "seasons_beatings", "stormbringer")) {
             BufferedImage image = ImageIO.read(java.util.Objects.requireNonNull(getClass().getResourceAsStream(
                     "/assets/cosmicpve/textures/item/" + name + ".png")));
             assertEquals(32, image.getWidth());
             assertEquals(32, image.getHeight());
             assertTrue(image.getColorModel().hasAlpha());
+            boolean transparent=false;
+            for(int y=0;y<image.getHeight()&&!transparent;y++) for(int x=0;x<image.getWidth();x++)
+                if(((image.getRGB(x,y)>>>24)&0xFF)<255) { transparent=true; break; }
+            assertTrue(transparent,name+" must retain transparent background pixels");
             assertEquals("cosmicpve:item/" + name, itemModel(name));
         }
     }

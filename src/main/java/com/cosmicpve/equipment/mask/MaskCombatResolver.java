@@ -12,6 +12,12 @@ import com.cosmicpve.content.definition.mask.MaskBehavior;
 import java.util.List;
 import net.minecraft.tags.DamageTypeTags;
 import net.neoforged.neoforge.common.NeoForgeMod;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import com.cosmicpve.equipment.enchantment.CosmicEnchantmentSpecs;
+import com.cosmicpve.equipment.enchantment.CosmicEnchantmentTier;
+import com.cosmicpve.equipment.enchantment.HolyWhiteScrollService;
 
 public final class MaskCombatResolver implements OutgoingDamageContributor, IncomingDamageContributor {
     /** Legacy diagnostic ID retained for compatibility; Turkey now contributes to Dodge's single roll. */
@@ -21,9 +27,14 @@ public final class MaskCombatResolver implements OutgoingDamageContributor, Inco
 
     @Override public List<OutgoingDamageContribution> resolve(CombatContext context) {
         if (context.attacker() == null || context.channel() != DamageChannel.ORDINARY) return List.of();
-        double bonus = masks.resolve(context.attacker()).stream().mapToDouble(definition -> switch (definition.behavior()) {
+        var equippedMasks = masks.resolve(context.attacker());
+        double bonus = equippedMasks.stream().mapToDouble(definition -> switch (definition.behavior()) {
             case PURGE -> .03; case PARTY -> .01; case DRAGON -> .02; default -> 0.0;
         }).sum();
+        if (equippedMasks.stream().anyMatch(definition -> definition.behavior() == MaskBehavior.THANOS)
+                && targetHasActualMastery(context.target())) bonus += .06;
+        if (equippedMasks.stream().anyMatch(definition -> definition.behavior() == MaskBehavior.MONOPOLY))
+            bonus += monopolyOutgoingBonus(holyGearCount(context.attacker()));
         return bonus == 0.0 ? List.of() : List.of(new OutgoingDamageContribution(CosmicPVE.id("mask_loadout"), bonus));
     }
 
@@ -45,6 +56,50 @@ public final class MaskCombatResolver implements OutgoingDamageContributor, Inco
 
     static boolean dragonProtects(DamageChannel channel, boolean fire, boolean poison) {
         return channel == DamageChannel.ORDINARY && (fire || poison);
+    }
+
+    static int holyGearCount(net.minecraft.world.entity.LivingEntity entity) {
+        return holyGearCount(entity.getMainHandItem(), List.of(
+                entity.getItemBySlot(EquipmentSlot.HEAD), entity.getItemBySlot(EquipmentSlot.CHEST),
+                entity.getItemBySlot(EquipmentSlot.LEGS), entity.getItemBySlot(EquipmentSlot.FEET)));
+    }
+
+    static int holyGearCount(ItemStack mainHand, Iterable<ItemStack> armor) {
+        int count = HolyWhiteScrollService.isHoly(mainHand) ? 1 : 0;
+        for (ItemStack stack : armor) if (HolyWhiteScrollService.isHoly(stack)) count++;
+        return count;
+    }
+
+    static double monopolyOutgoingBonus(int holyGearPieces) {
+        if (holyGearPieces < 0 || holyGearPieces > 5) throw new IllegalArgumentException("Holy gear count must be 0..5");
+        return holyGearPieces * .01;
+    }
+
+    static boolean anyActualMastery(Iterable<ItemStack> gear) {
+        for (ItemStack stack : gear) if (hasActualMastery(stack)) return true;
+        return false;
+    }
+
+    static List<ItemStack> currentGear(net.minecraft.world.entity.LivingEntity entity) {
+        var gear = new java.util.ArrayList<ItemStack>(5);
+        gear.add(entity.getMainHandItem());
+        for (EquipmentSlot slot : new EquipmentSlot[]{EquipmentSlot.HEAD, EquipmentSlot.CHEST,
+                EquipmentSlot.LEGS, EquipmentSlot.FEET}) gear.add(entity.getItemBySlot(slot));
+        return List.copyOf(gear);
+    }
+
+    static boolean targetHasActualMastery(net.minecraft.world.entity.LivingEntity target) {
+        if (target == null) return false;
+        return anyActualMastery(currentGear(target));
+    }
+
+    static boolean hasActualMastery(ItemStack stack) {
+        for (var entry : EnchantmentHelper.getEnchantmentsForCrafting(stack).entrySet()) {
+            var key = entry.getKey().unwrapKey();
+            if (key.isPresent() && CosmicEnchantmentSpecs.find(key.orElseThrow().identifier())
+                    .map(spec -> spec.tier() == CosmicEnchantmentTier.MASTERY).orElse(false)) return true;
+        }
+        return false;
     }
 
 }

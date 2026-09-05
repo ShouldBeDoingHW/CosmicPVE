@@ -64,6 +64,9 @@ public final class InventorGameTests {
         var level = helper.getLevel(); var registry = level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
         var boss = ModEntities.INVENTOR.get().create(level, EntitySpawnReason.EVENT);
         helper.assertTrue(boss != null, "Inventor entity must construct");
+        helper.assertTrue(boss.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE)
+                        == com.cosmicpve.entity.inventor.InventorEntity.ATTACK_DAMAGE,
+                "Inventor must use the configured 3.5 base attack damage");
         InventorService.equipBoss(boss, registry, 4);
         helper.assertTrue(boss.getMainHandItem().is(Items.NETHERITE_AXE), "Four-player Inventor must use Netherite Axe");
         helper.assertTrue(level(boss.getMainHandItem(), registry, ModEnchantments.SOUL_SIPHON) == 4
@@ -92,6 +95,12 @@ public final class InventorGameTests {
         helper.assertTrue(player.leggings().has(ModDataComponents.HEROIC.get())
                 && player.leggings().get(ModDataComponents.CUSTOM_ENCHANT_META.get()).transmogSorted(),
                 "Player leggings must be Heroic and Transmogged");
+        helper.assertTrue(player.healingPotions().size() == 2
+                        && player.healingPotions().stream().allMatch(stack -> stack.is(Items.SPLASH_POTION)
+                                && stack.getCount() == 4
+                                && stack.get(net.minecraft.core.component.DataComponents.POTION_CONTENTS)
+                                        .is(net.minecraft.world.item.alchemy.Potions.HEALING)),
+                "Inventor loadout must contain two stacks of four Healing I splash potions");
         helper.assertTrue(player.bread().is(Items.BREAD)
                         && player.bread().getCount() == TrialRoomLoadoutService.INVENTOR_BREAD
                         && TrialRoomLoadoutService.INVENTOR_BREAD_SLOT == 8,

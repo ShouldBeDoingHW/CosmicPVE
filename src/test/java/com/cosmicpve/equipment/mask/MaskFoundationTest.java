@@ -38,6 +38,12 @@ class MaskFoundationTest {
         assertTrue(MaskCombatResolver.dragonProtects(com.cosmicpve.combat.api.DamageChannel.ORDINARY,false,true));
         assertFalse(MaskCombatResolver.dragonProtects(com.cosmicpve.combat.api.DamageChannel.ORDINARY,false,false));
         assertFalse(MaskCombatResolver.dragonProtects(com.cosmicpve.combat.api.DamageChannel.TRUE,true,true));
+        for (int pieces=0; pieces<=5; pieces++) assertEquals(pieces * .01,
+                MaskCombatResolver.monopolyOutgoingBonus(pieces));
+        assertEquals(.55, com.cosmicpve.equipment.enchantment.HolyWhiteScrollService.preservationChance(true));
+        assertEquals(.50, com.cosmicpve.equipment.enchantment.HolyWhiteScrollService.preservationChance(false));
+        assertEquals(60,MaskRuntimeEventBridge.GUCCI_LEASE_TICKS);
+        assertEquals(20,MaskRuntimeEventBridge.GUCCI_REFRESH_AT);
     }
     @Test void attachedLoreIsCompactIdentityOnlyAndOrdered() {
         var masks=List.of(
@@ -80,6 +86,9 @@ class MaskFoundationTest {
                 dragon.get("profile_texture").getAsString());
         assertEquals("Separates a Multi-Mask into its individual Masks.",
                 lang.get("tooltip.cosmicpve.mask_splicer.purpose").getAsString());
+        assertEquals("Thanos",lang.get("mask.cosmicpve.thanos").getAsString());
+        assertEquals("Monopoly",lang.get("mask.cosmicpve.monopoly").getAsString());
+        assertEquals("Gucci",lang.get("mask.cosmicpve.gucci").getAsString());
     }
     @Test void loreSupportsSingleTwoThreeAndFiveInStableOrder() {
         var definitions=new java.util.ArrayList<com.cosmicpve.content.definition.mask.MaskDefinition>();
@@ -107,5 +116,49 @@ class MaskFoundationTest {
         var splicer=JsonParser.parseReader(new java.io.InputStreamReader(java.util.Objects.requireNonNull(
                 getClass().getResourceAsStream("/assets/cosmicpve/items/mask_splicer.json")))).getAsJsonObject().getAsJsonObject("model");
         assertEquals("minecraft:item/shears",splicer.get("model").getAsString());
+    }
+
+    @Test void monopolyCountsOnlyPersistentHolyStateOnCanonicalGear() {
+        var held=new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.DIAMOND_SWORD);
+        var armor=new java.util.ArrayList<net.minecraft.world.item.ItemStack>();
+        armor.add(new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.DIAMOND_HELMET));
+        armor.add(new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.DIAMOND_CHESTPLATE));
+        armor.add(new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.DIAMOND_LEGGINGS));
+        armor.add(new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.DIAMOND_BOOTS));
+        assertEquals(0,MaskCombatResolver.holyGearCount(held,armor));
+        held.set(com.cosmicpve.registry.ModDataComponents.HOLY.get(),true);
+        assertEquals(1,MaskCombatResolver.holyGearCount(held,armor));
+        for(int i=0;i<armor.size();i++) {
+            armor.get(i).set(com.cosmicpve.registry.ModDataComponents.HOLY.get(),true);
+            assertEquals(i+2,MaskCombatResolver.holyGearCount(held,armor));
+        }
+    }
+
+    @Test void thanosDetectsActualMasteryAndIgnoresOrdinaryCosmicEnchantments() {
+        var registry=new net.minecraft.core.MappedRegistry<net.minecraft.world.item.enchantment.Enchantment>(
+                net.minecraft.core.registries.Registries.ENCHANTMENT,com.mojang.serialization.Lifecycle.stable());
+        var supported=net.minecraft.core.HolderSet.direct(
+                net.minecraft.core.registries.BuiltInRegistries.ITEM.wrapAsHolder(net.minecraft.world.item.Items.DIAMOND_CHESTPLATE));
+        var definition=net.minecraft.world.item.enchantment.Enchantment.definition(supported,1,5,
+                net.minecraft.world.item.enchantment.Enchantment.constantCost(1),
+                net.minecraft.world.item.enchantment.Enchantment.constantCost(1),1,
+                net.minecraft.world.entity.EquipmentSlotGroup.CHEST);
+        var deathPact=registry.register(com.cosmicpve.registry.ModEnchantments.DEATH_PACT,
+                new net.minecraft.world.item.enchantment.Enchantment(net.minecraft.network.chat.Component.literal("Death Pact"),definition,
+                        net.minecraft.core.HolderSet.empty(),net.minecraft.core.component.DataComponentMap.EMPTY),
+                net.minecraft.core.RegistrationInfo.BUILT_IN);
+        var execute=registry.register(com.cosmicpve.registry.ModEnchantments.EXECUTE,
+                new net.minecraft.world.item.enchantment.Enchantment(net.minecraft.network.chat.Component.literal("Execute"),definition,
+                        net.minecraft.core.HolderSet.empty(),net.minecraft.core.component.DataComponentMap.EMPTY),
+                net.minecraft.core.RegistrationInfo.BUILT_IN);
+        registry.freeze();
+        var ordinary=new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.DIAMOND_CHESTPLATE);
+        net.minecraft.world.item.enchantment.EnchantmentHelper.updateEnchantments(ordinary,m -> m.set(execute,5));
+        assertFalse(MaskCombatResolver.hasActualMastery(ordinary));
+        var mastery=new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.DIAMOND_CHESTPLATE);
+        net.minecraft.world.item.enchantment.EnchantmentHelper.updateEnchantments(mastery,m -> m.set(deathPact,1));
+        assertTrue(MaskCombatResolver.hasActualMastery(mastery));
+        assertTrue(MaskCombatResolver.anyActualMastery(List.of(ordinary,mastery)));
+        assertFalse(MaskCombatResolver.anyActualMastery(List.of(ordinary)));
     }
 }

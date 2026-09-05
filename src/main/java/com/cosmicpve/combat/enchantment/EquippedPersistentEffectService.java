@@ -88,10 +88,16 @@ public final class EquippedPersistentEffectService {
                        Holder<MobEffect> effect, int leaseTicks, int refreshAt) {
         var stack = entity.getItemBySlot(slot);
         int level = enchantments.resolve(stack, virtualGrants.apply(stack)).level(id);
+        reconcileLease(entity, effect, level > 0, leaseTicks, refreshAt);
+    }
+
+    /** Reusable authoritative owned-effect seam for equipment whose activation is resolved elsewhere. */
+    public void reconcileLease(LivingEntity entity, Holder<MobEffect> effect, boolean active,
+            int leaseTicks, int refreshAt) {
         var effects = owned.computeIfAbsent(entity, ignored -> new java.util.HashMap<>());
         boolean ours = effects.containsKey(effect);
         var current = entity.getEffect(effect);
-        if (level > 0) {
+        if (active) {
             if (ours && !isManaged(current, leaseTicks)) {
                 effects.remove(effect); // an external source superseded our lease
                 return;

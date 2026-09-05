@@ -26,7 +26,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 
-/** Composes the three implemented skin behaviors into the existing combat seams. */
+/** Composes implemented skin behaviors into the existing combat seams. */
 public final class WeaponSkinCombatResolver
         implements OutgoingDamageContributor, IncomingDamageContributor, ProcCandidateResolver {
     public static final double MAUI_OUTGOING = 0.04;
@@ -36,6 +36,8 @@ public final class WeaponSkinCombatResolver
     public static final int STORM_SLOWNESS_TICKS = 30;
     public static final int STORM_SLOWNESS_AMPLIFIER = 1;
     public static final double STORM_INCOMING_MULTIPLIER = 0.98;
+    public static final double SEASONS_OUTGOING = 0.10;
+    public static final double SEASONS_INCOMING_MULTIPLIER = 0.95;
 
     private final WeaponSkinResolver skins;
     private final CombatStackService stacks;
@@ -51,20 +53,26 @@ public final class WeaponSkinCombatResolver
     @Override
     public List<OutgoingDamageContribution> resolve(com.cosmicpve.combat.api.CombatContext context) {
         if (context.channel() != DamageChannel.ORDINARY || context.category() != AttackCategory.MELEE) return List.of();
-        return skins.resolve(context.weaponSnapshot().stack())
-                .filter(definition -> definition.id().equals(WeaponSkinDefinitions.MAUIS_HOOK))
-                .map(definition -> List.of(new OutgoingDamageContribution(definition.id(), MAUI_OUTGOING)))
-                .orElse(List.of());
+        return skins.resolve(context.weaponSnapshot().stack()).map(definition -> {
+            if (definition.id().equals(WeaponSkinDefinitions.MAUIS_HOOK))
+                return List.of(new OutgoingDamageContribution(definition.id(), MAUI_OUTGOING));
+            if (definition.id().equals(WeaponSkinDefinitions.SEASONS_BEATINGS)
+                    && context.target() != null && context.target().hasEffect(MobEffects.SLOWNESS))
+                return List.of(new OutgoingDamageContribution(definition.id(), SEASONS_OUTGOING));
+            return List.<OutgoingDamageContribution>of();
+        }).orElse(List.of());
     }
 
     @Override
     public List<IncomingDamageContribution> resolveIncoming(com.cosmicpve.combat.api.CombatContext context) {
         if (context.channel() != DamageChannel.ORDINARY || context.target() == null) return List.of();
-        return skins.resolve(context.target().getMainHandItem())
-                .filter(definition -> definition.id().equals(WeaponSkinDefinitions.STORMBRINGER))
-                .map(definition -> List.of(new IncomingDamageContribution(
-                        definition.id(), STORM_INCOMING_MULTIPLIER)))
-                .orElse(List.of());
+        return skins.resolve(context.target().getMainHandItem()).map(definition -> {
+            if (definition.id().equals(WeaponSkinDefinitions.STORMBRINGER))
+                return List.of(new IncomingDamageContribution(definition.id(), STORM_INCOMING_MULTIPLIER));
+            if (definition.id().equals(WeaponSkinDefinitions.SEASONS_BEATINGS))
+                return List.of(new IncomingDamageContribution(definition.id(), SEASONS_INCOMING_MULTIPLIER));
+            return List.<IncomingDamageContribution>of();
+        }).orElse(List.of());
     }
 
     @Override

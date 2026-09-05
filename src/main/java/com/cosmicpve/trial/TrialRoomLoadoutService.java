@@ -67,6 +67,9 @@ public final class TrialRoomLoadoutService {
     public static final int CAVE_DIVING_COOKED_COD = 15;
     public static final int INVENTOR_BREAD = 16;
     public static final int INVENTOR_BREAD_SLOT = 8;
+    public static final int INVENTOR_HEALING_POTION_STACKS = 2;
+    public static final int INVENTOR_HEALING_POTIONS_PER_STACK = 4;
+    public static final int INVENTOR_HEALING_POTION_FIRST_SLOT = 1;
     public static final java.util.List<net.minecraft.world.item.Item> RAIDING_RAINBOW_ARMOR = java.util.List.of(
             Items.NETHERITE_HELMET, Items.NETHERITE_CHESTPLATE, Items.NETHERITE_LEGGINGS, Items.NETHERITE_BOOTS);
     private final TrialInventoryTransactionService inventories;
@@ -85,6 +88,10 @@ public final class TrialRoomLoadoutService {
         player.setItemSlot(EquipmentSlot.CHEST, loadout.chestplate());
         player.setItemSlot(EquipmentSlot.LEGS, loadout.leggings());
         player.setItemSlot(EquipmentSlot.FEET, loadout.boots());
+        for (int index = 0; index < loadout.healingPotions().size(); index++) {
+            player.getInventory().setItem(INVENTOR_HEALING_POTION_FIRST_SLOT + index,
+                    loadout.healingPotions().get(index).copy());
+        }
         if (!player.getInventory().getItem(INVENTOR_BREAD_SLOT).isEmpty())
             throw new IllegalStateException("Inventor Hotbar Slot 9 is already occupied");
         player.getInventory().setItem(INVENTOR_BREAD_SLOT, loadout.bread());
@@ -110,11 +117,16 @@ public final class TrialRoomLoadoutService {
         ItemStack boots = inventorArmor(Items.IRON_BOOTS, registry, Map.of(
                 ModEnchantments.ARMORED, 4, ModEnchantments.LUCK, 10, ModEnchantments.ANGELIC, 5,
                 ModEnchantments.DODGE, 5, ModEnchantments.STORMCALLER, 5));
+        ItemStack healing = net.minecraft.world.item.alchemy.PotionContents.createItemStack(
+                Items.SPLASH_POTION, net.minecraft.world.item.alchemy.Potions.HEALING);
+        healing.setCount(INVENTOR_HEALING_POTIONS_PER_STACK);
         return new InventorLoadout(ashoka, veil, chestplate, leggings, boots,
+                java.util.stream.IntStream.range(0, INVENTOR_HEALING_POTION_STACKS)
+                        .mapToObj(ignored -> healing.copy()).toList(),
                 new ItemStack(Items.BREAD, INVENTOR_BREAD));
     }
     public record InventorLoadout(ItemStack weapon, ItemStack helmet, ItemStack chestplate, ItemStack leggings,
-                                  ItemStack boots, ItemStack bread) {}
+                                  ItemStack boots, List<ItemStack> healingPotions, ItemStack bread) {}
     public void applyDevelopment(ServerPlayer player) {
         clear(player);
         ItemStack marker = new ItemStack(Items.STICK);
