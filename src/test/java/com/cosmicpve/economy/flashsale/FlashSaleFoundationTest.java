@@ -19,8 +19,8 @@ import org.junit.jupiter.api.Test;
 
 class FlashSaleFoundationTest {
     @Test void catalogPreservesCanonicalRowsAndExplicitDeferredDependencies() {
-        assertEquals(21, FlashSaleCatalog.CANONICAL_ROWS.size());
-        assertEquals(20, FlashSaleCatalog.productionRows().size());
+        assertEquals(22, FlashSaleCatalog.CANONICAL_ROWS.size());
+        assertEquals(21, FlashSaleCatalog.productionRows().size());
         assertFalse(FlashSaleCatalog.find("abandoned_spaceship_portal").orElseThrow().productionSelectable());
         assertEquals("memory_chest", FlashSaleCatalog.MEMORY_CHEST.id());
         assertTrue(FlashSaleCatalog.CANONICAL_ROWS.stream().noneMatch(row -> row.id().equals("memory_chest")));

@@ -12,7 +12,7 @@ public final class CactusBehavior {
     public static final RecursionPolicy RECURSION_POLICY = RecursionPolicy.NO_PROCS;
     private CactusBehavior() {}
     public static int equippedLevel(LivingEntity wearer) {
-        return EnchantmentLevels.onStack(wearer.getItemBySlot(EquipmentSlot.LEGS), ModEnchantments.CACTUS);
+        return EnchantmentLevels.onStack(wearer, wearer.getItemBySlot(EquipmentSlot.LEGS), ModEnchantments.CACTUS);
     }
     public static double chance(int level) { return Math.min(1.0, CHANCE_PER_LEVEL * Math.max(0, level)); }
     public static TrueDamagePacket packet() { return TrueDamagePacket.standard(ModEnchantments.CACTUS.identifier(), TRUE_DAMAGE); }

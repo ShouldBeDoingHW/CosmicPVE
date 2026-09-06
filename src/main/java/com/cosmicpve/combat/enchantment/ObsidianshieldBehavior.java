@@ -26,7 +26,7 @@ public final class ObsidianshieldBehavior implements IncomingDamageContributor {
     public List<IncomingDamageContribution> resolveIncoming(CombatContext context) {
         if (context.target() == null || context.damageSource() == null
                 || !context.damageSource().is(DamageTypeTags.IS_FIRE)) return List.of();
-        int level = enchantments.resolve(context.target().getItemBySlot(EquipmentSlot.LEGS), List.of())
+        int level = enchantments.resolve(context.target(), context.target().getItemBySlot(EquipmentSlot.LEGS), List.of())
                 .level(ModEnchantments.OBSIDIANSHIELD.identifier());
         level = Math.min(2, Math.max(0, level));
         return level == 0 ? List.of() : List.of(new IncomingDamageContribution(

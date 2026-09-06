@@ -39,6 +39,10 @@ import com.cosmicpve.reward.lootbox.AnimatedLootboxItem;
 import com.cosmicpve.upgrade.UpgradeCrystalItem;
 import com.cosmicpve.equipment.enchantment.HolyWhiteScrollItem;
 import com.cosmicpve.reward.lootbox.SpaceDustBundleItem;
+import com.cosmicpve.adventure.CallOfForestItem;
+import com.cosmicpve.adventure.DenseWoodlandsScrapItem;
+import com.cosmicpve.adventure.AdventureCompassItem;
+import com.cosmicpve.data.component.CallOfForestData;
 
 public final class ModItems {
     private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(CosmicPVE.MOD_ID);
@@ -148,6 +152,19 @@ public final class ModItems {
     public static final DeferredItem<TrialPortalItem> TRIAL_PORTAL = ITEMS.registerItem(
             "trial_portal", TrialPortalItem::new, properties -> properties.stacksTo(64));
 
+    private static final java.util.List<DeferredItem<CallOfForestItem>> PRODUCTION_CALLS = new java.util.ArrayList<>();
+    public static final DeferredItem<AnimatedLootboxItem> MYSTERY_CALL_OF_ADVENTURE = ITEMS.registerItem(
+            "mystery_call_of_adventure", properties -> new AnimatedLootboxItem(properties,
+                    AnimatedLootboxItem.Kind.MYSTERY_CALL_OF_ADVENTURE), properties -> properties.stacksTo(1));
+    public static final DeferredItem<CallOfForestItem> CALL_OF_FOREST_10 = callOfForest("call_of_forest_10", 10);
+    public static final DeferredItem<CallOfForestItem> CALL_OF_FOREST_20 = callOfForest("call_of_forest_20", 20);
+    public static final DeferredItem<CallOfForestItem> CALL_OF_FOREST_30 = callOfForest("call_of_forest_30", 30);
+    public static final DeferredItem<DenseWoodlandsScrapItem> DENSE_WOODLANDS_SCRAP = ITEMS.registerItem(
+            "dense_woodlands_scrap", DenseWoodlandsScrapItem::new, properties -> properties.stacksTo(64)
+                    .component(net.minecraft.core.component.DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true));
+    public static final DeferredItem<AdventureCompassItem> ADVENTURE_COMPASS = ITEMS.registerItem(
+            "adventure_compass", AdventureCompassItem::new, properties -> properties.stacksTo(1));
+
     public static final DeferredItem<ConquestFlareItem> CONQUEST_CHEST_FLARE = ITEMS.registerItem(
             "conquest_chest_flare", ConquestFlareItem::new, properties -> properties.stacksTo(64));
 
@@ -172,6 +189,19 @@ public final class ModItems {
     private static DeferredItem<TrialTrinketItem> trinket(String name, TrialTrinketType type, int value) {
         return ITEMS.registerItem(name, TrialTrinketItem::new, properties -> properties.stacksTo(64)
                 .component(ModDataComponents.TRIAL_TRINKET.get(), new TrialTrinketData(type, value)));
+    }
+
+    private static DeferredItem<CallOfForestItem> callOfForest(String name, int minutes) {
+        var item = ITEMS.registerItem(name, CallOfForestItem::new, properties -> properties.stacksTo(64)
+                .component(ModDataComponents.CALL_OF_FOREST.get(), new CallOfForestData(CallOfForestData.CURRENT_DATA_VERSION, minutes))
+                .component(net.minecraft.core.component.DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true));
+        PRODUCTION_CALLS.add(item);
+        return item;
+    }
+
+    /** Fresh canonical stacks, one per registered production Call SKU, without activating a Call. */
+    public static java.util.List<net.minecraft.world.item.ItemStack> productionCalls() {
+        return PRODUCTION_CALLS.stream().map(item -> new net.minecraft.world.item.ItemStack(item.get())).toList();
     }
 
     private static DeferredItem<MysterySpawnerItem> mysterySpawner(String name, MysterySpawnerTier tier) {

@@ -69,7 +69,7 @@ public final class Step8FGameTests {
         var generator = new RewardGeneratorService();
         var random = helper.getLevel().getRandom();
         var context = new RewardGenerationContext(helper.getLevel().registryAccess(), random, null);
-        var expectedCounts = Map.of("ultimate", 20, "legendary", 22, "mastery", 25);
+        var expectedCounts = Map.of("ultimate", 21, "legendary", 22, "mastery", 25);
         expectedCounts.forEach((tier, expected) -> {
             var table = CosmicContent.repository().requireRewardTable(CosmicPVE.id("space_chest/" + tier));
             helper.assertTrue(table.entries().size() == expected, tier + " Space Chest row count must be exact");
@@ -77,12 +77,12 @@ public final class Step8FGameTests {
                     tier + " reward must construct: " + entry.reward()));
         });
         var impossible = CosmicContent.repository().requireRewardTable(CosmicPVE.id("trial/impossible"));
-        helper.assertTrue(impossible.entries().size() == 17 && impossible.totalWeight() == 155,
+        helper.assertTrue(impossible.entries().size() == 18 && impossible.totalWeight() == 164,
                 "Step 8L Impossible table must include the now-constructible Fame Trinket row");
         impossible.entries().forEach(entry -> helper.assertTrue(generator.generate(entry.reward(), context).isPresent(),
                 "Impossible reward must construct: " + entry.reward()));
-        helper.assertTrue(FlashSaleCatalog.CANONICAL_ROWS.size() == 21, "Canonical Flash Sale row count must remain 21");
-        helper.assertTrue(FlashSaleCatalog.productionRows().size() == 20,
+        helper.assertTrue(FlashSaleCatalog.CANONICAL_ROWS.size() == 22, "Canonical Flash Sale row count must be 22");
+        helper.assertTrue(FlashSaleCatalog.productionRows().size() == 21,
                 "Only the unresolved Abandoned Spaceship Portal row may be nonselectable");
         FlashSaleCatalog.productionRows().forEach(entry -> helper.assertTrue(entry.create(random).isPresent(),
                 "Active Flash Sale reward must construct: " + entry.id()));

@@ -52,6 +52,7 @@ public final class WeaponSkinCombatResolver
 
     @Override
     public List<OutgoingDamageContribution> resolve(com.cosmicpve.combat.api.CombatContext context) {
+        if (com.cosmicpve.adventure.AdventureRules.restricted(context.attacker())) return List.of();
         if (context.channel() != DamageChannel.ORDINARY || context.category() != AttackCategory.MELEE) return List.of();
         return skins.resolve(context.weaponSnapshot().stack()).map(definition -> {
             if (definition.id().equals(WeaponSkinDefinitions.MAUIS_HOOK))
@@ -65,6 +66,7 @@ public final class WeaponSkinCombatResolver
 
     @Override
     public List<IncomingDamageContribution> resolveIncoming(com.cosmicpve.combat.api.CombatContext context) {
+        if (com.cosmicpve.adventure.AdventureRules.restricted(context.target())) return List.of();
         if (context.channel() != DamageChannel.ORDINARY || context.target() == null) return List.of();
         return skins.resolve(context.target().getMainHandItem()).map(definition -> {
             if (definition.id().equals(WeaponSkinDefinitions.STORMBRINGER))
@@ -77,6 +79,7 @@ public final class WeaponSkinCombatResolver
 
     @Override
     public List<ProcCandidate> resolve(ProcEvent event) {
+        if (com.cosmicpve.adventure.AdventureRules.restricted(event.attacker())) return List.of();
         if (event.hook() != ProcHook.ON_VALID_HIT || event.attacker() == null || event.target() == null
                 || event.combatResult().map(result -> result.context().category() != AttackCategory.MELEE).orElse(true)) {
             return List.of();

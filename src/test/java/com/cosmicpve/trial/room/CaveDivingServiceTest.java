@@ -98,6 +98,16 @@ class CaveDivingServiceTest {
         assertTrue(attempt.solved());
     }
 
+    @Test void rotatedWorldFacingSolutionMatchesAndDuplicateSherdsRemainExact() {
+        var sides=java.util.List.of(Items.ANGLER_POTTERY_SHERD,Items.ARCHER_POTTERY_SHERD,Items.BLADE_POTTERY_SHERD,Items.BREWER_POTTERY_SHERD);
+        var north=new CaveDivingService.PotAnswer(sides,Direction.NORTH);
+        var east=new CaveDivingService.PotAnswer(java.util.List.of(sides.get(2),sides.get(0),sides.get(3),sides.get(1)),Direction.EAST);
+        assertEquals(CaveDivingService.worldSides(north),CaveDivingService.worldSides(east));
+        assertTrue(CaveDivingService.matches(north,east));
+        var duplicate=new CaveDivingService.PotAnswer(java.util.List.of(sides.get(0),sides.get(0),sides.get(2),sides.get(3)),Direction.SOUTH);
+        assertEquals(2,CaveDivingService.worldSides(duplicate).stream().filter(i->i==sides.get(0)).count());
+    }
+
     private static java.util.Map<net.minecraft.world.item.Item,Integer> counts(java.util.List<net.minecraft.world.item.Item> values){
         var counts=new HashMap<net.minecraft.world.item.Item,Integer>(); values.forEach(value->counts.merge(value,1,Integer::sum)); return counts;
     }

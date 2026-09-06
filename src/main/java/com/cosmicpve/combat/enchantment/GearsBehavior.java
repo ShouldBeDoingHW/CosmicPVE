@@ -28,7 +28,7 @@ public final class GearsBehavior {
         var movement = entity.getAttribute(Attributes.MOVEMENT_SPEED);
         if (movement == null) return;
         int level = Math.min(3, Math.max(0,
-                EnchantmentLevels.onStack(entity.getItemBySlot(EquipmentSlot.FEET), ModEnchantments.GEARS)));
+                EnchantmentLevels.onStack(entity, entity.getItemBySlot(EquipmentSlot.FEET), ModEnchantments.GEARS)));
         double amount = movementBonus(level);
         var existing = movement.getModifier(MODIFIER_ID);
         if (amount == 0.0) {

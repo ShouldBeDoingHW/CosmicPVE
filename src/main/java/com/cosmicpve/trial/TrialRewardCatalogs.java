@@ -18,7 +18,8 @@ public final class TrialRewardCatalogs {
             row("+3 Minute Trial Trinket",3,1,true), row("+2 Insurance Trial Trinket",3,1,true),
             row("Unexamined Heroic Enchantment Book",5,1,true), row("Unexamined Mastery Enchantment Book",5,1,true),
             row("Conquest Chest Flare",5,1,true), row("Mystery Elite Spawner",5,1,true),
-            row("Mask Splicer",5,1,true), row("Heroic Crystal",5,1,true), row("Abandoned Spaceship Portal",5,1,false)));
+            row("Mask Splicer",5,1,true), row("Heroic Crystal",5,1,true), row("Abandoned Spaceship Portal",5,1,false),
+            row("Mystery Call of Adventure",7,1,true)));
     public static final Catalog IMPOSSIBLE = catalog(ImpossibleRewardCatalog.DECLARED.stream()
             .map(row -> new Row(row.name(),row.weight(),row.quantity(),row.active())).toList());
     public static final Catalog DEMONIC = catalog(List.of(

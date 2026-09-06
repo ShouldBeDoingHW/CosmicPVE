@@ -31,12 +31,11 @@ public final class CategoryDamageReductionBehavior implements IncomingDamageCont
         double reduction = sets.resolve(context.target()).filter(d -> d.id().equals(ArmorSetIds.DRAGONSLAYER))
                 .isPresent() ? .75 : 0.0;
         if (fire) {
-            int level = enchantments.resolve(context.target().getItemBySlot(EquipmentSlot.LEGS), List.of())
+            int level = enchantments.resolve(context.target(), context.target().getItemBySlot(EquipmentSlot.LEGS), List.of())
                     .level(ModEnchantments.OBSIDIANSHIELD.identifier());
             reduction += .25 * Math.min(2, Math.max(0, level));
         } else {
-            int level = EnchantmentLevels.onStack(
-                    context.target().getItemBySlot(EquipmentSlot.FEET), ModEnchantments.ENDER_WALKER);
+            int level = EnchantmentLevels.onStack(context.target(), context.target().getItemBySlot(EquipmentSlot.FEET), ModEnchantments.ENDER_WALKER);
             reduction += .10 * Math.min(5, Math.max(0, level));
         }
         double multiplier = multiplier(reduction);

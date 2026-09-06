@@ -26,7 +26,7 @@ public final class GeneratedEquipmentService {
         List<CosmicEnchantmentSpec> candidates = candidates(result, definition, enchantments);
         shuffle(candidates, random);
         int requested = random.nextIntBetweenInclusive(
-                definition.minimumEnchantments(), definition.maximumEnchantments());
+                definition.minimumEnchantments(), definition.limitToAvailable() ? Math.min(definition.maximumEnchantments(), candidates.size()) : definition.maximumEnchantments());
         if (requested > candidates.size() || requested > capacity.capacity(result)) {
             throw new IllegalStateException("Validated generated-equipment definition cannot produce " + requested
                     + " distinct enchantments for " + result.getItem());

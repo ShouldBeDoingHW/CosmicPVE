@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 class SpaceChestProductionResourcesTest {
     @Test void ultimateTableMatchesStep8FExactly() {
         assertRows("ultimate", List.of(
+                r(18,"static_item","cosmicpve:white_scroll"),
                 r(10,"unexamined_book","ultimate"), r(10,"unexamined_book","legendary"), rq(10,2,"unexamined_book","elite"),
                 r(8,"unexamined_book","unique"), r(8,"black_scroll","50"), r(4,"black_scroll","75"),
                 r(4,"static_item","cosmicpve:mystery_simple_spawner"), rq(8,16,"static_item","minecraft:golden_apple"),
@@ -27,7 +28,7 @@ class SpaceChestProductionResourcesTest {
     @Test void legendaryTableMatchesStep8FExactly() {
         assertRows("legendary", List.of(
                 rq(5,2,"unexamined_book","ultimate"), r(10,"unexamined_book","legendary"), rq(5,3,"unexamined_book","elite"),
-                r(10,"static_item","cosmicpve:white_scroll"), r(8,"black_scroll","60"), r(4,"black_scroll","80"),
+                r(20,"static_item","cosmicpve:white_scroll"), r(8,"black_scroll","60"), r(4,"black_scroll","80"),
                 r(5,"static_item","cosmicpve:mystery_elite_spawner"), r(3,"static_item","cosmicpve:conquest_chest_flare"),
                 r(4,"static_item","cosmicpve:trial_trinket_time_1"), r(4,"static_item","cosmicpve:trial_trinket_insurance_1"),
                 r(4,"static_item","cosmicpve:trial_trinket_skip_1"), r(10,"static_item","cosmicpve:repair_scroll"),

@@ -1,5 +1,6 @@
 {
   "entries": [
+    {"weight":18,"reward":{"type":"static_item","item":"cosmicpve:white_scroll"}},
     {"weight":10,"reward":{"type":"unexamined_book","rarity":"ultimate"}},
     {"weight":10,"reward":{"type":"unexamined_book","rarity":"legendary"}},
     {"weight":10,"minimum_quantity":2,"maximum_quantity":2,"reward":{"type":"unexamined_book","rarity":"elite"}},

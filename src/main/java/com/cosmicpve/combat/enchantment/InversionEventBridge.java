@@ -36,7 +36,7 @@ public final class InversionEventBridge {
                 || event.getSource().getDirectEntity() != attacker) return;
         var sword = event.getEntity().getMainHandItem();
         if (!sword.is(ItemTags.SWORDS)) return;
-        int level = enchantments.resolve(sword, List.of()).level(ModEnchantments.INVERSION.identifier());
+        int level = enchantments.resolve(event.getEntity(), sword, List.of()).level(ModEnchantments.INVERSION.identifier());
         if (level <= 0) return;
         var weapon = event.getSource().getWeaponItem();
         if (weapon == null || weapon.isEmpty()) weapon = attacker.getWeaponItem();

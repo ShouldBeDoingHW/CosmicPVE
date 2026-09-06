@@ -12,6 +12,7 @@ public final class ActivityContextService {
     private final Set<UUID> dungeonParkour = ConcurrentHashMap.newKeySet();
     public ActivityType current(LivingEntity entity) { return active.getOrDefault(entity.getUUID(), ActivityType.NONE); }
     public boolean isDungeon(LivingEntity entity) { return current(entity) == ActivityType.DUNGEON; }
+    public boolean isAdventure(LivingEntity entity) { return current(entity) == ActivityType.ADVENTURE; }
     public boolean isDungeonParkour(LivingEntity entity) {
         return isDungeon(entity) && dungeonParkour.contains(entity.getUUID());
     }

@@ -23,6 +23,7 @@ public final class Step8ELootboxService {
             case COSMIC_ENCHANTMENT_TABLE -> openCosmicTable(player, source);
             case HEROIC_COSMIC_ENCHANTMENT_TABLE -> openHeroicTable(player, source);
             case ADMIN_ABUSE -> openAdminAbuse(player, source);
+            case MYSTERY_CALL_OF_ADVENTURE -> openMysteryCall(player, source);
         };
     }
     public boolean forceHeroicTable(ServerPlayer player, net.minecraft.resources.Identifier id, int success) {
@@ -75,6 +76,16 @@ public final class Step8ELootboxService {
     private List<ItemStack> signatureCandidates(ServerPlayer player) {
         return SignatureWeaponDefinition.ALL.stream().map(definition -> signatures.create(definition, player.registryAccess())).toList();
     }
+    private boolean openMysteryCall(ServerPlayer player, ItemStack source) {
+        var candidates=ModItems.productionCalls();
+        if(candidates.isEmpty())return false;
+        return SingleRewardAnimationService.INSTANCE.open(player,selectCall(candidates,player.getRandom()),
+                LootAnimationPreviewProvider.uniform(candidates),()->source.shrink(1));
+    }
+    public static ItemStack selectCall(List<ItemStack> candidates,net.minecraft.util.RandomSource random) {
+        if(candidates.isEmpty())throw new IllegalArgumentException("No production Calls");
+        return candidates.get(random.nextInt(candidates.size())).copy();
+    }
     private List<ItemStack> adminCandidates(ServerPlayer player) {
         return AdminAbuseRewards.ALL.stream().map(outcome -> admin.create(outcome, player.registryAccess())).toList();
     }
@@ -84,6 +95,7 @@ public final class Step8ELootboxService {
             case COSMIC_ENCHANTMENT_TABLE -> stack.is(ModItems.COSMIC_ENCHANTMENT_TABLE.get());
             case HEROIC_COSMIC_ENCHANTMENT_TABLE -> stack.is(ModItems.HEROIC_COSMIC_ENCHANTMENT_TABLE.get());
             case ADMIN_ABUSE -> stack.is(ModItems.ADMIN_ABUSE.get());
+            case MYSTERY_CALL_OF_ADVENTURE -> stack.is(ModItems.MYSTERY_CALL_OF_ADVENTURE.get());
         };
     }
 }

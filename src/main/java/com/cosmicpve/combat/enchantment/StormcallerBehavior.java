@@ -21,8 +21,8 @@ public final class StormcallerBehavior {
     private StormcallerBehavior() {}
     public static int aggregateLevels(int chest, int boots) { return Math.min(10, Math.max(0, chest) + Math.max(0, boots)); }
     public static int equippedLevelTotal(LivingEntity entity) { return aggregateLevels(
-            EnchantmentLevels.onStack(entity.getItemBySlot(EquipmentSlot.CHEST), ModEnchantments.STORMCALLER),
-            EnchantmentLevels.onStack(entity.getItemBySlot(EquipmentSlot.FEET), ModEnchantments.STORMCALLER)); }
+            EnchantmentLevels.onStack(entity, entity.getItemBySlot(EquipmentSlot.CHEST), ModEnchantments.STORMCALLER),
+            EnchantmentLevels.onStack(entity, entity.getItemBySlot(EquipmentSlot.FEET), ModEnchantments.STORMCALLER)); }
     public static double chance(int total) { return Math.min(.05, Math.max(0, total) * .01); }
     public static double trueDamage(int total) { return 1.0 + .2 * Math.max(0, Math.min(10, total)); }
     public static int durationTicks(int total) { return total >= 8 ? 60 : 40; }

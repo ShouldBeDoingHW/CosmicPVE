@@ -46,6 +46,8 @@ public final class WarzoneGiantsService {
     public static final int ABSENT_TICKS = 60;
     public static final double GIANT_SCALE = 6.0D;
     public static final double GIANT_HEALTH = 100.0D;
+    public static final double GIANT_SPEED_INCREASE = 0.05D;
+    public static final double GIANT_ATTACK_DAMAGE = 1.0D;
     public static final int STRENGTH_TICKS = 36_000;
     public static final int STRENGTH_AMPLIFIER = 1;
     public static final int COLLISION_RECOVERY_CADENCE = 10;
@@ -149,7 +151,7 @@ public final class WarzoneGiantsService {
         zombie.getAttribute(Attributes.MAX_HEALTH).setBaseValue(GIANT_HEALTH);
         zombie.getAttribute(Attributes.ARMOR).setBaseValue(0.0D);
         zombie.getAttribute(Attributes.ARMOR_TOUGHNESS).setBaseValue(0.0D);
-        zombie.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(0.0D);
+        applyMovementAndDamage(zombie);
         zombie.setHealth((float) GIANT_HEALTH); zombie.setPersistenceRequired(); zombie.skipDropExperience();
         zombie.addEffect(new MobEffectInstance(MobEffects.STRENGTH, STRENGTH_TICKS,
                 STRENGTH_AMPLIFIER, true, false, false));
@@ -161,6 +163,12 @@ public final class WarzoneGiantsService {
         zombie.addTag("cosmicpve_trial_session_" + session.sessionId());
         if (!level.addFreshEntity(zombie)) throw new IllegalStateException("Server rejected Warzone Giant " + tier);
         attempt.giants.put(zombie.getUUID(), tier);
+    }
+
+    public static void applyMovementAndDamage(Zombie zombie) {
+        zombie.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(
+                Zombie.createAttributes().build().getBaseValue(Attributes.MOVEMENT_SPEED) + GIANT_SPEED_INCREASE);
+        zombie.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(GIANT_ATTACK_DAMAGE);
     }
 
     private static Optional<BlockPos> findSpawn(ServerLevel level, TrialSession session, Attempt attempt, Zombie zombie) {

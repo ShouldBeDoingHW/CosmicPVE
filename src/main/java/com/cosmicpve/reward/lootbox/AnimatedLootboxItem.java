@@ -28,6 +28,8 @@ public final class AnimatedLootboxItem extends Item {
                     .append(Component.literal(" Cosmic Enchantment Table")
                             .withStyle(style -> style.withColor(0x32045C).withBold(true)));
             case ADMIN_ABUSE -> adminName();
+            case MYSTERY_CALL_OF_ADVENTURE -> Component.literal("Mystery Call of Adventure")
+                    .withStyle(style -> style.withColor(0x55FFFF).withBold(true));
         };
     }
     public static List<Component> secretWeaponCacheLore() {
@@ -53,5 +55,10 @@ public final class AnimatedLootboxItem extends Item {
         }
         return result;
     }
-    public enum Kind { SECRET_WEAPON_CACHE, COSMIC_ENCHANTMENT_TABLE, HEROIC_COSMIC_ENCHANTMENT_TABLE, ADMIN_ABUSE }
+    public static List<Component> mysteryCallLore() {
+        return List.of(Component.literal("A distant path is waiting to answer.").withStyle(ChatFormatting.GRAY,ChatFormatting.ITALIC),
+                Component.literal("Contains one random Call of Adventure.").withStyle(ChatFormatting.GRAY),
+                Component.literal("RIGHT-CLICK TO REVEAL").withStyle(style -> style.withColor(0x55FFFF).withBold(true)));
+    }
+    public enum Kind { SECRET_WEAPON_CACHE, COSMIC_ENCHANTMENT_TABLE, HEROIC_COSMIC_ENCHANTMENT_TABLE, ADMIN_ABUSE, MYSTERY_CALL_OF_ADVENTURE }
 }

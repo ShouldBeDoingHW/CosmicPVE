@@ -49,7 +49,7 @@ public final class EquippedPersistentEffectService {
 
     void tickImplants(LivingEntity entity) {
         var helmet = entity.getItemBySlot(EquipmentSlot.HEAD);
-        int level = enchantments.resolve(helmet, virtualGrants.apply(helmet))
+        int level = enchantments.resolve(entity, helmet, virtualGrants.apply(helmet))
                 .level(ModEnchantments.IMPLANTS.identifier());
         if (level <= 0) { implants.remove(entity); return; }
         int now = entity.tickCount;
@@ -69,7 +69,7 @@ public final class EquippedPersistentEffectService {
 
     void tickAlienImplants(LivingEntity entity) {
         var helmet = entity.getItemBySlot(EquipmentSlot.HEAD);
-        int level = enchantments.resolve(helmet, virtualGrants.apply(helmet))
+        int level = enchantments.resolve(entity, helmet, virtualGrants.apply(helmet))
                 .level(ModEnchantments.ALIEN_IMPLANTS.identifier());
         if (level <= 0) { alienImplants.remove(entity); return; }
         int now = entity.tickCount;
@@ -87,7 +87,7 @@ public final class EquippedPersistentEffectService {
     private void apply(LivingEntity entity, EquipmentSlot slot, net.minecraft.resources.Identifier id,
                        Holder<MobEffect> effect, int leaseTicks, int refreshAt) {
         var stack = entity.getItemBySlot(slot);
-        int level = enchantments.resolve(stack, virtualGrants.apply(stack)).level(id);
+        int level = enchantments.resolve(entity, stack, virtualGrants.apply(stack)).level(id);
         reconcileLease(entity, effect, level > 0, leaseTicks, refreshAt);
     }
 

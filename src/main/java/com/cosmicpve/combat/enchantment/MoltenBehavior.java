@@ -12,10 +12,10 @@ public final class MoltenBehavior {
 
     public static int equippedLevelHighest(LivingEntity entity) {
         return aggregateHighest(
-                EnchantmentLevels.onStack(entity.getItemBySlot(EquipmentSlot.HEAD), ModEnchantments.MOLTEN),
-                EnchantmentLevels.onStack(entity.getItemBySlot(EquipmentSlot.CHEST), ModEnchantments.MOLTEN),
-                EnchantmentLevels.onStack(entity.getItemBySlot(EquipmentSlot.LEGS), ModEnchantments.MOLTEN),
-                EnchantmentLevels.onStack(entity.getItemBySlot(EquipmentSlot.FEET), ModEnchantments.MOLTEN));
+                EnchantmentLevels.onStack(entity, entity.getItemBySlot(EquipmentSlot.HEAD), ModEnchantments.MOLTEN),
+                EnchantmentLevels.onStack(entity, entity.getItemBySlot(EquipmentSlot.CHEST), ModEnchantments.MOLTEN),
+                EnchantmentLevels.onStack(entity, entity.getItemBySlot(EquipmentSlot.LEGS), ModEnchantments.MOLTEN),
+                EnchantmentLevels.onStack(entity, entity.getItemBySlot(EquipmentSlot.FEET), ModEnchantments.MOLTEN));
     }
 
     public static int aggregateHighest(int... levels) {

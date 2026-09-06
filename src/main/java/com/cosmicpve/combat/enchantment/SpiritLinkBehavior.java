@@ -44,8 +44,8 @@ public final class SpiritLinkBehavior implements ProcCandidateResolver, Outgoing
 
     public static int equippedLevel(LivingEntity wearer) {
         return aggregateLevels(
-                EnchantmentLevels.onStack(wearer.getItemBySlot(EquipmentSlot.HEAD), ModEnchantments.SPIRIT_LINK),
-                EnchantmentLevels.onStack(wearer.getItemBySlot(EquipmentSlot.CHEST), ModEnchantments.SPIRIT_LINK));
+                EnchantmentLevels.onStack(wearer, wearer.getItemBySlot(EquipmentSlot.HEAD), ModEnchantments.SPIRIT_LINK),
+                EnchantmentLevels.onStack(wearer, wearer.getItemBySlot(EquipmentSlot.CHEST), ModEnchantments.SPIRIT_LINK));
     }
 
     public static float healing(int aggregateLevel) {

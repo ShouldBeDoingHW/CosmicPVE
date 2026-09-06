@@ -45,7 +45,9 @@ public final class FlashSaleCatalog {
             item("heroic_crystal", "Heroic Crystal", 1, 45_000_000L, 65_000_000L, 77_500_000L, ModItems.HEROIC_CRYSTAL.get()),
             item("godly_vkit_bundle", "Godly V-Kit Bundle", 1, 400_000_000L, 500_000_000L, 600_000_000L, ModItems.GODLY_VKIT_BUNDLE.get()),
             item("cosmic_enchantment_table", "Cosmic Enchantment Table", 1, 90_000_000L, 100_000_000L, 120_000_000L,
-                    ModItems.COSMIC_ENCHANTMENT_TABLE.get()));
+                    ModItems.COSMIC_ENCHANTMENT_TABLE.get()),
+            item("mystery_call_of_adventure", "Mystery Call of Adventure", 1, 90_000_000L, 115_000_000L, 145_000_000L,
+                    ModItems.MYSTERY_CALL_OF_ADVENTURE.get()));
 
     public static final DeferredRow MEMORY_CHEST = new DeferredRow("memory_chest", 1,
             250_000_000L, 350_000_000L, 450_000_000L, "Memory Chest is not implemented");

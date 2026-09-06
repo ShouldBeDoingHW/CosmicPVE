@@ -13,7 +13,7 @@ public final class PaladinArmoredBehavior {
         for (var slot : new net.minecraft.world.entity.EquipmentSlot[] {
                 net.minecraft.world.entity.EquipmentSlot.HEAD, net.minecraft.world.entity.EquipmentSlot.CHEST,
                 net.minecraft.world.entity.EquipmentSlot.LEGS, net.minecraft.world.entity.EquipmentSlot.FEET }) {
-            total += EnchantmentLevels.onStack(wearer.getItemBySlot(slot), ModEnchantments.PALADIN_ARMORED);
+            total += EnchantmentLevels.onStack(wearer, wearer.getItemBySlot(slot), ModEnchantments.PALADIN_ARMORED);
         }
         return Math.min(16, total);
     }

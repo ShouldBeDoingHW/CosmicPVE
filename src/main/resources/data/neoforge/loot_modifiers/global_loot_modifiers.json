@@ -1,6 +1,7 @@
 {
   "replace": false,
   "entries": [
-    "cosmicpve:diamond_armor_progression"
+    "cosmicpve:diamond_armor_progression",
+    "cosmicpve:woodlands_rewards"
   ]
 }

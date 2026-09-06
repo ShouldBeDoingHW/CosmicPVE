@@ -76,12 +76,12 @@ class TrialResourceTest {
         assertNotNull(stream);
         var entries=JsonParser.parseReader(new InputStreamReader(stream,StandardCharsets.UTF_8))
                 .getAsJsonObject().getAsJsonArray("entries");
-        assertEquals(17, entries.size());
-        assertEquals(155, entries.asList().stream().mapToInt(value ->
+        assertEquals(18, entries.size());
+        assertEquals(164, entries.asList().stream().mapToInt(value ->
                 value.getAsJsonObject().get("weight").getAsInt()).sum());
-        assertEquals(18, ImpossibleRewardCatalog.DECLARED.size());
-        assertEquals(163, ImpossibleRewardCatalog.DECLARED_WEIGHT);
-        assertEquals(155, ImpossibleRewardCatalog.ACTIVE_WEIGHT);
+        assertEquals(19, ImpossibleRewardCatalog.DECLARED.size());
+        assertEquals(172, ImpossibleRewardCatalog.DECLARED_WEIGHT);
+        assertEquals(164, ImpossibleRewardCatalog.ACTIVE_WEIGHT);
         assertTrue(ImpossibleRewardCatalog.DECLARED.stream().filter(row -> row.name().contains("Fame")).findFirst().orElseThrow().active());
         assertFalse(ImpossibleRewardCatalog.DECLARED.stream().filter(row -> row.name().contains("Abandoned")).findFirst().orElseThrow().active());
     }
@@ -103,8 +103,8 @@ class TrialResourceTest {
         assertNotNull(stream);
         var entries=JsonParser.parseReader(new InputStreamReader(stream,StandardCharsets.UTF_8))
                 .getAsJsonObject().getAsJsonArray("entries");
-        assertEquals(17,entries.size());
-        assertEquals(97,entries.asList().stream().mapToInt(value -> value.getAsJsonObject().get("weight").getAsInt()).sum());
+        assertEquals(18,entries.size());
+        assertEquals(104,entries.asList().stream().mapToInt(value -> value.getAsJsonObject().get("weight").getAsInt()).sum());
         assertEquals(2,entries.asList().stream().map(value->value.getAsJsonObject().getAsJsonObject("reward"))
                 .filter(reward->reward.get("type").getAsString().equals("unexamined_book")).count());
         assertTrue(entries.asList().stream().map(value->value.getAsJsonObject().getAsJsonObject("reward"))

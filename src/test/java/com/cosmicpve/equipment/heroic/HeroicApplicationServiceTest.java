@@ -29,11 +29,9 @@ class HeroicApplicationServiceTest {
         assertEquals(HeroicCrystalItem.NAME_COLOR, crystal.getHoverName().getStyle().getColor().getValue());
         assertTrue(crystal.getHoverName().getStyle().isBold());
         assertTrue(crystal.hasFoil());
-        assertEquals(7, HeroicCrystalItem.lore().size());
-        assertEquals("A shard that refuses to let ordinary gear stay ordinary.", HeroicCrystalItem.lore().getFirst().getString());
-        assertTrue(HeroicCrystalItem.lore().getFirst().getStyle().isItalic());
-        assertEquals("ONE-TIME HEROIC UPGRADE", HeroicCrystalItem.lore().get(2).getString());
-        assertEquals(HeroicCrystalItem.NAME_COLOR, HeroicCrystalItem.lore().get(2).getStyle().getColor().getValue());
+        assertEquals(1, HeroicCrystalItem.lore().size());
+        assertEquals("Gives +250 durability to pickaxes, shovels, and armor as a one-time bonus!",
+                HeroicCrystalItem.lore().getFirst().getString());
     }
 
     @Test void appliesOnceAddsExactly250AndPreservesWearAndMetadata() {

@@ -16,6 +16,7 @@
     {"weight":10,"reward":{"type":"black_scroll","success_rate":100}},
     {"weight":10,"reward":{"type":"enchanted_black_scroll","success_rate":50}},
     {"weight":10,"reward":{"type":"weapon_orb","success_rate":60}},
-    {"weight":10,"reward":{"type":"armor_orb","success_rate":60}}
+    {"weight":10,"reward":{"type":"armor_orb","success_rate":60}},
+    {"weight":9,"reward":{"type":"static_item","item":"cosmicpve:mystery_call_of_adventure"}}
   ]
 }

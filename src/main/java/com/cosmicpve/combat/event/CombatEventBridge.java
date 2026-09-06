@@ -103,7 +103,7 @@ public final class CombatEventBridge {
                 DamageChannel.ORDINARY,
                 resolved.flags(),
                 resolved.weaponSnapshot(),
-                enchantments.resolve(resolved.weaponSnapshot().stack(),
+                enchantments.resolve(resolved.attacker(), resolved.weaponSnapshot().stack(),
                         weaponSkins.virtualEnchantments(resolved.weaponSnapshot().stack())),
                 sequence.id(),
                 sequence.parentId(),

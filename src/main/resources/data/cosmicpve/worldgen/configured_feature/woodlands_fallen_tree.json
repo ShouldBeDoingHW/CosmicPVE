@@ -1,0 +1,7 @@
+{
+  "type": "cosmicpve:woodland_template",
+  "config": {
+    "family": "fallen_tree",
+    "variants": 3
+  }
+}

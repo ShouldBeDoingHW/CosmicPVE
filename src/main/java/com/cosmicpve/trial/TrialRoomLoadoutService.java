@@ -77,7 +77,8 @@ public final class TrialRoomLoadoutService {
     public void clear(ServerPlayer player) { inventories.clearTrialInventory(player); }
     public void applyCaveDiving(ServerPlayer player) {
         clear(player);
-        player.getInventory().setItem(0, new ItemStack(Items.COOKED_COD, CAVE_DIVING_COOKED_COD));
+        player.getInventory().setItem(0, new ItemStack(Items.WOODEN_SWORD));
+        player.getInventory().setItem(8, new ItemStack(Items.COOKED_COD, CAVE_DIVING_COOKED_COD));
         player.getInventory().setSelectedSlot(0);
     }
     public void applyInventor(ServerPlayer player) {

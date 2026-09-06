@@ -24,5 +24,5 @@ public final class MaskResolver {
         }
         return List.copyOf(result);
     }
-    public List<MaskDefinition> resolve(LivingEntity entity) { return resolve(entity.getItemBySlot(EquipmentSlot.HEAD)); }
+    public List<MaskDefinition> resolve(LivingEntity entity) { return com.cosmicpve.adventure.AdventureRules.restricted(entity) ? List.of() : resolve(entity.getItemBySlot(EquipmentSlot.HEAD)); }
 }

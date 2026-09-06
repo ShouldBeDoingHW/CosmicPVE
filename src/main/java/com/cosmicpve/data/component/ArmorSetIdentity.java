@@ -36,4 +36,9 @@ public record ArmorSetIdentity(
         return new ArmorSetIdentity(CURRENT_DATA_VERSION, definition.id(), definition.displayName(),
                 definition.presentationColor(), definition.fullSetBonus());
     }
+
+    /** Legacy synchronized Yjiki snapshots retain identity and mechanics, but use the revised white presentation. */
+    @Override public int color() {
+        return setId.equals(com.cosmicpve.equipment.armor.ArmorSetIds.YJIKI) ? 0xFFFFFF : color;
+    }
 }

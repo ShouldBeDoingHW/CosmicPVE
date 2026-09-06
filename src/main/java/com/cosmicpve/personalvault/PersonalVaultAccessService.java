@@ -18,6 +18,7 @@ public final class PersonalVaultAccessService {
         ActivityType activity = CosmicCombat.activities().current(player);
         if (trial || activity == ActivityType.TRIAL) return new AccessResult(false,
                 "Personal Vaults cannot be accessed during a Trial.");
+        if (activity == ActivityType.ADVENTURE || com.cosmicpve.adventure.AdventureRules.restricted(player)) return new AccessResult(false, "Personal Vaults cannot be accessed during an Adventure.");
         if (activity == ActivityType.INVASION) return new AccessResult(false,
                 "Personal Vaults cannot be accessed during an Invasion.");
         if (activity == ActivityType.DUNGEON) return new AccessResult(false,
@@ -34,7 +35,7 @@ public final class PersonalVaultAccessService {
     }
 
     public static boolean restricted(ActivityType activity) {
-        return activity == ActivityType.TRIAL || activity == ActivityType.INVASION || activity == ActivityType.DUNGEON;
+        return activity == ActivityType.ADVENTURE || activity == ActivityType.TRIAL || activity == ActivityType.INVASION || activity == ActivityType.DUNGEON;
     }
 
     public record AccessResult(boolean allowed, String message) {}

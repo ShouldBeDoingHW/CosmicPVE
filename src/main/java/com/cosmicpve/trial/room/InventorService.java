@@ -60,6 +60,7 @@ public final class InventorService {
     public static final double HAZARD_DAMAGE_PER_STATION = 1.5D;
     public static final int REQUIRED_INTERACTIONS = 3;
     public static final int SPEED_DURATION_TICKS = 100;
+    public static final double BASE_BOSS_HEALTH = 325.0D;
 
     public enum Station {
         BELL(new BlockPos(9,4,9), new BlockPos(7,4,7), Blocks.BELL),
@@ -301,7 +302,7 @@ public final class InventorService {
     }
     public static double bossHealth(int partySize) {
         if (partySize < 1 || partySize > 4) throw new IllegalArgumentException("party size must be 1-4");
-        return 250.0D + (partySize - 1) * 200.0D;
+        return BASE_BOSS_HEALTH + (partySize - 1) * 200.0D;
     }
     public static net.minecraft.world.item.Item bossAxe(int partySize) {
         if (partySize < 1 || partySize > 4) throw new IllegalArgumentException("party size must be 1-4");

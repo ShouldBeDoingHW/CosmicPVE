@@ -17,8 +17,7 @@ public final class EnderWalkerBehavior implements IncomingDamageContributor {
     @Override public List<IncomingDamageContribution> resolveIncoming(CombatContext context) {
         if (context.channel() != DamageChannel.ORDINARY || context.target() == null
                 || !protectedSource(context.damageSource())) return List.of();
-        int level = EnchantmentLevels.onStack(
-                context.target().getItemBySlot(net.minecraft.world.entity.EquipmentSlot.FEET), ModEnchantments.ENDER_WALKER);
+        int level = EnchantmentLevels.onStack(context.target(), context.target().getItemBySlot(net.minecraft.world.entity.EquipmentSlot.FEET), ModEnchantments.ENDER_WALKER);
         return level <= 0 ? List.of() : List.of(new IncomingDamageContribution(
                 ModEnchantments.ENDER_WALKER.identifier(), multiplier(level)));
     }

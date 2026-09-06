@@ -1,0 +1,7 @@
+{
+  "type": "cosmicpve:woodland_template",
+  "config": {
+    "family": "small_boulder",
+    "variants": 2
+  }
+}

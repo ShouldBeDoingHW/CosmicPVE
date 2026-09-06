@@ -32,9 +32,9 @@ public final class EnchantmentOrbItem extends Item {
                         .withStyle(style -> style.withColor(0xFFFF55).withItalic(true)),
                 Component.empty(),
                 Component.literal("SUCCESS: " + data.successRate() + "%")
-                        .withStyle(style -> style.withColor(0x55FF55).withBold(true)),
+                        .withStyle(style -> style.withColor(OrbPresentationColors.SUCCESS).withBold(true)),
                 Component.literal("DESTROY: " + data.destroyRate() + "%")
-                        .withStyle(style -> style.withColor(0xFF5555).withBold(true)),
+                        .withStyle(style -> style.withColor(OrbPresentationColors.DESTROY).withBold(true)),
                 Component.literal("On success: +1 Cosmic Enchantment Slot").withStyle(net.minecraft.ChatFormatting.GRAY),
                 Component.literal(armor ? "Armor capacity: 5 → 8 max" : "Weapon capacity: 5 → 10 max")
                         .withStyle(net.minecraft.ChatFormatting.GRAY),

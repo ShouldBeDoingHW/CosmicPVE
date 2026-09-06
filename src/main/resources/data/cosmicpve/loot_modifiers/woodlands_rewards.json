@@ -1,0 +1,6 @@
+{
+  "type": "cosmicpve:reward_table",
+  "conditions": [],
+  "loot_table": "cosmicpve:chests/adventure/dense_woodlands",
+  "reward_table": "cosmicpve:adventure/dense_woodlands"
+}

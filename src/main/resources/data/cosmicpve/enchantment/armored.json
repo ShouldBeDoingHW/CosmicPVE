@@ -1,16 +1,59 @@
 {
   "anvil_cost": 8,
-  "description": {"translate": "enchantment.cosmicpve.armored"},
-  "effects": {
-    "minecraft:damage_protection": [{
-      "effect": {"type": "minecraft:add", "value": {"type": "minecraft:linear", "base": 0.5, "per_level_above_first": 0.5}},
-      "requirements": {"condition": "minecraft:damage_source_properties", "predicate": {"tags": [{"expected": false, "id": "minecraft:bypasses_invulnerability"}]}}
-    }]
+  "description": {
+    "translate": "enchantment.cosmicpve.armored"
   },
-  "max_cost": {"base": 1, "per_level_above_first": 0},
+  "effects": {
+    "minecraft:damage_protection": [
+      {
+        "effect": {
+          "type": "minecraft:add",
+          "value": {
+            "type": "minecraft:linear",
+            "base": 0.5,
+            "per_level_above_first": 0.5
+          }
+        },
+        "requirements": {
+          "condition": "minecraft:all_of",
+          "terms": [
+            {
+              "condition": "minecraft:damage_source_properties",
+              "predicate": {
+                "tags": [
+                  {
+                    "expected": false,
+                    "id": "minecraft:bypasses_invulnerability"
+                  }
+                ]
+              }
+            },
+            {
+              "condition": "minecraft:inverted",
+              "term": {
+                "condition": "minecraft:location_check",
+                "predicate": {
+                  "dimension": "cosmicpve:dense_woodlands"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "max_cost": {
+    "base": 1,
+    "per_level_above_first": 0
+  },
   "max_level": 4,
-  "min_cost": {"base": 1, "per_level_above_first": 0},
-  "slots": ["armor"],
+  "min_cost": {
+    "base": 1,
+    "per_level_above_first": 0
+  },
+  "slots": [
+    "armor"
+  ],
   "supported_items": "#minecraft:enchantable/armor",
   "weight": 1
 }

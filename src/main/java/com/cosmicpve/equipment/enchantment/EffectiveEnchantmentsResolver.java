@@ -11,6 +11,9 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 
 public final class EffectiveEnchantmentsResolver {
+    public EffectiveEnchantments resolve(LivingEntity owner, ItemStack stack, List<VirtualEnchantmentGrant> grants) {
+        return com.cosmicpve.adventure.AdventureRules.filter(owner,resolve(stack,com.cosmicpve.adventure.AdventureRules.restricted(owner) ? List.of() : grants));
+    }
     public EffectiveEnchantments resolve(ItemStack stack, List<VirtualEnchantmentGrant> virtualGrants) {
         return resolve(stack, CosmicPVE.id("actual_item"), virtualGrants);
     }
@@ -34,7 +37,7 @@ public final class EffectiveEnchantmentsResolver {
                         new ActualEnchantmentGrant(key.identifier(), entry.getIntValue(), sourceId)));
             }
         }
-        return resolveSources(actualGrants, virtualGrants);
+        return com.cosmicpve.adventure.AdventureRules.filter(entity,resolveSources(actualGrants, virtualGrants));
     }
 
     public EffectiveEnchantments resolveSources(

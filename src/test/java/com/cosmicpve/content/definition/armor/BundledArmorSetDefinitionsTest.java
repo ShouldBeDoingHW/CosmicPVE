@@ -31,7 +31,7 @@ class BundledArmorSetDefinitionsTest {
         assertEquals(.05, load("yjiki").additiveOutgoingBonus());
         assertEquals(.85, load("yjiki").incomingMultiplier());
         assertEquals(0x7D3F9E, load("dimensional_traveler").presentationColor());
-        assertEquals(.075, load("dimensional_traveler").additiveOutgoingBonus());
+        assertEquals(.05, load("dimensional_traveler").additiveOutgoingBonus());
         assertEquals(1.0, load("engineer").incomingMultiplier());
         assertEquals(0.0, load("ranger").additiveOutgoingBonus());
         assertEquals(0xFFED0F, load("dragonslayer").presentationColor());

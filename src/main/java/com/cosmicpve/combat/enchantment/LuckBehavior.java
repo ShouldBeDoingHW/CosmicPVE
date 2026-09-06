@@ -12,8 +12,8 @@ import net.minecraft.world.entity.LivingEntity;
 public final class LuckBehavior implements ProcModifierResolver {
     @Override
     public ProcModifiers resolve(LivingEntity owner) {
-        int totalLevel = EnchantmentLevels.onStack(owner.getItemBySlot(EquipmentSlot.LEGS), ModEnchantments.LUCK)
-                + EnchantmentLevels.onStack(owner.getItemBySlot(EquipmentSlot.FEET), ModEnchantments.LUCK);
+        int totalLevel = EnchantmentLevels.onStack(owner, owner.getItemBySlot(EquipmentSlot.LEGS), ModEnchantments.LUCK)
+                + EnchantmentLevels.onStack(owner, owner.getItemBySlot(EquipmentSlot.FEET), ModEnchantments.LUCK);
         if (owner instanceof net.minecraft.world.entity.player.Player player
                 && new com.cosmicpve.upgrade.PlayerUpgradeService().tier(
                         player, com.cosmicpve.upgrade.PlayerUpgrade.PURE_RNG) > 0) totalLevel += 2;

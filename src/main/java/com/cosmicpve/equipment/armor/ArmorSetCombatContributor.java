@@ -44,6 +44,9 @@ public final class ArmorSetCombatContributor implements OutgoingDamageContributo
             return activities.isDungeon(context.attacker()) ? .10 : .05;
         if (definition.id().equals(ArmorSetIds.RANGER))
             return isBowProjectile(context) ? .20 : 0.0;
+        if (definition.id().equals(ArmorSetIds.DIMENSIONAL_TRAVELER))
+            return activities.current(context.attacker()) == com.cosmicpve.activity.ActivityType.ADVENTURE
+                    ? definition.additiveOutgoingBonus() * 2.0 : definition.additiveOutgoingBonus();
         return definition.additiveOutgoingBonus();
     }
 

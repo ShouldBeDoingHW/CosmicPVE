@@ -122,6 +122,9 @@ public final class CaveDivingService {
     public boolean replaceUnderwaterDrops(TrialSession session, BlockDropsEvent event) {
         Attempt attempt = attempts.get(session.sessionId());
         List<Item> claimed = claimSherds(attempt, event.getPos());
+        if (attempt != null && attempt.solutionPosition().equals(event.getPos())
+                && event.getBlockEntity() instanceof DecoratedPotBlockEntity pot)
+            claimed = pot.getDecorations().ordered();
         if (claimed.isEmpty()) return false;
         event.getDrops().clear();
         for (Item sherd : claimed) {
@@ -173,7 +176,18 @@ public final class CaveDivingService {
     }
 
     public static boolean matches(PotAnswer model, PotAnswer submitted) {
-        return model != null && model.equals(submitted);
+        return model != null && submitted != null && worldSides(model).equals(worldSides(submitted));
+    }
+
+    /** Renderer decorations are back/left/right/front relative to the block's facing. */
+    public static List<Item> worldSides(PotAnswer answer) {
+        var sides = new java.util.EnumMap<Direction, Item>(Direction.class);
+        sides.put(answer.facing(), answer.decorations().get(3));
+        sides.put(answer.facing().getOpposite(), answer.decorations().get(0));
+        sides.put(answer.facing().getClockWise(), answer.decorations().get(1));
+        sides.put(answer.facing().getCounterClockWise(), answer.decorations().get(2));
+        return List.of(sides.get(Direction.NORTH), sides.get(Direction.EAST),
+                sides.get(Direction.SOUTH), sides.get(Direction.WEST));
     }
 
     static ValidationResult validate(Attempt attempt, PotAnswer submitted) {

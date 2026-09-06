@@ -12,8 +12,8 @@ import net.minecraft.world.entity.EquipmentSlot;
 
 public final class LeadershipBehavior implements OutgoingDamageContributor {
     public static int equippedLevel(net.minecraft.world.entity.LivingEntity owner) {
-        return aggregateLevels(EnchantmentLevels.onStack(owner.getItemBySlot(EquipmentSlot.CHEST), ModEnchantments.LEADERSHIP),
-                EnchantmentLevels.onStack(owner.getItemBySlot(EquipmentSlot.LEGS), ModEnchantments.LEADERSHIP));
+        return aggregateLevels(EnchantmentLevels.onStack(owner, owner.getItemBySlot(EquipmentSlot.CHEST), ModEnchantments.LEADERSHIP),
+                EnchantmentLevels.onStack(owner, owner.getItemBySlot(EquipmentSlot.LEGS), ModEnchantments.LEADERSHIP));
     }
     public static int aggregateLevels(int chest, int legs) { return Math.min(20, Math.max(0, chest) + Math.max(0, legs)); }
     public static double bonus(int totalLevel) { return Math.min(20, Math.max(0, totalLevel)) * .01; }

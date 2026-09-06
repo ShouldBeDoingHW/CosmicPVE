@@ -255,8 +255,7 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
 
     private void addVoodoo(ProcEvent event, List<ProcCandidate> result) {
         if (event.attacker() == null || event.target() == null) return;
-        int level = Math.min(6, EnchantmentLevels.onStack(
-                event.attacker().getItemBySlot(EquipmentSlot.HEAD), ModEnchantments.VOODOO));
+        int level = Math.min(6, EnchantmentLevels.onStack(event.attacker(), event.attacker().getItemBySlot(EquipmentSlot.HEAD), ModEnchantments.VOODOO));
         if (level <= 0) return;
         result.add(candidate(ModEnchantments.VOODOO.identifier(), ProcHook.ON_VALID_HIT,
                 VoodooBehavior.chance(level), Optional.empty(), 0L, Optional.empty(),
@@ -553,8 +552,7 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
         if (event.target() == null) {
             return;
         }
-        int level = EnchantmentLevels.onStack(
-                event.target().getItemBySlot(EquipmentSlot.HEAD), ModEnchantments.ENDER_SHIFT);
+        int level = EnchantmentLevels.onStack(event.target(), event.target().getItemBySlot(EquipmentSlot.HEAD), ModEnchantments.ENDER_SHIFT);
         if (level <= 0) {
             return;
         }

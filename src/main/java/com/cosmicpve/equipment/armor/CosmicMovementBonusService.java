@@ -10,6 +10,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import com.cosmicpve.activity.ActivityContextService;
 
 /** Aggregates every Cosmic percentage movement source before applying the shared +50% cap. */
 public final class CosmicMovementBonusService {
@@ -17,17 +18,23 @@ public final class CosmicMovementBonusService {
     public static final Identifier MODIFIER_ID = CosmicPVE.id("cosmic_movement_speed");
     private final ArmorSetResolver sets;
     private final MaskResolver masks;
+    private final ActivityContextService activities;
 
-    public CosmicMovementBonusService(ArmorSetResolver sets, MaskResolver masks) { this.sets = sets; this.masks = masks; }
+    public CosmicMovementBonusService(ArmorSetResolver sets, MaskResolver masks) {
+        this(sets, masks, new ActivityContextService());
+    }
+    public CosmicMovementBonusService(ArmorSetResolver sets, MaskResolver masks, ActivityContextService activities) {
+        this.sets = sets; this.masks = masks; this.activities = activities;
+    }
 
     public double rawBonus(LivingEntity entity) {
-        int gears = Math.min(3, Math.max(0, EnchantmentLevels.onStack(
-                entity.getItemBySlot(EquipmentSlot.FEET), ModEnchantments.GEARS)));
+        int gears = Math.min(3, Math.max(0, EnchantmentLevels.onStack(entity, entity.getItemBySlot(EquipmentSlot.FEET), ModEnchantments.GEARS)));
         double mask = masks.resolve(entity).stream().mapToDouble(definition -> switch (definition.behavior()) {
             case REINDEER -> .05; case PARTY -> .01; default -> 0.0;
         }).sum();
         double set = sets.resolve(entity).map(definition -> switch (definition.id().getPath()) {
-            case "dimensional_traveler", "ranger" -> .10;
+            case "dimensional_traveler" -> activities.isAdventure(entity) ? .15 : .075;
+            case "ranger" -> .10;
             case "engineer" -> .15;
             default -> 0.0;
         }).orElse(0.0);

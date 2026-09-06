@@ -11,7 +11,7 @@ public final class MightyCactusBehavior {
     public static final RecursionPolicy RECURSION_POLICY = RecursionPolicy.NO_PROCS;
     private MightyCactusBehavior() {}
     public static int equippedLevel(LivingEntity wearer) {
-        return EnchantmentLevels.onStack(wearer.getItemBySlot(EquipmentSlot.LEGS), ModEnchantments.MIGHTY_CACTUS);
+        return EnchantmentLevels.onStack(wearer, wearer.getItemBySlot(EquipmentSlot.LEGS), ModEnchantments.MIGHTY_CACTUS);
     }
     public static double chance(int level) { return Math.min(1.0, .04 * Math.max(0, Math.min(2, level))); }
     public static TrueDamagePacket packet() { return TrueDamagePacket.standard(ModEnchantments.MIGHTY_CACTUS.identifier(), TRUE_DAMAGE); }

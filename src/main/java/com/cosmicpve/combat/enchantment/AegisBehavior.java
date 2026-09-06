@@ -34,7 +34,7 @@ public final class AegisBehavior implements PreDefenseBoundsContributor {
 
     @Override
     public DamageBounds resolvePreDefenseBounds(CombatContext context) {
-        if (context.channel() != DamageChannel.ORDINARY || context.target() == null) {
+        if (context.channel() != DamageChannel.ORDINARY || context.target() == null || com.cosmicpve.adventure.AdventureRules.restricted(context.target())) {
             return DamageBounds.UNBOUNDED;
         }
         int level = enchantments.resolve(

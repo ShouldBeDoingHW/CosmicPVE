@@ -31,6 +31,8 @@ public final class SingleRewardAnimationService {
                 ? PendingLootAnimation.of(finalRewards.getFirst()) : PendingLootAnimation.of(finalRewards));
         try { sourceCommit.run(); }
         catch (RuntimeException failure) { clear(player); throw failure; }
+        // Source consumption and the selected reward obligation share one player-file checkpoint.
+        player.level().getServer().getPlayerList().getPlayerIo().save(player);
         RuntimeState runtime = new RuntimeState(player.level().getServer().getTickCount(), previews, firstPreview);
         runtimes.put(player.getUUID(), runtime);
         var opened = player.openMenu(new SimpleMenuProvider((id, inventory, ignored) -> new SingleRewardAnimationMenu(id, inventory),
@@ -84,6 +86,7 @@ public final class SingleRewardAnimationService {
         var rewards = pending.allRewards();
         clear(player);
         delivery.deliver(player, rewards);
+        player.level().getServer().getPlayerList().getPlayerIo().save(player);
     }
     private static void clear(ServerPlayer player) { player.setData(ModAttachments.LOOT_ANIMATION, PendingLootAnimation.empty()); }
 

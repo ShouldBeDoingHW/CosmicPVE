@@ -28,18 +28,7 @@ public final class HeroicCrystalItem extends Item {
 
     public static List<Component> lore() {
         return List.of(
-                Component.literal("A shard that refuses to let ordinary gear stay ordinary.")
-                        .withStyle(style -> style.withColor(0xFFFF55).withItalic(true)),
-                Component.empty(),
-                Component.literal("ONE-TIME HEROIC UPGRADE")
-                        .withStyle(style -> style.withColor(NAME_COLOR).withBold(true)),
-                Component.literal("Armor / Pickaxes / Shovels: +250 Maximum Durability")
-                        .withStyle(net.minecraft.ChatFormatting.GRAY),
-                Component.literal("Existing current durability also increases by 250")
-                        .withStyle(net.minecraft.ChatFormatting.GRAY),
-                Component.literal("Dungeon Portals: Converts to Heroic")
-                        .withStyle(net.minecraft.ChatFormatting.GRAY),
-                Component.literal("Armor assumes Heroic leather form; tools assume Heroic gold form.")
+                Component.literal("Gives +250 durability to pickaxes, shovels, and armor as a one-time bonus!")
                         .withStyle(net.minecraft.ChatFormatting.GRAY));
     }
 }

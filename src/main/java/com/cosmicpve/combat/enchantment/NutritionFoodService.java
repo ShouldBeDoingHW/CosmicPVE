@@ -20,7 +20,7 @@ public final class NutritionFoodService {
     }
 
     public boolean applyCompletedFood(ServerPlayer player, List<VirtualEnchantmentGrant> virtualGrants) {
-        int level = enchantments.resolve(player.getItemBySlot(EquipmentSlot.LEGS), virtualGrants)
+        int level = enchantments.resolve(player, player.getItemBySlot(EquipmentSlot.LEGS), virtualGrants)
                 .level(ModEnchantments.NUTRITION.identifier());
         if (level <= 0) return false;
         NutritionBehavior.applyBonus(player.getFoodData(), level);

@@ -1,0 +1,39 @@
+{
+  "has_precipitation": true,
+  "temperature": 0.8,
+  "downfall": 0.4,
+  "effects": {
+    "fog_color": 12638463,
+    "sky_color": 7907327,
+    "water_color": 4159204,
+    "water_fog_color": 329011
+  },
+  "carvers": [],
+  "features": [
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [
+      "cosmicpve:woodlands_campsite",
+      "cosmicpve:woodlands_tall_tree",
+      "cosmicpve:woodlands_fallen_tree",
+      "cosmicpve:woodlands_small_boulder",
+      "cosmicpve:woodlands_small_tree",
+      "minecraft:patch_tall_grass_2",
+      "minecraft:flower_plains",
+      "minecraft:patch_grass_plain",
+      "minecraft:brown_mushroom_normal",
+      "minecraft:red_mushroom_normal",
+      "minecraft:patch_pumpkin",
+      "minecraft:patch_sugar_cane"
+    ]
+  ],
+  "spawners": {},
+  "spawn_costs": {}
+}

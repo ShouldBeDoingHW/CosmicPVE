@@ -25,7 +25,7 @@ public final class DeathPactBehavior implements OutgoingDamageContributor, Incom
     }
 
     private int level(net.minecraft.world.entity.LivingEntity entity) {
-        return enchantments.resolve(entity.getItemBySlot(EquipmentSlot.CHEST), List.of())
+        return enchantments.resolve(entity, entity.getItemBySlot(EquipmentSlot.CHEST), List.of())
                 .level(ModEnchantments.DEATH_PACT.identifier());
     }
 

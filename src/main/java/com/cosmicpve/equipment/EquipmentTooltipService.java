@@ -16,6 +16,8 @@ import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 public final class EquipmentTooltipService {
     public void onTooltip(ItemTooltipEvent event) {
         var stack = event.getItemStack();
+        if(stack.is(com.cosmicpve.registry.ModItems.MYSTERY_CALL_OF_ADVENTURE.get()))
+            event.getToolTip().addAll(com.cosmicpve.reward.lootbox.AnimatedLootboxItem.mysteryCallLore());
         if (stack.is(com.cosmicpve.registry.ModItems.SPACE_CHEST.get())
                 && stack.has(ModDataComponents.SPACE_CHEST.get())) {
             event.getToolTip().addAll(com.cosmicpve.spacechest.SpaceChestItem.lore());
@@ -36,12 +38,7 @@ public final class EquipmentTooltipService {
                     .withStyle(net.minecraft.ChatFormatting.YELLOW, net.minecraft.ChatFormatting.ITALIC));
         var crystal = stack.get(ModDataComponents.ARMOR_SET_CRYSTAL.get());
         if (crystal != null) {
-            int color = crystal.identity().color();
-            event.getToolTip().add(Component.translatable("tooltip.cosmicpve.crystal.success", crystal.successRate()));
-            event.getToolTip().add(Component.translatable("tooltip.cosmicpve.crystal.destroy", 100));
-            event.getToolTip().add(Component.translatable("tooltip.cosmicpve.crystal.instruction"));
-            event.getToolTip().add(Component.translatable("tooltip.cosmicpve.armor_set.full_bonus").withColor(color));
-            crystal.identity().fullSetBonus().forEach(line -> event.getToolTip().add(line.copy().withColor(color)));
+            event.getToolTip().addAll(com.cosmicpve.equipment.armor.ArmorSetCrystalItem.lore(crystal));
         }
         var book = stack.get(ModDataComponents.COSMIC_ENCHANT_BOOK.get());
         if (book != null) {

@@ -16,6 +16,7 @@ public final class ModLootModifiers {
             DIAMOND_ARMOR_REPLACEMENT = TYPES.register("diamond_armor_replacement",
                     () -> DiamondArmorLootModifier.CODEC);
 
+    static { TYPES.register("reward_table", () -> RewardTableLootModifier.CODEC); }
     private ModLootModifiers() {}
 
     public static void register(IEventBus modBus) {

@@ -1,12 +1,14 @@
 # CosmicPVE Development Handoff
 
-Current accepted baseline: Step 8N — Thanos, Monopoly, and Gucci Masks plus the Season's Beatings Weapon Skin and the bounded Inventor follow-up are implemented, automated/runtime verified, and manually verified/accepted. Earlier accepted milestones remain recorded below.
+Current accepted baseline: Step 8O through Step 8O.4 — the Dense Woodlands Adventure prototype and corrective work are implemented, automated/runtime verified, and manually verified/accepted. The closure commit is being created; its actual hash will be recorded after the commit exists.
 
 Repository state: Steps 6A–8N and the earlier Conquest synchronization are implemented, verified, and manually accepted. The user-maintained `docs/Cosmic_Design.md` and root `assets`, `drafts`, and `woodlands` development-source folders remain outside closure ownership.
 
-Current uncommitted candidate: none at the Step 8N closure boundary.
+Current closure candidate: Step 8O through Step 8O.4 is manually accepted and authorized for the bounded production closure commit.
 
-Last handoff update: 2026-09-04
+Last handoff update: 2026-09-05
+
+Current next milestone after Step 8O.4: Cleave + Mighty Cleave + Curse + Solitude + Forbidden Curse, including the Cosmic Enchantment Table audit.
 
 Pinned environment:
 
@@ -941,11 +943,11 @@ The final post-Orb capacity is no longer unresolved for current target classes: 
 
 ## 16. Current Next Milestone
 
-**Immediate next action: implement Step 8O — Dense Woodlands Adventure Prototype plus Dimensional Traveler rebalance and Cave Diving pot corrective, then manually verify it.**
+**Immediate next action: finish the remaining client visual smoke checks (Computer Use was stopped with physical Escape), obtain user manual acceptance of the uncommitted Step 8O.4 candidate, and commit only when explicitly instructed.**
 
 Current intended sequence:
 
-Steps 8M, 8M.1, and 8N are accepted. Step 8O is bounded to the first Dense Woodlands Adventure loop, its reusable Adventure/session/worldgen foundations, the authored woodland assets and loot, Dimensional Traveler's settled Adventure rebalance, the two Cave Diving pot corrections, and the explicitly requested Inventor base-health adjustment. Cosmic Ranger, Desecrated Tombs, other Adventure dimensions, additional Masks/Skins, and the broader Dungeon milestone remain deferred.
+Steps 8M, 8M.1, and 8N are accepted. Step 8O through 8O.4 covers the first Dense Woodlands Adventure loop and authored worldgen, Dimensional Traveler's Adventure rebalance, Cave Diving pot/loadout corrections, Space Chest White Scroll weights, Inventor base health, woodland polish, Decision Box restore, Warzone Giant adjustments, Mystery Call reward integration, and Compass feedback. Cosmic Ranger, Desecrated Tombs, other Adventure dimensions, additional Masks/Skins, and the broader Dungeon milestone remain deferred.
 
 The ordinary-enchantment expansion remains split across bounded patches. Step 7C is the explicit instruction that made the current canonical Design Doc enchantment-table values implementation-authoritative; later design edits still require their own explicit implementation milestone.
 
@@ -961,6 +963,12 @@ The ordinary-enchantment expansion remains split across bounded patches. Step 7C
 8. Only then begin the next milestone.
 
 Preserve unrelated dirty changes. Never change pinned versions as a side effect of gameplay work. Prefer service-level rules and typed data over one-off event logic, and keep client-only classes isolated from dedicated-server loading.
+
+### Permanent guidance: selective Client Use verification
+
+Do not use Client Use (GUI automation / Computer Use) as a default verification mechanism. Prefer source inspection, automated tests, Gradle tasks, logs, dedicated-server verification, and client startup logs.
+
+Use Client Use when the issue is inherently visual, interactive, client-state-dependent, or cannot be adequately verified through automated/runtime evidence. For major completed gameplay features, one targeted Client Use smoke test is encouraged. Avoid repeated GUI inspection when logs or automated tests can establish the same fact.
 
 ## 18. Verification Snapshot
 
@@ -1272,6 +1280,56 @@ For the accepted Step 6F implementation:
 - The user manually verified the lore cleanup, Molten IV, and Nutrition III and accepted Step 6F.
 
 Step 6F gameplay is committed at `b5148760420b658cd7006a73b230199f9311bc73` (`Add equipment lore Molten and Nutrition`).
+
+### Step 8O — IMPLEMENTED / AUTOMATED-RUNTIME VERIFIED / MANUALLY VERIFIED / ACCEPTED
+
+Step 8O adds the Dense Woodlands Adventure foundation: a dedicated fixed-biome dimension, typed Call of the Forest items, Dense Woodlands Scrap and Adventure Compass primitives, per-player timed Adventure sessions, Adventure activity context, and server-authoritative entry/expiry handling. Dimensional Traveler now resolves to +5% outgoing, +7.5% movement and 0.85× proc cooldown outside Adventures, and +10%/+15%/0.70× inside Adventures. The Inventor baseline health is 325 HP plus 200 HP per additional party member. Cave Diving retains the world-facing sherd comparison, five-tick validation, and component-shard pot break behavior.
+
+### Step 8O.1 corrective — IMPLEMENTED / AUTOMATED-RUNTIME VERIFIED / MANUALLY VERIFIED / ACCEPTED
+
+The Dense Woodlands biome now uses the Minecraft 1.21.11 biome-generation schema (`carvers` and `features` are arrays; `spawners` and `spawn_costs` are maps), so its dynamic-registry entry bootstraps successfully. The three Call of the Forest tiers, Dense Woodlands Scrap, and Adventure Compass now have current item-definition resources backed by valid vanilla Goat Horn, Paper, and Compass presentations. Focused semantic resource coverage guards the biome collection types, dimension references, and all five item definitions.
+
+`gradlew.bat cleanTest test build` passes all 622 tests across 156 suites. An isolated dedicated-server universe successfully created a brand-new world and then reloaded that same existing world, reaching `Done` both times with the Dense Woodlands registry loaded. Fresh client resource initialization completed sound and texture-atlas loading with no missing CosmicPVE item model/texture warnings after the Adventure Compass was aligned to a valid vanilla compass model. The unrelated Slightly Improved Font pack metadata warning and optional development-mod warnings remain outside CosmicPVE scope.
+
+Step 8O through Step 8O.4 has been manually verified and accepted by the user. The root `assets/`, `woodlands/`, and `trial rooms/` development directories remain outside closure ownership. The user-maintained `Cosmic_Design.md` remains the gameplay authority and is not modified by this closure.
+
+### Step 8O.2 corrective — IMPLEMENTED / AUTOMATED-RUNTIME VERIFIED / MANUALLY VERIFIED / ACCEPTED
+
+Dense Woodlands now uses the authored 13-template woodland set through the registered `cosmicpve:woodland_template` feature family, with gentle generated terrain sampled from the actual `WORLD_SURFACE` heightmap. The dedicated runtime probe covered 65,536 columns at surface Y 73–88 (mean 82.055, median 83), 100% dirt-supporting columns, maximum neighboring slope 1, and all five feature families plus every authored variant. Campsite barrels resolve the canonical `cosmicpve:chests/adventure/dense_woodlands` loot table lazily without rerolls.
+
+Adventure entry is now a durable server-side transaction: one valid Call is consumed, the Goat Horn `call` sound and 100-tick Darkness/Nausea transition are applied, duplicate activation is locked, and activation teleports after the full delay to an authoritative safe surface with an owned Adventure Compass. Exits, bounded iron-armored diamond-axe Zombies, timeout/death cleanup, Compass ownership, and return state are wired through the session lifecycle. The real player-flow GameTest harness covers source Y values −100, 10, 64, and 250, extraction, death/respawn cleanup, ordinary drops, and the Cave Diving temporary loadout.
+
+Cave Diving now grants a wooden sword in hotbar slot 1 and 15 Cooked Cod in slot 9; pot validation compares world-facing sides and preserves exact duplicate sherd occurrences. Space Chest Ultimate contains exactly one White Scroll row at weight 18 and Legendary exactly one at weight 20. Dimensional Traveler's base outgoing value is 5%, with the existing Adventure doubling to 10%.
+
+Focused deterministic suites pass for Adventure regression, Dense Woodlands resources, Cave Diving service/structure behavior, bundled armor definitions, and Space Chest production resources. An isolated dedicated server previously reached `Done` and passed the generated-world GameTest/runtime proof; the player-flow test remains part of the final manual/runtime acceptance pass after this corrective build. No Step 8O candidate changes are committed.
+
+### Step 8O.3 / 8O.4 corrective — IMPLEMENTED; AUTOMATED/RUNTIME VERIFIED; MANUALLY VERIFIED / ACCEPTED
+
+The previous handoff stopped at 8O.2 despite existing 8O.3 implementation. Step 8O.3 supplies the current rolling terrain, Plains climate/tint and natural vegetation, Decision Box entry restoration using the established `/restore` semantics, and Warzone Giant movement +0.05/base attack 1. The isolated runtime reverified four players through five Decision entries each: health/food/effects restored before interaction while inventory, outside XP snapshot, and session state remained unchanged. Giant base speed changed 0.2300000042 to 0.2800000042. The current user instruction overrides the Design Doc's older 60-second Compass cooldown; user-maintained design/assets are untouched.
+
+**Campsites.** The lowest-surface soil anchor introduced in 8O.3 correctly avoided downhill pedestals, but collision validation then rejected uphill soil at local Y 1–2. Shelves also project outside the authored soil footprint. The correction validates and cuts at most two soil layers within the authored floor/low-prop footprint, retains the two-block relief cap, rejects fluids/obstructions/cliffs, and keeps all three original templates/rotations. Runtime additionally exposed a later boulder putting support dirt above a barrel; support fills now require soil beneath them rather than building on campsite props. All checks precede writes. The placed feature remains a one-in-48 per-chunk attempt, with no rate boost. Terrain, biome climate, vegetation configuration, and tree variant resources were preserved.
+
+Fresh dedicated-server evidence (seed `8022026`, chunks X/Z `500..531`, 1,024 chunks / 262,144 columns): six naturally generated campsites within the sample, variants 1/2/3 = 2/3/1; every observed authored floor supported and every barrel present, unburied, and wired to the canonical lazy loot table. Ground Y 69–87, mean 79.6837, median 80, 100% in the soft range, maximum neighboring slope 1. Authored small/tall/fallen trees and boulders remained present. Actual vegetation included 62,285 short grass, 4,957 tall-grass blocks, six flower species, both mushrooms, and 41 pumpkins. Dedicated-server color lookup is uninitialized (zero), so server color equality alone is not visual tint proof. The biome still uses Plains temperature 0.8/downfall 0.4 with no grass/foliage override or vanilla-tree feature. Final natural sample campsite origins: `(8060,73,8065)`, `(8097,84,8427)`, `(8230,78,8102)`, `(8277,76,8206)`, `(8309,78,8074)`, `(8327,77,8265)`. Two additional boundary-neighbor camps lie outside the counted region. `/cosmic adventure campsites` exposes bounded recent positions plus attempt/rejection/placement diagnostics; dense tree history no longer evicts campsite evidence.
+
+**Mystery Call.** `cosmicpve:mystery_call_of_adventure` uses the vanilla Rail item model, forced glint, and bold cyan `#55FFFF` name “Mystery Call of Adventure”. Exact lore: italic gray “A distant path is waiting to answer.”; normal light gray “Contains one random Call of Adventure.”; bold cyan “RIGHT-CLICK TO REVEAL”. The eligible pool is derived from actual production Call registrations: `cosmicpve:call_of_forest_10`, `cosmicpve:call_of_forest_20`, `cosmicpve:call_of_forest_30`, each exactly once with its canonical components. Uniform selection is over those three SKUs (1/3 each), not families. Blizzard/Abyss are design-only and excluded.
+
+Mystery Call reuses `SingleRewardAnimationService` and its existing nine-slot centered previews, 100-tick reveal, 120-tick close, and shared feedback. A single authoritative result is selected before cosmetic previews. Source consumption and pending reward are saved together to the normal player file before opening the menu; delivery/cleared obligation is checkpointed afterward. Early close, recovery, both hands, repeat-use guards, and full-inventory drop delivery use the shared implementation. Opening only awards a Call; using that resulting Call separately starts the Adventure.
+
+**Trial/Fame/Flash Sale.** Hardcore adds one unopened Mystery at weight 7: declared 102→109, active 97→104. Impossible adds weight 9: declared 163→172, active 155→164. Deferred Spaceship rows explain the declared/active differences; Apprentice/Demonic were unchanged. Fame's existing constructible Trial-row aggregate naturally materializes the unopened Mystery at Hardcore 35 / Impossible 55 Fame, preserving nine offers and payload distinctness. Seeded runtime generation reached both prices. Flash Sale selectable rewards 20→21 (declared 21→22): one logical Mystery row with low/medium/high prices `90,000,000 / 115,000,000 / 145,000,000` cents ($900,000 / $1,150,000 / $1,450,000). Existing uniform tier selection supplies the three prices; the reward has ordinary single-row catalog weight. Actual runtime purchases at all three prices delivered one unopened Mystery and blocked repeat purchase.
+
+**Compass.** Existing persistent deadline now uses 100 ticks / five seconds instead of 1,200 ticks / 60 seconds. Only accepted active-session, owned-compass use sends the normal distance message and one player-targeted `minecraft:entity.experience_orb.pickup` packet at volume/pitch 1.0. Rejected/no-session/wrong-owner/cooldown uses do not start the timer or play that sound. Runtime assertions passed at initial use, immediate repeat, tick 99 (silent), and tick 100 (success/new deadline). Remaining Adventure `1200` multiplication converts minutes to ticks and is unrelated to Compass cooldown.
+
+**Verification result.** Required `cleanTest test build` passed all 633 tests after the production corrections. Standard `runGameTestServer` passed all 14 required tests. Dedicated server reached `Done`. The 60 campsite fixture cases (3 variants × 4 rotations × flat/1-block/2-block/cliff/water), fresh woodland sample, Decision/Giant restoration, and Mystery/Fame/Flash/Compass runtime tests passed. The final `adventure_hotfix` run also loaded an actual player save, verified consumed source plus the exact pending reward in that checkpoint, and recovered the loaded player exactly once. Evidence logs: `C:/Dev/woodlands-audit/step8o4-server.log` (fresh world/Decision), `step8o4-final-server.log` (final player-file recovery), and `step8o4-gametest.log` (14 standard GameTests).
+
+Client smoke is PARTIAL: the fresh test client connected successfully, displayed the Dense Woodlands terrain/vegetation and active Adventure HUD, and displayed successful Compass distance messages. The previously observed Master Volume was off; audible feedback is not claimed as heard. Exact sound identity/count/volume/pitch were verified by server packet assertions. Rail tooltip/glint, animated GUI, and natural campsite close-up visual checks were not completed. Live user input initially interrupted control; after the user authorized taking control, the next Computer Use call reported physical Escape and required stopping. No manual acceptance is inferred. The isolated test client/server were left running for the user. `git diff --check` excluding `docs/Cosmic_Design.md` passes; the full command reports pre-existing Markdown trailing whitespace in that user-maintained file, which remains untouched. Final worktree has 108 status entries across the combined candidate/user material, no staged diff, and no commit.
+
+Manual checks after automated/runtime completion:
+
+- Enter using `/give @s cosmicpve:call_of_forest_10`, use normally, and explore fresh chunks. `/cosmic adventure sample <chunkX> <chunkZ> <width 1..24>` generates/inspects a bounded new area; `/cosmic adventure campsites` lists natural placement diagnostics without force-placement. Inspect floor edges, shelves, and open barrels. Existing already-generated chunks do not regenerate campsites.
+- `/give @s cosmicpve:mystery_call_of_adventure 1`; inspect Rail/glint/name/lore, open normally, repeat with early GUI close, inspect the faithful resulting Forest Call, and use it separately for the five-second Adventure transition.
+- `/cosmic reward inspect cosmicpve:trial/hardcore_development` and `/cosmic reward inspect cosmicpve:trial/impossible` show the actual tables. Existing Trial tooling does not force one specific reward row; the deterministic resource/runtime tests cover the exact Mystery rows without adding a separate debug engine.
+- `/cosmic flashsale force mystery_call_of_adventure low` (then `medium`, `high` on separate offers) and `/buy` exercise each price. Each purchase should give one unopened Mystery.
+- During an Adventure, use the owned Compass, repeat immediately, then reuse after five seconds. Only accepted uses should repeat the distance message and pickup sound.
 
 ## Maintaining This Handoff
 

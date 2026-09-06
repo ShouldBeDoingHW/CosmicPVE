@@ -18,7 +18,7 @@ public final class UndeadRuseBehavior {
     public static int equippedLevelHighest(LivingEntity entity) {
         int highest = 0;
         for (var slot : new EquipmentSlot[]{EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET})
-            highest = Math.max(highest, EnchantmentLevels.onStack(entity.getItemBySlot(slot), ModEnchantments.UNDEAD_RUSE));
+            highest = Math.max(highest, EnchantmentLevels.onStack(entity, entity.getItemBySlot(slot), ModEnchantments.UNDEAD_RUSE));
         return Math.min(10, highest);
     }
     public static double chance(int level) { return Math.max(0, Math.min(10, level)) * .005; }

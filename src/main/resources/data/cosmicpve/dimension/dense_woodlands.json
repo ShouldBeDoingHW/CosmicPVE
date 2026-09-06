@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:overworld",
+  "generator": {
+    "type": "minecraft:noise",
+    "settings": "cosmicpve:dense_woodlands",
+    "biome_source": {
+      "type": "minecraft:fixed",
+      "biome": "cosmicpve:dense_woodlands"
+    }
+  }
+}

@@ -51,6 +51,7 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.AddPackFindersEvent;
 import org.slf4j.Logger;
+import com.cosmicpve.adventure.DenseWoodlandsBootstrap;
 
 @Mod(CosmicPVE.MOD_ID)
 public final class CosmicPVE {
@@ -71,6 +72,8 @@ public final class CosmicPVE {
         TelekinesisGameTests.register(modBus);
         com.cosmicpve.trial.room.InventorGameTests.register(modBus);
         ModItems.register(modBus);
+        com.cosmicpve.adventure.WoodlandTemplateFeature.register(modBus);
+        com.cosmicpve.adventure.AdventureGameTests.register(modBus);
         ModEntities.register(modBus);
         ModMenus.register(modBus);
         ModLootModifiers.register(modBus);
@@ -108,6 +111,7 @@ public final class CosmicPVE {
         TrialBootstrap.register();
         ConquestBootstrap.register();
         FlashSaleBootstrap.register();
+        DenseWoodlandsBootstrap.register();
         var spaceChests = new SpaceChestEventBridge();
         NeoForge.EVENT_BUS.addListener(spaceChests::onLogin);
         NeoForge.EVENT_BUS.addListener(spaceChests::onRespawn);

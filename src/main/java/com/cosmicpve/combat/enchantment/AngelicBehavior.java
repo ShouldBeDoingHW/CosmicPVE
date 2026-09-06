@@ -10,10 +10,10 @@ public final class AngelicBehavior {
     private AngelicBehavior() {}
 
     public static int equippedLevelTotal(LivingEntity entity) {
-        return EnchantmentLevels.onStack(entity.getItemBySlot(EquipmentSlot.HEAD), ModEnchantments.ANGELIC)
-                + EnchantmentLevels.onStack(entity.getItemBySlot(EquipmentSlot.CHEST), ModEnchantments.ANGELIC)
-                + EnchantmentLevels.onStack(entity.getItemBySlot(EquipmentSlot.LEGS), ModEnchantments.ANGELIC)
-                + EnchantmentLevels.onStack(entity.getItemBySlot(EquipmentSlot.FEET), ModEnchantments.ANGELIC);
+        return EnchantmentLevels.onStack(entity, entity.getItemBySlot(EquipmentSlot.HEAD), ModEnchantments.ANGELIC)
+                + EnchantmentLevels.onStack(entity, entity.getItemBySlot(EquipmentSlot.CHEST), ModEnchantments.ANGELIC)
+                + EnchantmentLevels.onStack(entity, entity.getItemBySlot(EquipmentSlot.LEGS), ModEnchantments.ANGELIC)
+                + EnchantmentLevels.onStack(entity, entity.getItemBySlot(EquipmentSlot.FEET), ModEnchantments.ANGELIC);
     }
 
     public static int aggregateLevels(int... levels) {

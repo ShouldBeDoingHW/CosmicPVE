@@ -27,6 +27,7 @@ import com.cosmicpve.data.component.EnchantedBlackScrollData;
 import com.cosmicpve.data.component.SignatureWeaponIdentity;
 import com.cosmicpve.data.component.AdminAbuseRewardIdentity;
 import com.cosmicpve.data.component.CosmicBookRateOverride;
+import com.cosmicpve.data.component.CallOfForestData;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
@@ -168,6 +169,9 @@ public final class ModDataComponents {
             COMPONENTS.registerComponentType("cosmic_book_rate_override",
                     builder -> builder.persistent(CosmicBookRateOverride.CODEC)
                             .networkSynchronized(ByteBufCodecs.fromCodecWithRegistries(CosmicBookRateOverride.CODEC)).cacheEncoding());
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<CallOfForestData>> CALL_OF_FOREST =
+            COMPONENTS.registerComponentType("call_of_forest", builder -> builder.persistent(CallOfForestData.CODEC)
+                    .networkSynchronized(ByteBufCodecs.fromCodecWithRegistries(CallOfForestData.CODEC)).cacheEncoding());
     private ModDataComponents() {}
 
     public static void register(IEventBus modBus) {

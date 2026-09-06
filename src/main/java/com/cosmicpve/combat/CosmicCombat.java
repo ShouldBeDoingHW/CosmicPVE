@@ -86,7 +86,7 @@ public final class CosmicCombat {
     private static final ArmorSetImmunityResolver ARMOR_SET_IMMUNITIES = new ArmorSetImmunityResolver(ARMOR_SETS);
     private static final MaskResolver MASKS = new MaskResolver(CosmicContent.repository());
     private static final com.cosmicpve.equipment.armor.CosmicMovementBonusService MOVEMENT =
-            new com.cosmicpve.equipment.armor.CosmicMovementBonusService(ARMOR_SETS, MASKS);
+            new com.cosmicpve.equipment.armor.CosmicMovementBonusService(ARMOR_SETS, MASKS, ACTIVITIES);
     private static final ArmorSetEventBridge ARMOR_SET_EVENTS = new ArmorSetEventBridge(
             ARMOR_SET_IMMUNITIES, ARMOR_SETS,
             new com.cosmicpve.equipment.armor.ArmorSetAttributeService(ARMOR_SETS, MOVEMENT));
@@ -174,7 +174,7 @@ public final class CosmicCombat {
         INCOMING.register(playerUpgrades);
         PRE_DEFENSE_BOUNDS.register(new AegisBehavior(ENCHANTMENTS));
         PROC_MODIFIERS.register(new LuckBehavior());
-        PROC_MODIFIERS.register(new ArmorSetProcModifierResolver(ARMOR_SETS));
+        PROC_MODIFIERS.register(new ArmorSetProcModifierResolver(ARMOR_SETS, ACTIVITIES));
         PROC_SOURCES.register(ENCHANTMENT_BEHAVIORS);
         PROC_SOURCES.register(WEAPON_SKIN_COMBAT);
         PROC_SOURCES.register(DODGE);

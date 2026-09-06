@@ -3,7 +3,7 @@
     {"weight":5,"minimum_quantity":2,"maximum_quantity":2,"reward":{"type":"unexamined_book","rarity":"ultimate"}},
     {"weight":10,"reward":{"type":"unexamined_book","rarity":"legendary"}},
     {"weight":5,"minimum_quantity":3,"maximum_quantity":3,"reward":{"type":"unexamined_book","rarity":"elite"}},
-    {"weight":10,"reward":{"type":"static_item","item":"cosmicpve:white_scroll"}},
+    {"weight":20,"reward":{"type":"static_item","item":"cosmicpve:white_scroll"}},
     {"weight":8,"reward":{"type":"black_scroll","success_rate":60}},
     {"weight":4,"reward":{"type":"black_scroll","success_rate":80}},
     {"weight":5,"reward":{"type":"static_item","item":"cosmicpve:mystery_elite_spawner"}},
