@@ -45,6 +45,23 @@ public final class EquippedPersistentEffectService {
                 MobEffects.NIGHT_VISION, GLOWING_LEASE_TICKS, GLOWING_REFRESH_AT);
         tickImplants(entity);
         tickAlienImplants(entity);
+        reconcileCurseKnockback(entity);
+    }
+
+    void reconcileCurseKnockback(LivingEntity entity) {
+        var attribute = entity.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.KNOCKBACK_RESISTANCE);
+        if (attribute == null) return;
+        double amount = CurseBehavior.state(entity).knockbackResistance();
+        var existing = attribute.getModifier(CurseBehavior.KNOCKBACK_MODIFIER_ID);
+        if (amount == 0.0) {
+            if (existing != null) attribute.removeModifier(CurseBehavior.KNOCKBACK_MODIFIER_ID);
+            return;
+        }
+        if (existing != null && Double.compare(existing.amount(), amount) == 0) return;
+        if (existing != null) attribute.removeModifier(CurseBehavior.KNOCKBACK_MODIFIER_ID);
+        attribute.addTransientModifier(new net.minecraft.world.entity.ai.attributes.AttributeModifier(
+                CurseBehavior.KNOCKBACK_MODIFIER_ID, amount,
+                net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_VALUE));
     }
 
     void tickImplants(LivingEntity entity) {

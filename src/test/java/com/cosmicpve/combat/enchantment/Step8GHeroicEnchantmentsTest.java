@@ -11,16 +11,17 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 
 class Step8GHeroicEnchantmentsTest {
-    @Test void canonicalHeroicTierAndEightReplacementPairsAreExact() {
+    @Test void canonicalHeroicTierAndTenReplacementPairsAreExact() {
         assertEquals(0xFF00A2, CosmicEnchantmentTier.HEROIC.tooltipColor());
         assertTrue(CosmicEnchantmentTier.HEROIC.allowsRates(1, 1));
         assertTrue(CosmicEnchantmentTier.HEROIC.allowsRates(100, 100));
         assertFalse(CosmicEnchantmentTier.HEROIC.extractableByBlackScroll());
-        assertEquals(8, HeroicEnchantments.PAIRS.size());
+        assertEquals(10, HeroicEnchantments.PAIRS.size());
         assertEquals(Set.of(ModEnchantments.DEEP_BLEED.identifier(), ModEnchantments.MIGHTY_CACTUS.identifier(),
                 ModEnchantments.PALADIN_ARMORED.identifier(), ModEnchantments.BLIGHTED_VIRUS.identifier(),
                 ModEnchantments.ALIEN_IMPLANTS.identifier(), ModEnchantments.LETHAL_SNIPER.identifier(),
-                ModEnchantments.ETERNAL_SNARE.identifier(), ModEnchantments.PERMANENT_EXECUTE.identifier()),
+                ModEnchantments.ETERNAL_SNARE.identifier(), ModEnchantments.PERMANENT_EXECUTE.identifier(),
+                ModEnchantments.MIGHTY_CLEAVE.identifier(), ModEnchantments.FORBIDDEN_CURSE.identifier()),
                 HeroicEnchantments.PAIRS.stream().map(HeroicEnchantments.Pair::heroic).collect(Collectors.toSet()));
         for (var pair : HeroicEnchantments.PAIRS) {
             assertEquals(pair.heroic(), HeroicEnchantments.heroicFor(pair.ordinary()).orElseThrow());
@@ -29,8 +30,8 @@ class Step8GHeroicEnchantmentsTest {
     }
 
     @Test void heroicMetadataAndActivatedStormcallerAreCanonical() {
-        assertEquals(64, CosmicEnchantmentSpecs.ALL.size());
-        assertEquals(8, CosmicEnchantmentSpecs.ALL.stream()
+        assertEquals(69, CosmicEnchantmentSpecs.ALL.size());
+        assertEquals(10, CosmicEnchantmentSpecs.ALL.stream()
                 .filter(spec -> spec.tier() == CosmicEnchantmentTier.HEROIC).count());
         assertEquals(6, CosmicEnchantmentSpecs.DEEP_BLEED.maxLevel());
         assertEquals("axe", CosmicEnchantmentSpecs.DEEP_BLEED.equipmentApplicability());

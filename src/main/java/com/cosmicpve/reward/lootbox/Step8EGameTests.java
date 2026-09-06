@@ -126,7 +126,7 @@ public final class Step8EGameTests {
             var book = heroicTable.create(enchantments, helper.getLevel().getRandom());
             var data = book.get(ModDataComponents.COSMIC_ENCHANT_BOOK.get());
             helper.assertTrue(data != null && HeroicCosmicEnchantmentTableRewards.POOL.contains(data.enchantmentId()),
-                    "Heroic Table reward must use one of the exact eight replacements");
+                    "Heroic Table reward must use one of the exact ten replacements");
             helper.assertTrue(HeroicCosmicEnchantmentTableRewards.SUCCESS.contains(data.successRate())
                     && data.destroyRate() >= 1 && data.destroyRate() <= 100,
                     "Heroic Table rates must be 25/50/75 Success and 1-100 Destroy");
@@ -134,7 +134,7 @@ public final class Step8EGameTests {
                     "Heroic Table books must be maximum level");
             seenHeroics.add(data.enchantmentId());
         }
-        helper.assertTrue(seenHeroics.size() == 8, "Loaded-registry sampling must reach all eight Heroics");
+        helper.assertTrue(seenHeroics.size() == 10, "Loaded-registry sampling must reach all ten Heroics");
         verifyHeroicConversion(helper, enchantments);
         helper.succeed();
     }

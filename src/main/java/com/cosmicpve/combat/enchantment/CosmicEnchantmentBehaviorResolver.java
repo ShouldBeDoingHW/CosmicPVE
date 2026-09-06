@@ -47,6 +47,7 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
     private final com.cosmicpve.equipment.armor.ArmorSetResolver armorSets;
     private final com.cosmicpve.equipment.armor.ArmorSetSuppressionService armorSetSuppression;
     private final SnareRootService snareRoots;
+    private final CleaveBehavior cleave;
 
     public CosmicEnchantmentBehaviorResolver(
             ChildCombatActionService childActions,
@@ -80,6 +81,8 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
         this.armorSets = armorSets;
         this.armorSetSuppression = armorSetSuppression;
         this.snareRoots = snareRoots;
+        this.cleave = new CleaveBehavior(
+                com.cosmicpve.combat.ownership.GeneralAllyResolver.production(), childActions);
     }
 
     public CosmicEnchantmentBehaviorResolver(
@@ -93,6 +96,7 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
         var result = new ArrayList<ProcCandidate>();
         if (event.hook() == ProcHook.ON_VALID_HIT) {
             addDoublestrike(event, result);
+            addCleaveFamily(event, result);
             addBleed(event, result);
             addPoison(event, result);
             addPummel(event, result);
@@ -134,6 +138,23 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
             addDevour(event, result);
         }
         return List.copyOf(result);
+    }
+
+    private void addCleaveFamily(ProcEvent event, List<ProcCandidate> result) {
+        int mightyLevel = Math.min(8, event.effectiveEnchantments().level(ModEnchantments.MIGHTY_CLEAVE.identifier()));
+        int ordinaryLevel = Math.min(8, event.effectiveEnchantments().level(ModEnchantments.CLEAVE.identifier()));
+        boolean mighty = mightyLevel > 0;
+        int level = mighty ? mightyLevel : ordinaryLevel;
+        if (level <= 0) return;
+        Identifier id = mighty ? ModEnchantments.MIGHTY_CLEAVE.identifier() : ModEnchantments.CLEAVE.identifier();
+        result.add(candidate(id, ProcHook.ON_VALID_HIT,
+                mighty ? CleaveBehavior.mightyChance() : CleaveBehavior.cleaveChance(level),
+                Optional.empty(), 0L, Optional.empty(), ChildProcEligibility.LIMITED_OFFENSIVE_REROLL,
+                activation -> activation.event().combatResult().ifPresent(parent -> cleave.activate(parent, level, mighty)),
+                provenance(event, id),
+                condition(CosmicPVE.id("cleave_family_ordinary_axe_parent"), procEvent ->
+                        ordinaryAttack(procEvent) && procEvent.combatResult().map(parent ->
+                                parent.context().weaponSnapshot().stack().is(net.minecraft.tags.ItemTags.AXES)).orElse(false))));
     }
 
     private void addDeepBleed(ProcEvent event, List<ProcCandidate> result) {

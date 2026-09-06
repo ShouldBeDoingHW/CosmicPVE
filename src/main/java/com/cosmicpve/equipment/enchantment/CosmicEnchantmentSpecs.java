@@ -119,6 +119,12 @@ public final class CosmicEnchantmentSpecs {
             ModEnchantments.INVERSION.identifier(), 4, CosmicEnchantmentTier.ULTIMATE, "sword");
     public static final CosmicEnchantmentSpec SPIRIT_LINK = new CosmicEnchantmentSpec(
             ModEnchantments.SPIRIT_LINK.identifier(), 7, CosmicEnchantmentTier.ELITE, "helmet_or_chestplate");
+    public static final CosmicEnchantmentSpec CLEAVE = new CosmicEnchantmentSpec(
+            ModEnchantments.CLEAVE.identifier(), 8, CosmicEnchantmentTier.ULTIMATE, "axe");
+    public static final CosmicEnchantmentSpec SOLITUDE = new CosmicEnchantmentSpec(
+            ModEnchantments.SOLITUDE.identifier(), 3, CosmicEnchantmentTier.ELITE, "all_weapons");
+    public static final CosmicEnchantmentSpec CURSE = new CosmicEnchantmentSpec(
+            ModEnchantments.CURSE.identifier(), 5, CosmicEnchantmentTier.UNIQUE, "chestplate");
     public static final CosmicEnchantmentSpec DEEP_BLEED = new CosmicEnchantmentSpec(
             ModEnchantments.DEEP_BLEED.identifier(), 6, CosmicEnchantmentTier.HEROIC, "axe");
     public static final CosmicEnchantmentSpec MIGHTY_CACTUS = new CosmicEnchantmentSpec(
@@ -135,6 +141,10 @@ public final class CosmicEnchantmentSpecs {
             ModEnchantments.ETERNAL_SNARE.identifier(), 4, CosmicEnchantmentTier.HEROIC, "crossbow");
     public static final CosmicEnchantmentSpec PERMANENT_EXECUTE = new CosmicEnchantmentSpec(
             ModEnchantments.PERMANENT_EXECUTE.identifier(), 5, CosmicEnchantmentTier.HEROIC, "sword");
+    public static final CosmicEnchantmentSpec MIGHTY_CLEAVE = new CosmicEnchantmentSpec(
+            ModEnchantments.MIGHTY_CLEAVE.identifier(), 8, CosmicEnchantmentTier.HEROIC, "axe");
+    public static final CosmicEnchantmentSpec FORBIDDEN_CURSE = new CosmicEnchantmentSpec(
+            ModEnchantments.FORBIDDEN_CURSE.identifier(), 5, CosmicEnchantmentTier.HEROIC, "chestplate");
 
     public static final List<CosmicEnchantmentSpec> ALL =
             List.of(EXECUTE, ANGELIC, LIGHTNING, ENDER_SHIFT, DOUBLESTRIKE, BLEED, LUCK, POISON, PUMMEL,
@@ -145,8 +155,9 @@ public final class CosmicEnchantmentSpecs {
                     UNDEAD_RUSE, OBLITERATE, SOUL_TETHER, DODGE, LEADERSHIP,
                     HERO_KILLER, SOUL_SIPHON, BLACKOUT, ENDER_WALKER, VOODOO,
                     SNIPER, SNARE, PLAGUE_CARRIER, OBSIDIAN_DESTROYER, DOMINATE, HEX, STORMCALLER, INVERSION, SPIRIT_LINK,
+                    CLEAVE, SOLITUDE, CURSE,
                     DEEP_BLEED, MIGHTY_CACTUS, PALADIN_ARMORED, BLIGHTED_VIRUS, ALIEN_IMPLANTS,
-                    LETHAL_SNIPER, ETERNAL_SNARE, PERMANENT_EXECUTE);
+                    LETHAL_SNIPER, ETERNAL_SNARE, PERMANENT_EXECUTE, MIGHTY_CLEAVE, FORBIDDEN_CURSE);
 
     private CosmicEnchantmentSpecs() {}
 

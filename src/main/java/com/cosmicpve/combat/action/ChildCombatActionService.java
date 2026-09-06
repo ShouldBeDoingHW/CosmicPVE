@@ -73,11 +73,17 @@ public final class ChildCombatActionService {
 
     public CombatActionOutcome deliverOrdinary(
             CombatContext parent, LivingEntity target, double amount, RecursionPolicy policy) {
+        return deliverOrdinary(parent, target, amount, policy, Set.of());
+    }
+
+    public CombatActionOutcome deliverOrdinary(
+            CombatContext parent, LivingEntity target, double amount, RecursionPolicy policy,
+            Set<Identifier> additionalExcludedEffects) {
         if (!Double.isFinite(amount) || amount <= 0.0) {
             throw new IllegalArgumentException("Ordinary child damage must be finite and positive");
         }
         var sequence = sequences.nextChild(parent.attackSequenceId());
-        var child = parent.child(target, DamageChannel.ORDINARY, policy, sequence);
+        var child = parent.child(target, DamageChannel.ORDINARY, policy, sequence, additionalExcludedEffects);
         if (!(target.level() instanceof ServerLevel level) || target.isDeadOrDying() || child.damageSource() == null) {
             return new CombatActionOutcome(sequence.id(), parent.attackSequenceId(), DamageChannel.ORDINARY, amount, 0.0, false);
         }
@@ -113,6 +119,29 @@ public final class ChildCombatActionService {
                 deliveredContext, null, true, () -> target.hurtServer(level, source, (float) amount));
         return new CombatActionOutcome(
                 sequence.id(), parent.attackSequenceId(), DamageChannel.ORDINARY, amount,
+                Math.max(0.0, before - target.getHealth()), accepted);
+    }
+
+    /** Linked Cleave-family packet for the already-struck parent target only. */
+    public CombatActionOutcome deliverCleave(
+            CombatContext parent, LivingEntity target, double amount, Set<Identifier> exclusions) {
+        if (!Double.isFinite(amount) || amount <= 0.0 || parent.channel() != DamageChannel.ORDINARY
+                || parent.target() != target
+                || !exclusions.contains(com.cosmicpve.registry.ModEnchantments.CLEAVE.identifier())
+                || !exclusions.contains(com.cosmicpve.registry.ModEnchantments.MIGHTY_CLEAVE.identifier())) {
+            throw new IllegalArgumentException("Cleave bypass requires its linked ordinary parent and both exclusions");
+        }
+        var sequence = sequences.nextChild(parent.attackSequenceId());
+        var child = parent.child(target, DamageChannel.ORDINARY, RecursionPolicy.LIMITED_OFFENSIVE_REROLL,
+                sequence, exclusions);
+        if (!(target.level() instanceof ServerLevel level) || target.isDeadOrDying())
+            return new CombatActionOutcome(sequence.id(), parent.attackSequenceId(), DamageChannel.ORDINARY, amount, 0.0, false);
+        var source = level.damageSources().source(ModDamageTypes.CLEAVE, parent.directSource(), parent.creditedSource());
+        var deliveredContext = child.withDamageSource(source);
+        float before = target.getHealth();
+        boolean accepted = CombatDeliveryScope.call(
+                deliveredContext, null, true, () -> target.hurtServer(level, source, (float) amount));
+        return new CombatActionOutcome(sequence.id(), parent.attackSequenceId(), DamageChannel.ORDINARY, amount,
                 Math.max(0.0, before - target.getHealth()), accepted);
     }
 }

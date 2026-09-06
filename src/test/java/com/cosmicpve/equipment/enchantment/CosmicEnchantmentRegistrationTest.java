@@ -68,7 +68,12 @@ class CosmicEnchantmentRegistrationTest {
                 Map.entry("plague_carrier", 7),
                 Map.entry("hex", 5),
                 Map.entry("inversion", 4),
-                Map.entry("spirit_link", 7));
+                Map.entry("spirit_link", 7),
+                Map.entry("cleave", 8),
+                Map.entry("solitude", 3),
+                Map.entry("curse", 5),
+                Map.entry("mighty_cleave", 8),
+                Map.entry("forbidden_curse", 5));
         for (var entry : expected.entrySet()) {
             var resource = getClass().getClassLoader()
                     .getResourceAsStream("data/cosmicpve/enchantment/" + entry.getKey() + ".json");
@@ -123,7 +128,7 @@ class CosmicEnchantmentRegistrationTest {
                 }
             }
         }
-        assertEquals(64, CosmicEnchantmentSpecs.ALL.size());
+        assertEquals(69, CosmicEnchantmentSpecs.ALL.size());
         assertEquals(CosmicEnchantmentTier.ELITE, CosmicEnchantmentSpecs.EXECUTE.tier());
         assertEquals(CosmicEnchantmentTier.ULTIMATE, CosmicEnchantmentSpecs.ANGELIC.tier());
         assertEquals(CosmicEnchantmentTier.SIMPLE, CosmicEnchantmentSpecs.LIGHTNING.tier());
@@ -201,6 +206,13 @@ class CosmicEnchantmentRegistrationTest {
         assertTagContains("bypasses_cooldown", ModEnchantments.DOUBLESTRIKE.identifier().toString(), true);
         assertTagContains("bypasses_armor", ModEnchantments.DOUBLESTRIKE.identifier().toString(), false);
         assertTagContains("bypasses_shield", ModEnchantments.DOUBLESTRIKE.identifier().toString(), false);
+    }
+
+    @Test
+    void cleaveDamageTypeOnlyJoinsHurtCooldownBypass() throws Exception {
+        assertTagContains("bypasses_cooldown", ModEnchantments.CLEAVE.identifier().toString(), true);
+        assertTagContains("bypasses_armor", ModEnchantments.CLEAVE.identifier().toString(), false);
+        assertTagContains("bypasses_shield", ModEnchantments.CLEAVE.identifier().toString(), false);
     }
 
     private void assertTagContains(String tag, String id, boolean expected) throws Exception {

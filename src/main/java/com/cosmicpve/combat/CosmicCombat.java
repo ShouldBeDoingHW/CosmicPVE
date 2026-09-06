@@ -162,6 +162,7 @@ public final class CosmicCombat {
         OUTGOING.register(new com.cosmicpve.combat.enchantment.DominateBehavior());
         OUTGOING.register(hex);
         OUTGOING.register(SPIRIT_LINK);
+        OUTGOING.register(new com.cosmicpve.combat.enchantment.CurseBehavior());
         OUTGOING.register(playerUpgrades);
         OUTGOING.register(new com.cosmicpve.trial.room.InventorCombatContributor());
         INCOMING.register(ARMOR_SET_COMBAT);

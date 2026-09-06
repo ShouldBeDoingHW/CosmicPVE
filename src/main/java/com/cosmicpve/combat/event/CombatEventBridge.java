@@ -144,13 +144,17 @@ public final class CombatEventBridge {
         if (context.target() != event.getEntity() || context.damageSource() != event.getSource()) {
             throw new IllegalStateException("Scoped child damage did not match its NeoForge callback");
         }
-        if (scoped.doublestrikeBypass()
-                && (context.channel() != DamageChannel.ORDINARY
-                        || context.recursionPolicy() != RecursionPolicy.LIMITED_OFFENSIVE_REROLL
-                        || context.parentSequenceId().isEmpty()
-                        || !context.excludedProcEffectIds().contains(ModEnchantments.DOUBLESTRIKE.identifier())
-                        || !event.getSource().is(ModDamageTypes.DOUBLESTRIKE))) {
-            throw new IllegalStateException("Invalid Doublestrike hurt-immunity bypass scope");
+        if (scoped.doublestrikeBypass()) {
+            boolean common = context.channel() == DamageChannel.ORDINARY
+                    && context.recursionPolicy() == RecursionPolicy.LIMITED_OFFENSIVE_REROLL
+                    && context.parentSequenceId().isPresent();
+            boolean doublestrike = event.getSource().is(ModDamageTypes.DOUBLESTRIKE)
+                    && context.excludedProcEffectIds().contains(ModEnchantments.DOUBLESTRIKE.identifier());
+            boolean cleave = event.getSource().is(ModDamageTypes.CLEAVE)
+                    && context.excludedProcEffectIds().contains(ModEnchantments.CLEAVE.identifier())
+                    && context.excludedProcEffectIds().contains(ModEnchantments.MIGHTY_CLEAVE.identifier());
+            if (!common || (!doublestrike && !cleave))
+                throw new IllegalStateException("Invalid linked ordinary-child hurt-immunity bypass scope");
         }
 
         CombatResult provisional;

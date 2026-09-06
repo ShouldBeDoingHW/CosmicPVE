@@ -69,6 +69,7 @@ public final class CosmicPVE {
         Step8EGameTests.register(modBus);
         Step8FGameTests.register(modBus);
         Step8G2GameTests.register(modBus);
+        com.cosmicpve.combat.enchantment.CleaveCurseGameTests.register(modBus);
         TelekinesisGameTests.register(modBus);
         com.cosmicpve.trial.room.InventorGameTests.register(modBus);
         ModItems.register(modBus);

@@ -62,7 +62,7 @@ class UnexaminedBookOpeningServiceTest {
                 .noneMatch(spec -> spec == CosmicEnchantmentSpecs.POISON));
     }
 
-    @Test void heroicPoolContainsAllEightReplacementsWithOrdinaryRateRanges() {
+    @Test void heroicPoolContainsAllTenReplacementsWithOrdinaryRateRanges() {
         var seen = new java.util.HashSet<CosmicEnchantmentSpec>();
         var random = RandomSource.create(8808L);
         for (int i = 0; i < 400; i++) {
@@ -77,7 +77,8 @@ class UnexaminedBookOpeningServiceTest {
                 CosmicEnchantmentSpecs.MIGHTY_CACTUS, CosmicEnchantmentSpecs.PALADIN_ARMORED,
                 CosmicEnchantmentSpecs.BLIGHTED_VIRUS, CosmicEnchantmentSpecs.ALIEN_IMPLANTS,
                 CosmicEnchantmentSpecs.LETHAL_SNIPER, CosmicEnchantmentSpecs.ETERNAL_SNARE,
-                CosmicEnchantmentSpecs.PERMANENT_EXECUTE)), seen);
+                CosmicEnchantmentSpecs.PERMANENT_EXECUTE, CosmicEnchantmentSpecs.MIGHTY_CLEAVE,
+                CosmicEnchantmentSpecs.FORBIDDEN_CURSE)), seen);
         assertTrue(service.roll(CosmicEnchantmentTier.ELITE, java.util.List.of(CosmicEnchantmentSpecs.STORMCALLER),
                 random, null).isPresent());
     }

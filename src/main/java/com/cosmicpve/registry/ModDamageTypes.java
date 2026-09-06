@@ -13,6 +13,9 @@ public final class ModDamageTypes {
     /** Internal ordinary child-hit type. Its only special property is the bypasses_cooldown tag. */
     public static final ResourceKey<DamageType> DOUBLESTRIKE =
             ResourceKey.create(Registries.DAMAGE_TYPE, CosmicPVE.id("doublestrike"));
+    /** Internal ordinary Cleave-family child-hit type; only bypasses the linked parent's hurt cooldown. */
+    public static final ResourceKey<DamageType> CLEAVE =
+            ResourceKey.create(Registries.DAMAGE_TYPE, CosmicPVE.id("cleave"));
 
     private ModDamageTypes() {}
 }

@@ -62,6 +62,9 @@ public final class ModEnchantments {
     public static final ResourceKey<Enchantment> STORMCALLER = createKey("stormcaller");
     public static final ResourceKey<Enchantment> INVERSION = createKey("inversion");
     public static final ResourceKey<Enchantment> SPIRIT_LINK = createKey("spirit_link");
+    public static final ResourceKey<Enchantment> CLEAVE = createKey("cleave");
+    public static final ResourceKey<Enchantment> SOLITUDE = createKey("solitude");
+    public static final ResourceKey<Enchantment> CURSE = createKey("curse");
     public static final ResourceKey<Enchantment> DEEP_BLEED = createKey("deep_bleed");
     public static final ResourceKey<Enchantment> MIGHTY_CACTUS = createKey("mighty_cactus");
     public static final ResourceKey<Enchantment> PALADIN_ARMORED = createKey("paladin_armored");
@@ -70,6 +73,8 @@ public final class ModEnchantments {
     public static final ResourceKey<Enchantment> LETHAL_SNIPER = createKey("lethal_sniper");
     public static final ResourceKey<Enchantment> ETERNAL_SNARE = createKey("eternal_snare");
     public static final ResourceKey<Enchantment> PERMANENT_EXECUTE = createKey("permanent_execute");
+    public static final ResourceKey<Enchantment> MIGHTY_CLEAVE = createKey("mighty_cleave");
+    public static final ResourceKey<Enchantment> FORBIDDEN_CURSE = createKey("forbidden_curse");
 
     private ModEnchantments() {}
 

@@ -43,16 +43,18 @@ class Step8ELootboxTest {
                 ModEnchantments.OBLITERATE, ModEnchantments.LEADERSHIP, ModEnchantments.SOUL_SIPHON,
                 ModEnchantments.LUCK, ModEnchantments.EAGLE_EYE, ModEnchantments.LIGHTNING,
                 ModEnchantments.MOLTEN, ModEnchantments.SNIPER, ModEnchantments.STORMCALLER,
-                ModEnchantments.DOMINATE), Set.copyOf(CosmicEnchantmentTableRewards.POOL));
+                ModEnchantments.DOMINATE, ModEnchantments.VENOM, ModEnchantments.VIRUS,
+                ModEnchantments.UNDEAD_RUSE, ModEnchantments.SPIRIT_LINK, ModEnchantments.SOLITUDE),
+                Set.copyOf(CosmicEnchantmentTableRewards.POOL));
         assertEquals(List.of(50, 75, 100), CosmicEnchantmentTableRewards.ORDINARY_SUCCESS);
         assertEquals(List.of(25, 50), CosmicEnchantmentTableRewards.MASTERY_SUCCESS);
     }
 
-    @Test void heroicTableHasExactlyEightByThreeEqualOutcomes() {
+    @Test void heroicTableHasExactlyTenByThreeEqualOutcomes() {
         assertEquals(HeroicEnchantments.PAIRS.stream().map(HeroicEnchantments.Pair::heroic).toList(),
                 HeroicCosmicEnchantmentTableRewards.POOL);
         assertEquals(List.of(25, 50, 75), HeroicCosmicEnchantmentTableRewards.SUCCESS);
-        assertEquals(24, HeroicCosmicEnchantmentTableRewards.ENTRY_COUNT);
+        assertEquals(30, HeroicCosmicEnchantmentTableRewards.ENTRY_COUNT);
     }
 
     @Test void adminPoolIsExactlyFourEqualTwentyFiveWeights() {
