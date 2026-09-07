@@ -100,6 +100,8 @@ public final class CosmicCombat {
     private static final WeaponSkinResolver WEAPON_SKINS = new WeaponSkinResolver();
     private static final WeaponSkinCombatResolver WEAPON_SKIN_COMBAT =
             new WeaponSkinCombatResolver(WEAPON_SKINS, STACKS, CHILD_ACTIONS);
+    private static final com.cosmicpve.equipment.skin.HysteriaRedirectService HYSTERIA =
+            new com.cosmicpve.equipment.skin.HysteriaRedirectService(STACKS, PROC_EVENTS, CHILD_ACTIONS);
     private static final com.cosmicpve.combat.enchantment.SoulTetherService SOUL_TETHERS =
             new com.cosmicpve.combat.enchantment.SoulTetherService();
     private static final com.cosmicpve.combat.enchantment.SnareRootService SNARE_ROOTS =
@@ -116,7 +118,8 @@ public final class CosmicCombat {
     private static final ExecutionService EXECUTIONS = new ExecutionService(SEQUENCES, TRACES);
     private static final CombatEventBridge EVENTS =
             new CombatEventBridge(ENGINE, ATTRIBUTION, SEQUENCES, TRACES, ENCHANTMENTS, PROC_EVENTS,
-                    OUTGOING, INCOMING, PRE_DEFENSE_BOUNDS, RECENT_COMBAT_MEMORY, WEAPON_SKINS, SIGNATURE_WEAPONS);
+                    OUTGOING, INCOMING, PRE_DEFENSE_BOUNDS, RECENT_COMBAT_MEMORY, WEAPON_SKINS, SIGNATURE_WEAPONS,
+                    HYSTERIA);
     private static final ProcHookEventBridge PROC_HOOKS =
             new ProcHookEventBridge(PROC_EVENTS, EXECUTIONS, NUTRITION, SOUL_TETHERS);
     private static final CombatStackEventBridge STACK_EVENTS = new CombatStackEventBridge(STACKS, BLEED_RUNTIME);
@@ -174,7 +177,7 @@ public final class CosmicCombat {
         INCOMING.register(hex);
         INCOMING.register(playerUpgrades);
         PRE_DEFENSE_BOUNDS.register(new AegisBehavior(ENCHANTMENTS));
-        PROC_MODIFIERS.register(new LuckBehavior());
+        PROC_MODIFIERS.register(new LuckBehavior(STACKS));
         PROC_MODIFIERS.register(new ArmorSetProcModifierResolver(ARMOR_SETS, ACTIVITIES));
         PROC_SOURCES.register(ENCHANTMENT_BEHAVIORS);
         PROC_SOURCES.register(WEAPON_SKIN_COMBAT);

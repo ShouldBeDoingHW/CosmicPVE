@@ -12,6 +12,6 @@ public final class MiningEnchantmentEventBridge {
     public void onBreakSpeed(PlayerEvent.BreakSpeed event) {
         if (event.isCanceled()) return;
         event.setNewSpeed(service.applyObsidianDestroyer(
-                event.getNewSpeed(), event.getState(), event.getEntity().getMainHandItem()));
+                event.getEntity(), event.getNewSpeed(), event.getState(), event.getEntity().getMainHandItem()));
     }
 }

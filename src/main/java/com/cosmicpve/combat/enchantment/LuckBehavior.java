@@ -11,9 +11,18 @@ import net.minecraft.world.entity.LivingEntity;
 /** Generic proc-chance modifier source backed by actual Luck on leggings and boots. */
 public final class LuckBehavior implements ProcModifierResolver {
     private final com.cosmicpve.combat.ownership.GeneralAllyResolver allies;
+    private final com.cosmicpve.combat.stack.CombatStackService stacks;
 
-    public LuckBehavior() { this(com.cosmicpve.combat.ownership.GeneralAllyResolver.production()); }
-    public LuckBehavior(com.cosmicpve.combat.ownership.GeneralAllyResolver allies) { this.allies = allies; }
+    public LuckBehavior() { this(com.cosmicpve.combat.ownership.GeneralAllyResolver.production(), null); }
+    public LuckBehavior(com.cosmicpve.combat.ownership.GeneralAllyResolver allies) { this(allies, null); }
+    public LuckBehavior(com.cosmicpve.combat.stack.CombatStackService stacks) {
+        this(com.cosmicpve.combat.ownership.GeneralAllyResolver.production(), stacks);
+    }
+    public LuckBehavior(com.cosmicpve.combat.ownership.GeneralAllyResolver allies,
+                        com.cosmicpve.combat.stack.CombatStackService stacks) {
+        this.allies = allies;
+        this.stacks = stacks;
+    }
 
     @Override
     public ProcModifiers resolve(LivingEntity owner) {
@@ -26,7 +35,14 @@ public final class LuckBehavior implements ProcModifierResolver {
                 owner, owner.getMainHandItem(), ModEnchantments.SOLITUDE));
         int activeSolitude = solitude > 0 && !allies.hasAllyWithin(owner, solitudeRadius(solitude)) ? solitude : 0;
         totalLevel += activeSolitude;
-        return modifiersForLevels(totalLevel, activeSolitude);
+        int frenzy = stacks == null || owner.level().getServer() == null ? 0 : Math.min(10,
+                stacks.count(owner, com.cosmicpve.equipment.skin.WeaponSkinCombatResolver.FEEDING_FRENZY,
+                        owner.level().getServer().getTickCount()));
+        var base = modifiersForLevels(totalLevel, activeSolitude);
+        if (frenzy == 0) return base;
+        var chances = new java.util.ArrayList<>(base.chanceMultipliers());
+        chances.add(feedingFrenzyMultiplier(frenzy));
+        return new ProcModifiers(chances, base.cooldownDurationMultipliers(), base.namedChanceMultipliers());
     }
 
     public static double solitudeRadius(int level) { return 8.0 - Math.max(1, Math.min(3, level)); }
@@ -51,5 +67,9 @@ public final class LuckBehavior implements ProcModifierResolver {
             throw new IllegalArgumentException("Luck level total cannot be negative");
         }
         return 1.0 + totalLevel * 0.01;
+    }
+
+    public static double feedingFrenzyMultiplier(int stacks) {
+        return 1.0 + Math.min(10, Math.max(0, stacks)) * 0.01;
     }
 }

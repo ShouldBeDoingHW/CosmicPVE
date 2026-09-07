@@ -47,6 +47,7 @@ public final class CombatEventBridge {
     private final RecentCombatMemoryService recentCombatMemory;
     private final WeaponSkinResolver weaponSkins;
     private final com.cosmicpve.reward.lootbox.SignatureWeaponCombatService signatureWeapons;
+    private final com.cosmicpve.equipment.skin.HysteriaRedirectService hysteria;
     private final Map<DamageContainer, PendingCombat> incomingCandidates =
             Collections.synchronizedMap(new WeakHashMap<>());
     private final ThreadLocal<Deque<PendingCombat>> acceptedDamageStack =
@@ -64,7 +65,8 @@ public final class CombatEventBridge {
             PreDefenseBoundsContributor preDefenseBounds,
             RecentCombatMemoryService recentCombatMemory,
             WeaponSkinResolver weaponSkins,
-            com.cosmicpve.reward.lootbox.SignatureWeaponCombatService signatureWeapons) {
+            com.cosmicpve.reward.lootbox.SignatureWeaponCombatService signatureWeapons,
+            com.cosmicpve.equipment.skin.HysteriaRedirectService hysteria) {
         this.engine = engine;
         this.attribution = attribution;
         this.sequences = sequences;
@@ -77,6 +79,7 @@ public final class CombatEventBridge {
         this.recentCombatMemory = recentCombatMemory;
         this.weaponSkins = weaponSkins;
         this.signatureWeapons = signatureWeapons;
+        this.hysteria = hysteria;
     }
 
     public void onIncomingDamage(LivingIncomingDamageEvent event) {
@@ -190,6 +193,7 @@ public final class CombatEventBridge {
         PendingCombat result = incomingCandidates.remove(event.getContainer());
         if (event.getNewDamage() <= 0.0F) return;
         if (result != null) {
+            if (hysteria.redirect(result.result(), event)) return;
             acceptedDamageStack.get().push(result);
         }
     }

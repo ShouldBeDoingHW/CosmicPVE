@@ -12,7 +12,9 @@ import net.minecraft.world.entity.LivingEntity;
 
 public final class EffectiveEnchantmentsResolver {
     public EffectiveEnchantments resolve(LivingEntity owner, ItemStack stack, List<VirtualEnchantmentGrant> grants) {
-        return com.cosmicpve.adventure.AdventureRules.filter(owner,resolve(stack,com.cosmicpve.adventure.AdventureRules.restricted(owner) ? List.of() : grants));
+        var effective = com.cosmicpve.adventure.AdventureRules.filter(owner,
+                resolve(stack, com.cosmicpve.adventure.AdventureRules.restricted(owner) ? List.of() : grants));
+        return suppress(owner, effective);
     }
     public EffectiveEnchantments resolve(ItemStack stack, List<VirtualEnchantmentGrant> virtualGrants) {
         return resolve(stack, CosmicPVE.id("actual_item"), virtualGrants);
@@ -37,7 +39,8 @@ public final class EffectiveEnchantmentsResolver {
                         new ActualEnchantmentGrant(key.identifier(), entry.getIntValue(), sourceId)));
             }
         }
-        return com.cosmicpve.adventure.AdventureRules.filter(entity,resolveSources(actualGrants, virtualGrants));
+        return suppress(entity, com.cosmicpve.adventure.AdventureRules.filter(
+                entity, resolveSources(actualGrants, virtualGrants)));
     }
 
     public EffectiveEnchantments resolveSources(
@@ -58,5 +61,9 @@ public final class EffectiveEnchantmentsResolver {
             resolved.put(id, new EffectiveEnchantment(id, effectiveLevel, provenance));
         });
         return new EffectiveEnchantments(resolved);
+    }
+
+    private static EffectiveEnchantments suppress(LivingEntity owner, EffectiveEnchantments effective) {
+        return effective.filter(id -> !EnchantmentSuppressionService.GLOBAL.isSuppressed(owner, id));
     }
 }

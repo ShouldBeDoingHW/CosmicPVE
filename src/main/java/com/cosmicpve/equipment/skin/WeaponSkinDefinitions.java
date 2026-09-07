@@ -18,6 +18,10 @@ public final class WeaponSkinDefinitions {
     public static final Identifier MAUIS_HOOK = CosmicPVE.id("mauis_hook");
     public static final Identifier STORMBRINGER = CosmicPVE.id("stormbringer");
     public static final Identifier SEASONS_BEATINGS = CosmicPVE.id("seasons_beatings");
+    public static final Identifier GRIM_AXE = CosmicPVE.id("grim_axe");
+    public static final Identifier WHISK_TAKER = CosmicPVE.id("whisk_taker");
+    public static final Identifier THE_CARVER = CosmicPVE.id("the_carver");
+    public static final Identifier SPINAL_TAP = CosmicPVE.id("spinal_tap");
 
     private static final Map<Identifier, WeaponSkinDefinition> DEFINITIONS = List.of(
             definition(BOOSTED_CHAINSAW, 0xCCA00A, WeaponSkinDefinition.WeaponKind.AXE,
@@ -32,7 +36,18 @@ public final class WeaponSkinDefinitions {
                             Component.translatable("weapon_skin.cosmicpve.stormbringer.effect.defense")), List.of()),
             definition(SEASONS_BEATINGS, 0x1B943A, WeaponSkinDefinition.WeaponKind.SWORD,
                     List.of(Component.translatable("weapon_skin.cosmicpve.seasons_beatings.effect.defense"),
-                            Component.translatable("weapon_skin.cosmicpve.seasons_beatings.effect.slowness")), List.of())
+                            Component.translatable("weapon_skin.cosmicpve.seasons_beatings.effect.slowness")), List.of()),
+            definition(GRIM_AXE, 0x4C09B8, WeaponSkinDefinition.WeaponKind.AXE,
+                    List.of(Component.translatable("weapon_skin.cosmicpve.grim_axe.effect")), List.of()),
+            definition(WHISK_TAKER, 0xB08E00, WeaponSkinDefinition.WeaponKind.AXE,
+                    List.of(Component.translatable("weapon_skin.cosmicpve.whisk_taker.effect.frenzy"),
+                            Component.translatable("weapon_skin.cosmicpve.whisk_taker.effect.bonus")), List.of()),
+            definition(THE_CARVER, 0xDBD70B, WeaponSkinDefinition.WeaponKind.SWORD,
+                    List.of(Component.translatable("weapon_skin.cosmicpve.the_carver.effect.devour"),
+                            Component.translatable("weapon_skin.cosmicpve.the_carver.effect.damage")),
+                    List.of(new VirtualEnchantmentGrant(ModEnchantments.DEVOUR.identifier(), 4, THE_CARVER))),
+            definition(SPINAL_TAP, 0x00F02C, WeaponSkinDefinition.WeaponKind.SWORD,
+                    List.of(Component.translatable("weapon_skin.cosmicpve.spinal_tap.effect")), List.of())
     ).stream().collect(Collectors.toUnmodifiableMap(WeaponSkinDefinition::id, Function.identity()));
 
     private WeaponSkinDefinitions() {}

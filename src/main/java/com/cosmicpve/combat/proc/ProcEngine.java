@@ -13,6 +13,9 @@ import net.minecraft.resources.Identifier;
 public final class ProcEngine {
     public static final Identifier DETERMINISTIC_CLASSIFICATION =
             Identifier.fromNamespaceAndPath("cosmicpve", "deterministic");
+    /** Exact probabilities which intentionally ignore Luck and every other chance modifier. */
+    public static final Identifier UNMODIFIED_CHANCE_CLASSIFICATION =
+            Identifier.fromNamespaceAndPath("cosmicpve", "unmodified_chance");
     private final CooldownService cooldowns;
     private final ProcTraceService traces;
 
@@ -34,9 +37,12 @@ public final class ProcEngine {
 
     private ProcEvaluation evaluateOne(
             ProcEvent event, ProcCandidate candidate, Set<Identifier> claimedOnceKeys) {
-        var chanceMultipliers = new ArrayList<Double>(event.chanceMultipliers());
-        candidate.classifications().stream().map(event.namedChanceMultipliers()::get)
-                .filter(java.util.Objects::nonNull).forEach(chanceMultipliers::add);
+        var chanceMultipliers = new ArrayList<Double>();
+        if (!candidate.classifications().contains(UNMODIFIED_CHANCE_CLASSIFICATION)) {
+            chanceMultipliers.addAll(event.chanceMultipliers());
+            candidate.classifications().stream().map(event.namedChanceMultipliers()::get)
+                    .filter(java.util.Objects::nonNull).forEach(chanceMultipliers::add);
+        }
         double multiplier = ProcChance.multiplierProduct(chanceMultipliers);
         double finalChance = ProcChance.calculate(candidate.baseProbability(), chanceMultipliers);
 

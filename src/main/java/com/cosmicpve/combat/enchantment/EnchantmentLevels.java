@@ -10,6 +10,8 @@ public final class EnchantmentLevels {
 
     public static int onStack(net.minecraft.world.entity.LivingEntity owner, ItemStack stack, ResourceKey<Enchantment> enchantment) {
         if (com.cosmicpve.adventure.AdventureRules.restricted(owner) && !com.cosmicpve.adventure.AdventureRules.allows(enchantment.identifier())) return 0;
+        if (com.cosmicpve.equipment.enchantment.EnchantmentSuppressionService.GLOBAL
+                .isSuppressed(owner, enchantment.identifier())) return 0;
         return onStack(stack,enchantment);
     }
 

@@ -22,9 +22,11 @@ public final class MiningEnchantmentService {
 
     public void apply(BlockDropsEvent event) {
         ItemStack tool = event.getTool();
-        int autoSmelt = enchantments.resolve(tool, List.of()).level(ModEnchantments.AUTO_SMELT.identifier());
-        int experience = enchantments.resolve(tool, List.of()).level(ModEnchantments.EXPERIENCE.identifier());
-        int telekinesis = enchantments.resolve(tool, List.of()).level(ModEnchantments.TELEKINESIS.identifier());
+        var effective = event.getBreaker() instanceof net.minecraft.world.entity.LivingEntity owner
+                ? enchantments.resolve(owner, tool, List.of()) : enchantments.resolve(tool, List.of());
+        int autoSmelt = effective.level(ModEnchantments.AUTO_SMELT.identifier());
+        int experience = effective.level(ModEnchantments.EXPERIENCE.identifier());
+        int telekinesis = effective.level(ModEnchantments.TELEKINESIS.identifier());
         if (autoSmelt > 0 && event.getLevel() instanceof ServerLevel level) {
             transformDrops(event.getDrops(), stack -> smeltingResult(level, stack));
         }
@@ -36,6 +38,12 @@ public final class MiningEnchantmentService {
 
     public float applyObsidianDestroyer(float currentSpeed, BlockState state, ItemStack tool) {
         int level = enchantments.resolve(tool, List.of()).level(ModEnchantments.OBSIDIAN_DESTROYER.identifier());
+        return applyObsidianDestroyer(currentSpeed, state, level);
+    }
+
+    public float applyObsidianDestroyer(
+            net.minecraft.world.entity.LivingEntity owner, float currentSpeed, BlockState state, ItemStack tool) {
+        int level = enchantments.resolve(owner, tool, List.of()).level(ModEnchantments.OBSIDIAN_DESTROYER.identifier());
         return applyObsidianDestroyer(currentSpeed, state, level);
     }
 

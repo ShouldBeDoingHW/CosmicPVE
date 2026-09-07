@@ -1,14 +1,14 @@
 # CosmicPVE Development Handoff
 
-Current accepted baseline: Step 8O through Step 8O.4 at `3535bbd2c1b2093a6f5c036c9b1b009d63a350b3` (`Add Dense Woodlands Adventure prototype`), followed by the implemented, automated/runtime verified, and now manually accepted Cleave/Curse milestone. Its dedicated closure commit is the immediate Git action.
+Current accepted baseline: the four Dense Woodlands Weapon Skins Grim Axe, Whisk Taker, The Carver, and Spinal Tap plus their supporting passive/stack/resource architecture — implemented, automated/runtime verified, manually verified/accepted, and committed by the dedicated Weapon Skin closure immediately after `893990d` (`Add Cleave and Curse enchantment milestone`). The preceding Dense Woodlands Adventure baseline is `3535bbd` (`Add Dense Woodlands Adventure prototype`).
 
 Repository state: Steps 6A–8N and the earlier Conquest synchronization are implemented, verified, and manually accepted. The user-maintained `docs/Cosmic_Design.md` and root `assets`, `drafts`, and `woodlands` development-source folders remain outside closure ownership.
 
-Current accepted closure candidate: Cleave + Mighty Cleave + Curse + Solitude + Forbidden Curse, reusable general ally resolution, and the Cosmic Enchantment Table audit. The user manually verified/accepted it on 2026-09-06; commit only its owned files with the required closure message.
+Current uncommitted candidate: none at this closure point. The next bounded Roadmap milestone is Dense Woodlands hostile mobs + Nimble + Thundering Blow + Neutralize. Do not begin the following Abandoned Spaceship Prototype milestone.
 
-Last handoff update: 2026-09-05
+Last handoff update: 2026-09-06
 
-Current active milestone after Step 8O.4: the Cleave/Curse milestone is implemented, automated/runtime verified, and manually accepted. Close it before beginning the four-skin milestone.
+Current active milestone after the accepted Weapon Skin closure: Dense Woodlands hostile mobs + Nimble + Thundering Blow + Neutralize.
 
 Pinned environment:
 
@@ -948,11 +948,11 @@ The final post-Orb capacity is no longer unresolved for current target classes: 
 
 ## 16. Current Next Milestone
 
-**Immediate next action: manually verify the uncommitted Cleave/Curse milestone using the checklist below. Fix any defects before expansion; commit only after explicit user acceptance/instruction. Do not begin the following roadmap milestone.**
+**Immediate next action: manually verify the four uncommitted Weapon Skins with the checklist below. Fix defects before any commit or expansion. Do not begin the Dense Woodlands hostile-mob milestone.**
 
 Current intended sequence:
 
-Steps 8M, 8M.1, 8N, and 8O through 8O.4 are accepted and committed. The active uncommitted candidate is only the five-enchantment Cleave/Curse milestone and its Cosmic Enchantment Table audit. Cosmic Ranger, Desecrated Tombs, other Adventure dimensions, additional Masks/Skins, and the broader Dungeon milestone remain deferred.
+Steps 8M, 8M.1, 8N, and 8O through 8O.4 plus the Cleave/Curse milestone are accepted and committed. The active uncommitted candidate is only Grim Axe, Whisk Taker, The Carver, and Spinal Tap. Cosmic Ranger, Dense Woodlands hostile mobs, Desecrated Tombs, other Adventure dimensions, additional Masks/Skins, and the broader Dungeon milestone remain deferred.
 
 The ordinary-enchantment expansion remains split across bounded patches. Step 7C is the explicit instruction that made the current canonical Design Doc enchantment-table values implementation-authoritative; later design edits still require their own explicit implementation milestone.
 
@@ -1338,7 +1338,7 @@ Manual checks after automated/runtime completion:
 - `/cosmic flashsale force mystery_call_of_adventure low` (then `medium`, `high` on separate offers) and `/buy` exercise each price. Each purchase should give one unopened Mystery.
 - During an Adventure, use the owned Compass, repeat immediately, then reuse after five seconds. Only accepted uses should repeat the distance message and pickup sound.
 
-### Cleave / Curse milestone — IMPLEMENTED; AUTOMATED/RUNTIME VERIFIED; MANUALLY VERIFIED / ACCEPTED; CLOSURE COMMIT PENDING
+### Cleave / Curse milestone — IMPLEMENTED; AUTOMATED/RUNTIME VERIFIED; MANUALLY VERIFIED / ACCEPTED; COMMITTED
 
 This bounded candidate adds real Cleave VIII (Ultimate Axe), Solitude III (Elite All Weapons), Curse V (Unique Chestplate), Mighty Cleave VIII (Heroic Axe replacing Cleave), and Forbidden Curse V (Heroic Chestplate replacing Curse). It raises the registry to 69 definitions (59 ordinary plus ten Heroic), Heroic replacement families to ten, and Heroic Table outcomes to 30. All five use the existing Book, capacity, Transmog, Tinkerer/salvage, Dust, Unexamined, generic application, and tooltip systems. Initial Heroic conversion requires max ordinary VIII/V respectively, atomically replaces it without a second slot, and existing same-level Heroics follow the normal upgrade rule.
 
@@ -1356,7 +1356,7 @@ Verification on the exact final source state:
 - `gradlew.bat runGameTestServer --console=plain` succeeds with all 15 required GameTests. The loaded registry decodes all five new enchantments at exact max levels and constructs every ordinary Table entry at all valid Success variants plus all 30 Heroic outcomes through the production factories.
 - Dedicated-server startup loads 1,462 recipes, publishes current CosmicPVE content, verifies the eight disabled/eight control recipes, and reaches `Done (0.546s)`. The noninteractive verification process was then terminated after readiness; that termination alone makes that `runServer` Gradle invocation exit nonzero and is not a startup failure.
 - Fresh-client startup includes `mod/cosmicpve` in ResourceManager reload, initializes OpenAL/SoundEngine, and constructs particle, armor-trim, block, item, chest, and GUI atlases. The installed Slightly Improved Font pack retains its unrelated newer-pack metadata error; no relevant CosmicPVE resource, registry, or sided-loading failure was observed.
-- Candidate-owned paths pass `git diff --check`; the full worktree check still reports only the separately maintained Design Doc's pre-existing Markdown whitespace. Pinned versions/IDs are unchanged. The user manually verified and accepted this milestone on 2026-09-06; its dedicated closure commit is the next action.
+- Candidate-owned paths pass `git diff --check`; the full worktree check still reports only the separately maintained Design Doc's pre-existing Markdown whitespace. Pinned versions/IDs are unchanged. The user manually verified and accepted this milestone on 2026-09-06. Its dedicated closure is `893990d` (`Add Cleave and Curse enchantment milestone`).
 
 Exact manual commands and scenarios (operator permission is required for `/cosmic ...`):
 
@@ -1366,6 +1366,38 @@ Exact manual commands and scenarios (operator permission is required for `/cosmi
 - For Curse, use `/cosmic combat set-health @s 6` on a normal 20-HP player to prove exactly 30% is inactive, then `5.9` to prove below 30% is active; compare trace contribution and knockback. For Forbidden Curse V, `7` HP (35%) is inactive and `6.9` is active with fixed +7.5% damage/+15% resistance. Unequip or heal above threshold and confirm the modifier disappears rather than stacking.
 - Open the real sources with `/cosmic reward cosmic-enchantment-table give @s` and `/cosmic reward heroic-cosmic-enchantment-table give @s`. Force ordinary results with `/cosmic reward cosmic-enchantment-table force <entry> <success>`, where `<entry>` is one of `angelic armored eagle_eye lightning luck molten rage venom virus undead_ruse sniper obliterate leadership soul_siphon stormcaller dominate spirit_link solitude`; use 50/75/100 except Soul Siphon 25/50. Force Heroics with `/cosmic reward heroic-cosmic-enchantment-table force <entry> <success>` using 25/50/75 and each of the ten Heroic IDs. Confirm maximum level, tier/rates/Destroy range, normal animation/recovery, and real application.
 - Use `/enchanter`, `/tinkerer`, `/cosmic tinkerer dust give @s ultimate 64`, `/cosmic tinkerer dust give @s unique 64`, `/cosmic tinkerer dust give @s elite 64`, and `/cosmic tinkerer dust give @s heroic 64` to spot-check the generic economy paths. Also apply a Transmog Scroll and both Black Scroll variants: ordinary Cleave/Solitude/Curse remain ordered/extractable as appropriate, Heroics remain non-extractable, and salvage values follow their registered tiers.
+
+### Four Weapon Skins — IMPLEMENTED; AUTOMATED/RUNTIME VERIFIED; MANUALLY VERIFIED/ACCEPTED; COMMITTED
+
+This bounded candidate adds exactly four normal skins through the shared persistent weapon-skin identity and inventory interaction: Whisk Taker and Grim Axe accept the existing Axe family; Spinal Tap and The Carver accept the existing Sword family. All ordinary vanilla material tiers supported by those predicates remain valid. Application consumes one loose skin only on success, rejects same/different second skins without mutation, preserves enchantments, capacity/orbs, Scroll/Transmog/custom data and underlying attack damage/speed, and right-click removal returns the loose skin while restoring the prior model. No Special category or skin-owned attribute normalization was introduced.
+
+Whisk Taker grants one independent three-second positive `feeding_frenzy` stack on a committed melee hit when the target was strictly below 40% HP before that hit. The stack caps at ten, remains eligible for generalized positive-stack transfer/cleanse behavior, supplies one binary +5% ordinary outgoing contribution while any stack remains, and supplies a relative `1 + 0.01 × stacks` Luck factor capped at 1.10×. Grim Axe makes one normal Luck-relative 5% ProcEngine roll per qualifying committed melee hit, then session-locally suppresses only Elite and Unique Cosmic effects for two seconds. The reusable tier suppression filters both centralized effective enchantments (including virtual grants) and owner-aware direct level reads without changing item enchantment data; repeat applications refresh the expiry, and weak entity identity plus expiry/death cleanup prevents permanent state damage.
+
+Spinal Tap applies one independent four-second negative `hysteria` stack per committed melee hit, capped at eight. Before an otherwise accepted root ordinary hit commits, Hysteria makes one exact, deliberately Luck-independent `0.5% × active stacks` roll. Success sets the original target's damage to zero and replays the combat engine's resolved pre-vanilla-mitigation ordinary snapshot against the attacker as a linked `NO_PROCS` ordinary child; the attacker then receives its own vanilla mitigation once. Explicit exclusions cover Hysteria, Cleave, Mighty Cleave, Doublestrike, Inversion, and Mighty, and the no-proc child cannot recurse or start an ordinary proc chain. The Carver contributes virtual effective Devour IV through the established highest-level resolver, so it occupies no stored enchantment slot and cannot produce a duplicate Devour copy; removal removes the grant. It also adds exactly +3.3% ordinary outgoing damage only when target current-HP percentage is strictly lower than the wielder's; equality, true damage, and execution are unaffected.
+
+The four root RGBA artworks remain untouched. Runtime conversion used each image's alpha-positive bounds, exact nearest-source-pixel sampling, aspect-preserving fit, and centered transparent 32×32 `Format32bppArgb` canvas. No nontransparent output color absent from its source was introduced:
+
+- Grim Axe: source 200×200, bounds `(44,0)–(155,199)` / 112×200, scaled artwork 18×32.
+- Whisk Taker: source 62×200, bounds `(0,0)–(61,199)` / 62×200, scaled artwork 10×32.
+- The Carver: source 33×200, bounds `(0,0)–(32,199)` / 33×200, scaled artwork 5×32.
+- Spinal Tap: source 71×200, bounds `(0,0)–(70,199)` / 71×200, scaled artwork 11×32.
+
+Verification on the exact uncommitted source state:
+
+- `gradlew.bat cleanTest test build --console=plain` succeeds with 648 JUnit tests across 163 suites, zero failures. Coverage includes family/material acceptance, atomic one-skin application/removal, persistent metadata and Transmog preservation, unchanged effective attack damage/speed, exact colors/lore/models/textures, virtual highest-level Devour IV/removal, strict HP comparisons, outgoing/Luck values and caps, stack polarity/durations/maxima/expiry policies, suppression tier/refresh/expiry rules, exact Hysteria chance/snapshot/exclusions, and the ProcEngine's explicit unmodified-chance path.
+- `gradlew.bat runGameTestServer --console=plain` publishes 12 stack definitions including `feeding_frenzy` and `hysteria`, then passes all 15 required GameTests.
+- Dedicated-server startup loads 1,462 recipes, publishes current content, verifies progression recipes, and reaches `Done (0.519s)`. The verification process was terminated after readiness, so that Gradle invocation's nonzero termination is not a startup failure.
+- Fresh-client startup reloads `mod/cosmicpve`, initializes OpenAL/SoundEngine, and creates the item and GUI atlases with no relevant missing-model, missing-texture, malformed-resource, or sided-loading error. The separately installed Slightly Improved Font pack retains its unrelated newer-pack metadata warning.
+- Candidate-owned paths pass `git diff --check`. The user manually verified and accepted the complete four-skin milestone on 2026-09-06. Its dedicated closure commit is `Add Dense Woodlands weapon skins`; the exact hash is recorded in the current post-closure handoff state. User-maintained `docs/Cosmic_Design.md`, root `assets/`, and root `woodlands/` remain outside closure ownership.
+
+Exact manual commands and scenarios (operator permission is required for `/cosmic ...`):
+
+- Give the loose skins with `/cosmic skin give @s cosmicpve:whisk_taker`, `/cosmic skin give @s cosmicpve:grim_axe`, `/cosmic skin give @s cosmicpve:spinal_tap`, and `/cosmic skin give @s cosmicpve:the_carver`. Use `/give @s minecraft:diamond_axe`, `/give @s minecraft:netherite_axe`, `/give @s minecraft:diamond_sword`, and `/give @s minecraft:iron_sword` as representative targets. Drag each skin onto its matching weapon, inspect loose/attached lore and first-/third-person/GUI orientation, then right-click with an empty cursor to remove it and confirm the returned loose skin. Wrong-family application, same-skin reapplication, and a different second skin must not consume/mutate anything.
+- Before attachment, add Vanilla/Cosmic enchantments, Orb/capacity/Scroll/Transmog state, custom name, durability, and any other important accepted metadata. Record attack damage/speed. Apply, save/relog, and remove each skin; all underlying state and attributes must remain exact while only the skin identity/model/passive changes.
+- For Whisk Taker, enable `/cosmic combat trace on` and `/cosmic proc trace on`; hit a target at exactly 40% HP (no stack), then below 40% (one `feeding_frenzy`). Inspect with `/cosmic stack list @s`. Confirm +5% ordinary outgoing is identical at one and ten stacks, while proc trace Luck rises 1% per active stack to 10%; use `/cosmic stack add @s cosmicpve:feeding_frenzy 10` for the cap and wait three seconds to confirm independent expiry removes both bonuses. Use generalized positive steal/cleanse commands as a classification check.
+- For Grim Axe, place Elite/Unique and Legendary/Mastery/Heroic effects on the target, enable proc trace, and repeat valid melee hits until the 5% Luck-relative proc activates. For two seconds only Elite/Unique behaviors must stop; the other tiers and all stored item enchantment data must remain unchanged. Reproc before expiry to check refresh, then wait for automatic restoration and repeat across death/relog.
+- For Spinal Tap, land sword hits and inspect `/cosmic stack list <target>` for four-second negative `hysteria`, independent expiries, and an eight-stack cap. Use `/cosmic stack add @s cosmicpve:hysteria 8` to accelerate redirect testing. On activation, the intended victim must take zero, the attacker must take the resolved ordinary self-hit after its own mitigation, and trace output must show no Hysteria/Cleave/Mighty Cleave/Doublestrike/Inversion/ordinary child chain. Wait four seconds and confirm redirects cease; generalized negative cleanse must remove it.
+- For The Carver, compare otherwise identical sword hits at lower/equal/higher target HP percentage to confirm only the strictly-lower case adds +3.3% ordinary damage. With sufficient hunger, proc trace should show one effective Devour IV source and normal 5% Luck-relative Devour behavior; repeat with an underlying lower-level Devour and confirm one highest-level IV evaluation, not two. Remove the skin and confirm the virtual Devour IV and +3.3% contribution disappear without altering stored enchantments.
 
 ## Maintaining This Handoff
 

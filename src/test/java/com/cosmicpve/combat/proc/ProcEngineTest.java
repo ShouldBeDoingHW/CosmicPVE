@@ -64,6 +64,19 @@ class ProcEngineTest {
     }
 
     @Test
+    void explicitlyUnmodifiedChanceIgnoresLuckMultiplier() {
+        var id = CosmicPVE.id("test/exact_chance");
+        var exact = new ProcCandidate(id, ProcHook.ON_VALID_HIT, .005, Optional.empty(), 0L,
+                CooldownScope.EPHEMERAL_COMBAT, Optional.empty(), List.of(), List.of(), Optional.empty(),
+                ChildProcEligibility.ROOT_ONLY, Set.of(ProcEngine.UNMODIFIED_CHANCE_CLASSIFICATION), id,
+                ignored -> {}, new ProcProvenance(ProcSourceKind.OTHER, id));
+        var result = engine().evaluate(event(41, UUID.randomUUID(), 0, RecursionPolicy.NORMAL,
+                new CountingRandom(.0051), List.of(10.0), Set.of()), List.of(exact));
+        assertEquals(.005, result.evaluations().getFirst().finalChance(), 1e-12);
+        assertEquals(ProcEvaluationStatus.ROLL_FAILED, result.evaluations().getFirst().status());
+    }
+
+    @Test
     void cooldownBlocksImmediateRepeatWithoutAnotherRollThenExpires() {
         var cooldowns = new CooldownService();
         var engine = new ProcEngine(cooldowns, new ProcTraceService());

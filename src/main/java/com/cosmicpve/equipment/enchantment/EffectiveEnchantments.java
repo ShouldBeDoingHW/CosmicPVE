@@ -34,4 +34,10 @@ public final class EffectiveEnchantments {
     public boolean isEmpty() {
         return entries.isEmpty();
     }
+
+    public EffectiveEnchantments filter(java.util.function.Predicate<Identifier> retained) {
+        var filtered = new LinkedHashMap<Identifier, EffectiveEnchantment>();
+        entries.forEach((id, value) -> { if (retained.test(id)) filtered.put(id, value); });
+        return filtered.size() == entries.size() ? this : new EffectiveEnchantments(filtered);
+    }
 }

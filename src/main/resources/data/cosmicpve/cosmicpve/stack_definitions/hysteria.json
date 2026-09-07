@@ -1,0 +1,9 @@
+{
+  "polarity": "negative",
+  "maximum_stacks": 8,
+  "duration_ticks": 80,
+  "refresh_policy": "independent",
+  "transferable": false,
+  "cleansable": true,
+  "persistent": false
+}

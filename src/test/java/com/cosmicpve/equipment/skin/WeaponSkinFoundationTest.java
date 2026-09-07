@@ -34,7 +34,10 @@ class WeaponSkinFoundationTest {
 
     @Test void definitionsAreStableDiscoverableAndApplicableToMultipleVanillaTiers() {
         assertEquals(List.of(WeaponSkinDefinitions.BOOSTED_CHAINSAW, WeaponSkinDefinitions.MAUIS_HOOK,
-                WeaponSkinDefinitions.SEASONS_BEATINGS, WeaponSkinDefinitions.STORMBRINGER), WeaponSkinDefinitions.ids());
+                WeaponSkinDefinitions.GRIM_AXE, WeaponSkinDefinitions.SEASONS_BEATINGS,
+                WeaponSkinDefinitions.SPINAL_TAP, WeaponSkinDefinitions.STORMBRINGER,
+                WeaponSkinDefinitions.THE_CARVER, WeaponSkinDefinitions.WHISK_TAKER).stream()
+                .sorted(java.util.Comparator.comparing(Identifier::toString)).toList(), WeaponSkinDefinitions.ids());
         assertTrue(WeaponSkinDefinitions.find(WeaponSkinDefinitions.BOOSTED_CHAINSAW).orElseThrow()
                 .accepts(new ItemStack(Items.WOODEN_AXE)));
         assertTrue(WeaponSkinDefinitions.find(WeaponSkinDefinitions.STORMBRINGER).orElseThrow()
@@ -47,6 +50,16 @@ class WeaponSkinFoundationTest {
                 .accepts(new ItemStack(Items.DIAMOND_SWORD)));
         assertFalse(WeaponSkinDefinitions.find(WeaponSkinDefinitions.SEASONS_BEATINGS).orElseThrow()
                 .accepts(new ItemStack(Items.DIAMOND_AXE)));
+        assertTrue(WeaponSkinDefinitions.find(WeaponSkinDefinitions.WHISK_TAKER).orElseThrow()
+                .accepts(new ItemStack(Items.GOLDEN_AXE)));
+        assertTrue(WeaponSkinDefinitions.find(WeaponSkinDefinitions.GRIM_AXE).orElseThrow()
+                .accepts(new ItemStack(Items.NETHERITE_AXE)));
+        assertFalse(WeaponSkinDefinitions.find(WeaponSkinDefinitions.GRIM_AXE).orElseThrow()
+                .accepts(new ItemStack(Items.WOODEN_SWORD)));
+        assertTrue(WeaponSkinDefinitions.find(WeaponSkinDefinitions.SPINAL_TAP).orElseThrow()
+                .accepts(new ItemStack(Items.WOODEN_SWORD)));
+        assertTrue(WeaponSkinDefinitions.find(WeaponSkinDefinitions.THE_CARVER).orElseThrow()
+                .accepts(new ItemStack(Items.NETHERITE_SWORD)));
     }
 
     @Test void canonicalLoreUsesPerSkinNameColorsAndSharedYellowGrayPresentation() {
@@ -58,6 +71,10 @@ class WeaponSkinFoundationTest {
                 WeaponSkinDefinition.WeaponKind.AXE, 2);
         assertSkinLore(WeaponSkinDefinitions.SEASONS_BEATINGS, 0x1B943A,
                 WeaponSkinDefinition.WeaponKind.SWORD, 2);
+        assertSkinLore(WeaponSkinDefinitions.GRIM_AXE, 0x4C09B8, WeaponSkinDefinition.WeaponKind.AXE, 1);
+        assertSkinLore(WeaponSkinDefinitions.WHISK_TAKER, 0xB08E00, WeaponSkinDefinition.WeaponKind.AXE, 2);
+        assertSkinLore(WeaponSkinDefinitions.SPINAL_TAP, 0x00F02C, WeaponSkinDefinition.WeaponKind.SWORD, 1);
+        assertSkinLore(WeaponSkinDefinitions.THE_CARVER, 0xDBD70B, WeaponSkinDefinition.WeaponKind.SWORD, 2);
     }
 
     @Test void typedDataCodecsRejectInvalidVersions() {
@@ -203,7 +220,8 @@ class WeaponSkinFoundationTest {
     }
 
     @Test void suppliedTexturesAreUsableTransparentThirtyTwoPixelResources() throws Exception {
-        for (String name : List.of("boosted_chainsaw", "mauis_hook", "seasons_beatings", "stormbringer")) {
+        for (String name : List.of("boosted_chainsaw", "mauis_hook", "seasons_beatings", "stormbringer",
+                "grim_axe", "whisk_taker", "the_carver", "spinal_tap")) {
             BufferedImage image = ImageIO.read(java.util.Objects.requireNonNull(getClass().getResourceAsStream(
                     "/assets/cosmicpve/textures/item/" + name + ".png")));
             assertEquals(32, image.getWidth());
@@ -215,6 +233,46 @@ class WeaponSkinFoundationTest {
             assertTrue(transparent,name+" must retain transparent background pixels");
             assertEquals("cosmicpve:item/" + name, itemModel(name));
         }
+    }
+
+    @Test void newSkinsPreserveUnderlyingAttackAttributes() {
+        assertAttributesPreserved(WeaponSkinDefinitions.WHISK_TAKER, Items.DIAMOND_AXE);
+        assertAttributesPreserved(WeaponSkinDefinitions.GRIM_AXE, Items.NETHERITE_AXE);
+        assertAttributesPreserved(WeaponSkinDefinitions.SPINAL_TAP, Items.DIAMOND_SWORD);
+        assertAttributesPreserved(WeaponSkinDefinitions.THE_CARVER, Items.IRON_SWORD);
+    }
+
+    @Test void carverDevourIsVirtualHighestLevelAndDisappearsOnRemoval() {
+        var skin = WeaponSkinItemFactory.create(WeaponSkinDefinitions.THE_CARVER);
+        var sword = new ItemStack(Items.DIAMOND_SWORD);
+        service.apply(skin, sword, skin, sword);
+        var grants = resolver.virtualEnchantments(sword);
+        assertEquals(1, grants.size());
+        assertEquals(ModEnchantments.DEVOUR.identifier(), grants.getFirst().enchantmentId());
+        assertEquals(4, grants.getFirst().level());
+        assertFalse(EnchantmentHelper.hasAnyEnchantments(sword));
+        var effective = new EffectiveEnchantmentsResolver().resolveSources(List.of(
+                new ActualEnchantmentGrant(ModEnchantments.DEVOUR.identifier(), 2, CosmicPVE.id("actual_item"))), grants);
+        assertEquals(4, effective.level(ModEnchantments.DEVOUR.identifier()));
+        assertEquals(1, effective.entries().size());
+        service.remove(sword, sword, true);
+        assertTrue(resolver.virtualEnchantments(sword).isEmpty());
+    }
+
+    @Test void newPassiveThresholdsAndBucketsAreExact() {
+        assertTrue(WeaponSkinCombatResolver.strictlyUnderHealthThreshold(39.999, 100, .40));
+        assertFalse(WeaponSkinCombatResolver.strictlyUnderHealthThreshold(40, 100, .40));
+        assertTrue(WeaponSkinCombatResolver.lowerHealthPercentage(9, 20, 5, 10));
+        assertFalse(WeaponSkinCombatResolver.lowerHealthPercentage(5, 10, 10, 20));
+        assertEquals(.05, WeaponSkinCombatResolver.WHISK_OUTGOING);
+        assertEquals(0.0, WeaponSkinCombatResolver.whiskOutgoingBonus(0));
+        assertEquals(.05, WeaponSkinCombatResolver.whiskOutgoingBonus(1));
+        assertEquals(.05, WeaponSkinCombatResolver.whiskOutgoingBonus(10));
+        assertEquals(.05, WeaponSkinCombatResolver.GRIM_CHANCE);
+        assertEquals(40, WeaponSkinCombatResolver.GRIM_SUPPRESSION_TICKS);
+        assertEquals(.033, WeaponSkinCombatResolver.CARVER_OUTGOING);
+        assertEquals(1.10, com.cosmicpve.combat.enchantment.LuckBehavior.feedingFrenzyMultiplier(10), 1e-12);
+        assertEquals(1.10, com.cosmicpve.combat.enchantment.LuckBehavior.feedingFrenzyMultiplier(99), 1e-12);
     }
 
     @Test void blackScrollPresentationIsInkSacOnly() throws Exception {
@@ -231,6 +289,26 @@ class WeaponSkinFoundationTest {
             return JsonParser.parseReader(reader).getAsJsonObject().getAsJsonObject("model")
                     .get("model").getAsString();
         }
+    }
+
+    private void assertAttributesPreserved(Identifier skinId, net.minecraft.world.item.Item item) {
+        var weapon = new ItemStack(item);
+        var before = weapon.getOrDefault(DataComponents.ATTRIBUTE_MODIFIERS,
+                net.minecraft.world.item.component.ItemAttributeModifiers.EMPTY);
+        double damage = before.compute(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE,
+                1.0, net.minecraft.world.entity.EquipmentSlot.MAINHAND);
+        double speed = before.compute(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_SPEED,
+                4.0, net.minecraft.world.entity.EquipmentSlot.MAINHAND);
+        var skin = WeaponSkinItemFactory.create(skinId);
+        assertEquals(WeaponSkinApplicationService.ApplyOutcome.SUCCESS,
+                service.apply(skin, weapon, skin, weapon));
+        var after = weapon.getOrDefault(DataComponents.ATTRIBUTE_MODIFIERS,
+                net.minecraft.world.item.component.ItemAttributeModifiers.EMPTY);
+        assertEquals(before, after);
+        assertEquals(damage, after.compute(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE,
+                1.0, net.minecraft.world.entity.EquipmentSlot.MAINHAND));
+        assertEquals(speed, after.compute(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_SPEED,
+                4.0, net.minecraft.world.entity.EquipmentSlot.MAINHAND));
     }
 
     private static void assertSkinLore(

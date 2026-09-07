@@ -19,7 +19,7 @@ public final class OxygenateService {
         boolean underwater = player.isEyeInFluid(FluidTags.WATER);
         boolean pickaxe = tool.is(ItemTags.PICKAXES);
         if (!underwater || !pickaxe) return 0;
-        int level = enchantments.resolve(tool, List.of()).level(ModEnchantments.OXYGENATE.identifier());
+        int level = enchantments.resolve(player, tool, List.of()).level(ModEnchantments.OXYGENATE.identifier());
         int restoration = restorationAmount(underwater, pickaxe, level);
         if (restoration == 0) return 0;
         int before = player.getAirSupply();
