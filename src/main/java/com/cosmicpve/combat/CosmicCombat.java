@@ -96,6 +96,14 @@ public final class CosmicCombat {
     private static final TrueDamageDeliveryService TRUE_DAMAGE = new TrueDamageDeliveryService();
     private static final ChildCombatActionService CHILD_ACTIONS = new ChildCombatActionService(SEQUENCES, TRUE_DAMAGE);
     private static final CombatStackService STACKS = new CombatStackService(CosmicContent.repository());
+    private static final com.cosmicpve.combat.enchantment.NimbleBehavior NIMBLE =
+            new com.cosmicpve.combat.enchantment.NimbleBehavior(STACKS);
+    private static final com.cosmicpve.combat.enchantment.ThunderingBlowVelocityService THUNDERING_VELOCITY =
+            new com.cosmicpve.combat.enchantment.ThunderingBlowVelocityService();
+    private static final com.cosmicpve.combat.enchantment.ThunderingBlowBehavior THUNDERING_BLOW =
+            new com.cosmicpve.combat.enchantment.ThunderingBlowBehavior(THUNDERING_VELOCITY);
+    private static final com.cosmicpve.combat.enchantment.NeutralizeBehavior NEUTRALIZE =
+            new com.cosmicpve.combat.enchantment.NeutralizeBehavior();
     private static final BleedRuntimeService BLEED_RUNTIME = new BleedRuntimeService(CHILD_ACTIONS);
     private static final WeaponSkinResolver WEAPON_SKINS = new WeaponSkinResolver();
     private static final WeaponSkinCombatResolver WEAPON_SKIN_COMBAT =
@@ -125,7 +133,7 @@ public final class CosmicCombat {
     private static final CombatStackEventBridge STACK_EVENTS = new CombatStackEventBridge(STACKS, BLEED_RUNTIME);
     private static final MaskCombatResolver MASK_COMBAT = new MaskCombatResolver(MASKS);
     private static final MaskRuntimeEventBridge MASK_EVENTS = new MaskRuntimeEventBridge(
-            MASKS, PROC_EVENTS, ENCHANTMENTS, ACTIVITIES, EQUIPPED_EFFECTS);
+            MASKS, PROC_EVENTS, ENCHANTMENTS, ACTIVITIES, EQUIPPED_EFFECTS, EVENTS);
     private static final com.cosmicpve.combat.enchantment.DodgeProcResolver DODGE =
             new com.cosmicpve.combat.enchantment.DodgeProcResolver(MASKS);
     private static final SelfDestructEventBridge SELF_DESTRUCT_EVENTS = new SelfDestructEventBridge();
@@ -167,6 +175,7 @@ public final class CosmicCombat {
         OUTGOING.register(SPIRIT_LINK);
         OUTGOING.register(new com.cosmicpve.combat.enchantment.CurseBehavior());
         OUTGOING.register(playerUpgrades);
+        OUTGOING.register(NIMBLE);
         OUTGOING.register(new com.cosmicpve.trial.room.InventorCombatContributor());
         INCOMING.register(ARMOR_SET_COMBAT);
         INCOMING.register(WEAPON_SKIN_COMBAT);
@@ -184,6 +193,10 @@ public final class CosmicCombat {
         PROC_SOURCES.register(DODGE);
         PROC_SOURCES.register(LETHAL_SNIPER);
         PROC_SOURCES.register(SPIRIT_LINK);
+        PROC_SOURCES.register(NIMBLE);
+        PROC_SOURCES.register(THUNDERING_BLOW);
+        PROC_SOURCES.register(NEUTRALIZE);
+        PROCS.registerActivationListener(NIMBLE);
         NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, SELF_DESTRUCT_EVENTS::onIncomingDamage);
         NeoForge.EVENT_BUS.addListener(EVENTS::onIncomingDamage);
         NeoForge.EVENT_BUS.addListener(EVENTS::onDamageAccepted);
@@ -210,6 +223,7 @@ public final class CosmicCombat {
         NeoForge.EVENT_BUS.addListener(MASK_EVENTS::onPlayerTick);
         NeoForge.EVENT_BUS.addListener(MASK_EVENTS::onEffectApplicable);
         NeoForge.EVENT_BUS.addListener(RECENT_COMBAT_MEMORY_EVENTS::onServerTick);
+        NeoForge.EVENT_BUS.addListener(THUNDERING_VELOCITY::onServerTick);
         NeoForge.EVENT_BUS.addListener(SELF_DESTRUCT_EVENTS::onExplosion);
         NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, SPIRIT_LINK::onDeath);
     }

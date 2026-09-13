@@ -8,7 +8,10 @@ import net.minecraft.world.entity.LivingEntity;
 public final class AdventureRules {
     private AdventureRules() {}
     public static boolean restricted(LivingEntity entity) {
-        return entity!=null && entity.level()!=null && entity.level().dimension().equals(DenseWoodlandsSessionService.DIMENSION);
+        if (!(entity instanceof net.minecraft.server.level.ServerPlayer player) || entity.level()==null
+                || !entity.level().dimension().equals(DenseWoodlandsSessionService.DIMENSION)) return false;
+        var session = DenseWoodlandsBootstrap.SESSIONS.session(player);
+        return session != null && session.phase() == AdventureSession.Phase.ACTIVE;
     }
     public static boolean allows(Identifier id) {
         return CosmicEnchantmentSpecs.find(id).map(s -> switch(s.tier()) {

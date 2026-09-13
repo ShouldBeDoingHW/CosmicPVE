@@ -4,9 +4,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.cosmicpve.CosmicPVE;
 import com.cosmicpve.combat.api.RecursionPolicy;
+import com.cosmicpve.combat.api.AttackCategory;
+import com.cosmicpve.combat.api.CombatContext;
+import com.cosmicpve.combat.api.CombatFlag;
+import com.cosmicpve.combat.api.DamageChannel;
+import com.cosmicpve.combat.api.WeaponSnapshot;
 import com.cosmicpve.combat.cooldown.CooldownScope;
 import com.cosmicpve.combat.cooldown.CooldownService;
+import com.cosmicpve.combat.pipeline.CombatCalculationRequest;
+import com.cosmicpve.combat.pipeline.CombatEngine;
 import com.cosmicpve.equipment.enchantment.EffectiveEnchantments;
+import com.cosmicpve.registry.ModEnchantments;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalLong;
@@ -162,6 +170,42 @@ class ProcEngineTest {
         assertEquals(ProcEvaluationStatus.ACTIVATED, result.evaluations().get(1).status());
         assertEquals(ProcEvaluationStatus.RECURSION_FILTERED, result.evaluations().get(2).status());
         assertEquals(1, random.calls());
+    }
+
+    @Test
+    void neutralizedContextSuppressesDefensiveCandidateForOnlyThatEvent() {
+        var activations = new AtomicInteger();
+        var id = ModEnchantments.CACTUS.identifier();
+        var defensive = new ProcCandidate(id, ProcHook.ON_VALID_HIT, 1.0, Optional.empty(), 0,
+                CooldownScope.EPHEMERAL_COMBAT, Optional.empty(), List.of(), List.of(), Optional.empty(),
+                ChildProcEligibility.ROOT_ONLY, id, ignored -> activations.incrementAndGet(),
+                new ProcProvenance(ProcSourceKind.ACTUAL_ENCHANTMENT, id));
+        var context = new CombatContext(null, null, null, null, Optional.empty(), null,
+                AttackCategory.MELEE, DamageChannel.ORDINARY,
+                Set.of(CombatFlag.MELEE, CombatFlag.DEFENSIVE_COSMIC_SUPPRESSED), WeaponSnapshot.empty(),
+                EffectiveEnchantments.EMPTY, 50, OptionalLong.empty(), RecursionPolicy.NORMAL);
+        var neutralizedResult = new CombatEngine().calculate(context, CombatCalculationRequest.unchanged(4)).commit(4);
+        UUID owner = UUID.randomUUID();
+        var suppressed = new ProcEvent(ProcHook.ON_VALID_HIT, 50, OptionalLong.empty(), RecursionPolicy.NORMAL,
+                owner, Optional.of(owner), 0, List.of(1.0), List.of(1.0), Set.of(),
+                EffectiveEnchantments.EMPTY, Optional.of(neutralizedResult), null, null, new CountingRandom(0));
+
+        var first = engine().evaluate(suppressed, List.of(defensive));
+        assertEquals(ProcEvaluationStatus.DEFENSIVE_COSMIC_SUPPRESSED, first.evaluations().getFirst().status());
+        assertEquals(0, activations.get());
+
+        // Constructing a fresh context is deliberate: suppression is scoped to the first logical event.
+        var ordinaryContext = new CombatContext(null, null, null, null, Optional.empty(), null,
+                AttackCategory.MELEE, DamageChannel.ORDINARY, Set.of(CombatFlag.MELEE), WeaponSnapshot.empty(),
+                EffectiveEnchantments.EMPTY, 51, OptionalLong.empty(), RecursionPolicy.NORMAL);
+        var ordinaryResult = new CombatEngine().calculate(
+                ordinaryContext, CombatCalculationRequest.unchanged(4)).commit(4);
+        var next = new ProcEvent(ProcHook.ON_VALID_HIT, 51, OptionalLong.empty(), RecursionPolicy.NORMAL,
+                owner, Optional.of(owner), 1, List.of(1.0), List.of(1.0), Set.of(),
+                EffectiveEnchantments.EMPTY, Optional.of(ordinaryResult), null, null, new CountingRandom(0));
+        assertEquals(ProcEvaluationStatus.ACTIVATED, engine().evaluate(next, List.of(defensive))
+                .evaluations().getFirst().status());
+        assertEquals(1, activations.get());
     }
 
     private static ProcEngine engine() {

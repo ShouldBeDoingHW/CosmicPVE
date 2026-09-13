@@ -82,7 +82,7 @@ class ObsidianDestroyerDominateTest {
 
     @Test
     void ordinaryEnchantmentRegistryNowContainsFiftyTwoEntries() {
-        assertEquals(69, CosmicEnchantmentSpecs.ALL.size());
+        assertEquals(72, CosmicEnchantmentSpecs.ALL.size());
         assertTrue(CosmicEnchantmentSpecs.find(ModEnchantments.OBSIDIAN_DESTROYER.identifier()).isPresent());
         assertTrue(CosmicEnchantmentSpecs.find(ModEnchantments.DOMINATE.identifier()).isPresent());
     }

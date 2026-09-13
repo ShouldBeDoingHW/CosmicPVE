@@ -508,4 +508,12 @@
   ,"enchantment.cosmicpve.mighty_cleave.description":"Splash nearby non-allies and heal nearby allies when the cleave succeeds."
   ,"enchantment.cosmicpve.forbidden_curse":"Forbidden Curse"
   ,"enchantment.cosmicpve.forbidden_curse.description":"At its level-scaled low-health threshold, gain damage and knockback resistance."
+  ,"enchantment.cosmicpve.nimble":"Nimble"
+  ,"enchantment.cosmicpve.nimble.description":"Defensive armor procs store short-lived damage for your next committed parent hit."
+  ,"enchantment.cosmicpve.thundering_blow":"Thundering Blow"
+  ,"enchantment.cosmicpve.thundering_blow.description":"Sword hits may cancel all target velocity after ordinary knockback."
+  ,"enchantment.cosmicpve.neutralize":"Neutralize"
+  ,"enchantment.cosmicpve.neutralize.description":"Axe attacks may suppress enemy defensive Cosmic enchantments for that logical attack."
+  ,"entity.cosmicpve.forest_fanatic":"Forest Fanatic"
+  ,"entity.cosmicpve.dreadmane":"Dreadmane"
 }

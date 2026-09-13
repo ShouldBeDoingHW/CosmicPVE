@@ -125,6 +125,12 @@ public final class CosmicEnchantmentSpecs {
             ModEnchantments.SOLITUDE.identifier(), 3, CosmicEnchantmentTier.ELITE, "all_weapons");
     public static final CosmicEnchantmentSpec CURSE = new CosmicEnchantmentSpec(
             ModEnchantments.CURSE.identifier(), 5, CosmicEnchantmentTier.UNIQUE, "chestplate");
+    public static final CosmicEnchantmentSpec NIMBLE = new CosmicEnchantmentSpec(
+            ModEnchantments.NIMBLE.identifier(), 4, CosmicEnchantmentTier.UNIQUE, "boots");
+    public static final CosmicEnchantmentSpec THUNDERING_BLOW = new CosmicEnchantmentSpec(
+            ModEnchantments.THUNDERING_BLOW.identifier(), 3, CosmicEnchantmentTier.SIMPLE, "sword");
+    public static final CosmicEnchantmentSpec NEUTRALIZE = new CosmicEnchantmentSpec(
+            ModEnchantments.NEUTRALIZE.identifier(), 5, CosmicEnchantmentTier.MASTERY, "axe");
     public static final CosmicEnchantmentSpec DEEP_BLEED = new CosmicEnchantmentSpec(
             ModEnchantments.DEEP_BLEED.identifier(), 6, CosmicEnchantmentTier.HEROIC, "axe");
     public static final CosmicEnchantmentSpec MIGHTY_CACTUS = new CosmicEnchantmentSpec(
@@ -155,7 +161,7 @@ public final class CosmicEnchantmentSpecs {
                     UNDEAD_RUSE, OBLITERATE, SOUL_TETHER, DODGE, LEADERSHIP,
                     HERO_KILLER, SOUL_SIPHON, BLACKOUT, ENDER_WALKER, VOODOO,
                     SNIPER, SNARE, PLAGUE_CARRIER, OBSIDIAN_DESTROYER, DOMINATE, HEX, STORMCALLER, INVERSION, SPIRIT_LINK,
-                    CLEAVE, SOLITUDE, CURSE,
+                    CLEAVE, SOLITUDE, CURSE, NIMBLE, THUNDERING_BLOW, NEUTRALIZE,
                     DEEP_BLEED, MIGHTY_CACTUS, PALADIN_ARMORED, BLIGHTED_VIRUS, ALIEN_IMPLANTS,
                     LETHAL_SNIPER, ETERNAL_SNARE, PERMANENT_EXECUTE, MIGHTY_CLEAVE, FORBIDDEN_CURSE);
 

@@ -34,7 +34,7 @@ class UnexaminedBookOpeningServiceTest {
                 CosmicEnchantmentSpecs.MORTAL_COIL, CosmicEnchantmentSpecs.PHOENIX,
                 CosmicEnchantmentSpecs.DIVINE_IMMOLATION, CosmicEnchantmentSpecs.SOUL_TETHER,
                 CosmicEnchantmentSpecs.HERO_KILLER, CosmicEnchantmentSpecs.SOUL_SIPHON,
-                CosmicEnchantmentSpecs.BLACKOUT);
+                CosmicEnchantmentSpecs.BLACKOUT, CosmicEnchantmentSpecs.NEUTRALIZE);
         var seen = new java.util.HashSet<CosmicEnchantmentSpec>();
         var random = RandomSource.create(1L);
         for (int i = 0; i < 200; i++) {

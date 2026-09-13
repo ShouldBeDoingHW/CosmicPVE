@@ -76,6 +76,8 @@ public final class CosmicPVE {
         com.cosmicpve.adventure.WoodlandTemplateFeature.register(modBus);
         com.cosmicpve.adventure.AdventureGameTests.register(modBus);
         ModEntities.register(modBus);
+        com.cosmicpve.entity.woodlands.DenseWoodlandsGameTests.register(modBus);
+        com.cosmicpve.entity.woodlands.DenseWoodlandsMobSpawns.register(modBus);
         ModMenus.register(modBus);
         ModLootModifiers.register(modBus);
         modBus.addListener(CosmicNetwork::registerPayloads);

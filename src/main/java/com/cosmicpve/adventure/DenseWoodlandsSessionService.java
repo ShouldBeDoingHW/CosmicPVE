@@ -82,7 +82,6 @@ public final class DenseWoodlandsSessionService {
                         long seconds=(s.deadline()-time+19)/20;
                         player.displayClientMessage(Component.literal("Dense Woodlands: "+seconds/60+":"+String.format(java.util.Locale.ROOT,"%02d",seconds%60)),true);
                     }
-                    if(time%100==0) AdventureZombies.spawn(player,s);
                 }
                 case RETURNING -> restore(player,s);
                 case DEAD -> { if(player.isAlive())restore(player,s); }

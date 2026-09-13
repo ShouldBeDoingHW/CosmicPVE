@@ -3,6 +3,7 @@ package com.cosmicpve.combat.proc;
 public enum ProcHook {
     ON_VALID_HIT,
     ON_PRE_DAMAGE_CALCULATION,
+    ON_PRE_DEFENSE,
     ON_DAMAGE_TAKEN,
     ON_TARGETED,
     ON_KILL,

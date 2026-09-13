@@ -2,7 +2,6 @@ package com.cosmicpve.combat.enchantment;
 
 import com.cosmicpve.combat.api.AttackCategory;
 import com.cosmicpve.combat.proc.ProcEvent;
-import net.minecraft.world.item.CrossbowItem;
 
 public final class SnareBehavior {
     private SnareBehavior() {}
@@ -12,8 +11,10 @@ public final class SnareBehavior {
     }
 
     public static boolean eligible(ProcEvent event) {
-        return event.combatResult().map(result -> result.context().category() == AttackCategory.PROJECTILE
-                && result.context().weaponSnapshot().stack().getItem() instanceof CrossbowItem).orElse(false);
+        // Normal enchanting still restricts Snare to crossbows. Explicitly assigned mob equipment (the
+        // Forest Fanatic bow) is authoritative, so runtime eligibility is the projectile hit itself.
+        return event.combatResult().map(result -> result.context().category() == AttackCategory.PROJECTILE)
+                .orElse(false);
     }
 
     public static void activate(ProcEvent event, SnareRootService roots) {

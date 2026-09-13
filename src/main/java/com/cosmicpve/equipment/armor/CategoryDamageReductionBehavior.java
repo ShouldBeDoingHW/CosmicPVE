@@ -30,11 +30,11 @@ public final class CategoryDamageReductionBehavior implements IncomingDamageCont
         if (!fire && !poisonWither) return List.of();
         double reduction = sets.resolve(context.target()).filter(d -> d.id().equals(ArmorSetIds.DRAGONSLAYER))
                 .isPresent() ? .75 : 0.0;
-        if (fire) {
+        if (fire && !context.defensiveCosmicSuppressed()) {
             int level = enchantments.resolve(context.target(), context.target().getItemBySlot(EquipmentSlot.LEGS), List.of())
                     .level(ModEnchantments.OBSIDIANSHIELD.identifier());
             reduction += .25 * Math.min(2, Math.max(0, level));
-        } else {
+        } else if (!context.defensiveCosmicSuppressed()) {
             int level = EnchantmentLevels.onStack(context.target(), context.target().getItemBySlot(EquipmentSlot.FEET), ModEnchantments.ENDER_WALKER);
             reduction += .10 * Math.min(5, Math.max(0, level));
         }

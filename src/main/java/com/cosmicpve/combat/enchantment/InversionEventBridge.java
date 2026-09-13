@@ -32,6 +32,7 @@ public final class InversionEventBridge {
     public static double chance(int level) { return Math.max(0, Math.min(4, level)) * .01; }
     public void onTargeted(LivingDamageEvent.Pre event) {
         if (event.getNewDamage() <= 0 || event.getEntity().level().isClientSide() || CombatDeliveryScope.current().isPresent()) return;
+        if (combat.defensiveCosmicSuppressed(event.getContainer())) return;
         if (!(event.getSource().getEntity() instanceof LivingEntity attacker)
                 || event.getSource().getDirectEntity() != attacker) return;
         var sword = event.getEntity().getMainHandItem();

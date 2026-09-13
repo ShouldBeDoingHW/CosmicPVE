@@ -18,10 +18,16 @@ public final class ProcEngine {
             Identifier.fromNamespaceAndPath("cosmicpve", "unmodified_chance");
     private final CooldownService cooldowns;
     private final ProcTraceService traces;
+    private final java.util.List<ProcActivationListener> activationListeners =
+            new java.util.concurrent.CopyOnWriteArrayList<>();
 
     public ProcEngine(CooldownService cooldowns, ProcTraceService traces) {
         this.cooldowns = cooldowns;
         this.traces = traces;
+    }
+
+    public void registerActivationListener(ProcActivationListener listener) {
+        activationListeners.add(java.util.Objects.requireNonNull(listener));
     }
 
     public ProcDispatchResult evaluate(ProcEvent event, List<ProcCandidate> candidates) {
@@ -48,6 +54,11 @@ public final class ProcEngine {
 
         if (candidate.hook() != event.hook()) {
             return skipped(candidate, multiplier, finalChance, ProcEvaluationStatus.HOOK_MISMATCH, true);
+        }
+        if (event.combatResult().map(result -> result.context().defensiveCosmicSuppressed()).orElse(false)
+                && com.cosmicpve.combat.enchantment.DefensiveCosmicEnchantments.defensive(candidate)) {
+            return skipped(candidate, multiplier, finalChance,
+                    ProcEvaluationStatus.DEFENSIVE_COSMIC_SUPPRESSED, true);
         }
         if (!recursionAllows(event, candidate)) {
             return skipped(candidate, multiplier, finalChance, ProcEvaluationStatus.RECURSION_FILTERED, true);
@@ -81,7 +92,9 @@ public final class ProcEngine {
         candidate.cooldownKey().ifPresent(key -> cooldowns.start(
                 event.ownerId(), key, candidate.baseCooldownTicks(), combinedCooldownMultipliers(event, candidate),
                 event.serverTick(), candidate.cooldownScope(), candidate.cooldownScopeId()));
-        candidate.action().execute(new ProcActivation(event, candidate, finalChance, roll));
+        var activation = new ProcActivation(event, candidate, finalChance, roll);
+        candidate.action().execute(activation);
+        activationListeners.forEach(listener -> listener.activated(activation));
         return rolled(candidate, multiplier, finalChance, roll, ProcEvaluationStatus.ACTIVATED);
     }
 

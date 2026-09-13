@@ -87,6 +87,28 @@ public final class ProcEventService {
                 Optional.of(provisional)));
     }
 
+    public ProcDispatchResult onPreDefense(CombatResult provisional) {
+        var context = provisional.context();
+        if (context.attacker() == null || !(context.target().level() instanceof ServerLevel level))
+            throw new IllegalArgumentException("Pre-defense proc dispatch requires a server-side living attacker");
+        return dispatch(create(ProcHook.ON_PRE_DEFENSE, context.attacker(), context.attacker(), context.target(),
+                context.attackSequenceId(), context.parentSequenceId(), context.recursionPolicy(),
+                context.attributedPlayerId().or(() -> tracePlayer(context.target())),
+                context.effectiveEnchantments(), eventRandom(level), context.excludedProcEffectIds(),
+                Optional.of(provisional)));
+    }
+
+    public ProcDispatchResult dispatchTargeted(
+            LivingEntity owner, LivingEntity attacker, LivingEntity target, boolean suppressDefensiveCosmic) {
+        var sequence = sequences.nextRoot();
+        var effective = enchantments.resolve(owner, List.of());
+        if (suppressDefensiveCosmic)
+            effective = effective.filter(id -> !com.cosmicpve.combat.enchantment.DefensiveCosmicEnchantments.contains(id));
+        var event = create(ProcHook.ON_TARGETED, owner, attacker, target, sequence.id(), sequence.parentId(),
+                RecursionPolicy.NORMAL, tracePlayer(owner), effective, serverRandom(owner), Set.of(), Optional.empty());
+        return dispatch(event);
+    }
+
     public ProcDispatchResult dispatchRoot(
             ProcHook hook,
             LivingEntity owner,

@@ -31,7 +31,9 @@ public final class ProcHookEventBridge {
 
     public void onPreDeath(LivingDeathEvent event) {
         if (!events.hasCandidateSources() || event.getEntity().level().isClientSide()
-                || executions.isExecuting(event.getEntity())) {
+                || executions.isExecuting(event.getEntity())
+                || com.cosmicpve.combat.enchantment.DefensiveSuppressionContext.GLOBAL
+                    .active(event.getEntity(), event.getSource())) {
             return;
         }
         LivingEntity attacker = event.getSource().getEntity() instanceof LivingEntity living ? living : null;

@@ -113,4 +113,15 @@ public record CombatContext(
                 category, channel, flags, weaponSnapshot, effectiveEnchantments,
                 attackSequenceId, parentSequenceId, recursionPolicy, excludedProcEffectIds);
     }
+
+    public CombatContext withFlag(CombatFlag flag) {
+        var updated = new HashSet<>(flags); updated.add(flag);
+        return new CombatContext(directSource, creditedSource, attacker, target, attributedPlayerId, damageSource,
+                category, channel, updated, weaponSnapshot, effectiveEnchantments, attackSequenceId,
+                parentSequenceId, recursionPolicy, excludedProcEffectIds);
+    }
+
+    public boolean defensiveCosmicSuppressed() {
+        return flags.contains(CombatFlag.DEFENSIVE_COSMIC_SUPPRESSED);
+    }
 }

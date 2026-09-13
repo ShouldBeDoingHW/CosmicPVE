@@ -15,6 +15,8 @@ import com.cosmicpve.client.entity.SpacePirateVariant2Renderer;
 import com.cosmicpve.client.entity.UndeadCorpseRenderer;
 import net.neoforged.neoforge.common.NeoForge;
 import net.minecraft.client.renderer.entity.ZombieVillagerRenderer;
+import com.cosmicpve.client.entity.ForestFanaticRenderer;
+import com.cosmicpve.client.entity.DreadmaneRenderer;
 
 @Mod(value = CosmicPVE.MOD_ID, dist = Dist.CLIENT)
 public final class CosmicPVEClient {
@@ -55,6 +57,8 @@ public final class CosmicPVEClient {
         event.registerEntityRenderer(ModEntities.SPACE_PIRATE_VARIANT_2.get(), SpacePirateVariant2Renderer::new);
         event.registerEntityRenderer(ModEntities.UNDEAD_CORPSE.get(), UndeadCorpseRenderer::new);
         event.registerEntityRenderer(ModEntities.INVENTOR.get(), ZombieVillagerRenderer::new);
+        event.registerEntityRenderer(ModEntities.FOREST_FANATIC.get(), ForestFanaticRenderer::new);
+        event.registerEntityRenderer(ModEntities.DREADMANE.get(), DreadmaneRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.CONQUEST_CHEST.get(), ChestRenderer::new);
     }
 

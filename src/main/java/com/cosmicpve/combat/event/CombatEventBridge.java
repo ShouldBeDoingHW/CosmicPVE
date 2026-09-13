@@ -31,6 +31,7 @@ import com.cosmicpve.registry.ModDamageTypes;
 import com.cosmicpve.registry.ModEnchantments;
 import java.util.Set;
 import com.cosmicpve.combat.enchantment.DevourBehavior;
+import com.cosmicpve.combat.enchantment.DefensiveSuppressionContext;
 import com.cosmicpve.combat.pipeline.OutgoingDamageContribution;
 
 /** Thin NeoForge adapter; all damage arithmetic remains in {@link CombatEngine}. */
@@ -113,6 +114,16 @@ public final class CombatEventBridge {
                 RecursionPolicy.NORMAL,
                 Set.of());
         var unchanged = CombatCalculationRequest.unchanged(event.getAmount());
+        var neutralizeProbe = engine.calculate(context, unchanged);
+        boolean neutralized = context.attacker() != null
+                && procEvents.onPreDefense(neutralizeProbe).evaluations().stream()
+                        .anyMatch(evaluation -> evaluation.candidateId().equals(ModEnchantments.NEUTRALIZE.identifier())
+                                && evaluation.activated());
+        if (neutralized) context = context.withFlag(com.cosmicpve.combat.api.CombatFlag.DEFENSIVE_COSMIC_SUPPRESSED);
+        if (neutralized) com.cosmicpve.combat.enchantment.DefensiveSuppressionContext.GLOBAL
+                .mark(event.getEntity(), event.getSource());
+        if (neutralized || com.cosmicpve.adventure.AdventureRules.restricted(event.getEntity()))
+            preserveNonCosmicEnchantmentProtection(event, event.getEntity());
         var resolvedOutgoing = outgoingContributors.resolve(context);
         var request = new CombatCalculationRequest(
                 unchanged.baseOrdinaryDamage() + signatureWeapons.baseDamageBonus(context), unchanged.additiveOutgoingBonus(),
@@ -144,6 +155,10 @@ public final class CombatEventBridge {
 
     private void handleScopedDamage(LivingIncomingDamageEvent event, CombatDeliveryScope.State scoped) {
         var context = scoped.context();
+        if (context.defensiveCosmicSuppressed()) {
+            com.cosmicpve.combat.enchantment.DefensiveSuppressionContext.GLOBAL.mark(event.getEntity(), event.getSource());
+            preserveNonCosmicEnchantmentProtection(event, event.getEntity());
+        }
         if (context.target() != event.getEntity() || context.damageSource() != event.getSource()) {
             throw new IllegalStateException("Scoped child damage did not match its NeoForge callback");
         }
@@ -191,9 +206,17 @@ public final class CombatEventBridge {
 
     public void onDamageAccepted(LivingDamageEvent.Pre event) {
         PendingCombat result = incomingCandidates.remove(event.getContainer());
-        if (event.getNewDamage() <= 0.0F) return;
+        if (event.getNewDamage() <= 0.0F) {
+            if (result != null) {
+                DefensiveSuppressionContext.GLOBAL.clear(event.getEntity(), event.getSource());
+            }
+            return;
+        }
         if (result != null) {
-            if (hysteria.redirect(result.result(), event)) return;
+            if (hysteria.redirect(result.result(), event)) {
+                DefensiveSuppressionContext.GLOBAL.clear(event.getEntity(), event.getSource());
+                return;
+            }
             acceptedDamageStack.get().push(result);
         }
     }
@@ -202,6 +225,29 @@ public final class CombatEventBridge {
     public java.util.Optional<CombatResult> provisional(net.neoforged.neoforge.common.damagesource.DamageContainer container) {
         PendingCombat pending = incomingCandidates.get(container);
         return pending == null ? java.util.Optional.empty() : java.util.Optional.of(pending.result());
+    }
+
+    public boolean defensiveCosmicSuppressed(DamageContainer container) {
+        return provisional(container).map(result -> result.context().defensiveCosmicSuppressed()).orElse(false);
+    }
+
+    private static void preserveNonCosmicEnchantmentProtection(
+            LivingIncomingDamageEvent event, net.minecraft.world.entity.LivingEntity target) {
+        if (!(target.level() instanceof net.minecraft.server.level.ServerLevel level)) return;
+        float cosmicProtection = 0.0F;
+        for (var slot : net.minecraft.world.entity.EquipmentSlot.VALUES) {
+            var stack = target.getItemBySlot(slot);
+            cosmicProtection += .5F * com.cosmicpve.combat.enchantment.EnchantmentLevels.onStack(stack, ModEnchantments.ARMORED);
+            cosmicProtection += .5F * com.cosmicpve.combat.enchantment.EnchantmentLevels.onStack(stack, ModEnchantments.PALADIN_ARMORED);
+        }
+        final float excluded = cosmicProtection;
+        event.addReductionModifier(DamageContainer.Reduction.ENCHANTMENTS, (container, reduction) -> {
+            float total = net.minecraft.world.item.enchantment.EnchantmentHelper.getDamageProtection(
+                    level, target, event.getSource());
+            float retained = Math.max(0.0F, total - excluded);
+            float before = container.getNewDamage();
+            return before - net.minecraft.world.damagesource.CombatRules.getDamageAfterMagicAbsorb(before, retained);
+        });
     }
 
     public void onDamageCommitted(LivingDamageEvent.Post event) {
@@ -238,6 +284,8 @@ public final class CombatEventBridge {
             inventor.consumeStrikeCharge(player.getUUID());
         }
         procEvents.onCommittedDamage(committed);
+        com.cosmicpve.combat.enchantment.DefensiveSuppressionContext.GLOBAL
+                .clear(event.getEntity(), event.getSource());
     }
 
     private record PendingCombat(CombatResult result, boolean devourActivated) {}

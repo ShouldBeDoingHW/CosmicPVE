@@ -1,0 +1,10 @@
+{
+  "polarity": "positive",
+  "maximum_stacks": 8,
+  "duration_ticks": 180,
+  "refresh_policy": "independent",
+  "transferable": false,
+  "cleansable": true,
+  "visible": true,
+  "persistent": false
+}

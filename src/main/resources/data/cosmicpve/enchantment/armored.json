@@ -14,31 +14,7 @@
             "per_level_above_first": 0.5
           }
         },
-        "requirements": {
-          "condition": "minecraft:all_of",
-          "terms": [
-            {
-              "condition": "minecraft:damage_source_properties",
-              "predicate": {
-                "tags": [
-                  {
-                    "expected": false,
-                    "id": "minecraft:bypasses_invulnerability"
-                  }
-                ]
-              }
-            },
-            {
-              "condition": "minecraft:inverted",
-              "term": {
-                "condition": "minecraft:location_check",
-                "predicate": {
-                  "dimension": "cosmicpve:dense_woodlands"
-                }
-              }
-            }
-          ]
-        }
+        "requirements": {"condition": "minecraft:damage_source_properties", "predicate": {"tags": [{"expected": false, "id": "minecraft:bypasses_invulnerability"}]}}
       }
     ]
   },

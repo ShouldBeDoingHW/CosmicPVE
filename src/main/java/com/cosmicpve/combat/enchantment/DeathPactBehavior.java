@@ -37,7 +37,7 @@ public final class DeathPactBehavior implements OutgoingDamageContributor, Incom
     }
 
     @Override public List<IncomingDamageContribution> resolveIncoming(CombatContext context) {
-        if (context.target() == null) return List.of();
+        if (context.target() == null || context.defensiveCosmicSuppressed()) return List.of();
         int level = level(context.target());
         return level <= 0 ? List.of() : List.of(new IncomingDamageContribution(
                 ModEnchantments.DEATH_PACT.identifier(), incomingMultiplier(level)));

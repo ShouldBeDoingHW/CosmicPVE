@@ -120,6 +120,8 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
             addBlightedVirus(event, result);
             addEternalSnare(event, result);
         } else if (event.hook() == ProcHook.ON_DAMAGE_TAKEN) {
+            if (event.combatResult().map(hit -> hit.context().defensiveCosmicSuppressed()).orElse(false))
+                return List.of();
             addAngelic(event, result);
             addEnderShift(event, result);
             addMolten(event, result);
@@ -367,7 +369,7 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
                 SnareBehavior.chance(level), Optional.empty(), 0L, Optional.empty(), ChildProcEligibility.ROOT_ONLY,
                 activation -> SnareBehavior.activate(activation.event(), snareRoots),
                 provenance(event, ModEnchantments.SNARE.identifier()),
-                condition(CosmicPVE.id("snare_crossbow_projectile"), SnareBehavior::eligible)));
+                condition(CosmicPVE.id("snare_projectile"), SnareBehavior::eligible)));
     }
 
     private void addDominate(ProcEvent event, List<ProcCandidate> result) {
@@ -667,10 +669,11 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
             com.cosmicpve.combat.proc.ProcAction action,
             ProcProvenance provenance,
             com.cosmicpve.combat.proc.ProcCondition... conditions) {
-        java.util.Set<Identifier> classifications = com.cosmicpve.equipment.enchantment.CosmicEnchantmentSpecs.find(id)
+        java.util.Set<Identifier> classifications = new java.util.HashSet<>(com.cosmicpve.equipment.enchantment.CosmicEnchantmentSpecs.find(id)
                 .filter(spec -> spec.tier() == com.cosmicpve.equipment.enchantment.CosmicEnchantmentTier.MASTERY)
                 .map(ignored -> java.util.Set.of(com.cosmicpve.equipment.armor.ArmorSetIds.MASTERY_PROC))
-                .orElseGet(java.util.Set::of);
+                .orElseGet(java.util.Set::of));
+        if (DefensiveCosmicEnchantments.contains(id)) classifications.add(DefensiveCosmicEnchantments.PROC_CLASSIFICATION);
         return new ProcCandidate(
                 id, hook, chance, cooldown, cooldownTicks, CooldownScope.EPHEMERAL_COMBAT, Optional.empty(),
                 List.of(), List.of(conditions), onceKey, childEligibility, classifications, id, action, provenance);
@@ -690,7 +693,9 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
         return new ProcCandidate(
                 id, hook, chance, cooldown, cooldownTicks, CooldownScope.EPHEMERAL_COMBAT, Optional.empty(),
                 List.of(), List.of(conditions), onceKey, childEligibility,
-                java.util.Set.of(ProcEngine.DETERMINISTIC_CLASSIFICATION), id, action, provenance);
+                DefensiveCosmicEnchantments.contains(id)
+                        ? java.util.Set.of(ProcEngine.DETERMINISTIC_CLASSIFICATION, DefensiveCosmicEnchantments.PROC_CLASSIFICATION)
+                        : java.util.Set.of(ProcEngine.DETERMINISTIC_CLASSIFICATION), id, action, provenance);
     }
 
     private static ProcProvenance provenance(ProcEvent event, Identifier enchantmentId) {
