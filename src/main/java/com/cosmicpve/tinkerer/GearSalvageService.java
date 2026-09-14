@@ -17,7 +17,8 @@ public final class GearSalvageService {
 
     public OptionalLong storedXp(ItemStack stack) {
         if ((!CustomEnchantCapacityService.isArmor(stack) && !isSalvageWeapon(stack))
-                || stack.has(ModDataComponents.MASK_LOADOUT.get()) || stack.has(ModDataComponents.WEAPON_SKIN.get())) {
+                || stack.has(ModDataComponents.MASK_LOADOUT.get()) || stack.has(ModDataComponents.WEAPON_SKIN.get())
+                || hasAttachedAccessory(stack)) {
             return OptionalLong.empty();
         }
         long total = 0;
@@ -36,6 +37,11 @@ public final class GearSalvageService {
             return OptionalLong.empty();
         }
         return enchanted && total > 0 ? OptionalLong.of(total) : OptionalLong.empty();
+    }
+
+    private static boolean hasAttachedAccessory(ItemStack stack) {
+        var loadout = stack.get(ModDataComponents.ACCESSORY_LOADOUT.get());
+        return loadout != null && loadout.valid() && !loadout.attachments().isEmpty();
     }
 
     private static boolean isSalvageWeapon(ItemStack stack) {

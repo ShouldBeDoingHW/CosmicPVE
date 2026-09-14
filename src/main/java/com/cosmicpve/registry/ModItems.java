@@ -43,9 +43,25 @@ import com.cosmicpve.adventure.CallOfForestItem;
 import com.cosmicpve.adventure.DenseWoodlandsScrapItem;
 import com.cosmicpve.adventure.AdventureCompassItem;
 import com.cosmicpve.data.component.CallOfForestData;
+import com.cosmicpve.data.component.AccessoryItemData;
+import com.cosmicpve.data.component.AccessorySocketData;
+import com.cosmicpve.data.component.AccessorySlot;
+import com.cosmicpve.equipment.accessory.AmuletDefinition;
+import com.cosmicpve.equipment.accessory.AmuletItem;
+import com.cosmicpve.equipment.accessory.AccessorySocketItem;
 
 public final class ModItems {
     private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(CosmicPVE.MOD_ID);
+
+    public static final DeferredItem<AccessorySocketItem> AMULET_SOCKET = ITEMS.registerItem("amulet_socket",
+            AccessorySocketItem::new, properties -> properties.stacksTo(64)
+                    .component(ModDataComponents.ACCESSORY_SOCKET.get(),
+                            new AccessorySocketData(AccessorySocketData.DATA_VERSION, AccessorySlot.AMULET, 100)));
+    public static final DeferredItem<AmuletItem> BLOOD_DIAMOND_AMULET = amulet("blood_diamond_amulet",
+            AmuletDefinition.BLOOD_DIAMOND);
+    public static final DeferredItem<AmuletItem> ICICLE_AMULET = amulet("icicle_amulet", AmuletDefinition.ICICLE);
+    public static final DeferredItem<AmuletItem> BLACK_HEART_AMULET = amulet("black_heart_amulet",
+            AmuletDefinition.BLACK_HEART);
 
     public static final DeferredItem<Item> FOUNDATION_TOKEN = ITEMS.registerSimpleItem(
             "foundation_token",
@@ -192,6 +208,12 @@ public final class ModItems {
     private static DeferredItem<TrialTrinketItem> trinket(String name, TrialTrinketType type, int value) {
         return ITEMS.registerItem(name, TrialTrinketItem::new, properties -> properties.stacksTo(64)
                 .component(ModDataComponents.TRIAL_TRINKET.get(), new TrialTrinketData(type, value)));
+    }
+
+    private static DeferredItem<AmuletItem> amulet(String name, AmuletDefinition definition) {
+        return ITEMS.registerItem(name, AmuletItem::new, properties -> properties.stacksTo(1)
+                .component(ModDataComponents.ACCESSORY_ITEM.get(), new AccessoryItemData(
+                        AccessoryItemData.DATA_VERSION, AccessorySlot.AMULET, definition.id())));
     }
 
     private static DeferredItem<CallOfForestItem> callOfForest(String name, int minutes) {

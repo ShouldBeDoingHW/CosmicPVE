@@ -31,6 +31,7 @@ import com.cosmicpve.trial.TrialBootstrap;
 import com.cosmicpve.trial.trinket.TrialTrinketEventBridge;
 import com.cosmicpve.equipment.mask.MaskEventBridge;
 import com.cosmicpve.equipment.mask.MaskAnvilEventBridge;
+import com.cosmicpve.equipment.accessory.AccessoryEventBridge;
 import com.cosmicpve.conquest.ConquestBootstrap;
 import com.cosmicpve.conquest.ConquestGameTests;
 import com.cosmicpve.vkit.VKitGameTests;
@@ -71,6 +72,7 @@ public final class CosmicPVE {
         Step8G2GameTests.register(modBus);
         com.cosmicpve.combat.enchantment.CleaveCurseGameTests.register(modBus);
         com.cosmicpve.combat.enchantment.OverloadSilenceLongbowGameTests.register(modBus);
+        com.cosmicpve.equipment.accessory.AmuletGameTests.register(modBus);
         TelekinesisGameTests.register(modBus);
         com.cosmicpve.trial.room.InventorGameTests.register(modBus);
         ModItems.register(modBus);
@@ -108,6 +110,8 @@ public final class CosmicPVE {
         NeoForge.EVENT_BUS.addListener(trialTrinkets::onStacked);
         var masks = new MaskEventBridge();
         NeoForge.EVENT_BUS.addListener(masks::onStacked);
+        var accessories = new AccessoryEventBridge();
+        NeoForge.EVENT_BUS.addListener(accessories::onStacked);
         var maskAnvils = new MaskAnvilEventBridge();
         NeoForge.EVENT_BUS.addListener(maskAnvils::onAnvilUpdate);
         NeoForge.EVENT_BUS.addListener(maskAnvils::onAnvilCraft);

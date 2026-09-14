@@ -32,7 +32,8 @@ public final class NeutralizeBehavior implements ProcCandidateResolver {
         return List.of(new ProcCandidate(ModEnchantments.NEUTRALIZE.identifier(), ProcHook.ON_PRE_DEFENSE,
                 chance(level), Optional.empty(), 0, CooldownScope.EPHEMERAL_COMBAT, Optional.empty(),
                 List.of(), List.of(), Optional.of(CosmicPVE.id("neutralize_once")), ChildProcEligibility.ROOT_ONLY,
-                Set.of(), ModEnchantments.NEUTRALIZE.identifier(), activation -> {},
+                Set.of(), ModEnchantments.NEUTRALIZE.identifier(),
+                activation -> activation.markAffected(activation.event().target()),
                 new ProcProvenance(ProcSourceKind.ACTUAL_ENCHANTMENT, ModEnchantments.NEUTRALIZE.identifier())));
     }
 }

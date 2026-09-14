@@ -7,6 +7,7 @@ import com.cosmicpve.equipment.enchantment.CustomEnchantCapacityService;
 import com.cosmicpve.equipment.enchantment.TransmogApplicationService;
 import com.cosmicpve.equipment.enchantment.TransmogTooltipOrdering;
 import com.cosmicpve.equipment.enchantment.ItemApplicationColors;
+import com.cosmicpve.equipment.accessory.AccessorySocketItem;
 import java.util.ArrayList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -16,6 +17,40 @@ import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 public final class EquipmentTooltipService {
     public void onTooltip(ItemTooltipEvent event) {
         var stack = event.getItemStack();
+        var accessorySocket = stack.get(ModDataComponents.ACCESSORY_SOCKET.get());
+        if (accessorySocket != null && accessorySocket.valid()) {
+            event.getToolTip().add(Component.literal("Success Rate: " + accessorySocket.successRate() + "%")
+                    .withColor(AccessorySocketItem.COLOR));
+            event.getToolTip().add(Component.literal(
+                    "Apply to any CHESTPLATE to gain the ability to wear amulets! Drag n'drop to apply!")
+                    .withColor(AccessorySocketItem.COLOR));
+        }
+        var looseAccessory = stack.get(ModDataComponents.ACCESSORY_ITEM.get());
+        if (looseAccessory != null && looseAccessory.valid()) {
+            com.cosmicpve.equipment.accessory.AmuletDefinition.find(looseAccessory.accessoryId()).ifPresent(definition -> {
+                event.getToolTip().add(Component.literal(definition.effect()).withColor(definition.color()));
+                event.getToolTip().add(Component.literal("Drag n' Drop onto a socketed chestplate to apply.")
+                        .withStyle(net.minecraft.ChatFormatting.GRAY));
+            });
+        }
+        var accessoryLoadout = stack.get(ModDataComponents.ACCESSORY_LOADOUT.get());
+        if (accessoryLoadout != null && accessoryLoadout.valid()
+                && accessoryLoadout.socketed(com.cosmicpve.data.component.AccessorySlot.AMULET)) {
+            var attached = accessoryLoadout.attached(com.cosmicpve.data.component.AccessorySlot.AMULET)
+                    .flatMap(com.cosmicpve.equipment.accessory.AmuletDefinition::find);
+            if (attached.isPresent()) {
+                var definition = attached.orElseThrow();
+                event.getToolTip().add(Component.literal("Socketed: ").withStyle(style -> style
+                                .withColor(AccessorySocketItem.COLOR).withBold(true))
+                        .append(Component.literal(definition.displayName()).withStyle(style -> style
+                                .withColor(definition.color()).withBold(true))));
+                event.getToolTip().add(Component.literal("Right-click with an empty cursor to remove.")
+                        .withStyle(net.minecraft.ChatFormatting.GRAY));
+            } else {
+                event.getToolTip().add(Component.literal("Socketed: EMPTY")
+                        .withStyle(style -> style.withColor(AccessorySocketItem.COLOR).withBold(true)));
+            }
+        }
         if(stack.is(com.cosmicpve.registry.ModItems.MYSTERY_CALL_OF_ADVENTURE.get()))
             event.getToolTip().addAll(com.cosmicpve.reward.lootbox.AnimatedLootboxItem.mysteryCallLore());
         if(stack.is(com.cosmicpve.registry.ModItems.RANDOM_WEAPON_SKIN_GENERATOR.get()))

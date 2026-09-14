@@ -28,6 +28,9 @@ import com.cosmicpve.data.component.SignatureWeaponIdentity;
 import com.cosmicpve.data.component.AdminAbuseRewardIdentity;
 import com.cosmicpve.data.component.CosmicBookRateOverride;
 import com.cosmicpve.data.component.CallOfForestData;
+import com.cosmicpve.data.component.AccessoryLoadout;
+import com.cosmicpve.data.component.AccessorySocketData;
+import com.cosmicpve.data.component.AccessoryItemData;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
@@ -39,6 +42,16 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 public final class ModDataComponents {
     private static final DeferredRegister.DataComponents COMPONENTS =
             DeferredRegister.createDataComponents(Registries.DATA_COMPONENT_TYPE, CosmicPVE.MOD_ID);
+
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<AccessoryLoadout>> ACCESSORY_LOADOUT =
+            COMPONENTS.registerComponentType("accessory_loadout", builder -> builder.persistent(AccessoryLoadout.CODEC)
+                    .networkSynchronized(ByteBufCodecs.fromCodecWithRegistries(AccessoryLoadout.CODEC)).cacheEncoding());
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<AccessorySocketData>> ACCESSORY_SOCKET =
+            COMPONENTS.registerComponentType("accessory_socket", builder -> builder.persistent(AccessorySocketData.CODEC)
+                    .networkSynchronized(ByteBufCodecs.fromCodecWithRegistries(AccessorySocketData.CODEC)).cacheEncoding());
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<AccessoryItemData>> ACCESSORY_ITEM =
+            COMPONENTS.registerComponentType("accessory_item", builder -> builder.persistent(AccessoryItemData.CODEC)
+                    .networkSynchronized(ByteBufCodecs.fromCodecWithRegistries(AccessoryItemData.CODEC)).cacheEncoding());
 
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<CustomEnchantMetadata>> CUSTOM_ENCHANT_META =
             COMPONENTS.registerComponentType(

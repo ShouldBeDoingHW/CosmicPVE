@@ -105,6 +105,12 @@ public final class CosmicCombat {
     private static final com.cosmicpve.combat.enchantment.NeutralizeBehavior NEUTRALIZE =
             new com.cosmicpve.combat.enchantment.NeutralizeBehavior();
     private static final BleedRuntimeService BLEED_RUNTIME = new BleedRuntimeService(CHILD_ACTIONS);
+    private static final com.cosmicpve.equipment.accessory.AccessoryResolver ACCESSORIES =
+            new com.cosmicpve.equipment.accessory.AccessoryResolver();
+    private static final com.cosmicpve.equipment.accessory.BlackHeartStateService BLACK_HEART =
+            new com.cosmicpve.equipment.accessory.BlackHeartStateService();
+    private static final com.cosmicpve.equipment.accessory.AmuletCombatService AMULETS =
+            new com.cosmicpve.equipment.accessory.AmuletCombatService(ACCESSORIES, STACKS, BLEED_RUNTIME, BLACK_HEART);
     private static final WeaponSkinResolver WEAPON_SKINS = new WeaponSkinResolver();
     private static final WeaponSkinCombatResolver WEAPON_SKIN_COMBAT =
             new WeaponSkinCombatResolver(WEAPON_SKINS, STACKS, CHILD_ACTIONS);
@@ -177,6 +183,7 @@ public final class CosmicCombat {
         OUTGOING.register(playerUpgrades);
         OUTGOING.register(NIMBLE);
         OUTGOING.register(new com.cosmicpve.combat.enchantment.LongbowBehavior());
+        OUTGOING.register(AMULETS);
         OUTGOING.register(new com.cosmicpve.trial.room.InventorCombatContributor());
         INCOMING.register(ARMOR_SET_COMBAT);
         INCOMING.register(WEAPON_SKIN_COMBAT);
@@ -198,9 +205,11 @@ public final class CosmicCombat {
         PROC_SOURCES.register(NIMBLE);
         PROC_SOURCES.register(THUNDERING_BLOW);
         PROC_SOURCES.register(NEUTRALIZE);
+        PROC_SOURCES.register(AMULETS);
         PROC_SOURCES.register(new com.cosmicpve.combat.enchantment.SilenceBehavior(
                 com.cosmicpve.equipment.enchantment.EnchantmentSuppressionService.GLOBAL));
         PROCS.registerActivationListener(NIMBLE);
+        PROCS.registerActivationListener(AMULETS);
         NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, SELF_DESTRUCT_EVENTS::onIncomingDamage);
         NeoForge.EVENT_BUS.addListener(EVENTS::onIncomingDamage);
         NeoForge.EVENT_BUS.addListener(EVENTS::onDamageAccepted);
@@ -285,4 +294,6 @@ public final class CosmicCombat {
     public static ArmorSetImmunityResolver armorSetImmunities() { return ARMOR_SET_IMMUNITIES; }
     public static RecentCombatMemoryService recentCombatMemory() { return RECENT_COMBAT_MEMORY; }
     public static WeaponSkinResolver weaponSkins() { return WEAPON_SKINS; }
+    public static com.cosmicpve.equipment.accessory.AccessoryResolver accessories() { return ACCESSORIES; }
+    public static com.cosmicpve.equipment.accessory.BlackHeartStateService blackHeart() { return BLACK_HEART; }
 }

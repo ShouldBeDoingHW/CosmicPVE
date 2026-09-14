@@ -7,8 +7,11 @@ import com.cosmicpve.registry.ModEnchantments;
 import com.cosmicpve.registry.ModItems;
 import com.cosmicpve.CosmicPVE;
 import com.cosmicpve.data.component.CosmicEnchantmentBookData;
+import com.cosmicpve.data.component.AccessoryLoadout;
+import com.cosmicpve.data.component.AccessorySlot;
 import com.cosmicpve.data.component.MaskLoadout;
 import com.cosmicpve.data.component.WeaponSkinIdentity;
+import com.cosmicpve.equipment.accessory.AmuletDefinition;
 import com.cosmicpve.equipment.enchantment.CosmicEnchantmentTier;
 import java.util.List;
 import java.util.Optional;
@@ -89,6 +92,21 @@ class GearSalvageServiceTest {
         bow.set(ModDataComponents.WEAPON_SKIN.get(), new WeaponSkinIdentity(1,
                 CosmicPVE.id("test_skin"), Optional.empty()));
         assertTrue(service.storedXp(bow).isEmpty());
+    }
+
+    @Test void socketOnlyGearCanBeSalvagedButAnAttachedAmuletCannot() {
+        var fixture = fixture();
+        var service = new GearSalvageService();
+        ItemStack chestplate = new ItemStack(Items.DIAMOND_CHESTPLATE);
+        enchant(chestplate, fixture.protection(), 1);
+        chestplate.set(ModDataComponents.ACCESSORY_LOADOUT.get(),
+                AccessoryLoadout.empty().withSocket(AccessorySlot.AMULET));
+        assertTrue(service.storedXp(chestplate).isPresent());
+
+        chestplate.set(ModDataComponents.ACCESSORY_LOADOUT.get(),
+                chestplate.get(ModDataComponents.ACCESSORY_LOADOUT.get()).withAttachment(
+                        AccessorySlot.AMULET, AmuletDefinition.ICICLE.id()));
+        assertTrue(service.storedXp(chestplate).isEmpty());
     }
 
     @Test void ineligibleToolsAndUnenchantedGearAreRejectedWithoutConsumption() {
@@ -195,7 +213,8 @@ class GearSalvageServiceTest {
         return new Fixture(protection, unbreaking, gears, molten);
     }
     private static Enchantment enchantment(String name, int max) {
-        var supported = HolderSet.direct(BuiltInRegistries.ITEM.wrapAsHolder(Items.IRON_BOOTS));
+        var supported = HolderSet.direct(BuiltInRegistries.ITEM.wrapAsHolder(Items.IRON_BOOTS),
+                BuiltInRegistries.ITEM.wrapAsHolder(Items.DIAMOND_CHESTPLATE));
         return new Enchantment(Component.literal(name), Enchantment.definition(supported, 1, max,
                 Enchantment.constantCost(1), Enchantment.constantCost(1), 1, EquipmentSlotGroup.ARMOR),
                 HolderSet.empty(), DataComponentMap.EMPTY);

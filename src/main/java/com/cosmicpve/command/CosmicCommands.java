@@ -84,6 +84,7 @@ public final class CosmicCommands {
                 .then(ArmorSetCommands.create())
                 .then(EnchantingCommands.create())
                 .then(WeaponSkinCommands.create())
+                .then(AccessoryCommands.create())
                 .then(HeroicCommands.create())
                 .then(EconomyCommands.create())
                 .then(FlashSaleCommands.create())

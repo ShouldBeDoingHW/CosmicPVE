@@ -27,7 +27,9 @@ public final class BlightedVirusBehavior {
         var outcome = children.deliverTrue(parent.context(), activation.event().target(),
                 TrueDamagePacket.standard(ModEnchantments.BLIGHTED_VIRUS.identifier(), trueDamage(level)),
                 RecursionPolicy.NO_PROCS);
-        if (outcome.accepted()) activation.event().attacker().addEffect(
-                new MobEffectInstance(MobEffects.REGENERATION, REGENERATION_TICKS, 0));
+        if (outcome.accepted()) {
+            activation.markAffected(activation.event().target());
+            activation.event().attacker().addEffect(new MobEffectInstance(MobEffects.REGENERATION, REGENERATION_TICKS, 0));
+        }
     }
 }

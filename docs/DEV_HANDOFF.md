@@ -1,14 +1,14 @@
 # CosmicPVE Development Handoff
 
-Current accepted baseline: Overload + Godly Overload + Silence + Longbow and the bounded Admin/Generator/tooltip/Dragon correctness hotpatch — implemented, automated/runtime verified, manually verified/accepted, and being closed as `Add Overload Silence Longbow and content hotfixes`. The preceding Dense Woodlands hostile/combat baseline is `68bfc8f026239951170de8af54434731374f6e74` (`Add Dense Woodlands hostile mobs and combat enchants`).
+Current accepted baseline: Overload + Godly Overload + Silence + Longbow and the bounded Admin/Generator/tooltip/Dragon correctness hotpatch — implemented, automated/runtime verified, manually verified/accepted, and committed as `30771fc` (`Add Overload Silence Longbow and content hotfixes`). The preceding Dense Woodlands hostile/combat baseline is `68bfc8f026239951170de8af54434731374f6e74` (`Add Dense Woodlands hostile mobs and combat enchants`).
 
 Repository state: Steps 6A–8N and the earlier Conquest synchronization are implemented, verified, and manually accepted. The user-maintained `docs/Cosmic_Design.md` and root `assets`, `blockbench`, `drafts`, and `woodlands` development-source folders remain outside closure ownership.
 
-Current uncommitted candidate: none at this closure point. The next bounded Roadmap milestone is Amulet Sockets + Icicle Amulet + Black Heart Amulet + Blood Diamond Amulet. Do not begin Belt content, Jelly Roll, Omni Socket as a usable item, the Abandoned Spaceship Prototype, Madness modifiers, or a Trial data refactor.
+Current uncommitted candidate: none at the Amulet closure point. Amulet Socket + Blood Diamond/Icicle/Black Heart Amulets are implemented, automated/runtime verified, manually verified/accepted by the user, and committed in the dedicated `Add amulet sockets and amulets` closure. The next bounded candidate is Belt Socket + Bandolier/Shock Therapy/Jelly Roll Belts + Omni Socket.
 
 Last handoff update: 2026-09-13
 
-Current active milestone after the accepted Overload/content-hotpatch closure: Amulet Sockets + Icicle Amulet + Black Heart Amulet + Blood Diamond Amulet.
+Current active milestone: Belt Socket + Bandolier/Shock Therapy/Jelly Roll Belts + Omni Socket.
 
 Pinned environment:
 
@@ -948,11 +948,11 @@ The final post-Orb capacity is no longer unresolved for current target classes: 
 
 ## 16. Current Next Milestone
 
-**Immediate next action: implement only Overload + Godly Overload + Silence + Longbow as the next bounded candidate. Do not begin Amulet or Belt content, Jelly Roll, or the Abandoned Spaceship Prototype.**
+**Immediate next action: implement only Belt Socket + Bandolier/Shock Therapy/Jelly Roll Belts + Omni Socket by extending the accepted accessory foundation. Do not begin Candy Buckle, new Amulets, Madness modifiers, Trial refactoring/presets, or Abandoned Spaceship.**
 
 Current intended sequence:
 
-Steps 8M, 8M.1, 8N, and 8O through 8O.4, Cleave/Curse, the four Weapon Skins, and Dense Woodlands hostile mobs + Nimble + Thundering Blow + Neutralize are accepted and committed. The next candidate is limited to Overload, Godly Overload, Silence, Longbow, and the smallest shared attribute/suppression support they require. Amulet Sockets, Icicle/Black Heart/Blood Diamond Amulets, Belt Sockets, Bandolier/Shock Therapy Belts, Jelly Roll, Abandoned Spaceship, and unrelated content remain deferred.
+Steps 8M, 8M.1, 8N, and 8O through 8O.4, Cleave/Curse, the four Weapon Skins, Dense Woodlands hostile mobs + Nimble + Thundering Blow + Neutralize, and Overload/Godly Overload/Silence/Longbow plus the content hotpatch are accepted and committed. The current candidate is limited to the Amulet Socket and the Blood Diamond, Icicle, and Black Heart Amulets plus their smallest shared accessory foundation. Belt Sockets, actual Belt items/rendering, Omni Socket as a usable item, Jelly Roll, Abandoned Spaceship, Madness modifiers, Trial refactoring, and unrelated content remain deferred.
 
 The ordinary-enchantment expansion remains split across bounded patches. Step 7C is the explicit instruction that made the current canonical Design Doc enchantment-table values implementation-authoritative; later design edits still require their own explicit implementation milestone.
 
@@ -1495,6 +1495,44 @@ Exact manual commands and scenarios (operator permission is required for `/cosmi
 - Dragonslayer/Obsidianshield: `/cosmic armor crystal give @s cosmicpve:dragonslayer 100` supplies crystals for a full set; use `/cosmic armor omni mark` on held armor to build the accepted two-anchor/two-Omni variant. Apply `/cosmic enchant book give @s cosmicpve:obsidianshield 1 100 1` or level 2 to leggings. Compare Dragonslayer alone (75%), Dragon alone (50%), Dragonslayer + Obsidian I (100%), and Dragon + Obsidian II (100%) across Fire/Lava/Poison, ensuring Lava is not reduced twice. Confirm Wither remains eligible only for Ender Walker and that Yeti behavior is unchanged.
 
 No next-roadmap implementation was started.
+
+### Amulet Socket + Blood Diamond/Icicle/Black Heart — IMPLEMENTED: YES; AUTOMATED/RUNTIME VERIFIED: YES; MANUALLY VERIFIED/ACCEPTED: YES; COMMITTED: YES
+
+The accepted Overload/Silence/Longbow and content-hotpatch candidate was selectively closed as `30771fc` (`Add Overload Silence Longbow and content hotfixes`). Its owned tracked source, resource, test, and handoff files were included; the user-maintained `docs/Cosmic_Design.md` and root `assets/`, `blockbench/`, and `woodlands/` development sources were excluded and preserved.
+
+The accessory foundation uses three synchronized, persistent item components: versioned `AccessoryLoadout` on host equipment, versioned `AccessorySocketData` on socket items, and versioned `AccessoryItemData` on loose accessories. `AccessorySlot` distinguishes active `AMULET` from reserved data-only `BELT`, but this milestone registers and exposes only Amulet content. No Belt or Omni Socket item exists. A loadout stores concrete unlocked slots separately from a slot-to-accessory identity map, validates that every attachment has its socket, and permits at most one identity per slot. It remains a component of the original chestplate, so ordinary component-preserving enchantment, Heroic, Armor Set, Omni, Transmog, White/Holy Scroll, Orb, durability, repair, rename, copy/save/drop/dimension operations do not replace or discard it.
+
+`cosmicpve:amulet_socket` carries an exact integer 1–100 success rate and no destroy field. It uses the vanilla Tripwire Hook item model and the canonical Socket color `#055251` for its bold item name, success text, and flavor text. Only real chest armor is accepted: the chest armor tag or chest armor-attribute fallback is required in addition to chest-slot equipability, which rejects Elytra and arbitrary chest-slot items. A valid attempt consumes one Socket exactly once. A 100% item succeeds without querying RNG; a failed roll leaves the chestplate bit-for-bit unchanged and uses survived-failure feedback, never anvil-break/destruction feedback. Reapplication to an already socketed chestplate rejects before RNG and consumption. The exact flavor text is `Apply to any CHESTPLATE to gain the ability to wear amulets! Drag n'drop to apply!`; its tooltip also renders `Success Rate: N%` and no Destroy Rate.
+
+Loose Blood Diamond, Icicle, and Black Heart items attach through the normal primary inventory stack-on-item interaction only after the Amulet socket exists. Attachment has no roll, consumes one loose item, and rejects a second without overwriting or consuming it. Empty-cursor secondary interaction returns exactly one canonical loose Amulet while retaining the permanent socket. Stale cursor/slot object identities reject transaction races. The host tooltip now uses canonical Socket presentation: `Socketed: EMPTY` in bold `#055251`, or `Socketed: Amulet: …` with the bold `#055251` prefix and the attached identity in its canonical Amulet color, plus the removal instruction. Loose names are entirely bold and use Blood Diamond `#5C0404`, Icicle `#BDF0FF`, and Black Heart `#310082`, followed by the canonical concise effect and attach instruction.
+
+Canonical source-to-gameplay mappings are:
+
+- `blockbench/amulets/blood_diamond/blood_diamond.bbmodel` (`cosmic_ruby_amulet`) → Blood Diamond.
+- `blockbench/amulets/icicle/icicle.bbmodel` (`cosmic_frost_amulet`) → Icicle.
+- `blockbench/amulets/blackened_heart/blackened_heart.bbmodel` (`cosmic_void_amulet`) → Black Heart.
+
+The source files remain untouched/untracked user assets. Reproducible `tools/export_amulet_models.ps1` reads their embedded 32×32 textures and authored cubes/mesh, rotations, pivots, and UVs, producing namespaced OBJ/MTL/PNG runtime assets. After the first manual visual pass exposed a shared offset, the exporter was corrected to retain torso-local geometry while adding Minecraft's conventional `(0.5, 0.5, 0.5)` model-center offset. This prevents the item renderer's own center translation from shifting all models left/up. Model wrappers include explicit texture/particle aliases, a centered GUI view, and explicit first-/third-person transforms that anchor held Amulets to the hand. Client-only `AmuletClientPresentation` captures the equipped chestplate identity into `AvatarRenderState` and adds a dedicated layer for every player skin. The layer follows `PlayerModel.body`, submits the fixed model over existing chest armor, skips invisible avatars, and never replaces armor/model/stats. Common registration never references the client class; dedicated-server startup verifies sided safety. A fresh client reload after the correction reports no Amulet or Socket missing model/texture warning. Exact final physical placement, clipping, animation, and compatibility with each appearance remain manual acceptance items.
+
+`AccessoryResolver` is the one equipped-accessory query boundary and reads only the actual chest equipment slot for any `LivingEntity`; inventory, hotbar, containers, and dropped hosts are inactive. Accessories are not Cosmic enchantments and do not participate in capacity, Heroic conversion, Silence, Neutralize, Grim Axe, Black Scroll, or Enchanted Black Scroll suppression.
+
+`AmuletCombatService` is the one combat integration point. Blood Diamond reads canonical active `cosmicpve:bleed` stack counts on attacker and target during ordinary root outgoing resolution and contributes +1% per stack to the shared additive bucket; true, status, proc, retaliation, and child damage are excluded. Icicle produces one root-only, once-per-event `ON_VALID_HIT` candidate only for a committed ordinary parent hit against a currently Slowed living target. Its exact 10% classification ignores Luck and all other chance multipliers; success uses the canonical Bleed stack service, cap, duration, attribution, and movement reconciliation to add one standard stack.
+
+Black Heart is implemented as generic successful-proc observation rather than an enchantment allowlist. `ProcActivation` now collects the living entities an action actually affected, and current Mastery/Heroic damage/debuff actions mark accepted results. The listener resolves rarity from `CosmicEnchantmentSpecs`, requires Mastery or Heroic, another owner, the wearer among actual affected entities, and an equipped Black Heart. Failed, suppressed, passive, self-only, owner-self, and irrelevant lower-rarity cases never qualify. Runtime weak state stores one expiry per entity: a qualification sets current tick + 80, a retrigger replaces that expiry, magnitude remains +5%, and the shared ordinary root bucket excludes true/status/proc/child damage.
+
+Tinkerer salvage rejects valid loadouts with any attached accessory, preventing Amulet destruction. A socket-only enchanted chestplate remains eligible under normal salvage rules. Deterministic coverage explicitly guards both cases.
+
+Final automated/runtime verification: focused Amulet and salvage suites pass; `gradlew.bat cleanTest test build --console=plain` passes 670 JUnit tests across 166 suites with zero failures, errors, or skips. `gradlew.bat runGameTestServer --console=plain` passes all 18 required loaded-registry GameTests, including the new Amulet environment's live socket/attachment/equipped-only resolution, Blood Diamond 3+5 calculation, fixed Icicle chance and canonical Bleed, child exclusion, and Black Heart Mastery activation/80-tick refresh/+5% ordinary-only behavior. Dedicated `runServer` reaches `Done (0.558s)` without client classloading; the verification harness required Ctrl-C termination after startup because Gradle's PTY did not accept the normal stop command. Fresh `runClient` reloads `mod/cosmicpve`, starts the sound engine, and builds item and all other texture atlases without a CosmicPVE missing model/texture, OBJ, registry, codec, localization, or sided-loading error. The installed Slightly Improved Font pack retains its unrelated metadata warning. Candidate-owned paths pass whitespace checks; `docs/Cosmic_Design.md` retains its pre-existing user diff and is excluded. The entire Amulet candidate remains unstaged and uncommitted.
+
+Permissioned manual acquisition commands:
+
+- `/cosmic accessory give socket @s 100` and `/cosmic accessory give socket @s 1` for convenient success/failure sampling.
+- `/cosmic accessory give blood_diamond @s`
+- `/cosmic accessory give icicle @s`
+- `/cosmic accessory give black_heart @s`
+- `/give @s minecraft:diamond_chestplate`, plus representative normal, Armor Set/Omni, and Heroic-appearance chestplates from their existing test flows.
+
+Manual acceptance must inspect exact Socket flavor/success display, successful and failed drag application, already-socketed rejection, each attach/remove/re-attach cycle and permanent socket, concise host identities, front/side/back placement while standing/walking/crouching, and overlay compatibility with no armor/ordinary/Armor Set/Omni/Heroic appearances. Combat checks should use `/cosmic combat trace on`, `/cosmic proc trace on`, `/cosmic combat trace last`, `/cosmic proc trace last`, and existing stack/effect commands to validate known Blood Diamond Bleed totals, fixed-rate Icicle hits against Slowness, and Black Heart against representative hostile Permafrost/Mighty Cactus-style Mastery/Heroic actions. No force-proc command was invented; sample real rolls where existing commands cannot deterministically force the production action.
 
 ## Maintaining This Handoff
 

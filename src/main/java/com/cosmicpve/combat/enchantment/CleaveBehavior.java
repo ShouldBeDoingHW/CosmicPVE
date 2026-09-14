@@ -38,29 +38,30 @@ public final class CleaveBehavior {
         return finalizedOrdinaryDamage * (mighty ? mightyFraction() : cleaveFraction(level));
     }
 
-    public void activate(CombatResult parent, int level, boolean mighty) {
+    public Set<LivingEntity> activate(CombatResult parent, int level, boolean mighty) {
         if (!parent.isCommittedDamagingHit() || parent.context().channel() != DamageChannel.ORDINARY
-                || parent.context().attacker() == null || parent.context().target() == null) return;
+                || parent.context().attacker() == null || parent.context().target() == null) return Set.of();
         LivingEntity attacker = parent.context().attacker();
         LivingEntity origin = parent.context().target();
         double amount = childDamage(parent.breakdown().finalOrdinaryDamage(), level, mighty);
         double radius = mighty ? MIGHTY_RADIUS : CLEAVE_RADIUS;
         var delivered = new LinkedHashSet<LivingEntity>();
+        var affected = new LinkedHashSet<LivingEntity>();
         for (LivingEntity candidate : origin.level().getEntitiesOfClass(LivingEntity.class,
                 origin.getBoundingBox().inflate(radius), entity -> entity != attacker && entity.isAlive()
                         && !entity.isRemoved() && !allies.isAlly(attacker, entity))) {
             if (!GeneralAllyResolver.within(origin, candidate, radius) || !delivered.add(candidate)) continue;
-            if (candidate == origin) {
-                childActions.deliverCleave(parent.context(), candidate, amount, RECURSION_EXCLUSIONS);
-            } else {
-                childActions.deliverOrdinary(parent.context(), candidate, amount,
+            var outcome = candidate == origin
+                    ? childActions.deliverCleave(parent.context(), candidate, amount, RECURSION_EXCLUSIONS)
+                    : childActions.deliverOrdinary(parent.context(), candidate, amount,
                         RecursionPolicy.LIMITED_OFFENSIVE_REROLL, RECURSION_EXCLUSIONS);
-            }
+            if (outcome.accepted() && outcome.healthDamage() > 0) affected.add(candidate);
         }
         if (mighty) {
             for (LivingEntity ally : allies.alliesWithin(attacker, MIGHTY_HEAL_RADIUS)) {
                 if (ally.getHealth() < ally.getMaxHealth()) ally.heal(MIGHTY_HEAL_HP);
             }
         }
+        return Set.copyOf(affected);
     }
 }

@@ -6,6 +6,7 @@ public enum ProcSourceKind {
     ARMOR_SET,
     MASK,
     WEAPON_SKIN,
+    ACCESSORY,
     DEVELOPMENT,
     OTHER
 }

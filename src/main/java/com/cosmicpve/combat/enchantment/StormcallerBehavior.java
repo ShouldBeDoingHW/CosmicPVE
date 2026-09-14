@@ -36,6 +36,7 @@ public final class StormcallerBehavior {
             if (bolt != null) { bolt.setVisualOnly(true); bolt.setPos(attacker.getX(), attacker.getY(), attacker.getZ()); level.addFreshEntity(bolt); }
         }
         attacker.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, durationTicks(total), 0));
+        activation.markAffected(attacker);
         actions.deliverTrue(parent.context(), attacker,
                 TrueDamagePacket.standard(CosmicPVE.id("stormcaller"), trueDamage(total)), RecursionPolicy.NO_PROCS);
     }

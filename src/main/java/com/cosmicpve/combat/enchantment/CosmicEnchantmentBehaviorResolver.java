@@ -152,7 +152,8 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
         result.add(candidate(id, ProcHook.ON_VALID_HIT,
                 mighty ? CleaveBehavior.mightyChance() : CleaveBehavior.cleaveChance(level),
                 Optional.empty(), 0L, Optional.empty(), ChildProcEligibility.LIMITED_OFFENSIVE_REROLL,
-                activation -> activation.event().combatResult().ifPresent(parent -> cleave.activate(parent, level, mighty)),
+                activation -> activation.event().combatResult().ifPresent(parent ->
+                        cleave.activate(parent, level, mighty).forEach(activation::markAffected)),
                 provenance(event, id),
                 condition(CosmicPVE.id("cleave_family_ordinary_axe_parent"), procEvent ->
                         ordinaryAttack(procEvent) && procEvent.combatResult().map(parent ->
@@ -171,6 +172,7 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
                             StackApplication.ephemeral(Optional.of(attacker.getUUID()), activation.event().tracePlayerId()),
                             activation.event().serverTick(), DeepBleedBehavior.STACK_DURATION_TICKS);
                     bleedRuntime.reconcileMovement(target, added.finalCount());
+                    if (added.added() > 0 || added.refreshed() > 0) activation.markAffected(target);
                 }, provenance(event, ModEnchantments.DEEP_BLEED.identifier()),
                 meleeCondition(CosmicPVE.id("deep_bleed_melee_hit"))));
     }
@@ -194,7 +196,8 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
         if (level <= 0 || event.target() == null || !event.target().hasEffect(net.minecraft.world.effect.MobEffects.POISON)) return;
         result.add(deterministicCandidate(ModEnchantments.BLIGHTED_VIRUS.identifier(), ProcHook.ON_PROJECTILE_HIT,
                 1.0, Optional.empty(), 0L, Optional.empty(), ChildProcEligibility.ROOT_ONLY,
-                activation -> BlightedVirusBehavior.activate(activation, level, childActions),
+                activation -> { BlightedVirusBehavior.activate(activation, level, childActions);
+                    activation.markAffected(activation.event().target()); },
                 provenance(event, ModEnchantments.BLIGHTED_VIRUS.identifier()),
                 condition(CosmicPVE.id("blighted_virus_poisoned_projectile"), procEvent ->
                         procEvent.combatResult().map(hit -> hit.context().category()
@@ -207,7 +210,7 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
         var behavior = new EternalSnareBehavior(snareRoots);
         result.add(candidate(ModEnchantments.ETERNAL_SNARE.identifier(), ProcHook.ON_PROJECTILE_HIT,
                 EternalSnareBehavior.chance(level), Optional.empty(), 0L, Optional.empty(), ChildProcEligibility.ROOT_ONLY,
-                activation -> behavior.activate(activation.event()),
+                activation -> { behavior.activate(activation.event()); activation.markAffected(activation.event().target()); },
                 provenance(event, ModEnchantments.ETERNAL_SNARE.identifier()),
                 condition(CosmicPVE.id("eternal_snare_crossbow"), EternalSnareBehavior::eligible)));
     }
@@ -220,8 +223,11 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
                 MightyCactusBehavior.chance(level), Optional.empty(), 0L, Optional.of(MIGHTY_CACTUS_ONCE_KEY),
                 ChildProcEligibility.LIMITED_DEFENSIVE_REACTION, activation -> {
                     var parent = activation.event().combatResult().orElse(null);
-                    if (parent != null && activation.event().attacker() != null) childActions.deliverTrue(parent.context(),
-                            activation.event().attacker(), MightyCactusBehavior.packet(), MightyCactusBehavior.RECURSION_POLICY);
+                    if (parent != null && activation.event().attacker() != null) {
+                        var outcome = childActions.deliverTrue(parent.context(), activation.event().attacker(),
+                                MightyCactusBehavior.packet(), MightyCactusBehavior.RECURSION_POLICY);
+                        if (outcome.accepted() && outcome.healthDamage() > 0) activation.markAffected(activation.event().attacker());
+                    }
                 }, provenance(event, ModEnchantments.MIGHTY_CACTUS.identifier())));
     }
 
@@ -232,7 +238,8 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
         result.add(candidate(ModEnchantments.PALADIN_ARMORED.identifier(), ProcHook.ON_DAMAGE_TAKEN,
                 PaladinArmoredBehavior.chance(total), Optional.empty(), 0L, Optional.of(PALADIN_ARMORED_ONCE_KEY),
                 ChildProcEligibility.LIMITED_DEFENSIVE_REACTION,
-                activation -> PaladinArmoredBehavior.weaken(activation.event().attacker()),
+                activation -> { PaladinArmoredBehavior.weaken(activation.event().attacker());
+                    activation.markAffected(activation.event().attacker()); },
                 new ProcProvenance(ProcSourceKind.ACTUAL_ENCHANTMENT, CosmicPVE.id("equipped_armor")),
                 condition(CosmicPVE.id("paladin_armored_ordinary_hit"), CosmicEnchantmentBehaviorResolver::ordinaryAttack)));
     }
@@ -245,7 +252,8 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
         result.add(candidate(ModEnchantments.STORMCALLER.identifier(), ProcHook.ON_DAMAGE_TAKEN,
                 StormcallerBehavior.chance(total), Optional.empty(), 0L, Optional.of(STORMCALLER_ONCE_KEY),
                 ChildProcEligibility.LIMITED_DEFENSIVE_REACTION,
-                activation -> StormcallerBehavior.activate(activation, total, childActions),
+                activation -> { StormcallerBehavior.activate(activation, total, childActions);
+                    activation.markAffected(activation.event().attacker()); },
                 new ProcProvenance(ProcSourceKind.ACTUAL_ENCHANTMENT, CosmicPVE.id("equipped_armor")),
                 condition(CosmicPVE.id("stormcaller_ordinary_parent"), procEvent -> ordinaryAttack(procEvent)
                         && procEvent.combatResult().map(hit -> hit.context().parentSequenceId().isEmpty()).orElse(false))));
@@ -270,8 +278,9 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
         result.add(candidate(ModEnchantments.BLACKOUT.identifier(), ProcHook.ON_VALID_HIT,
                 BlackoutBehavior.chance(level), Optional.empty(), 0L, Optional.empty(),
                 ChildProcEligibility.LIMITED_OFFENSIVE_REROLL,
-                activation -> BlackoutBehavior.activate(armorSetSuppression, activation.event().target(), level,
-                        activation.event().serverTick()), provenance(event, ModEnchantments.BLACKOUT.identifier()),
+                activation -> { BlackoutBehavior.activate(armorSetSuppression, activation.event().target(), level,
+                        activation.event().serverTick()); activation.markAffected(activation.event().target()); },
+                provenance(event, ModEnchantments.BLACKOUT.identifier()),
                 condition(CosmicPVE.id("blackout_active_armor_set"), procEvent -> procEvent.target() != null
                         && armorSets.resolve(procEvent.target()).isPresent() && ordinaryAttack(procEvent))));
     }
@@ -332,8 +341,9 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
         result.add(candidate(ModEnchantments.SOUL_TETHER.identifier(), ProcHook.ON_VALID_HIT, .10,
                 Optional.of(ModEnchantments.SOUL_TETHER.identifier()), 600L, Optional.empty(),
                 ChildProcEligibility.LIMITED_OFFENSIVE_REROLL,
-                activation -> soulTethers.apply(activation.event().attacker(), activation.event().target(), level,
-                        activation.event().serverTick()), provenance(event, ModEnchantments.SOUL_TETHER.identifier()),
+                activation -> { soulTethers.apply(activation.event().attacker(), activation.event().target(), level,
+                        activation.event().serverTick()); activation.markAffected(activation.event().target()); },
+                provenance(event, ModEnchantments.SOUL_TETHER.identifier()),
                 meleeCondition(CosmicPVE.id("soul_tether_melee_hit"))));
     }
 
@@ -636,7 +646,8 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
         result.add(candidate(ModEnchantments.PERMAFROST.identifier(), ProcHook.ON_DAMAGE_TAKEN,
                 PermafrostBehavior.chance(level), Optional.empty(), 0L, Optional.of(PERMAFROST_ONCE_KEY),
                 ChildProcEligibility.LIMITED_DEFENSIVE_REACTION,
-                activation -> PermafrostBehavior.activate(activation.event(), level, stacks, childActions),
+                activation -> { PermafrostBehavior.activate(activation.event(), level, stacks, childActions);
+                    activation.markAffected(activation.event().attacker()); },
                 provenance(event, ModEnchantments.PERMAFROST.identifier()),
                 condition(CosmicPVE.id("permafrost_ordinary_attack"), CosmicEnchantmentBehaviorResolver::ordinaryAttack)));
     }
