@@ -76,7 +76,11 @@ class CosmicEnchantmentRegistrationTest {
                 Map.entry("forbidden_curse", 5),
                 Map.entry("nimble", 4),
                 Map.entry("thundering_blow", 3),
-                Map.entry("neutralize", 5));
+                Map.entry("neutralize", 5),
+                Map.entry("overload", 3),
+                Map.entry("godly_overload", 3),
+                Map.entry("silence", 4),
+                Map.entry("longbow", 5));
         for (var entry : expected.entrySet()) {
             var resource = getClass().getClassLoader()
                     .getResourceAsStream("data/cosmicpve/enchantment/" + entry.getKey() + ".json");
@@ -131,7 +135,7 @@ class CosmicEnchantmentRegistrationTest {
                 }
             }
         }
-        assertEquals(72, CosmicEnchantmentSpecs.ALL.size());
+        assertEquals(76, CosmicEnchantmentSpecs.ALL.size());
         assertEquals(CosmicEnchantmentTier.ELITE, CosmicEnchantmentSpecs.EXECUTE.tier());
         assertEquals(CosmicEnchantmentTier.ULTIMATE, CosmicEnchantmentSpecs.ANGELIC.tier());
         assertEquals(CosmicEnchantmentTier.SIMPLE, CosmicEnchantmentSpecs.LIGHTNING.tier());

@@ -18,6 +18,8 @@ public final class EquipmentTooltipService {
         var stack = event.getItemStack();
         if(stack.is(com.cosmicpve.registry.ModItems.MYSTERY_CALL_OF_ADVENTURE.get()))
             event.getToolTip().addAll(com.cosmicpve.reward.lootbox.AnimatedLootboxItem.mysteryCallLore());
+        if(stack.is(com.cosmicpve.registry.ModItems.RANDOM_WEAPON_SKIN_GENERATOR.get()))
+            event.getToolTip().addAll(com.cosmicpve.reward.lootbox.AnimatedLootboxItem.randomWeaponSkinLore());
         if (stack.is(com.cosmicpve.registry.ModItems.SPACE_CHEST.get())
                 && stack.has(ModDataComponents.SPACE_CHEST.get())) {
             event.getToolTip().addAll(com.cosmicpve.spacechest.SpaceChestItem.lore());

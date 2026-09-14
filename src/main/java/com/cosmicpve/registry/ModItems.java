@@ -143,6 +143,9 @@ public final class ModItems {
     public static final DeferredItem<AnimatedLootboxItem> ADMIN_ABUSE = ITEMS.registerItem(
             "admin_abuse", properties -> new AnimatedLootboxItem(properties,
                     AnimatedLootboxItem.Kind.ADMIN_ABUSE), properties -> properties.stacksTo(1));
+    public static final DeferredItem<AnimatedLootboxItem> RANDOM_WEAPON_SKIN_GENERATOR = ITEMS.registerItem(
+            "random_weapon_skin_generator", properties -> new AnimatedLootboxItem(properties,
+                    AnimatedLootboxItem.Kind.RANDOM_WEAPON_SKIN_GENERATOR), properties -> properties.stacksTo(1));
     public static final DeferredItem<SpaceDustBundleItem> SPACE_DUST_BUNDLE = ITEMS.registerItem(
             "space_dust_bundle", SpaceDustBundleItem::new, properties -> properties.stacksTo(1));
 

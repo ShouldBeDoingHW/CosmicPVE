@@ -14,7 +14,7 @@ public final class ImpossibleRewardCatalog {
             row("Cosmic Enchantment Table", 5, 1, true), row("100% Black Scroll", 10, 1, true),
             row("50% Enchanted Black Scroll", 10, 1, true), row("60% Weapon Enchantment Orb", 10, 1, true),
             row("60% Armor Enchantment Orb", 10, 1, true), row("Abandoned Spaceship Portal", 8, 1, false),
-            row("Mystery Call of Adventure",9,1,true));
+            row("Mystery Call of Adventure",9,1,true), row("Random Weapon Skin Generator",3,1,true));
     public static final int DECLARED_WEIGHT = DECLARED.stream().mapToInt(Row::weight).sum();
     public static final int ACTIVE_WEIGHT = DECLARED.stream().filter(Row::active).mapToInt(Row::weight).sum();
     private ImpossibleRewardCatalog() {}

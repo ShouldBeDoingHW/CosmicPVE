@@ -68,6 +68,9 @@ public final class ModEnchantments {
     public static final ResourceKey<Enchantment> NIMBLE = createKey("nimble");
     public static final ResourceKey<Enchantment> THUNDERING_BLOW = createKey("thundering_blow");
     public static final ResourceKey<Enchantment> NEUTRALIZE = createKey("neutralize");
+    public static final ResourceKey<Enchantment> OVERLOAD = createKey("overload");
+    public static final ResourceKey<Enchantment> SILENCE = createKey("silence");
+    public static final ResourceKey<Enchantment> LONGBOW = createKey("longbow");
     public static final ResourceKey<Enchantment> DEEP_BLEED = createKey("deep_bleed");
     public static final ResourceKey<Enchantment> MIGHTY_CACTUS = createKey("mighty_cactus");
     public static final ResourceKey<Enchantment> PALADIN_ARMORED = createKey("paladin_armored");
@@ -78,6 +81,7 @@ public final class ModEnchantments {
     public static final ResourceKey<Enchantment> PERMANENT_EXECUTE = createKey("permanent_execute");
     public static final ResourceKey<Enchantment> MIGHTY_CLEAVE = createKey("mighty_cleave");
     public static final ResourceKey<Enchantment> FORBIDDEN_CURSE = createKey("forbidden_curse");
+    public static final ResourceKey<Enchantment> GODLY_OVERLOAD = createKey("godly_overload");
 
     private ModEnchantments() {}
 

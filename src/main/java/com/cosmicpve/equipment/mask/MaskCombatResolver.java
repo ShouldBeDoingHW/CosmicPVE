@@ -10,8 +10,6 @@ import com.cosmicpve.combat.pipeline.OutgoingDamageContribution;
 import com.cosmicpve.combat.pipeline.OutgoingDamageContributor;
 import com.cosmicpve.content.definition.mask.MaskBehavior;
 import java.util.List;
-import net.minecraft.tags.DamageTypeTags;
-import net.neoforged.neoforge.common.NeoForgeMod;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
@@ -42,20 +40,12 @@ public final class MaskCombatResolver implements OutgoingDamageContributor, Inco
         if (context.target() == null) return List.of();
         var equipped = masks.resolve(context.target());
         if (context.damageSource() != null) {
-            if (equipped.stream().anyMatch(d -> d.behavior() == MaskBehavior.DRAGON)
-                    && dragonProtects(context.channel(), context.damageSource().is(DamageTypeTags.IS_FIRE),
-                            context.damageSource().is(NeoForgeMod.POISON_DAMAGE)))
-                return List.of(new IncomingDamageContribution(CosmicPVE.id("dragon_mask_category_reduction"), 0.5));
             if (equipped.stream().anyMatch(d -> d.behavior() == MaskBehavior.ZEUS)
                     && context.damageSource().is(net.minecraft.world.damagesource.DamageTypes.LIGHTNING_BOLT))
                 return List.of(new IncomingDamageContribution(CosmicPVE.id("zeus_mask_lightning_immunity"), 0.0));
         }
         return equipped.stream().anyMatch(d -> d.behavior() == MaskBehavior.PARTY) && context.channel() == DamageChannel.ORDINARY
                 ? List.of(new IncomingDamageContribution(CosmicPVE.id("party_mask"), .99)) : List.of();
-    }
-
-    static boolean dragonProtects(DamageChannel channel, boolean fire, boolean poison) {
-        return channel == DamageChannel.ORDINARY && (fire || poison);
     }
 
     static int holyGearCount(net.minecraft.world.entity.LivingEntity entity) {

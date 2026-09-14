@@ -131,6 +131,12 @@ public final class CosmicEnchantmentSpecs {
             ModEnchantments.THUNDERING_BLOW.identifier(), 3, CosmicEnchantmentTier.SIMPLE, "sword");
     public static final CosmicEnchantmentSpec NEUTRALIZE = new CosmicEnchantmentSpec(
             ModEnchantments.NEUTRALIZE.identifier(), 5, CosmicEnchantmentTier.MASTERY, "axe");
+    public static final CosmicEnchantmentSpec OVERLOAD = new CosmicEnchantmentSpec(
+            ModEnchantments.OVERLOAD.identifier(), 3, CosmicEnchantmentTier.LEGENDARY, "chestplate");
+    public static final CosmicEnchantmentSpec SILENCE = new CosmicEnchantmentSpec(
+            ModEnchantments.SILENCE.identifier(), 4, CosmicEnchantmentTier.LEGENDARY, "all_weapons");
+    public static final CosmicEnchantmentSpec LONGBOW = new CosmicEnchantmentSpec(
+            ModEnchantments.LONGBOW.identifier(), 5, CosmicEnchantmentTier.LEGENDARY, "bow");
     public static final CosmicEnchantmentSpec DEEP_BLEED = new CosmicEnchantmentSpec(
             ModEnchantments.DEEP_BLEED.identifier(), 6, CosmicEnchantmentTier.HEROIC, "axe");
     public static final CosmicEnchantmentSpec MIGHTY_CACTUS = new CosmicEnchantmentSpec(
@@ -151,6 +157,8 @@ public final class CosmicEnchantmentSpecs {
             ModEnchantments.MIGHTY_CLEAVE.identifier(), 8, CosmicEnchantmentTier.HEROIC, "axe");
     public static final CosmicEnchantmentSpec FORBIDDEN_CURSE = new CosmicEnchantmentSpec(
             ModEnchantments.FORBIDDEN_CURSE.identifier(), 5, CosmicEnchantmentTier.HEROIC, "chestplate");
+    public static final CosmicEnchantmentSpec GODLY_OVERLOAD = new CosmicEnchantmentSpec(
+            ModEnchantments.GODLY_OVERLOAD.identifier(), 3, CosmicEnchantmentTier.HEROIC, "chestplate");
 
     public static final List<CosmicEnchantmentSpec> ALL =
             List.of(EXECUTE, ANGELIC, LIGHTNING, ENDER_SHIFT, DOUBLESTRIKE, BLEED, LUCK, POISON, PUMMEL,
@@ -161,9 +169,10 @@ public final class CosmicEnchantmentSpecs {
                     UNDEAD_RUSE, OBLITERATE, SOUL_TETHER, DODGE, LEADERSHIP,
                     HERO_KILLER, SOUL_SIPHON, BLACKOUT, ENDER_WALKER, VOODOO,
                     SNIPER, SNARE, PLAGUE_CARRIER, OBSIDIAN_DESTROYER, DOMINATE, HEX, STORMCALLER, INVERSION, SPIRIT_LINK,
-                    CLEAVE, SOLITUDE, CURSE, NIMBLE, THUNDERING_BLOW, NEUTRALIZE,
+                    CLEAVE, SOLITUDE, CURSE, NIMBLE, THUNDERING_BLOW, NEUTRALIZE, OVERLOAD, SILENCE, LONGBOW,
                     DEEP_BLEED, MIGHTY_CACTUS, PALADIN_ARMORED, BLIGHTED_VIRUS, ALIEN_IMPLANTS,
-                    LETHAL_SNIPER, ETERNAL_SNARE, PERMANENT_EXECUTE, MIGHTY_CLEAVE, FORBIDDEN_CURSE);
+                    LETHAL_SNIPER, ETERNAL_SNARE, PERMANENT_EXECUTE, MIGHTY_CLEAVE, FORBIDDEN_CURSE,
+                    GODLY_OVERLOAD);
 
     private CosmicEnchantmentSpecs() {}
 

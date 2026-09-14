@@ -30,6 +30,7 @@ class CleaveCurseHeroicApplicationTest {
         var fixture = fixture();
         verifyPair(fixture, Items.DIAMOND_AXE, ModEnchantments.CLEAVE, ModEnchantments.MIGHTY_CLEAVE, 8);
         verifyPair(fixture, Items.IRON_CHESTPLATE, ModEnchantments.CURSE, ModEnchantments.FORBIDDEN_CURSE, 5);
+        verifyPair(fixture, Items.IRON_CHESTPLATE, ModEnchantments.OVERLOAD, ModEnchantments.GODLY_OVERLOAD, 3);
     }
 
     private static void verifyPair(Fixture fixture, Item item, ResourceKey<Enchantment> ordinaryKey,
@@ -79,6 +80,8 @@ class CleaveCurseHeroicApplicationTest {
         register(registry, ModEnchantments.MIGHTY_CLEAVE, Items.DIAMOND_AXE, 8);
         register(registry, ModEnchantments.CURSE, Items.IRON_CHESTPLATE, 5);
         register(registry, ModEnchantments.FORBIDDEN_CURSE, Items.IRON_CHESTPLATE, 5);
+        register(registry, ModEnchantments.OVERLOAD, Items.IRON_CHESTPLATE, 3);
+        register(registry, ModEnchantments.GODLY_OVERLOAD, Items.IRON_CHESTPLATE, 3);
         registry.freeze();
         return new Fixture(registry);
     }

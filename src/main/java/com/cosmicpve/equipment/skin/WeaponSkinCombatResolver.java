@@ -130,7 +130,7 @@ public final class WeaponSkinCombatResolver
         }
         if (definition.id().equals(WeaponSkinDefinitions.GRIM_AXE)) {
             return List.of(rootCandidate(definition.id(), GRIM_CHANCE, Set.of(), activation ->
-                    EnchantmentSuppressionService.GLOBAL.suppress(activation.event().target(),
+                    EnchantmentSuppressionService.GLOBAL.suppressTiers(activation.event().target(), definition.id(),
                             Set.of(CosmicEnchantmentTier.ELITE, CosmicEnchantmentTier.UNIQUE),
                             GRIM_SUPPRESSION_TICKS, activation.event().serverTick())));
         }

@@ -66,8 +66,8 @@ public final class CleaveCurseGameTests {
         }
 
         var heroic = new HeroicCosmicEnchantmentTableRewards();
-        helper.assertTrue(HeroicCosmicEnchantmentTableRewards.POOL.size() == 10
-                && HeroicCosmicEnchantmentTableRewards.ENTRY_COUNT == 30, "Heroic Table must contain 10x3 outcomes");
+        helper.assertTrue(HeroicCosmicEnchantmentTableRewards.POOL.size() == 11
+                && HeroicCosmicEnchantmentTableRewards.ENTRY_COUNT == 33, "Heroic Table must contain 11x3 outcomes");
         for (var id : HeroicCosmicEnchantmentTableRewards.POOL) for (int success : HeroicCosmicEnchantmentTableRewards.SUCCESS) {
             CosmicEnchantmentBookData data = heroic.create(registry, id, success, RandomSource.create(2))
                     .get(ModDataComponents.COSMIC_ENCHANT_BOOK.get());

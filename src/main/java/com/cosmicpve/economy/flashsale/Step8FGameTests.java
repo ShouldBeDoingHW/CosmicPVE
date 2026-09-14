@@ -77,8 +77,8 @@ public final class Step8FGameTests {
                     tier + " reward must construct: " + entry.reward()));
         });
         var impossible = CosmicContent.repository().requireRewardTable(CosmicPVE.id("trial/impossible"));
-        helper.assertTrue(impossible.entries().size() == 18 && impossible.totalWeight() == 164,
-                "Step 8L Impossible table must include the now-constructible Fame Trinket row");
+        helper.assertTrue(impossible.entries().size() == 19 && impossible.totalWeight() == 167,
+                "Impossible table must include the exact weight-3 Random Weapon Skin Generator row");
         impossible.entries().forEach(entry -> helper.assertTrue(generator.generate(entry.reward(), context).isPresent(),
                 "Impossible reward must construct: " + entry.reward()));
         helper.assertTrue(FlashSaleCatalog.CANONICAL_ROWS.size() == 22, "Canonical Flash Sale row count must be 22");

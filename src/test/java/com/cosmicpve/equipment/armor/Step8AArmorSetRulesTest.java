@@ -22,6 +22,7 @@ class Step8AArmorSetRulesTest {
         assertEquals(.05, CategoryDamageReductionBehavior.multiplier(.75 + .20), 1e-12);
         assertEquals(0.0, CategoryDamageReductionBehavior.multiplier(.75 + .50));
         assertEquals(1.0, CategoryDamageReductionBehavior.multiplier(0));
+        assertEquals(0.0, CategoryDamageReductionBehavior.multiplier(.50 + .50));
     }
 
     @Test void cosmicMovementCapAppliesOnlyAfterAggregation() {

@@ -34,10 +34,6 @@ class MaskFoundationTest {
         assertEquals(160,MaskRuntimeEventBridge.SCARECROW_INTERVAL_TICKS);
         assertEquals(.05,MaskRuntimeEventBridge.movementBonus(com.cosmicpve.content.definition.mask.MaskBehavior.REINDEER));
         assertEquals(.01,MaskRuntimeEventBridge.movementBonus(com.cosmicpve.content.definition.mask.MaskBehavior.PARTY));
-        assertTrue(MaskCombatResolver.dragonProtects(com.cosmicpve.combat.api.DamageChannel.ORDINARY,true,false));
-        assertTrue(MaskCombatResolver.dragonProtects(com.cosmicpve.combat.api.DamageChannel.ORDINARY,false,true));
-        assertFalse(MaskCombatResolver.dragonProtects(com.cosmicpve.combat.api.DamageChannel.ORDINARY,false,false));
-        assertFalse(MaskCombatResolver.dragonProtects(com.cosmicpve.combat.api.DamageChannel.TRUE,true,true));
         for (int pieces=0; pieces<=5; pieces++) assertEquals(pieces * .01,
                 MaskCombatResolver.monopolyOutgoingBonus(pieces));
         assertEquals(.55, com.cosmicpve.equipment.enchantment.HolyWhiteScrollService.preservationChance(true));
@@ -77,7 +73,7 @@ class MaskFoundationTest {
                 getClass().getResourceAsStream("/assets/cosmicpve/lang/en_us.json")))).getAsJsonObject();
         assertEquals("Dragon",lang.get("mask.cosmicpve.dragon").getAsString());
         assertEquals("Gain +5% Movement Speed!",lang.get("mask.cosmicpve.reindeer.effect").getAsString());
-        assertEquals("Deal +2% outgoing damage and take 50% less damage from fire, lava, and poison damage!",
+        assertEquals("Deal +2% outgoing damage and take 50% less damage from Fire, Lava, and Poison.",
                 lang.get("mask.cosmicpve.dragon.effect").getAsString());
         var dragon=JsonParser.parseReader(new java.io.InputStreamReader(java.util.Objects.requireNonNull(
                 getClass().getResourceAsStream("/data/cosmicpve/cosmicpve/masks/dragon.json")))).getAsJsonObject();

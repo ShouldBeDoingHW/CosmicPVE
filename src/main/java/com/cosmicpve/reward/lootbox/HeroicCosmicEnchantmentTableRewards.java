@@ -15,7 +15,7 @@ import net.minecraft.world.item.enchantment.Enchantment;
 public final class HeroicCosmicEnchantmentTableRewards {
     public static final List<Identifier> POOL = HeroicEnchantments.PAIRS.stream().map(HeroicEnchantments.Pair::heroic).toList();
     public static final List<Integer> SUCCESS = List.of(25, 50, 75);
-    public static final int ENTRY_COUNT = 30;
+    public static final int ENTRY_COUNT = POOL.size() * SUCCESS.size();
 
     public ItemStack create(Registry<Enchantment> registry, RandomSource random) {
         return create(registry, POOL.get(random.nextInt(POOL.size())),

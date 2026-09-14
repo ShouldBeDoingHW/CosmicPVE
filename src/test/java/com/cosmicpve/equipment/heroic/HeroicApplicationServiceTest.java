@@ -24,14 +24,18 @@ class HeroicApplicationServiceTest {
                 ItemApplicationFeedback.soundsFor(ItemApplicationFeedback.Cue.SUCCESS));
     }
 
-    @Test void crystalUsesCanonicalPurpleNameAndYellowBodyLore() {
+    @Test void crystalUsesCanonicalHeroicNameAndFlavor() {
         var crystal = new ItemStack(ModItems.HEROIC_CRYSTAL.get());
         assertEquals(HeroicCrystalItem.NAME_COLOR, crystal.getHoverName().getStyle().getColor().getValue());
         assertTrue(crystal.getHoverName().getStyle().isBold());
         assertTrue(crystal.hasFoil());
         assertEquals(1, HeroicCrystalItem.lore().size());
-        assertEquals("Gives +250 durability to pickaxes, shovels, and armor as a one-time bonus!",
+        assertEquals("Modifies the appearance and gives +250 durability to digging tools and armor! One time use!",
                 HeroicCrystalItem.lore().getFirst().getString());
+        assertEquals(HeroicCrystalItem.NAME_COLOR,
+                HeroicCrystalItem.lore().getFirst().getStyle().getColor().getValue());
+        assertTrue(HeroicCrystalItem.lore().getFirst().getStyle().isItalic());
+        assertFalse(HeroicCrystalItem.lore().getFirst().getStyle().isBold());
     }
 
     @Test void appliesOnceAddsExactly250AndPreservesWearAndMetadata() {

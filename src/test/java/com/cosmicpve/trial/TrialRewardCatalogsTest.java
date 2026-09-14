@@ -12,8 +12,8 @@ class TrialRewardCatalogsTest {
     @Test void canonicalDeclaredAndActiveTotalsArePinned() {
         assertCatalog(TrialRewardCatalogs.APPRENTICE,12,89,89);
         assertCatalog(TrialRewardCatalogs.HARDCORE,19,109,104);
-        assertCatalog(TrialRewardCatalogs.IMPOSSIBLE,19,172,164);
-        assertCatalog(TrialRewardCatalogs.DEMONIC,17,130,126);
+        assertCatalog(TrialRewardCatalogs.IMPOSSIBLE,20,175,167);
+        assertCatalog(TrialRewardCatalogs.DEMONIC,18,135,131);
     }
 
     @Test void runtimeTablesExactlyEqualTheirActiveCanonicalRows() throws Exception {
@@ -77,6 +77,7 @@ class TrialRewardCatalogsTest {
 
     private static String staticName(String path){return switch(path){
         case "mystery_call_of_adventure"->"Mystery Call of Adventure";
+        case "random_weapon_skin_generator"->"Random Weapon Skin Generator";
         case "repair_scroll"->"Repair Scroll"; case "white_scroll"->"White Scroll";
         case "transmog_scroll"->"Transmog Scroll"; case "mystery_simple_spawner"->"Mystery Simple Spawner";
         case "mystery_elite_spawner"->"Mystery Elite Spawner"; case "space_dust_bundle"->"Space Dust Bundle";

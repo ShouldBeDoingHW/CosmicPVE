@@ -30,6 +30,8 @@ public final class AnimatedLootboxItem extends Item {
             case ADMIN_ABUSE -> adminName();
             case MYSTERY_CALL_OF_ADVENTURE -> Component.literal("Mystery Call of Adventure")
                     .withStyle(style -> style.withColor(0x55FFFF).withBold(true));
+            case RANDOM_WEAPON_SKIN_GENERATOR -> Component.literal("Random Weapon Skin Generator")
+                    .withStyle(style -> style.withColor(0xF5B431).withBold(true));
         };
     }
     public static List<Component> secretWeaponCacheLore() {
@@ -60,5 +62,15 @@ public final class AnimatedLootboxItem extends Item {
                 Component.literal("Contains one random Call of Adventure.").withStyle(ChatFormatting.GRAY),
                 Component.literal("RIGHT-CLICK TO REVEAL").withStyle(style -> style.withColor(0x55FFFF).withBold(true)));
     }
-    public enum Kind { SECRET_WEAPON_CACHE, COSMIC_ENCHANTMENT_TABLE, HEROIC_COSMIC_ENCHANTMENT_TABLE, ADMIN_ABUSE, MYSTERY_CALL_OF_ADVENTURE }
+    public static List<Component> randomWeaponSkinLore() {
+        return List.of(
+                Component.literal("Gives one random skin out of:").withColor(0xF5B431),
+                Component.literal("• Stormbringer").withColor(0x224B57),
+                Component.literal("• Boosted Chainsaw").withColor(0xCCA00A),
+                Component.literal("• Spinal Tap").withColor(0x00F02C),
+                Component.literal("• Grim Axe").withColor(0x4C09B8),
+                Component.literal("• Maui's Hook").withColor(0x404242));
+    }
+    public enum Kind { SECRET_WEAPON_CACHE, COSMIC_ENCHANTMENT_TABLE, HEROIC_COSMIC_ENCHANTMENT_TABLE,
+        ADMIN_ABUSE, MYSTERY_CALL_OF_ADVENTURE, RANDOM_WEAPON_SKIN_GENERATOR }
 }

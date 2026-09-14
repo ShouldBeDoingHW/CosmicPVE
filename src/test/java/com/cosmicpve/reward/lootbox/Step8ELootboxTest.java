@@ -5,6 +5,8 @@ import com.cosmicpve.combat.api.AttackCategory;
 import com.cosmicpve.data.component.SignatureWeaponIdentity;
 import com.cosmicpve.equipment.armor.ArmorSetIds;
 import com.cosmicpve.equipment.enchantment.HeroicEnchantments;
+import com.cosmicpve.equipment.skin.WeaponSkinDefinitions;
+import com.cosmicpve.registry.ModDataComponents;
 import com.cosmicpve.registry.ModEnchantments;
 import com.google.gson.JsonParser;
 import java.io.InputStreamReader;
@@ -54,7 +56,7 @@ class Step8ELootboxTest {
         assertEquals(HeroicEnchantments.PAIRS.stream().map(HeroicEnchantments.Pair::heroic).toList(),
                 HeroicCosmicEnchantmentTableRewards.POOL);
         assertEquals(List.of(25, 50, 75), HeroicCosmicEnchantmentTableRewards.SUCCESS);
-        assertEquals(30, HeroicCosmicEnchantmentTableRewards.ENTRY_COUNT);
+        assertEquals(33, HeroicCosmicEnchantmentTableRewards.ENTRY_COUNT);
     }
 
     @Test void adminPoolIsExactlyFourEqualTwentyFiveWeights() {
@@ -64,6 +66,31 @@ class Step8ELootboxTest {
         var reached = new java.util.HashSet<AdminAbuseRewards.Outcome>();
         for (long seed = 0; seed < 1000; seed++) reached.add(AdminAbuseRewards.select(RandomSource.create(seed)));
         assertEquals(Set.copyOf(AdminAbuseRewards.ALL), reached);
+    }
+
+    @Test void randomWeaponSkinGeneratorIsExactEqualFiveWayLooseSkinPool() {
+        var name = AnimatedLootboxItem.displayName(AnimatedLootboxItem.Kind.RANDOM_WEAPON_SKIN_GENERATOR);
+        assertEquals("Random Weapon Skin Generator", name.getString());
+        assertEquals(0xF5B431, color(name));
+        assertTrue(name.getStyle().isBold());
+        var lore = AnimatedLootboxItem.randomWeaponSkinLore();
+        assertEquals(List.of("Gives one random skin out of:", "• Stormbringer", "• Boosted Chainsaw",
+                        "• Spinal Tap", "• Grim Axe", "• Maui's Hook"),
+                lore.stream().map(net.minecraft.network.chat.Component::getString).toList());
+        assertEquals(List.of(0xF5B431, 0x224B57, 0xCCA00A, 0x00F02C, 0x4C09B8, 0x404242),
+                lore.stream().map(Step8ELootboxTest::color).toList());
+        var candidates = Step8ELootboxService.randomWeaponSkinCandidates();
+        assertEquals(5, candidates.size());
+        assertEquals(Set.of(WeaponSkinDefinitions.STORMBRINGER, WeaponSkinDefinitions.BOOSTED_CHAINSAW,
+                        WeaponSkinDefinitions.SPINAL_TAP, WeaponSkinDefinitions.GRIM_AXE, WeaponSkinDefinitions.MAUIS_HOOK),
+                candidates.stream().map(stack -> stack.get(ModDataComponents.WEAPON_SKIN_ITEM.get()).skinId())
+                        .collect(Collectors.toSet()));
+        assertTrue(candidates.stream().allMatch(stack -> stack.has(ModDataComponents.WEAPON_SKIN_ITEM.get())
+                && !stack.has(ModDataComponents.WEAPON_SKIN.get())));
+        var reached = new java.util.HashSet<net.minecraft.resources.Identifier>();
+        for (long seed = 0; seed < 1000; seed++) reached.add(Step8ELootboxService.selectRandomWeaponSkin(
+                candidates, RandomSource.create(seed)).get(ModDataComponents.WEAPON_SKIN_ITEM.get()).skinId());
+        assertEquals(5, reached.size());
     }
 
     @Test void adminNamesAndLootboxPresentationUseCanonicalStyles() {
@@ -108,6 +135,7 @@ class Step8ELootboxTest {
         assertModel("cosmic_enchantment_table", "minecraft:block/enchanting_table");
         assertModel("heroic_cosmic_enchantment_table", "minecraft:block/enchanting_table");
         assertModel("admin_abuse", "minecraft:block/end_portal_frame");
+        assertModel("random_weapon_skin_generator", "minecraft:block/chiseled_bookshelf_inventory");
     }
 
     private static void assertSpecialChest(String name, String expectedBase, String expectedTexture) {

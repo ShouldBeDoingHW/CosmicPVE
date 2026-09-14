@@ -46,6 +46,11 @@ public final class EquippedPersistentEffectService {
         tickImplants(entity);
         tickAlienImplants(entity);
         reconcileCurseKnockback(entity);
+        reconcileOverloadHealth(entity);
+    }
+
+    void reconcileOverloadHealth(LivingEntity entity) {
+        OverloadBehavior.reconcile(entity, OverloadBehavior.effectiveBonus(entity, enchantments, virtualGrants));
     }
 
     void reconcileCurseKnockback(LivingEntity entity) {

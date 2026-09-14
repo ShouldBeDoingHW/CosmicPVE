@@ -30,7 +30,8 @@ public final class TrialRewardCatalogs {
             row("75% Dragonslayer Crystal",8,1,true), row("100% Dragonslayer Crystal",4,1,true),
             row("100% Enchanted Black Scroll",10,1,true), row("Legendary Space Chest",10,1,true),
             row("Random V-Kit Unlock",12,1,true), row("Godly V-Kit Bundle",4,1,true),
-            row("White Scroll",10,3,true), row("Heroic Abandoned Spaceship Portal",4,1,false)));
+            row("White Scroll",10,3,true), row("Heroic Abandoned Spaceship Portal",4,1,false),
+            row("Random Weapon Skin Generator",5,1,true)));
 
     private TrialRewardCatalogs() {}
     private static Row row(String name,int weight,int quantity,boolean active){return new Row(name,weight,quantity,active);}

@@ -141,7 +141,7 @@ public final class AdventureGameTests {
             players.forEach(ServerPlayer::discard);helper.succeed();
         });
     }
-    static ServerPlayer player(GameTestHelper helper,String name) {
+    public static ServerPlayer player(GameTestHelper helper,String name) {
         return player(helper,name,packet->{});
     }
     static ServerPlayer player(GameTestHelper helper,String name,Consumer<Packet<?>> packets) {

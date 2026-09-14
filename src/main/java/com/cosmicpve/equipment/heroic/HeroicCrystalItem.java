@@ -28,7 +28,7 @@ public final class HeroicCrystalItem extends Item {
 
     public static List<Component> lore() {
         return List.of(
-                Component.literal("Gives +250 durability to pickaxes, shovels, and armor as a one-time bonus!")
-                        .withStyle(net.minecraft.ChatFormatting.GRAY));
+                Component.literal("Modifies the appearance and gives +250 durability to digging tools and armor! One time use!")
+                        .withStyle(style -> style.withColor(NAME_COLOR).withItalic(true)));
     }
 }

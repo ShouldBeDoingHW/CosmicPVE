@@ -24,6 +24,7 @@ public final class Step8ELootboxService {
             case HEROIC_COSMIC_ENCHANTMENT_TABLE -> openHeroicTable(player, source);
             case ADMIN_ABUSE -> openAdminAbuse(player, source);
             case MYSTERY_CALL_OF_ADVENTURE -> openMysteryCall(player, source);
+            case RANDOM_WEAPON_SKIN_GENERATOR -> openRandomWeaponSkin(player, source);
         };
     }
     public boolean forceHeroicTable(ServerPlayer player, net.minecraft.resources.Identifier id, int success) {
@@ -48,7 +49,7 @@ public final class Step8ELootboxService {
     }
     private boolean openSecretCache(ServerPlayer player, ItemStack source) {
         List<ItemStack> candidates = signatureCandidates(player);
-        ItemStack reward = candidates.get(player.getRandom().nextInt(candidates.size())).copy();
+        ItemStack reward = selectRandomWeaponSkin(candidates, player.getRandom());
         return SingleRewardAnimationService.INSTANCE.open(player, reward,
                 LootAnimationPreviewProvider.uniform(candidates), () -> source.shrink(1));
     }
@@ -82,6 +83,29 @@ public final class Step8ELootboxService {
         return SingleRewardAnimationService.INSTANCE.open(player,selectCall(candidates,player.getRandom()),
                 LootAnimationPreviewProvider.uniform(candidates),()->source.shrink(1));
     }
+    private boolean openRandomWeaponSkin(ServerPlayer player, ItemStack source) {
+        var candidates = randomWeaponSkinCandidates();
+        ItemStack reward = candidates.get(player.getRandom().nextInt(candidates.size())).copy();
+        return SingleRewardAnimationService.INSTANCE.open(player, reward,
+                LootAnimationPreviewProvider.uniform(candidates), () -> source.shrink(1));
+    }
+    public static List<ItemStack> randomWeaponSkinCandidates() {
+        return List.of(
+                com.cosmicpve.equipment.skin.WeaponSkinItemFactory.create(
+                        com.cosmicpve.equipment.skin.WeaponSkinDefinitions.STORMBRINGER),
+                com.cosmicpve.equipment.skin.WeaponSkinItemFactory.create(
+                        com.cosmicpve.equipment.skin.WeaponSkinDefinitions.BOOSTED_CHAINSAW),
+                com.cosmicpve.equipment.skin.WeaponSkinItemFactory.create(
+                        com.cosmicpve.equipment.skin.WeaponSkinDefinitions.SPINAL_TAP),
+                com.cosmicpve.equipment.skin.WeaponSkinItemFactory.create(
+                        com.cosmicpve.equipment.skin.WeaponSkinDefinitions.GRIM_AXE),
+                com.cosmicpve.equipment.skin.WeaponSkinItemFactory.create(
+                        com.cosmicpve.equipment.skin.WeaponSkinDefinitions.MAUIS_HOOK));
+    }
+    public static ItemStack selectRandomWeaponSkin(List<ItemStack> candidates, net.minecraft.util.RandomSource random) {
+        if (candidates.size() != 5) throw new IllegalArgumentException("Weapon Skin Generator requires five outcomes");
+        return candidates.get(random.nextInt(candidates.size())).copy();
+    }
     public static ItemStack selectCall(List<ItemStack> candidates,net.minecraft.util.RandomSource random) {
         if(candidates.isEmpty())throw new IllegalArgumentException("No production Calls");
         return candidates.get(random.nextInt(candidates.size())).copy();
@@ -96,6 +120,7 @@ public final class Step8ELootboxService {
             case HEROIC_COSMIC_ENCHANTMENT_TABLE -> stack.is(ModItems.HEROIC_COSMIC_ENCHANTMENT_TABLE.get());
             case ADMIN_ABUSE -> stack.is(ModItems.ADMIN_ABUSE.get());
             case MYSTERY_CALL_OF_ADVENTURE -> stack.is(ModItems.MYSTERY_CALL_OF_ADVENTURE.get());
+            case RANDOM_WEAPON_SKIN_GENERATOR -> stack.is(ModItems.RANDOM_WEAPON_SKIN_GENERATOR.get());
         };
     }
 }

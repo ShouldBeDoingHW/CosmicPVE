@@ -76,12 +76,17 @@ class TrialResourceTest {
         assertNotNull(stream);
         var entries=JsonParser.parseReader(new InputStreamReader(stream,StandardCharsets.UTF_8))
                 .getAsJsonObject().getAsJsonArray("entries");
-        assertEquals(18, entries.size());
-        assertEquals(164, entries.asList().stream().mapToInt(value ->
+        assertEquals(19, entries.size());
+        assertEquals(167, entries.asList().stream().mapToInt(value ->
                 value.getAsJsonObject().get("weight").getAsInt()).sum());
-        assertEquals(19, ImpossibleRewardCatalog.DECLARED.size());
-        assertEquals(172, ImpossibleRewardCatalog.DECLARED_WEIGHT);
-        assertEquals(164, ImpossibleRewardCatalog.ACTIVE_WEIGHT);
+        assertEquals(20, ImpossibleRewardCatalog.DECLARED.size());
+        assertEquals(175, ImpossibleRewardCatalog.DECLARED_WEIGHT);
+        assertEquals(167, ImpossibleRewardCatalog.ACTIVE_WEIGHT);
+        assertEquals(1, entries.asList().stream().filter(value -> {
+            var entry = value.getAsJsonObject(); var reward = entry.getAsJsonObject("reward");
+            return entry.get("weight").getAsInt() == 3 && reward.get("type").getAsString().equals("static_item")
+                    && reward.get("item").getAsString().equals("cosmicpve:random_weapon_skin_generator");
+        }).count());
         assertTrue(ImpossibleRewardCatalog.DECLARED.stream().filter(row -> row.name().contains("Fame")).findFirst().orElseThrow().active());
         assertFalse(ImpossibleRewardCatalog.DECLARED.stream().filter(row -> row.name().contains("Abandoned")).findFirst().orElseThrow().active());
     }
@@ -91,8 +96,13 @@ class TrialResourceTest {
         assertNotNull(stream);
         var entries=JsonParser.parseReader(new InputStreamReader(stream,StandardCharsets.UTF_8))
                 .getAsJsonObject().getAsJsonArray("entries");
-        assertEquals(16,entries.size());
-        assertEquals(126,entries.asList().stream().mapToInt(value->value.getAsJsonObject().get("weight").getAsInt()).sum());
+        assertEquals(17,entries.size());
+        assertEquals(131,entries.asList().stream().mapToInt(value->value.getAsJsonObject().get("weight").getAsInt()).sum());
+        assertEquals(1, entries.asList().stream().filter(value -> {
+            var entry = value.getAsJsonObject(); var reward = entry.getAsJsonObject("reward");
+            return entry.get("weight").getAsInt() == 5 && reward.get("type").getAsString().equals("static_item")
+                    && reward.get("item").getAsString().equals("cosmicpve:random_weapon_skin_generator");
+        }).count());
         assertTrue(entries.asList().stream().map(value->value.getAsJsonObject().getAsJsonObject("reward"))
                 .anyMatch(reward->reward.get("type").getAsString().equals("mask")
                         && reward.get("mask_count").getAsInt()==2));

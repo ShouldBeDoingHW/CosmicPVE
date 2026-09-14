@@ -63,7 +63,7 @@ public final class Step8EGameTests {
             }
         }
         var adminFactory = new AdminAbuseRewardFactory();
-        int[] expectedCosmic = {7, 6, 7, 6};
+        int[] expectedCosmic = {7, 6, 8, 7};
         int index = 0;
         for (var outcome : AdminAbuseRewards.ALL) {
             var stack = adminFactory.create(outcome, access);
@@ -94,17 +94,20 @@ public final class Step8EGameTests {
                         "Ghostly Veil must use Paladin Armored IV and Alien Implants III");
                 case COVERT_CLOAK -> helper.assertTrue(level(access, stack,
                         com.cosmicpve.registry.ModEnchantments.PALADIN_ARMORED) == 4
-                        && level(access, stack, com.cosmicpve.registry.ModEnchantments.ARMORED) == 0,
-                        "Covert Cloak must use Paladin Armored IV");
+                        && level(access, stack, com.cosmicpve.registry.ModEnchantments.GODLY_OVERLOAD) == 3
+                        && level(access, stack, com.cosmicpve.registry.ModEnchantments.UNDEAD_RUSE) == 0,
+                        "Covert Cloak must use Paladin Armored IV and Godly Overload III without Undead Ruse");
                 case NANKADA -> helper.assertTrue(level(access, stack,
                         com.cosmicpve.registry.ModEnchantments.PERMANENT_EXECUTE) == 5
+                        && level(access, stack, com.cosmicpve.registry.ModEnchantments.SILENCE) == 4
                         && level(access, stack, com.cosmicpve.registry.ModEnchantments.EXECUTE) == 0,
-                        "Nankada must use Permanent Execute V");
+                        "Nankada must use Permanent Execute V and Silence IV");
                 case ASHOKA -> helper.assertTrue(level(access, stack,
                         com.cosmicpve.registry.ModEnchantments.DEEP_BLEED) == 6
+                        && level(access, stack, com.cosmicpve.registry.ModEnchantments.SILENCE) == 4
                         && level(access, stack, com.cosmicpve.registry.ModEnchantments.BLEED) == 0
                         && level(access, stack, com.cosmicpve.registry.ModEnchantments.PUMMEL) == 0,
-                        "Ashoka must use Deep Bleed VI without Pummel or ordinary Bleed");
+                        "Ashoka must use Deep Bleed VI and Silence IV without Pummel or ordinary Bleed");
             }
         }
         var table = new CosmicEnchantmentTableRewards();
@@ -134,9 +137,121 @@ public final class Step8EGameTests {
                     "Heroic Table books must be maximum level");
             seenHeroics.add(data.enchantmentId());
         }
-        helper.assertTrue(seenHeroics.size() == 10, "Loaded-registry sampling must reach all ten Heroics");
+        helper.assertTrue(seenHeroics.size() == 11, "Loaded-registry sampling must reach all eleven Heroics");
         verifyHeroicConversion(helper, enchantments);
+        verifyDamageCategories(helper);
+        verifyDragonReductionAndOmniActivation(helper, enchantments);
+        verifyWeaponSkinGenerator(helper);
         helper.succeed();
+    }
+
+    private static void verifyDamageCategories(GameTestHelper helper) {
+        var sources = helper.getLevel().damageSources();
+        helper.assertTrue(com.cosmicpve.equipment.armor.DamageCategoryClassifier.classify(sources.lava())
+                == com.cosmicpve.equipment.armor.DamageCategoryClassifier.Category.LAVA,
+                "Lava must classify once as Lava rather than also applying Fire");
+        helper.assertTrue(com.cosmicpve.equipment.armor.DamageCategoryClassifier.classify(sources.onFire())
+                == com.cosmicpve.equipment.armor.DamageCategoryClassifier.Category.FIRE, "On-fire damage must classify as Fire");
+        helper.assertTrue(com.cosmicpve.equipment.armor.DamageCategoryClassifier.classify(sources.wither())
+                == com.cosmicpve.equipment.armor.DamageCategoryClassifier.Category.WITHER, "Wither must remain separate");
+        helper.assertTrue(com.cosmicpve.equipment.armor.DamageCategoryClassifier.classify(sources.drown())
+                == com.cosmicpve.equipment.armor.DamageCategoryClassifier.Category.OTHER, "Drowning must not be protected");
+        var poison = new net.minecraft.world.damagesource.DamageSource(helper.getLevel().registryAccess()
+                .lookupOrThrow(Registries.DAMAGE_TYPE).getOrThrow(net.neoforged.neoforge.common.NeoForgeMod.POISON_DAMAGE));
+        helper.assertTrue(com.cosmicpve.equipment.armor.DamageCategoryClassifier.classify(poison)
+                == com.cosmicpve.equipment.armor.DamageCategoryClassifier.Category.POISON,
+                "Only the poison damage source must classify as Poison");
+        var damageTypes = helper.getLevel().registryAccess().lookupOrThrow(Registries.DAMAGE_TYPE);
+        for (var excluded : java.util.List.of(net.minecraft.world.damagesource.DamageTypes.FREEZE,
+                net.minecraft.world.damagesource.DamageTypes.MAGIC,
+                net.minecraft.world.damagesource.DamageTypes.LIGHTNING_BOLT,
+                net.minecraft.world.damagesource.DamageTypes.GENERIC)) {
+            helper.assertTrue(com.cosmicpve.equipment.armor.DamageCategoryClassifier.classify(
+                    new net.minecraft.world.damagesource.DamageSource(damageTypes.getOrThrow(excluded)))
+                    == com.cosmicpve.equipment.armor.DamageCategoryClassifier.Category.OTHER,
+                    "Freeze, generic magic, lightning, and ordinary damage must be excluded");
+        }
+    }
+
+    private static void verifyWeaponSkinGenerator(GameTestHelper helper) {
+        var player = com.cosmicpve.adventure.AdventureGameTests.player(helper, "weaponskingenerator");
+        player.setPos(helper.absolutePos(new net.minecraft.core.BlockPos(5, 3, 5)).getCenter());
+        for (int slot = 0; slot < 36; slot++) player.getInventory().setItem(slot, new ItemStack(Items.STONE, 64));
+        var source = new ItemStack(com.cosmicpve.registry.ModItems.RANDOM_WEAPON_SKIN_GENERATOR.get(), 2);
+        player.setItemInHand(net.minecraft.world.InteractionHand.OFF_HAND, source);
+        helper.assertTrue(source.use(player.level(), player, net.minecraft.world.InteractionHand.OFF_HAND)
+                instanceof net.minecraft.world.InteractionResult.Success, "Generator must use the standard animation");
+        var pending = player.getData(com.cosmicpve.registry.ModAttachments.LOOT_ANIMATION);
+        var reward = pending.allRewards().getFirst();
+        helper.assertTrue(source.getCount() == 1 && pending.valid() && pending.allRewards().size() == 1,
+                "Generator consumes exactly one and persists exactly one selected reward");
+        helper.assertTrue(reward.has(ModDataComponents.WEAPON_SKIN_ITEM.get())
+                && !reward.has(ModDataComponents.WEAPON_SKIN.get()), "Generator reward must be an actual loose skin");
+        player.closeContainer();
+        com.cosmicpve.reward.animation.SingleRewardAnimationService.INSTANCE.recover(player);
+        com.cosmicpve.reward.animation.SingleRewardAnimationService.INSTANCE.recover(player);
+        var drops = helper.getLevel().getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class,
+                player.getBoundingBox().inflate(5), entity -> ItemStack.matches(entity.getItem(), reward));
+        helper.assertTrue(drops.size() == 1 && !player.getData(com.cosmicpve.registry.ModAttachments.LOOT_ANIMATION).valid(),
+                "Full-inventory recovery must overflow exactly one selected loose skin");
+        drops.forEach(net.minecraft.world.entity.item.ItemEntity::discard);
+        player.discard();
+    }
+
+    private static void verifyDragonReductionAndOmniActivation(GameTestHelper helper,
+            net.minecraft.core.Registry<net.minecraft.world.item.enchantment.Enchantment> enchantments) {
+        var player = com.cosmicpve.adventure.AdventureGameTests.player(helper, "dragoncategories");
+        var definition = com.cosmicpve.content.CosmicContent.repository()
+                .requireArmorSetDefinition(com.cosmicpve.equipment.armor.ArmorSetIds.DRAGONSLAYER);
+        var identity = com.cosmicpve.data.component.ArmorSetIdentity.from(definition);
+        var helmet = new ItemStack(Items.IRON_HELMET); helmet.set(ModDataComponents.ARMOR_SET_ID.get(), identity);
+        var chest = new ItemStack(Items.IRON_CHESTPLATE); chest.set(ModDataComponents.ARMOR_SET_ID.get(), identity);
+        var legs = new ItemStack(Items.IRON_LEGGINGS); legs.set(ModDataComponents.OMNI_ARMOR.get(), true);
+        var boots = new ItemStack(Items.IRON_BOOTS); boots.set(ModDataComponents.OMNI_ARMOR.get(), true);
+        player.setItemSlot(net.minecraft.world.entity.EquipmentSlot.HEAD, helmet);
+        player.setItemSlot(net.minecraft.world.entity.EquipmentSlot.CHEST, chest);
+        player.setItemSlot(net.minecraft.world.entity.EquipmentSlot.LEGS, legs);
+        player.setItemSlot(net.minecraft.world.entity.EquipmentSlot.FEET, boots);
+        var behavior = new com.cosmicpve.equipment.armor.CategoryDamageReductionBehavior(
+                new com.cosmicpve.equipment.armor.ArmorSetResolver(com.cosmicpve.content.CosmicContent.repository()),
+                new com.cosmicpve.equipment.enchantment.EffectiveEnchantmentsResolver(),
+                new com.cosmicpve.equipment.mask.MaskResolver(com.cosmicpve.content.CosmicContent.repository()));
+        helper.assertTrue(multiplier(behavior, categoryContext(player, helper.getLevel().damageSources().lava())) == .25,
+                "Two Dragonslayer anchors plus two Omni pieces must activate 75% Lava reduction");
+        EnchantmentHelper.updateEnchantments(legs, mutable -> mutable.set(
+                enchantments.getOrThrow(com.cosmicpve.registry.ModEnchantments.OBSIDIANSHIELD), 1));
+        helper.assertTrue(multiplier(behavior, categoryContext(player, helper.getLevel().damageSources().lava())) == 0.0,
+                "Dragonslayer 75% plus Obsidianshield I 25% must flat-add to 100%");
+
+        helmet.remove(ModDataComponents.ARMOR_SET_ID.get()); chest.remove(ModDataComponents.ARMOR_SET_ID.get());
+        legs.remove(ModDataComponents.OMNI_ARMOR.get()); boots.remove(ModDataComponents.OMNI_ARMOR.get());
+        helmet.set(ModDataComponents.MASK_LOADOUT.get(), com.cosmicpve.equipment.mask.MaskItemFactory
+                .create(CosmicPVE.id("dragon")).get(ModDataComponents.MASK_ITEM.get()));
+        EnchantmentHelper.updateEnchantments(legs, mutable -> mutable.set(
+                enchantments.getOrThrow(com.cosmicpve.registry.ModEnchantments.OBSIDIANSHIELD), 2));
+        helper.assertTrue(multiplier(behavior, categoryContext(player, helper.getLevel().damageSources().lava())) == 0.0,
+                "Dragon 50% plus Obsidianshield II 50% must flat-add to 100%");
+        EnchantmentHelper.updateEnchantments(legs, mutable -> mutable.removeIf(ignored -> true));
+        helper.assertTrue(multiplier(behavior, categoryContext(player, helper.getLevel().damageSources().lava())) == .5,
+                "Dragon alone must reduce Lava exactly once by 50%");
+        helper.assertTrue(behavior.resolveIncoming(categoryContext(player, helper.getLevel().damageSources().wither())).isEmpty(),
+                "Dragon category behavior must not protect Wither");
+        player.discard();
+    }
+
+    private static double multiplier(com.cosmicpve.equipment.armor.CategoryDamageReductionBehavior behavior,
+            com.cosmicpve.combat.api.CombatContext context) {
+        var contributions = behavior.resolveIncoming(context);
+        return contributions.isEmpty() ? 1.0 : contributions.getFirst().multiplier();
+    }
+
+    private static com.cosmicpve.combat.api.CombatContext categoryContext(
+            net.minecraft.world.entity.LivingEntity target, net.minecraft.world.damagesource.DamageSource source) {
+        return new com.cosmicpve.combat.api.CombatContext(null, null, null, target, java.util.Optional.empty(), source,
+                com.cosmicpve.combat.api.AttackCategory.ENVIRONMENTAL, com.cosmicpve.combat.api.DamageChannel.ORDINARY,
+                java.util.Set.of(), com.cosmicpve.combat.api.WeaponSnapshot.empty(),
+                com.cosmicpve.equipment.enchantment.EffectiveEnchantments.EMPTY, 1, java.util.OptionalLong.empty(),
+                com.cosmicpve.combat.api.RecursionPolicy.NORMAL);
     }
 
     private static void verifyHeroicConversion(GameTestHelper helper,

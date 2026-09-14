@@ -176,11 +176,13 @@ public final class CosmicCombat {
         OUTGOING.register(new com.cosmicpve.combat.enchantment.CurseBehavior());
         OUTGOING.register(playerUpgrades);
         OUTGOING.register(NIMBLE);
+        OUTGOING.register(new com.cosmicpve.combat.enchantment.LongbowBehavior());
         OUTGOING.register(new com.cosmicpve.trial.room.InventorCombatContributor());
         INCOMING.register(ARMOR_SET_COMBAT);
         INCOMING.register(WEAPON_SKIN_COMBAT);
         INCOMING.register(deathPact);
-        INCOMING.register(new com.cosmicpve.equipment.armor.CategoryDamageReductionBehavior(ARMOR_SETS, ENCHANTMENTS));
+        INCOMING.register(new com.cosmicpve.equipment.armor.CategoryDamageReductionBehavior(ARMOR_SETS, ENCHANTMENTS, MASKS));
+        INCOMING.register(new com.cosmicpve.combat.enchantment.EnderWalkerBehavior());
         INCOMING.register(permafrost);
         INCOMING.register(MASK_COMBAT);
         INCOMING.register(hex);
@@ -196,6 +198,8 @@ public final class CosmicCombat {
         PROC_SOURCES.register(NIMBLE);
         PROC_SOURCES.register(THUNDERING_BLOW);
         PROC_SOURCES.register(NEUTRALIZE);
+        PROC_SOURCES.register(new com.cosmicpve.combat.enchantment.SilenceBehavior(
+                com.cosmicpve.equipment.enchantment.EnchantmentSuppressionService.GLOBAL));
         PROCS.registerActivationListener(NIMBLE);
         NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, SELF_DESTRUCT_EVENTS::onIncomingDamage);
         NeoForge.EVENT_BUS.addListener(EVENTS::onIncomingDamage);

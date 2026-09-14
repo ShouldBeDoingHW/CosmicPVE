@@ -1,5 +1,6 @@
 {
   "item.cosmicpve.mystery_call_of_adventure": "Mystery Call of Adventure",
+  "item.cosmicpve.random_weapon_skin_generator": "Random Weapon Skin Generator",
   "item.cosmicpve.call_of_forest_10": "Call of the Forest (10)",
   "item.cosmicpve.call_of_forest_20": "Call of the Forest (20)",
   "item.cosmicpve.call_of_forest_30": "Call of the Forest (30)",
@@ -54,7 +55,7 @@
   "armor_set.cosmicpve.ranger.bonus.movement": "+10% movement speed",
   "armor_set.cosmicpve.dragonslayer": "Dragonslayer",
   "armor_set.cosmicpve.dragonslayer.bonus.outgoing": "+10% outgoing damage",
-  "armor_set.cosmicpve.dragonslayer.bonus.reduction": "-75% Poison, Wither, and fire damage",
+  "armor_set.cosmicpve.dragonslayer.bonus.reduction": "Deal +10% outgoing damage and take 75% less damage from Fire, Lava, and Poison.",
   "tooltip.cosmicpve.armor_set.identity": "%s Armor",
   "tooltip.cosmicpve.armor_set.full_bonus": "Full Set Bonus (4 pieces):",
   "tooltip.cosmicpve.crystal.success": "Success Rate: %s%%",
@@ -181,6 +182,7 @@
   ,"tooltip.cosmicpve.applicability.sword":"Sword Enchantment"
   ,"tooltip.cosmicpve.applicability.axe":"Axe Enchantment"
   ,"tooltip.cosmicpve.applicability.bow_or_crossbow":"Bow/Crossbow Enchantment"
+  ,"tooltip.cosmicpve.applicability.bow":"Bow Enchantment"
   ,"tooltip.cosmicpve.applicability.helmet":"Helmet Enchantment"
   ,"tooltip.cosmicpve.applicability.chestplate":"Chestplate Enchantment"
   ,"tooltip.cosmicpve.applicability.any_armor":"Any Armor Enchantment"
@@ -351,7 +353,7 @@
   ,"mask.cosmicpve.scarecrow.effect":"Passively Restores Hunger and Saturation!"
   ,"mask.cosmicpve.zeus.effect":"Gives Full Immunity to Lightning Based Damage!"
   ,"mask.cosmicpve.turkey.effect":"Gain +2% Dodge Chance!"
-  ,"mask.cosmicpve.dragon.effect":"Deal +2% outgoing damage and take 50% less damage from fire, lava, and poison damage!"
+  ,"mask.cosmicpve.dragon.effect":"Deal +2% outgoing damage and take 50% less damage from Fire, Lava, and Poison."
   ,"mask.cosmicpve.thanos.effect":"Deal +6% damage to enemies with any Mastery enchantments on their gear!"
   ,"mask.cosmicpve.gucci.effect":"Gain Jump Boost I during Dungeon parkour phases!"
   ,"mask.cosmicpve.monopoly.effect":"+1% outgoing damage per Holy gear piece! Holy items are preserved 5% more often!"
@@ -514,6 +516,14 @@
   ,"enchantment.cosmicpve.thundering_blow.description":"Sword hits may cancel all target velocity after ordinary knockback."
   ,"enchantment.cosmicpve.neutralize":"Neutralize"
   ,"enchantment.cosmicpve.neutralize.description":"Axe attacks may suppress enemy defensive Cosmic enchantments for that logical attack."
+  ,"enchantment.cosmicpve.overload":"Overload"
+  ,"enchantment.cosmicpve.overload.description":"Increases maximum health by 1 HP per level."
+  ,"enchantment.cosmicpve.godly_overload":"Godly Overload"
+  ,"enchantment.cosmicpve.godly_overload.description":"Increases maximum health by 3 plus 1 HP per level."
+  ,"enchantment.cosmicpve.silence":"Silence"
+  ,"enchantment.cosmicpve.silence.description":"Hits may temporarily suppress one distinct Cosmic armor enchantment type."
+  ,"enchantment.cosmicpve.longbow":"Longbow"
+  ,"enchantment.cosmicpve.longbow.description":"Bow shots deal more ordinary damage to targets holding a Bow at impact."
   ,"entity.cosmicpve.forest_fanatic":"Forest Fanatic"
   ,"entity.cosmicpve.dreadmane":"Dreadmane"
 }

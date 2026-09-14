@@ -17,15 +17,7 @@ public final class WhiteScrollItem extends Item {
 
     public static java.util.List<Component> lore() {
         return java.util.List.of(
-                Component.literal("A thin veil between fortune and ruin.")
-                        .withStyle(style -> style.withColor(0xFFFF55).withItalic(true)),
-                Component.empty(),
-                Component.literal("ONE-TIME PROTECTION")
-                        .withStyle(style -> style.withColor(0x55FFFF).withBold(true)),
-                Component.literal("Apply to eligible equipment.").withStyle(net.minecraft.ChatFormatting.GRAY),
-                Component.literal("Protects against one destructive failed application.")
-                        .withStyle(net.minecraft.ChatFormatting.GRAY),
-                Component.literal("Consumed only when it actually prevents destruction.")
-                        .withStyle(net.minecraft.ChatFormatting.GRAY));
+                Component.literal("Prevents an item from being destroyed due to a failed enchantment book. Place scroll on item to apply!")
+                        .withStyle(style -> style.withColor(0x55FFFF).withItalic(true)));
     }
 }

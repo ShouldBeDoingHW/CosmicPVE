@@ -2,7 +2,6 @@
   "display_name": {"translate": "armor_set.cosmicpve.dragonslayer"},
   "color": "#FFED0F",
   "full_set_bonus": [
-    {"translate": "armor_set.cosmicpve.dragonslayer.bonus.outgoing"},
     {"translate": "armor_set.cosmicpve.dragonslayer.bonus.reduction"}
   ],
   "additive_outgoing_bonus": 0.10,
