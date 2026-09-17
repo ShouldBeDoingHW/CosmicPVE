@@ -1,4 +1,8 @@
 {
+  "handler": "cosmicpve:trial/inventor",
+  "loadout": "cosmicpve:trial/inventor",
+  "base_weight": 5,
+  "enabled": true,
   "display_name": "Inventor",
   "category": "impossible",
   "pieces": [{"structure": "cosmicpve:trial/the_inventor"}],

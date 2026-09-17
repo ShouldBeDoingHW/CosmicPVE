@@ -1,0 +1,1 @@
+{"id":"cosmicpve:time_glitch","name":"Time Glitch","description":"The remaining Trial time is only readable every so often; otherwise the timer is obfuscated, including in the Decision Box.","icon":"minecraft:daylight_detector","handler":"cosmicpve:time_glitch","parameters":{"readable_interval_seconds":15}}

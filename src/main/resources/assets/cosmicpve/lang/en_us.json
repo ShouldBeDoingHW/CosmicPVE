@@ -1,4 +1,9 @@
 {
+  "item.cosmicpve.trial_trinket_madness_1": "+1 Madness Ballot Trial Trinket",
+  "item.cosmicpve.trial_trinket_madness_2": "+2 Madness Ballot Trial Trinket",
+  "item.cosmicpve.trial_trinket_madness_3": "+3 Madness Ballot Trial Trinket",
+  "tooltip.cosmicpve.trial_trinket.madness_one": "Adds 1 additional Madness Modifier option to each Madness ballot.",
+  "tooltip.cosmicpve.trial_trinket.madness": "Adds %s additional Madness Modifier options to each Madness ballot.",
   "item.cosmicpve.mystery_call_of_adventure": "Mystery Call of Adventure",
   "item.cosmicpve.random_weapon_skin_generator": "Random Weapon Skin Generator",
   "item.cosmicpve.call_of_forest_10": "Call of the Forest (10)",

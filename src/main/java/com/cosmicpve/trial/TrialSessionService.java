@@ -119,11 +119,54 @@ public final class TrialSessionService {
     private final TrialPerformanceTracker performance = new TrialPerformanceTracker();
     private final Map<UUID, BlockPos> decisionSpawns = new HashMap<>();
     private final Map<UUID, BlockPos> roomSpawns = new HashMap<>();
+    private final TrialRoomHandlerRegistry handlers = new TrialRoomHandlerRegistry();
 
     public TrialSessionService(TrialSessionRepository repository, TrialInventoryTransactionService inventories,
             InstanceStructureService structures, InstanceProtectionService protection, TrialTitleService titles) {
         this.repository = repository; this.inventories = inventories; this.structures = structures;
         this.protection = protection; this.titles = titles; this.loadouts = new TrialRoomLoadoutService(inventories);
+        handlers.register(RAIDING_RAINBOW,loadouts::applyRaidingRainbow);
+        handlers.register(CIRCUIT_CIRCUS,loadouts::applyCircuitCircus);
+        handlers.register(FIRE_COLONY,loadouts::applyFireColony);
+        handlers.register(ZERO_G,loadouts::applyZeroG);
+        handlers.register(COLD_SNAP,loadouts::applyColdSnap);
+        handlers.register(BOMB_SQUAD,loadouts::applyBombSquad);
+        handlers.register(DEADEYE,loadouts::applyDeadeye);
+        handlers.register(HAZE_AND_SEEK,loadouts::applyHazeAndSeek);
+        handlers.register(WARZONE_GIANTS,loadouts::applyWarzoneGiants);
+        handlers.register(CAVE_DIVING,loadouts::applyCaveDiving);
+        handlers.register(INVENTOR,loadouts::applyInventor);
+        handlers.register(HIDDEN_GRAVEYARD,loadouts::applyHiddenGraveyard);
+        handlers.registerStarter(RAIDING_RAINBOW,(level,session,p) -> new TrialRoomHandlerRegistry.Start(
+                rainbow.initialize(level,session,p.bounds(),net.minecraft.util.RandomSource.create()),p.participantSpawn()));
+        handlers.registerStarter(CIRCUIT_CIRCUS,(level,session,p) -> new TrialRoomHandlerRegistry.Start(
+                circuit.initialize(level,ROOM_ORIGIN,p.bounds(),net.minecraft.util.RandomSource.create()),p.participantSpawn()));
+        handlers.registerStarter(ZERO_G,(level,session,p) -> new TrialRoomHandlerRegistry.Start(
+                zeroG.initialize(level,session,p.bounds(),ROOM_ORIGIN),p.participantSpawn()));
+        handlers.registerStarter(COLD_SNAP,(level,session,p) -> new TrialRoomHandlerRegistry.Start(
+                coldSnap.initialize(level,session,ROOM_ORIGIN,p.bounds()),p.participantSpawn()));
+        handlers.registerStarter(BOMB_SQUAD,(level,session,p) -> {
+            var result = bombSquad.initialize(level,session,ROOM_ORIGIN,p.bounds(),net.minecraft.util.RandomSource.create());
+            return new TrialRoomHandlerRegistry.Start(result.encounter(),result.participantSpawn());
+        });
+        handlers.registerStarter(HIDDEN_GRAVEYARD,(level,session,p) -> new TrialRoomHandlerRegistry.Start(
+                hiddenGraveyard.initialize(level,session,ROOM_ORIGIN,p.bounds(),net.minecraft.util.RandomSource.create()).encounter(),p.participantSpawn()));
+        handlers.registerStarter(DEADEYE,(level,session,p) -> new TrialRoomHandlerRegistry.Start(
+                deadeye.initialize(level,session,ROOM_ORIGIN,p.participantSpawn().below(),p.bounds()),p.participantSpawn()));
+        handlers.registerStarter(HAZE_AND_SEEK,(level,session,p) -> new TrialRoomHandlerRegistry.Start(
+                haze.initialize(level,session,p.bounds(),net.minecraft.util.RandomSource.create()),p.participantSpawn()));
+        handlers.registerStarter(WARZONE_GIANTS,(level,session,p) -> new TrialRoomHandlerRegistry.Start(
+                warzone.initialize(level,session,p.bounds(),net.minecraft.util.RandomSource.create()),p.participantSpawn()));
+        handlers.registerStarter(CAVE_DIVING,(level,session,p) -> new TrialRoomHandlerRegistry.Start(
+                caveDiving.initialize(level,session,ROOM_ORIGIN,p.bounds(),net.minecraft.util.RandomSource.create()).encounter(),p.participantSpawn()));
+        handlers.registerStarter(INVENTOR,(level,session,p) -> {
+            inventor.initialize(level,session,ROOM_ORIGIN,p.bounds(),net.minecraft.util.RandomSource.create());
+            return new TrialRoomHandlerRegistry.Start(TrialEncounterState.EMPTY,p.participantSpawn());
+        });
+        handlers.registerStarter(FIRE_COLONY,(level,session,p) -> {
+            fireColony.initialize(level,session,p.bounds());
+            return new TrialRoomHandlerRegistry.Start(TrialEncounterState.EMPTY,p.participantSpawn());
+        });
     }
 
     public Optional<TrialSession> active(MinecraftServer server) { return repository.active(server); }
@@ -186,7 +229,9 @@ public final class TrialSessionService {
 
     public void tick(MinecraftServer server) {
         celebrations.tick(server);
-        TrialSession session = active(server).orElse(null); if (session == null) return;
+        TrialSession session = active(server).orElse(null);
+        com.cosmicpve.trial.madness.MadnessRuntime.INSTANCE.tick(server,session);
+        session = active(server).orElse(null); if (session == null) return;
         long started = System.nanoTime();
         try { tickActive(server, session); }
         finally { performance.record(System.nanoTime() - started, session); }
@@ -254,10 +299,14 @@ public final class TrialSessionService {
     }
 
     private void tickDecision(MinecraftServer server, TrialSession session) {
+        int countdown = session.stateTicksRemaining();
+        if (countdown > 0 && countdown % 20 == 0 && TrialTitleService.shouldAnnounceDecision(countdown / 20))
+            forOnline(server,session,player -> titles.decision(player,session.initialDecision(),countdown / 20));
+        if (!session.progress().madness().options().isEmpty()) {
+            tickMadness(server, session); return;
+        }
         int current = session.stateTicksRemaining();
         if (session.initialDecision()) {
-            if (current % 20 == 0 && TrialTitleService.shouldAnnounceDecision(current / 20))
-                forOnline(server, session, player -> titles.decision(player, true, current / 20));
             int next = Math.max(0, current - 1);
             if (next == 0) {
                 if (session.participants().isEmpty()) cleanupAndClose(server, session);
@@ -270,8 +319,6 @@ public final class TrialSessionService {
             else publishTick(server, session.withStateTicks(next));
             return;
         }
-        if (current % 20 == 0 && TrialTitleService.shouldAnnounceDecision(current / 20))
-            forOnline(server, session, player -> titles.decision(player, false, current / 20));
         if (server.getTickCount() % 20 == 0) forOnline(server, session, player -> {
             if (session.progress().decision(player.getUUID()) == TrialDecision.UNDECIDED
                     && !(player.containerMenu instanceof TrialDecisionMenu)) openDecision(player);
@@ -384,10 +431,8 @@ public final class TrialSessionService {
     }
 
     static int completionTimeBonus(TrialProgress before, TrialProgress after) {
-        int roomBonus = before.phase() == TrialPhase.APPRENTICE ? APPRENTICE_REWARD_TIME
-                : before.phase() == TrialPhase.HARDCORE ? HARDCORE_REWARD_TIME : 0;
-        int transition = before.phase() != after.phase() ? PHASE_ENTRY_BONUS : 0;
-        return roomBonus + transition;
+        return TrialProgression.playedRoomBonusTicks(before.phase())
+                + TrialProgression.phaseEntryTicks(before.completedRooms(), after.completedRooms());
     }
 
     static Identifier rewardTableFor(TrialPhase phase) {
@@ -404,7 +449,7 @@ public final class TrialSessionService {
         if (progress.initialSkipProcessed()) return session;
         try {
             for (int i = 0; i < progress.portalModifiers().skipRooms(); i++) {
-                List<ItemStack> reward = rewards.roll(APPRENTICE_REWARDS, 1,
+                List<ItemStack> reward = rewards.roll(rewardTableFor(TrialProgression.phaseForRoomOrdinal(progress.nextRoomOrdinal())), 1,
                         new RewardGenerationContext(server.registryAccess(), net.minecraft.util.RandomSource.create(), null));
                 progress = progress.appendSkippedReward(reward);
             }
@@ -412,7 +457,8 @@ public final class TrialSessionService {
                     .filter(java.util.Objects::nonNull).mapToInt(player ->
                             new com.cosmicpve.upgrade.PlayerUpgradeService().tier(
                                     player, com.cosmicpve.upgrade.PlayerUpgrade.SLOW_MO) * 20).max().orElse(0);
-            TrialSession processed = session.withTimerAndProgress(session.timerTicks() + slowMoSeconds * 20,
+            int entryBonus = TrialProgression.phaseEntryTicks(session.progress().completedRooms(), progress.completedRooms());
+            TrialSession processed = session.withTimerAndProgress(session.timerTicks() + slowMoSeconds * 20 + entryBonus,
                     progress.markInitialSkipProcessed());
             repository.publish(server, processed);
             return processed;
@@ -426,7 +472,8 @@ public final class TrialSessionService {
 
     public TrialOperationResult continueRoom(MinecraftServer server) {
         TrialSession session = active(server).orElse(null);
-        if (session == null || session.state() != TrialLifecycleState.DECISION || session.initialDecision())
+        if (session == null || session.state() != TrialLifecycleState.DECISION || session.initialDecision()
+                || !session.progress().madness().options().isEmpty())
             return TrialOperationResult.rejected("The Trial is not waiting in a post-room Decision Box.");
         beginNextRoom(server, session); return TrialOperationResult.ok("Continuing to the next "
                 + session.progress().phase().getSerializedName() + " room.");
@@ -435,6 +482,7 @@ public final class TrialSessionService {
     public TrialOperationResult decide(ServerPlayer player, TrialDecision decision) {
         MinecraftServer server = player.level().getServer(); TrialSession session = active(server).orElse(null);
         if (session == null || session.state() != TrialLifecycleState.DECISION || session.initialDecision()
+                || !session.progress().madness().options().isEmpty()
                 || !session.activeParticipant(player.getUUID())) return TrialOperationResult.rejected("No active Trial decision is available.");
         if (session.progress().decision(player.getUUID()) != TrialDecision.UNDECIDED)
             return TrialOperationResult.rejected("Your Trial decision is already committed.");
@@ -478,6 +526,7 @@ public final class TrialSessionService {
 
     private void resolveIfReady(MinecraftServer server, TrialSession session) {
         if (session.participants().isEmpty()) { cleanupAndClose(server, session); return; }
+        if (!session.progress().madness().options().isEmpty()) return;
         boolean ready = allContinuingReady(session);
         if (ready) beginNextRoom(server, session);
     }
@@ -487,7 +536,10 @@ public final class TrialSessionService {
     }
 
     private void beginNextRoom(MinecraftServer server, TrialSession session) {
-        List<Identifier> pool = roomPool(session.progress().phase());
+        if (session.progress().madness().pending() > 0) {
+            beginMadness(server, session); return;
+        }
+        List<Identifier> pool = productionRoomPool(session.progress().phase());
         Identifier room = selection.select(session, pool, net.minecraft.util.RandomSource.create()).orElse(null);
         if (room == null) {
             CosmicPVE.LOGGER.error("No eligible {} Trial room for session {}", session.progress().phase(), session.sessionId());
@@ -498,6 +550,87 @@ public final class TrialSessionService {
         beginRoom(server, session, room);
     }
 
+    private void beginMadness(MinecraftServer server, TrialSession session) {
+        var definitions = List.copyOf(CosmicContent.repository().snapshot().madnessDefinitions().values());
+        var state = session.progress().madness();
+        var random = net.minecraft.util.RandomSource.create();
+        while (state.pending() > 0) {
+            state = state.offer(definitions, session.progress().portalModifiers().madnessChoices(definitions.size()), random);
+            if (!state.options().isEmpty()) break;
+            state = state.resolve(session.participants(), random); // Exhausted pool: consume without blocking.
+        }
+        TrialSession next = session.withProgress(session.progress().withMadness(state))
+                .withState(TrialLifecycleState.DECISION, session.stateTicksRemaining() > 0 ? session.stateTicksRemaining() : 600,
+                        Optional.empty(), false, session.protectedBounds());
+        repository.publish(server,next);
+        if (state.pending() == 0) { beginNextRoom(server,next); return; }
+        forOnline(server,next,this::openMadness);
+    }
+
+    private void openMadness(ServerPlayer player) {
+        player.openMenu(new SimpleMenuProvider((id, inventory, ignored) ->
+                new com.cosmicpve.trial.madness.MadnessMenu(id,inventory,player),
+                Component.literal("Madness").withColor(0x8C1708)));
+    }
+
+    private void tickMadness(MinecraftServer server, TrialSession session) {
+        if (session.progress().madness().allSubmitted(session.participants())) {
+            resolveMadness(server,session.sessionId(),session.progress().madness().ballotSerial()); return;
+        }
+        if (server.getTickCount() % 20 == 0) forOnline(server,session,player -> {
+            if (session.progress().madness().owesVote(player.getUUID())
+                    && !(player.containerMenu instanceof com.cosmicpve.trial.madness.MadnessMenu)) openMadness(player);
+        });
+        int remaining = Math.max(0,session.stateTicksRemaining()-1);
+        if (remaining > 0) { publishTick(server,session.withStateTicks(remaining)); return; }
+        resolveMadness(server,session.sessionId(),session.progress().madness().ballotSerial());
+    }
+
+    private void resolveMadness(MinecraftServer server,UUID sessionId,long ballotSerial) {
+        TrialSession session = active(server).orElse(null);
+        if (session == null || !session.sessionId().equals(sessionId) || session.state() != TrialLifecycleState.DECISION) return;
+        var before = session.progress().madness();
+        var state = before.resolveBallot(ballotSerial,session.participants(),net.minecraft.util.RandomSource.create());
+        if (state == before) return;
+        TrialSession next = session.withProgress(session.progress().withMadness(state)); repository.publish(server,next);
+        if (state.active().size() > before.active().size()) {
+            var winner = state.active().getLast();
+            forOnline(server,next,player -> player.sendSystemMessage(Component.literal(
+                    "Madness Modifier Selected: " + winner.name()).withColor(0x8C1708)));
+        }
+        forOnline(server,next,ServerPlayer::closeContainer);
+        if (state.pending() > 0) next = next.withStateTicks(600); // Existing sequential ballots each receive their own timeout.
+        beginNextRoom(server,next);
+    }
+
+    public void voteMadness(ServerPlayer player, UUID sessionId, long ballotSerial, List<Identifier> ballot, Identifier option) {
+        var server = player.level().getServer(); var session = active(server).orElse(null);
+        if (session == null || session.state() != TrialLifecycleState.DECISION || !session.sessionId().equals(sessionId)
+                || !session.activeParticipant(player.getUUID())) return;
+        var madness = session.progress().madness();
+        if (madness.ballotSerial() != ballotSerial || madness.hasSubmittedVote(player.getUUID())
+                || ballot.isEmpty() || !ballot.contains(option)
+                || !madness.options().stream().map(com.cosmicpve.trial.madness.MadnessDefinition::id).toList().equals(ballot)) return;
+        repository.publish(server,session.withProgress(session.progress().withMadness(session.progress().madness().vote(player.getUUID(),option))));
+        player.closeContainer();
+        var submitted = active(server).orElseThrow();
+        if (submitted.progress().madness().allSubmitted(submitted.participants())) resolveMadness(server,sessionId,ballotSerial);
+    }
+
+    public TrialOperationResult debugAddMadness(MinecraftServer server, Identifier id) {
+        var session = active(server).orElse(null);
+        var definition = CosmicContent.repository().snapshot().madnessDefinitions().get(id);
+        if (session == null || definition == null || !definition.enabled())
+            return TrialOperationResult.rejected("No active Trial or unknown/disabled Madness ID: " + id);
+        var state = session.progress().madness();
+        if (!state.options().isEmpty()) return TrialOperationResult.rejected("Finish the current Madness ballot first.");
+        if (state.active().stream().anyMatch(d -> d.id().equals(id))) return TrialOperationResult.rejected("Madness is already active.");
+        var selected = new java.util.ArrayList<>(state.active()); selected.add(definition);
+        repository.publish(server,session.withProgress(session.progress().withMadness(
+                new com.cosmicpve.trial.madness.MadnessState(state.pending(),selected,List.of(),List.of(),state.ballotSerial()))));
+        return TrialOperationResult.ok("Added Trial-local Madness: " + definition.name());
+    }
+
     static List<Identifier> roomPool(TrialPhase phase) {
         var pool = new java.util.ArrayList<Identifier>(APPRENTICE_NATIVE_ROOMS);
         if (phase != TrialPhase.APPRENTICE) pool.addAll(HARDCORE_NATIVE_ROOMS);
@@ -506,36 +639,37 @@ public final class TrialSessionService {
         return List.copyOf(pool);
     }
 
+    private List<Identifier> productionRoomPool(TrialPhase phase) {
+        return CosmicContent.repository().snapshot().trialRooms().values().stream()
+                .filter(definition -> definition.enabled() && eligibleNativeTier(definition.category(),phase))
+                .filter(definition -> {
+                    boolean known = handlers.hasStarter(definition.handler()) && handlers.contains(definition.loadout())
+                            && definition.id().equals(definition.handler()); // Bespoke callbacks own their stable room identity.
+                    if (!known) CosmicPVE.LOGGER.warn("Ineligible Trial room {}: unknown/incompatible handler or loadout {} / {}",
+                            definition.id(),definition.handler(),definition.loadout());
+                    return known;
+                }).map(com.cosmicpve.content.definition.trial.TrialRoomDefinition::id)
+                .sorted(java.util.Comparator.comparing(Identifier::toString)).toList();
+    }
+
+    static boolean eligibleNativeTier(com.cosmicpve.content.definition.trial.TrialRoomCategory category,TrialPhase phase) {
+        return switch (category) {
+            case APPRENTICE -> true;
+            case HARDCORE -> phase.ordinal() >= TrialPhase.HARDCORE.ordinal();
+            case IMPOSSIBLE -> phase.ordinal() >= TrialPhase.IMPOSSIBLE.ordinal();
+            case DEMONIC -> phase == TrialPhase.DEMONIC;
+            default -> false;
+        };
+    }
+
     private void beginRoom(MinecraftServer server, TrialSession session, Identifier room) {
         worldTimeAtRoomStart(room).ifPresent(time ->
                 server.getAllLevels().forEach(world -> world.setDayTime(time)));
         removePortal(server, session); ServerLevel level = server.getLevel(TrialRuntime.INSTANCE_DIMENSION);
         var placed = structures.place(level, CosmicContent.repository().requireTrialRoom(room), ROOM_ORIGIN);
-        BlockPos participantSpawn = placed.participantSpawn();
-        TrialEncounterState encounter;
-        if (room.equals(RAIDING_RAINBOW)) encounter = rainbow.initialize(level, session, placed.bounds(), net.minecraft.util.RandomSource.create());
-        else if (room.equals(CIRCUIT_CIRCUS)) encounter = circuit.initialize(level, ROOM_ORIGIN, placed.bounds(), net.minecraft.util.RandomSource.create());
-        else if (room.equals(ZERO_G)) encounter = zeroG.initialize(level, session, placed.bounds(), ROOM_ORIGIN);
-        else if (room.equals(COLD_SNAP)) encounter = coldSnap.initialize(level, session, ROOM_ORIGIN, placed.bounds());
-        else if (room.equals(BOMB_SQUAD)) {
-            var initialized = bombSquad.initialize(level, session, ROOM_ORIGIN, placed.bounds(), net.minecraft.util.RandomSource.create());
-            participantSpawn = initialized.participantSpawn(); encounter = initialized.encounter();
-        }
-        else if (room.equals(HIDDEN_GRAVEYARD)) {
-            var initialized = hiddenGraveyard.initialize(level, session, ROOM_ORIGIN, placed.bounds(),
-                    net.minecraft.util.RandomSource.create()); encounter = initialized.encounter();
-        }
-        else if (room.equals(DEADEYE)) encounter = deadeye.initialize(
-                level, session, ROOM_ORIGIN, participantSpawn.below(), placed.bounds());
-        else if (room.equals(HAZE_AND_SEEK)) encounter = haze.initialize(level, session, placed.bounds(), net.minecraft.util.RandomSource.create());
-        else if (room.equals(WARZONE_GIANTS)) encounter = warzone.initialize(level, session, placed.bounds(), net.minecraft.util.RandomSource.create());
-        else if (room.equals(CAVE_DIVING)) encounter = caveDiving.initialize(
-                level, session, ROOM_ORIGIN, placed.bounds(), net.minecraft.util.RandomSource.create()).encounter();
-        else if (room.equals(INVENTOR)) {
-            inventor.initialize(level, session, ROOM_ORIGIN, placed.bounds(), net.minecraft.util.RandomSource.create());
-            encounter = TrialEncounterState.EMPTY;
-        }
-        else { fireColony.initialize(level, session, placed.bounds()); encounter = TrialEncounterState.EMPTY; }
+        var start = handlers.initialize(CosmicContent.repository().requireTrialRoom(room).handler(),level,session,placed);
+        BlockPos participantSpawn = start.spawn();
+        TrialEncounterState encounter = start.encounter();
         roomSpawns.put(session.sessionId(), participantSpawn);
         TrialProgress progress = session.progress().beginRoom(room, encounter);
         InstanceBounds decisionBounds = InstanceBounds.from(CosmicContent.repository().requireTrialRoom(DECISION_ROOM).bounds().at(DECISION_ORIGIN));
@@ -544,18 +678,7 @@ public final class TrialSessionService {
                 TrialSession.ROOM_INTRO_TICKS, Optional.of(room), false, bounds);
         repository.publish(server, next);
         forOnline(server, next, player -> {
-            if (room.equals(RAIDING_RAINBOW)) loadouts.applyRaidingRainbow(player);
-            else if (room.equals(CIRCUIT_CIRCUS)) loadouts.applyCircuitCircus(player);
-            else if (room.equals(FIRE_COLONY)) loadouts.applyFireColony(player);
-            else if (room.equals(ZERO_G)) loadouts.applyZeroG(player);
-            else if (room.equals(COLD_SNAP)) loadouts.applyColdSnap(player);
-            else if (room.equals(BOMB_SQUAD)) loadouts.applyBombSquad(player);
-            else if (room.equals(DEADEYE)) loadouts.applyDeadeye(player);
-            else if (room.equals(HAZE_AND_SEEK)) loadouts.applyHazeAndSeek(player);
-            else if (room.equals(WARZONE_GIANTS)) loadouts.applyWarzoneGiants(player);
-            else if (room.equals(CAVE_DIVING)) loadouts.applyCaveDiving(player);
-            else if (room.equals(INVENTOR)) loadouts.applyInventor(player);
-            else loadouts.applyHiddenGraveyard(player);
+            handlers.apply(CosmicContent.repository().requireTrialRoom(room).loadout(),player);
             teleport(player, roomSpawns.get(session.sessionId()));
         });
     }
@@ -890,7 +1013,7 @@ public final class TrialSessionService {
         return caveDiving.status(session.sessionId(), level);
     }
     public String productionPoolStatus(TrialSession session) {
-        return roomPool(session.progress().phase()).stream()
+        return productionRoomPool(session.progress().phase()).stream()
                 .map(room -> room.getPath().substring(room.getPath().lastIndexOf('/') + 1) + "=" + selection.weight(session, room))
                 .collect(java.util.stream.Collectors.joining(", "));
     }

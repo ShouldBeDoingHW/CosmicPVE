@@ -1,4 +1,8 @@
 {
+  "handler": "cosmicpve:trial/hidden_graveyard",
+  "loadout": "cosmicpve:trial/hidden_graveyard",
+  "base_weight": 5,
+  "enabled": true,
   "display_name": "Hidden Graveyard",
   "category": "impossible",
   "pieces": [{"structure": "cosmicpve:trial/hidden_graveyard"}],

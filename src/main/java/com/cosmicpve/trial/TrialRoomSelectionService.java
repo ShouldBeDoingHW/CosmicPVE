@@ -10,7 +10,12 @@ public final class TrialRoomSelectionService {
     private final List<TrialRoomWeightModifier> modifiers = new ArrayList<>();
     public void register(TrialRoomWeightModifier modifier) { modifiers.add(modifier); }
     public int weight(TrialSession session, Identifier room) {
-        int result = 5 - 2 * session.progress().appearances(room);
+        var definition = com.cosmicpve.content.CosmicContent.repository().snapshot().trialRooms().get(room);
+        int base = definition == null ? 5 : definition.baseWeight();
+        int appearances = session.progress().appearances(room);
+        if (appearances >= 3) return -1;
+        int result = base - 2 * appearances;
+        if (result <= 0) return result; // An overlay cannot resurrect an exhausted actual-room identity.
         for (var modifier : modifiers) result += modifier.modify(session, room);
         return result;
     }

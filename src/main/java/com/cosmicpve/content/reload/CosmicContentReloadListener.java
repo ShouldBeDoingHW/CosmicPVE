@@ -78,6 +78,10 @@ public final class CosmicContentReloadListener
                 candidate::addTrialRoom);
         loadDefinitions(resourceManager, MASK_DEFINITIONS, MaskDefinitionData.CODEC, candidate,
                 candidate::addMaskDefinition);
+        loadDefinitions(resourceManager, FileToIdConverter.json("cosmicpve/madness"),
+                com.cosmicpve.trial.madness.MadnessDefinition.CODEC, candidate, candidate::addMadnessDefinition);
+        loadDefinitions(resourceManager, FileToIdConverter.json("cosmicpve/trial_portal_presets"),
+                com.cosmicpve.data.component.TrialPortalModifiers.CODEC, candidate, candidate::addTrialPortalPreset);
         return candidate.build();
     }
 

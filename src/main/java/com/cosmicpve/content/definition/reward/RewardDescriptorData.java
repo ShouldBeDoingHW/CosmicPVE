@@ -17,7 +17,8 @@ import net.minecraft.resources.Identifier;
 public record RewardDescriptorData(RewardType type, Optional<Identifier> itemId, Optional<Long> cents,
         Optional<CosmicEnchantmentTier> rarity, Optional<Integer> successRate,
         Optional<Identifier> entityTypeId, Optional<GeneratedEquipmentDefinitionData> generatedEquipment,
-        Optional<Integer> maskCount, Optional<Identifier> armorSetId, Optional<Long> experience) {
+        Optional<Integer> maskCount, Optional<Identifier> armorSetId, Optional<Long> experience,
+        Optional<Identifier> portalPreset) {
     public static final Codec<RewardDescriptorData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             RewardType.CODEC.fieldOf("type").forGetter(RewardDescriptorData::type),
             Identifier.CODEC.optionalFieldOf("item").forGetter(RewardDescriptorData::itemId),
@@ -29,12 +30,22 @@ public record RewardDescriptorData(RewardType type, Optional<Identifier> itemId,
                     .forGetter(RewardDescriptorData::generatedEquipment),
             Codec.INT.optionalFieldOf("mask_count").forGetter(RewardDescriptorData::maskCount),
             Identifier.CODEC.optionalFieldOf("armor_set").forGetter(RewardDescriptorData::armorSetId),
-            Codec.LONG.optionalFieldOf("experience").forGetter(RewardDescriptorData::experience)
+            Codec.LONG.optionalFieldOf("experience").forGetter(RewardDescriptorData::experience),
+            Identifier.CODEC.optionalFieldOf("portal_preset").forGetter(RewardDescriptorData::portalPreset)
     ).apply(instance, RewardDescriptorData::new));
+
+    public RewardDescriptorData(RewardType type, Optional<Identifier> item, Optional<Long> cents,
+            Optional<CosmicEnchantmentTier> rarity, Optional<Integer> rate, Optional<Identifier> entity,
+            Optional<GeneratedEquipmentDefinitionData> equipment, Optional<Integer> masks,
+            Optional<Identifier> armor, Optional<Long> xp) {
+        this(type,item,cents,rarity,rate,entity,equipment,masks,armor,xp,Optional.empty());
+    }
 
     public ValidationResult<RewardDescriptor> resolve(String source, RegistryAccess registries) {
         try {
             return switch (type) {
+                case TRIAL_PORTAL_PRESET -> ValidationResult.success(new RewardDescriptor.TrialPortalPreset(
+                        required(portalPreset,"portal_preset")));
                 case STATIC_ITEM -> {
                     var id = required(itemId, "item");
                     if (!BuiltInRegistries.ITEM.containsKey(id)) yield failure(source, "Unknown item: " + id);

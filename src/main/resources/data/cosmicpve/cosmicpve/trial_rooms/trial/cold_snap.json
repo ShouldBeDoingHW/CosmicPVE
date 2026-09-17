@@ -1,4 +1,8 @@
 {
+  "handler": "cosmicpve:trial/cold_snap",
+  "loadout": "cosmicpve:trial/cold_snap",
+  "base_weight": 5,
+  "enabled": true,
   "display_name": "Cold Snap",
   "category": "apprentice",
   "pieces": [{"structure": "cosmicpve:trial/cold_snap"}],

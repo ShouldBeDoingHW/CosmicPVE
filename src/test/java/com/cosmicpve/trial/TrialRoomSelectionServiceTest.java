@@ -14,12 +14,12 @@ class TrialRoomSelectionServiceTest {
         return TrialSession.joining(java.util.UUID.randomUUID(), Identifier.parse("minecraft:overworld"), BlockPos.ZERO,
                 List.of(), List.of(new InstanceBounds(BlockPos.ZERO, BlockPos.ZERO))).withProgress(progress);
     }
-    @Test void weightsDeclineWithoutASeparateAppearanceCap() {
+    @Test void weightsDeclineAndOverlaysCannotResurrectExhaustedRooms() {
         var service=new TrialRoomSelectionService(); var progress=TrialProgress.EMPTY;
         assertEquals(5,service.weight(session(progress),A));
         for(int expected:new int[]{3,1,-1}) { progress=progress.beginRoom(A,TrialEncounterState.EMPTY); assertEquals(expected,service.weight(session(progress),A)); }
         service.register((ignored,room)->room.equals(A)?4:0);
-        assertEquals(3,service.weight(session(progress),A));
+        assertEquals(-1,service.weight(session(progress),A));
     }
     @Test void immediatelyPreviousRoomIsExcludedAndRngIsInjectable() {
         var service=new TrialRoomSelectionService();

@@ -66,7 +66,11 @@ public final class TrialPortalItem extends Item {
                 Component.translatable(modifiers.skipRooms() == 1
                         ? "tooltip.cosmicpve.trial_portal.skip_description_one"
                         : "tooltip.cosmicpve.trial_portal.skip_description", modifiers.skipRooms()));
-        if (modifiers.timeMinutes() > 0) addModifier(lines,
+        if (modifiers.timeBonusSeconds() % 60 != 0) addModifier(lines,
+                Component.literal("Extra Time: +" + modifiers.timeBonusSeconds() + " Seconds"),
+                com.cosmicpve.data.component.TrialTrinketType.TIME.presentationColor(),
+                Component.literal("Added to the starting Trial timer."));
+        else if (modifiers.timeMinutes() > 0) addModifier(lines,
                 Component.translatable(modifiers.timeMinutes() == 1
                                 ? "tooltip.cosmicpve.trial_portal.time_one"
                                 : "tooltip.cosmicpve.trial_portal.time", modifiers.timeMinutes()),
@@ -86,6 +90,9 @@ public final class TrialPortalItem extends Item {
                 Component.translatable("tooltip.cosmicpve.trial_portal.fame", modifiers.famePercent()),
                 com.cosmicpve.data.component.TrialTrinketType.FAME.presentationColor(),
                 Component.translatable("tooltip.cosmicpve.trial_portal.fame_description", modifiers.famePercent()));
+        if (modifiers.madnessOptionBonus() > 0) addModifier(lines,
+                Component.literal("Bonus Madness Ballot: +" + modifiers.madnessOptionBonus() + " Options"),
+                0x8C1708, Component.literal("Up to " + modifiers.madnessChoices(8) + " distinct choices per vote."));
         if (lines.isEmpty()) lines.add(Component.translatable("tooltip.cosmicpve.trial_portal.none").withColor(0x777777));
         return List.copyOf(lines);
     }

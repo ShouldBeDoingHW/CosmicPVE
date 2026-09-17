@@ -1,4 +1,8 @@
 {
+  "handler": "cosmicpve:trial/haze_seek",
+  "loadout": "cosmicpve:trial/haze_seek",
+  "base_weight": 5,
+  "enabled": true,
   "display_name": "Haze and Seek",
   "category": "hardcore",
   "pieces": [{"structure": "cosmicpve:trial/haze_seek"}],

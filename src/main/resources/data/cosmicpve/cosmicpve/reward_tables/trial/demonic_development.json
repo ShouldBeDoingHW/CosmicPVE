@@ -8,6 +8,7 @@
   {"weight":8,"reward":{"type":"static_item","item":"cosmicpve:trial_trinket_fame_100"}},
   {"weight":8,"reward":{"type":"static_item","item":"cosmicpve:trial_trinket_time_5"}},
   {"weight":8,"reward":{"type":"static_item","item":"cosmicpve:trial_trinket_insurance_3"}},
+  {"weight":8,"reward":{"type":"static_item","item":"cosmicpve:trial_trinket_madness_3"}},
   {"weight":8,"reward":{"type":"armor_set_crystal","armor_set":"cosmicpve:dragonslayer","success_rate":75}},
   {"weight":4,"reward":{"type":"armor_set_crystal","armor_set":"cosmicpve:dragonslayer","success_rate":100}},
   {"weight":10,"reward":{"type":"enchanted_black_scroll","success_rate":100}},

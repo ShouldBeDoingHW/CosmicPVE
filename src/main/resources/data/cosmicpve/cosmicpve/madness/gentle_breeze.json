@@ -1,0 +1,1 @@
+{"id":"cosmicpve:gentle_breeze","name":"Gentle Breeze","description":"While not crouching, you are gently pulled in a random direction. The direction changes each room.","icon":"minecraft:oak_sapling","handler":"cosmicpve:gentle_breeze","parameters":{"acceleration":0.004,"maximum_horizontal_speed":0.15}}

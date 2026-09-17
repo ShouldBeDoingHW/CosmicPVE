@@ -1,4 +1,8 @@
 {
+  "handler": "cosmicpve:trial/warzone_giants",
+  "loadout": "cosmicpve:trial/warzone_giants",
+  "base_weight": 5,
+  "enabled": true,
   "display_name": "Warzone Giants",
   "category": "demonic",
   "pieces": [

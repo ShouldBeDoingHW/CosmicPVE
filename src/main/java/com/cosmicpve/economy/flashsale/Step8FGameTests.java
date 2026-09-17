@@ -77,7 +77,7 @@ public final class Step8FGameTests {
                     tier + " reward must construct: " + entry.reward()));
         });
         var impossible = CosmicContent.repository().requireRewardTable(CosmicPVE.id("trial/impossible"));
-        helper.assertTrue(impossible.entries().size() == 19 && impossible.totalWeight() == 167,
+        helper.assertTrue(impossible.entries().size() == 20 && impossible.totalWeight() == 175,
                 "Impossible table must include the exact weight-3 Random Weapon Skin Generator row");
         impossible.entries().forEach(entry -> helper.assertTrue(generator.generate(entry.reward(), context).isPresent(),
                 "Impossible reward must construct: " + entry.reward()));

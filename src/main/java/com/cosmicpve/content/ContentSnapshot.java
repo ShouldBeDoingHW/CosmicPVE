@@ -16,7 +16,9 @@ public record ContentSnapshot(
         Map<Identifier, ArmorSetDefinition> armorSetDefinitions,
         Map<Identifier, RewardTable> rewardTables,
         Map<Identifier, TrialRoomDefinition> trialRooms,
-        Map<Identifier, MaskDefinition> maskDefinitions) {
+        Map<Identifier, MaskDefinition> maskDefinitions,
+        Map<Identifier, com.cosmicpve.trial.madness.MadnessDefinition> madnessDefinitions,
+        Map<Identifier, com.cosmicpve.data.component.TrialPortalModifiers> trialPortalPresets) {
     public static final ContentSnapshot EMPTY = new ContentSnapshot(0L, Map.of(), Map.of(), Map.of(), Map.of(), Map.of(), Map.of());
 
     public ContentSnapshot {
@@ -29,6 +31,15 @@ public record ContentSnapshot(
         rewardTables = Map.copyOf(rewardTables);
         trialRooms = Map.copyOf(trialRooms);
         maskDefinitions = Map.copyOf(maskDefinitions);
+        madnessDefinitions = Map.copyOf(madnessDefinitions);
+        trialPortalPresets = Map.copyOf(trialPortalPresets);
+    }
+
+    public ContentSnapshot(long revision, Map<Identifier, ScalingProfile> scaling,
+            Map<Identifier, StackDefinition> stacks, Map<Identifier, ArmorSetDefinition> armor,
+            Map<Identifier, RewardTable> rewards, Map<Identifier, TrialRoomDefinition> rooms,
+            Map<Identifier, MaskDefinition> masks) {
+        this(revision, scaling, stacks, armor, rewards, rooms, masks, Map.of(), Map.of());
     }
 
     public ContentSnapshot(long revision, Map<Identifier, ScalingProfile> scalingProfiles,
@@ -58,6 +69,7 @@ public record ContentSnapshot(
     }
 
     public ContentSnapshot withRevision(long nextRevision) {
-        return new ContentSnapshot(nextRevision, scalingProfiles, stackDefinitions, armorSetDefinitions, rewardTables, trialRooms, maskDefinitions);
+        return new ContentSnapshot(nextRevision, scalingProfiles, stackDefinitions, armorSetDefinitions, rewardTables, trialRooms,
+                maskDefinitions, madnessDefinitions, trialPortalPresets);
     }
 }

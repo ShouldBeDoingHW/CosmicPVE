@@ -1,0 +1,1 @@
+{"id":"cosmicpve:statues","name":"Statues","description":"Every so often, after a short countdown, remain completely still for a moment or lose 50% of your maximum HP.","icon":"minecraft:armor_stand","handler":"cosmicpve:statues","parameters":{"interval_ticks":600,"warning_ticks":60,"stillness_ticks":15,"movement_epsilon":0.03,"penalty_max_health_fraction":0.5}}

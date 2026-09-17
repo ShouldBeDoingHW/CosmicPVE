@@ -22,6 +22,10 @@ public final class TrialTrinketItem extends Item {
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display,
                                 Consumer<Component> tooltip, TooltipFlag flag) {
+        var data = stack.get(ModDataComponents.TRIAL_TRINKET.get());
+        if(data != null && data.valid() && data.type() == com.cosmicpve.data.component.TrialTrinketType.MADNESS)
+            tooltip.accept(Component.translatable(data.value()==1 ? "tooltip.cosmicpve.trial_trinket.madness_one"
+                    : "tooltip.cosmicpve.trial_trinket.madness",data.value()).withColor(0xAAAAAA));
         tooltip.accept(Component.translatable("tooltip.cosmicpve.trial_trinket.purpose")
                 .withStyle(net.minecraft.ChatFormatting.YELLOW));
         tooltip.accept(Component.translatable("tooltip.cosmicpve.trial_trinket.instruction")

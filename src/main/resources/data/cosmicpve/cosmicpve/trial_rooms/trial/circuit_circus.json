@@ -1,4 +1,8 @@
 {
+  "handler": "cosmicpve:trial/circuit_circus",
+  "loadout": "cosmicpve:trial/circuit_circus",
+  "base_weight": 5,
+  "enabled": true,
   "display_name": "Circuit Circus",
   "category": "apprentice",
   "pieces": [

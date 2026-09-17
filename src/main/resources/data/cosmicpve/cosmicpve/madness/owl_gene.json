@@ -1,0 +1,1 @@
+{"id":"cosmicpve:owl_gene","name":"Owl Gene","description":"Every so often, you are turned 180 degrees after a short countdown.","icon":"minecraft:ender_pearl","handler":"cosmicpve:owl_gene","parameters":{"interval_ticks":400,"warning_ticks":60}}

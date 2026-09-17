@@ -35,12 +35,24 @@ public final class TrialCommands {
                                                                 IntegerArgumentType.getInteger(ctx, "time"),
                                                                 IntegerArgumentType.getInteger(ctx, "skip"),
                                                                 IntegerArgumentType.getInteger(ctx, "insurance"))))))))
+                        .then(Commands.literal("preset").then(Commands.argument("player", EntityArgument.player())
+                                .then(Commands.argument("preset", net.minecraft.commands.arguments.IdentifierArgument.id()).executes(ctx -> {
+                                    try {
+                                        var id = net.minecraft.commands.arguments.IdentifierArgument.getId(ctx,"preset");
+                                        var stack = com.cosmicpve.trial.portal.TrialPortalPresets.generate(id);
+                                        var player = EntityArgument.getPlayer(ctx,"player");
+                                        if (!player.getInventory().add(stack)) player.drop(stack,false);
+                                        return 1;
+                                    } catch (IllegalArgumentException exception) {
+                                        ctx.getSource().sendFailure(Component.literal(exception.getMessage())); return 0;
+                                    }
+                                }))))
                         .then(Commands.literal("inspect").executes(ctx -> inspectPortal(ctx.getSource()))))
                 .then(Commands.literal("trinket").then(Commands.literal("give")
                         .then(Commands.argument("player", EntityArgument.player())
                                 .then(Commands.argument("type", StringArgumentType.word())
                                         .suggests((ctx, builder) -> net.minecraft.commands.SharedSuggestionProvider.suggest(
-                                                new String[]{"time", "skip", "insurance", "fame"}, builder))
+                                                new String[]{"time", "skip", "insurance", "fame", "madness"}, builder))
                                         .then(Commands.argument("value", IntegerArgumentType.integer(1, 100))
                                                 .executes(ctx -> giveTrinket(ctx.getSource(), EntityArgument.getPlayer(ctx, "player"),
                                                         StringArgumentType.getString(ctx, "type"),
@@ -52,6 +64,10 @@ public final class TrialCommands {
                                                                 IntegerArgumentType.getInteger(ctx, "count")))))))))
                 .then(Commands.literal("debug")
                         .then(Commands.literal("status").executes(ctx -> status(ctx.getSource())))
+                        .then(Commands.literal("madness").then(Commands.literal("add")
+                                .then(Commands.argument("id",net.minecraft.commands.arguments.IdentifierArgument.id()).executes(ctx -> send(ctx.getSource(),
+                                        TrialRuntime.sessions().debugAddMadness(ctx.getSource().getServer(),
+                                                net.minecraft.commands.arguments.IdentifierArgument.getId(ctx,"id")))))))
                         .then(Commands.literal("perf").executes(ctx -> perf(ctx.getSource())))
                         .then(Commands.literal("corpse")
                                 .then(Commands.literal("spawn").executes(ctx -> spawnCorpse(ctx.getSource())))
@@ -127,9 +143,9 @@ public final class TrialCommands {
             source.sendFailure(Component.literal("Hold a Trial Portal in your main hand.")); return 0;
         }
         var modifiers = held.getOrDefault(ModDataComponents.TRIAL_PORTAL_MODIFIERS.get(), TrialPortalModifiers.EMPTY);
-        source.sendSuccess(() -> Component.literal("Trial Portal modifiers: time=" + modifiers.timeMinutes()
+        source.sendSuccess(() -> Component.literal("Trial Portal modifiers: timeSeconds=" + modifiers.timeBonusSeconds()
                 + " skip=" + modifiers.skipRooms() + " insurance=" + modifiers.insuranceLevel()), false);
-        source.sendSuccess(() -> Component.literal("  fame=" + modifiers.famePercent() + "%"), false);
+        source.sendSuccess(() -> Component.literal("  fame=" + modifiers.famePercent() + "% madnessOptionBonus=" + modifiers.madnessOptionBonus()), false);
         return 1;
     }
 
@@ -160,6 +176,11 @@ public final class TrialCommands {
                 + " pot=" + session.progress().pot().size() + " modifiers=" + session.progress().portalModifiers()
                 + " baseFame=" + session.progress().baseFame()
                 + " skipProcessed=" + session.progress().initialSkipProcessed()), false);
+        source.sendSuccess(() -> Component.literal("  nextOrdinal=" + session.progress().nextRoomOrdinal()
+                + " pendingMadness=" + session.progress().madness().pending()
+                + " activeMadness=" + session.progress().madness().active().stream().map(com.cosmicpve.trial.madness.MadnessDefinition::name).toList()
+                + " skipped rewards by phase=" + session.progress().pot().stream().filter(com.cosmicpve.trial.TrialPotEntry::skipped)
+                .collect(java.util.stream.Collectors.groupingBy(entry -> entry.phase().map(Object::toString).orElse("legacy"),java.util.stream.Collectors.counting()))),false);
         source.sendSuccess(() -> Component.literal("  eligible pool weights: "
                 + TrialRuntime.sessions().productionPoolStatus(session)), false);
         if (!session.progress().encounter().hiddenSequence().isEmpty())

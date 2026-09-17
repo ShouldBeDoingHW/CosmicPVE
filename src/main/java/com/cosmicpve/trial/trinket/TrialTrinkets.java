@@ -38,6 +38,12 @@ public final class TrialTrinkets {
                 case 3 -> ModItems.TRIAL_TRINKET_INSURANCE_3.get();
                 default -> throw new IllegalArgumentException("Insurance Trinket must be level 1, 2, or 3");
             };
+            case MADNESS -> switch (value) {
+                case 1 -> ModItems.TRIAL_TRINKET_MADNESS_1.get();
+                case 2 -> ModItems.TRIAL_TRINKET_MADNESS_2.get();
+                case 3 -> ModItems.TRIAL_TRINKET_MADNESS_3.get();
+                default -> throw new IllegalArgumentException("Invalid Madness ballot value");
+            };
             case FAME -> switch (value) {
                 case 33 -> ModItems.TRIAL_TRINKET_FAME_33.get();
                 case 66 -> ModItems.TRIAL_TRINKET_FAME_66.get();

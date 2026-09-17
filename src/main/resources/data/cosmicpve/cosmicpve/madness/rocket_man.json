@@ -1,0 +1,1 @@
+{"id":"cosmicpve:rocket_man","name":"Rocket Man","description":"Every so often, you are launched approximately 8 blocks upward. Fall damage remains enabled.","icon":"minecraft:firework_rocket","handler":"cosmicpve:rocket_man","parameters":{"interval_ticks":500,"vertical_velocity":1.2}}

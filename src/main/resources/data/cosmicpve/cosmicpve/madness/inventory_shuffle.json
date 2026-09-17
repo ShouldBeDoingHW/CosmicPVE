@@ -1,0 +1,1 @@
+{"id":"cosmicpve:inventory_shuffle","name":"Inventory Shuffle","description":"Every so often, your entire Trial inventory is randomly scrambled.","icon":"minecraft:dispenser","handler":"cosmicpve:inventory_shuffle","parameters":{"interval_ticks":360}}

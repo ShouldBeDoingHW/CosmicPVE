@@ -192,6 +192,9 @@ public final class CosmicCombat {
         OUTGOING.register(AMULETS);
         OUTGOING.register(BELTS);
         OUTGOING.register(new com.cosmicpve.trial.room.InventorCombatContributor());
+        var madness = new com.cosmicpve.trial.madness.MadnessCombatContributor();
+        OUTGOING.register(madness);
+        INCOMING.register(madness);
         INCOMING.register(ARMOR_SET_COMBAT);
         INCOMING.register(WEAPON_SKIN_COMBAT);
         INCOMING.register(deathPact);

@@ -1,4 +1,8 @@
 {
+  "handler": "cosmicpve:trial/cave_diving",
+  "loadout": "cosmicpve:trial/cave_diving",
+  "base_weight": 5,
+  "enabled": true,
   "display_name": "Cave Diving",
   "category": "impossible",
   "pieces": [{"structure": "cosmicpve:trial/cave_diving"}],

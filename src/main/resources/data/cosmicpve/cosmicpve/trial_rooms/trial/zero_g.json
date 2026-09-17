@@ -1,4 +1,8 @@
 {
+  "handler": "cosmicpve:trial/zero_g",
+  "loadout": "cosmicpve:trial/zero_g",
+  "base_weight": 5,
+  "enabled": true,
   "display_name": "Zero-G",
   "category": "apprentice",
   "pieces": [{"structure": "cosmicpve:trial/zero_g"}],

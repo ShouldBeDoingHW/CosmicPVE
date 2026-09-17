@@ -15,6 +15,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 /** Sends participant-only timer updates only when the authoritative displayed second changes. */
 public final class TrialTimerDisplayService {
     private final Map<UUID, Integer> displayedSeconds = new HashMap<>();
+    private final Map<UUID, Boolean> displayedObfuscation = new HashMap<>();
     private final Map<UUID, String> displayedOwners = new HashMap<>();
     private final Map<UUID, TrialPhase> displayedPhases = new HashMap<>();
     private final Map<UUID, RoomDisplay> displayedRooms = new HashMap<>();
@@ -25,6 +26,7 @@ public final class TrialTimerDisplayService {
 
     public void update(MinecraftServer server, TrialSession session) {
         int seconds = displayedSeconds(session.timerTicks());
+        boolean obfuscated = !com.cosmicpve.trial.madness.MadnessRuntime.timerReadable(session,server.getTickCount());
         java.util.ArrayList<UUID> stale = null;
         for (UUID id : displayedSeconds.keySet()) if (!session.participants().contains(id)) {
             if (stale == null) stale = new java.util.ArrayList<>();
@@ -39,23 +41,26 @@ public final class TrialTimerDisplayService {
             if (player != null) showOwnerIfChanged(player, owner);
             if (player != null) showPhaseIfChanged(player, phase);
             if (player != null) showRoomIfChanged(player, room);
-            if (player != null && accept(id, seconds)) {
-                PacketDistributor.sendToPlayer(player, new TrialTimerPayload(seconds));
+            if (player != null && accept(id, seconds, obfuscated)) {
+                PacketDistributor.sendToPlayer(player, new TrialTimerPayload(seconds, obfuscated));
             }
         }
     }
 
     public void show(ServerPlayer player, TrialSession session) {
         int seconds = displayedSeconds(session.timerTicks());
+        boolean obfuscated = !com.cosmicpve.trial.madness.MadnessRuntime.timerReadable(session,player.level().getServer().getTickCount());
         displayedSeconds.put(player.getUUID(), seconds);
+        displayedObfuscation.put(player.getUUID(), obfuscated);
         showOwnerIfChanged(player, session.owner().header());
         showPhaseIfChanged(player, session.progress().phase());
         showRoomIfChanged(player, roomDisplay(session));
-        PacketDistributor.sendToPlayer(player, new TrialTimerPayload(seconds));
+        PacketDistributor.sendToPlayer(player, new TrialTimerPayload(seconds, obfuscated));
     }
 
     public void hide(ServerPlayer player) {
         displayedSeconds.remove(player.getUUID());
+        displayedObfuscation.remove(player.getUUID());
         displayedOwners.remove(player.getUUID());
         displayedPhases.remove(player.getUUID());
         displayedRooms.remove(player.getUUID());
@@ -72,6 +77,7 @@ public final class TrialTimerDisplayService {
 
     private void hide(MinecraftServer server, UUID id) {
         displayedSeconds.remove(id);
+        displayedObfuscation.remove(id);
         displayedOwners.remove(id);
         displayedPhases.remove(id);
         displayedRooms.remove(id);
@@ -95,6 +101,13 @@ public final class TrialTimerDisplayService {
     }
     boolean accept(UUID player, int seconds) {
         return !Integer.valueOf(seconds).equals(displayedSeconds.put(player, seconds));
+    }
+    boolean accept(UUID player,int seconds,boolean obfuscated) {
+        var previous = displayedObfuscation.put(player,obfuscated);
+        return accept(player,seconds) | !java.util.Objects.equals(previous,obfuscated);
+    }
+    public static net.minecraft.network.chat.Component timerComponent(int seconds,boolean obfuscated) {
+        return net.minecraft.network.chat.Component.literal(formatSeconds(seconds)).withStyle(style -> style.withObfuscated(obfuscated));
     }
 
     boolean acceptOwner(UUID player, String heading) {

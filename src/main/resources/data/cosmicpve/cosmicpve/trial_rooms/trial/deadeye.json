@@ -1,4 +1,8 @@
 {
+  "handler": "cosmicpve:trial/deadeye",
+  "loadout": "cosmicpve:trial/deadeye",
+  "base_weight": 5,
+  "enabled": true,
   "display_name": "Deadeye",
   "category": "demonic",
   "pieces": [

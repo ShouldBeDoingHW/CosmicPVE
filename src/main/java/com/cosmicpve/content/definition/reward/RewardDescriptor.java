@@ -7,8 +7,12 @@ public sealed interface RewardDescriptor permits RewardDescriptor.StaticItem, Re
         RewardDescriptor.CosmicBook, RewardDescriptor.UnexaminedBook, RewardDescriptor.BlackScroll, RewardDescriptor.ArmorOrb,
         RewardDescriptor.WeaponOrb, RewardDescriptor.MobSpawner, RewardDescriptor.GeneratedEquipment,
         RewardDescriptor.SpaceChest, RewardDescriptor.Mask, RewardDescriptor.ArmorSetCrystal,
-        RewardDescriptor.XpBottle, RewardDescriptor.RandomVKitCrystal, RewardDescriptor.EnchantedBlackScroll {
+        RewardDescriptor.XpBottle, RewardDescriptor.RandomVKitCrystal, RewardDescriptor.EnchantedBlackScroll,
+        RewardDescriptor.TrialPortalPreset {
     RewardType type();
+    record TrialPortalPreset(Identifier presetId) implements RewardDescriptor {
+        public RewardType type(){return RewardType.TRIAL_PORTAL_PRESET;}
+    }
     record StaticItem(Identifier itemId) implements RewardDescriptor { public RewardType type(){return RewardType.STATIC_ITEM;} }
     record Banknote(long cents) implements RewardDescriptor { public RewardType type(){return RewardType.BANKNOTE;} }
     record CosmicBook(CosmicEnchantmentTier rarity) implements RewardDescriptor { public RewardType type(){return RewardType.COSMIC_BOOK;} }

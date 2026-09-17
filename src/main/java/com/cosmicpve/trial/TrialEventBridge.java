@@ -76,7 +76,11 @@ public final class TrialEventBridge {
         }
     }
     public void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
+        if (event.isCanceled()) return;
         if (event.getEntity() instanceof ServerPlayer player) {
+            if (com.cosmicpve.trial.madness.MadnessRuntime.INSTANCE.rejectControl(player,event.getPos())) {
+                event.setCanceled(true); event.setCancellationResult(net.minecraft.world.InteractionResult.FAIL); return;
+            }
             TrialRuntime.sessions().onCircuitLever(player, event.getPos());
             TrialRuntime.sessions().onFireColonyLever(player, event.getPos());
             TrialRuntime.sessions().onColdSnapLever(player, event.getPos());

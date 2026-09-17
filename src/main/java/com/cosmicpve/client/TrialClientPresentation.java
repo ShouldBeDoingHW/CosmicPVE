@@ -22,7 +22,7 @@ public final class TrialClientPresentation {
     static final int HUD_WIDTH = 120;
     static final int HORIZONTAL_PADDING = 8;
     private static int timerSeconds = -1;
-    private static String timerText = "";
+    private static Component timerText = Component.empty();
     private static String ownerHeading = "";
     private static String phaseLabel = "";
     private static int phaseColor = 0xFFFFFF;
@@ -32,7 +32,7 @@ public final class TrialClientPresentation {
 
     public static void registerPayloadHandlers(RegisterClientPayloadHandlersEvent event) {
         event.register(TrialTimerPayload.TYPE, (payload, context) -> {
-            timerSeconds = payload.seconds(); timerText = formatSeconds(timerSeconds);
+            timerSeconds = payload.seconds(); timerText = com.cosmicpve.trial.TrialTimerDisplayService.timerComponent(timerSeconds,payload.obfuscated());
         });
         event.register(TrialOwnerPayload.TYPE, (payload, context) -> ownerHeading = payload.heading());
         event.register(TrialPhasePayload.TYPE, (payload, context) -> {
@@ -57,8 +57,8 @@ public final class TrialClientPresentation {
 
     private static void renderTimer(GuiGraphics graphics, net.minecraft.client.DeltaTracker ignored) {
         Minecraft minecraft = Minecraft.getInstance();
-        if (timerSeconds < 0 || minecraft.options.hideGui) return;
-        String value = timerText;
+        if (timerSeconds == -1 || minecraft.options.hideGui) return;
+        Component value = timerText;
         String heading = ownerHeading.isBlank() ? "Trial" : ownerHeading;
         PanelLayout layout = layout(graphics.guiWidth(), graphics.guiHeight());
         int textWidth = Math.max(1, layout.width() - HORIZONTAL_PADDING * 2);
@@ -81,7 +81,7 @@ public final class TrialClientPresentation {
                 x, top + 72, 0xFFE0E0E0, false);
         graphics.drawString(minecraft.font, Component.literal("Time Left").withStyle(ChatFormatting.BOLD),
                 x, top + 93, 0xFFFFFFFF, false);
-        graphics.drawString(minecraft.font, Component.literal(value), x, top + 104, 0xFFE0E0E0, false);
+        graphics.drawString(minecraft.font, value, x, top + 104, 0xFFE0E0E0, false);
     }
 
     private static String fit(net.minecraft.client.gui.Font font, String value, int width) {

@@ -18,6 +18,13 @@ public final class RewardGeneratorService {
 
     public Optional<ItemStack> generate(RewardDescriptor descriptor, RewardGenerationContext context) {
         return switch (descriptor) {
+            case RewardDescriptor.TrialPortalPreset reward -> {
+                try { yield Optional.of(com.cosmicpve.trial.portal.TrialPortalPresets.generate(reward.presetId())); }
+                catch (IllegalArgumentException unavailable) {
+                    com.cosmicpve.CosmicPVE.LOGGER.warn("Deferred Trial Portal reward: {}", unavailable.getMessage());
+                    yield Optional.empty();
+                }
+            }
             case RewardDescriptor.StaticItem reward -> BuiltInRegistries.ITEM.get(reward.itemId())
                     .map(holder -> new ItemStack(holder.value()));
             case RewardDescriptor.Banknote reward -> Optional.of(Banknotes.create(reward.cents()));

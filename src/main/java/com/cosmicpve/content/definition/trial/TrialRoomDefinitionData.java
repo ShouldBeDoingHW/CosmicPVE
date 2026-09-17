@@ -13,7 +13,8 @@ import net.minecraft.resources.Identifier;
 public record TrialRoomDefinitionData(String displayName, TrialRoomCategory category,
                                       List<TrialStructurePiece> pieces, TrialSpawnMarkerRule spawnMarker,
                                       Optional<BlockPos> spawnMarkerPosition,
-                                      Optional<Identifier> spawnMarkerReplacement, TrialRoomBounds bounds) {
+                                      Optional<Identifier> spawnMarkerReplacement, TrialRoomBounds bounds,
+                                      Optional<Identifier> handler, Optional<Identifier> loadout, int baseWeight, boolean enabled) {
     public static final Codec<TrialRoomDefinitionData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.STRING.fieldOf("display_name").forGetter(TrialRoomDefinitionData::displayName),
             TrialRoomCategory.CODEC.fieldOf("category").forGetter(TrialRoomDefinitionData::category),
@@ -21,8 +22,17 @@ public record TrialRoomDefinitionData(String displayName, TrialRoomCategory cate
             TrialSpawnMarkerRule.CODEC.fieldOf("spawn_marker").forGetter(TrialRoomDefinitionData::spawnMarker),
             BlockPos.CODEC.optionalFieldOf("spawn_marker_position").forGetter(TrialRoomDefinitionData::spawnMarkerPosition),
             Identifier.CODEC.optionalFieldOf("spawn_marker_replacement").forGetter(TrialRoomDefinitionData::spawnMarkerReplacement),
-            TrialRoomBounds.CODEC.fieldOf("bounds").forGetter(TrialRoomDefinitionData::bounds)
+            TrialRoomBounds.CODEC.fieldOf("bounds").forGetter(TrialRoomDefinitionData::bounds),
+            Identifier.CODEC.optionalFieldOf("handler").forGetter(TrialRoomDefinitionData::handler),
+            Identifier.CODEC.optionalFieldOf("loadout").forGetter(TrialRoomDefinitionData::loadout),
+            Codec.intRange(1,1000).optionalFieldOf("base_weight",5).forGetter(TrialRoomDefinitionData::baseWeight),
+            Codec.BOOL.optionalFieldOf("enabled",true).forGetter(TrialRoomDefinitionData::enabled)
     ).apply(instance, TrialRoomDefinitionData::new));
+
+    public TrialRoomDefinitionData(String name, TrialRoomCategory category, List<TrialStructurePiece> pieces,
+            TrialSpawnMarkerRule marker, Optional<BlockPos> position, Optional<Identifier> replacement, TrialRoomBounds bounds) {
+        this(name,category,pieces,marker,position,replacement,bounds,Optional.empty(),Optional.empty(),5,true);
+    }
 
     public ValidationResult<TrialRoomDefinition> resolve(Identifier id) {
         var diagnostics = new ArrayList<ContentDiagnostic>();
@@ -33,6 +43,6 @@ public record TrialRoomDefinitionData(String displayName, TrialRoomCategory cate
             diagnostics.add(ContentDiagnostic.error(id.toString(), "Spawn marker position lies outside room bounds"));
         if (!diagnostics.isEmpty()) return ValidationResult.failure(diagnostics);
         return ValidationResult.success(new TrialRoomDefinition(id, displayName, category, pieces, spawnMarker,
-                spawnMarkerPosition, spawnMarkerReplacement, bounds));
+                spawnMarkerPosition, spawnMarkerReplacement, bounds, handler.orElse(id),loadout.orElse(id),baseWeight,enabled));
     }
 }

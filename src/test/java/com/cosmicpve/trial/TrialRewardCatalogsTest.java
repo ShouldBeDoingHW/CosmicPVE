@@ -11,9 +11,9 @@ import org.junit.jupiter.api.Test;
 class TrialRewardCatalogsTest {
     @Test void canonicalDeclaredAndActiveTotalsArePinned() {
         assertCatalog(TrialRewardCatalogs.APPRENTICE,12,89,89);
-        assertCatalog(TrialRewardCatalogs.HARDCORE,19,109,104);
-        assertCatalog(TrialRewardCatalogs.IMPOSSIBLE,20,175,167);
-        assertCatalog(TrialRewardCatalogs.DEMONIC,18,135,131);
+        assertCatalog(TrialRewardCatalogs.HARDCORE,21,122,117);
+        assertCatalog(TrialRewardCatalogs.IMPOSSIBLE,21,183,175);
+        assertCatalog(TrialRewardCatalogs.DEMONIC,19,143,139);
     }
 
     @Test void runtimeTablesExactlyEqualTheirActiveCanonicalRows() throws Exception {
@@ -90,6 +90,9 @@ class TrialRewardCatalogsTest {
         case "trial_trinket_fame_33"->"+33% Fame Trial Trinket";
         case "trial_trinket_fame_66"->"+66% Fame Trial Trinket";
         case "trial_trinket_fame_100"->"+100% Fame Trial Trinket";
+        case "trial_trinket_madness_1"->"+1 Madness Ballot Trial Trinket";
+        case "trial_trinket_madness_2"->"+2 Madness Ballot Trial Trinket";
+        case "trial_trinket_madness_3"->"+3 Madness Ballot Trial Trinket";
         case "conquest_chest_flare"->"Conquest Chest Flare"; case "mask_splicer"->"Mask Splicer";
         case "heroic_crystal"->"Heroic Crystal"; case "cosmic_enchantment_table"->"Cosmic Enchantment Table";
         case "secret_weapon_cache"->"Secret Weapon Cache"; case "admin_abuse"->"Admin Abuse";

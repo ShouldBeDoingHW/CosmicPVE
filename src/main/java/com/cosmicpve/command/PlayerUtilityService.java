@@ -12,7 +12,11 @@ public final class PlayerUtilityService {
         player.getFoodData().setSaturation(RESTORE_SATURATION);
     }
 
-    public static void heal(ServerPlayer player) { player.setHealth(player.getMaxHealth()); }
+    public static void heal(ServerPlayer player) {
+        // Ordinary restoration must use the same healing event as potions, regeneration and Cosmic heals.
+        if (player.getHealth() > 0) player.heal(Math.max(0,player.getMaxHealth()-player.getHealth()));
+        else player.setHealth(player.getMaxHealth()); // Preserve the operator's existing dead-player reset behavior.
+    }
 
     public static void restore(ServerPlayer player) { heal(player); feed(player); }
 }

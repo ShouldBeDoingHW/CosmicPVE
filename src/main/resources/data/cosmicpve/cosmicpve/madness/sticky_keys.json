@@ -1,0 +1,1 @@
+{"id":"cosmicpve:sticky_keys","name":"Sticky Keys","description":"Buttons and levers have a 50% chance to fail to activate.","icon":"minecraft:slime_ball","handler":"cosmicpve:sticky_keys","parameters":{"failure_chance":0.5}}

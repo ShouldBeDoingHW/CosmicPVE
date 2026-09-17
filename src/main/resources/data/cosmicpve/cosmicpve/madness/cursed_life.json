@@ -1,0 +1,1 @@
+{"id":"cosmicpve:cursed_life","name":"Cursed Life","description":"All healing received, including natural regeneration, is reduced by 30%.","icon":"minecraft:wither_skeleton_skull","handler":"cosmicpve:cursed_life","parameters":{"healing_multiplier":0.7}}

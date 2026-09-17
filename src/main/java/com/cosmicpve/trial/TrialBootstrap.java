@@ -19,6 +19,7 @@ public final class TrialBootstrap {
         NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, trials::onBlockDrops);
         NeoForge.EVENT_BUS.addListener(trials::onProjectileImpact);
         NeoForge.EVENT_BUS.addListener(trials::onRightClickBlock);
+        NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, com.cosmicpve.trial.madness.MadnessRuntime.INSTANCE::onHeal);
         NeoForge.EVENT_BUS.addListener(trials::onNeighborNotify);
         NeoForge.EVENT_BUS.addListener(trials::onEntityJoin);
         NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, trials::onIncomingDamage);

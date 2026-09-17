@@ -204,6 +204,9 @@ public final class ModItems {
     public static final DeferredItem<MaskSplicerItem> MASK_SPLICER = ITEMS.registerItem(
             "mask_splicer", MaskSplicerItem::new, properties -> properties.stacksTo(1));
 
+    public static final DeferredItem<TrialTrinketItem> TRIAL_TRINKET_MADNESS_1 = trinket("trial_trinket_madness_1", TrialTrinketType.MADNESS, 1);
+    public static final DeferredItem<TrialTrinketItem> TRIAL_TRINKET_MADNESS_2 = trinket("trial_trinket_madness_2", TrialTrinketType.MADNESS, 2);
+    public static final DeferredItem<TrialTrinketItem> TRIAL_TRINKET_MADNESS_3 = trinket("trial_trinket_madness_3", TrialTrinketType.MADNESS, 3);
     public static final DeferredItem<TrialTrinketItem> TRIAL_TRINKET_TIME_1 = trinket("trial_trinket_time_1", TrialTrinketType.TIME, 1);
     public static final DeferredItem<TrialTrinketItem> TRIAL_TRINKET_TIME_3 = trinket("trial_trinket_time_3", TrialTrinketType.TIME, 3);
     public static final DeferredItem<TrialTrinketItem> TRIAL_TRINKET_TIME_5 = trinket("trial_trinket_time_5", TrialTrinketType.TIME, 5);

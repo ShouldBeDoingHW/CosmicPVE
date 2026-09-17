@@ -1,4 +1,8 @@
 {
+  "handler": "cosmicpve:trial/raiding_rainbow",
+  "loadout": "cosmicpve:trial/raiding_rainbow",
+  "base_weight": 5,
+  "enabled": true,
   "display_name": "Raiding Rainbow",
   "category": "apprentice",
   "pieces": [

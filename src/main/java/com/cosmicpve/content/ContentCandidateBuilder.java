@@ -29,6 +29,25 @@ public final class ContentCandidateBuilder {
     private final Map<Identifier, TrialRoomDefinition> trialRooms = new LinkedHashMap<>();
     private final Map<Identifier, MaskDefinition> maskDefinitions = new LinkedHashMap<>();
     private final List<ContentDiagnostic> diagnostics = new ArrayList<>();
+    private final Map<Identifier, com.cosmicpve.trial.madness.MadnessDefinition> madnessDefinitions = new LinkedHashMap<>();
+    private final Map<Identifier, com.cosmicpve.data.component.TrialPortalModifiers> trialPortalPresets = new LinkedHashMap<>();
+
+    public void addMadnessDefinition(Identifier id, com.cosmicpve.trial.madness.MadnessDefinition data) {
+        if (!id.equals(data.id()) || !data.valid()
+                || !net.minecraft.core.registries.BuiltInRegistries.ITEM.containsKey(data.icon())) {
+            diagnostics.add(ContentDiagnostic.error(id.toString(), "Invalid Madness ID or handler")); return;
+        }
+        if (madnessDefinitions.values().stream().anyMatch(existing -> existing.handler().equals(data.handler()))) {
+            diagnostics.add(ContentDiagnostic.error(id.toString(), "Madness handler already has a definition: " + data.handler())); return;
+        }
+        if (madnessDefinitions.putIfAbsent(id, data) != null)
+            diagnostics.add(ContentDiagnostic.error(id.toString(), "Duplicate Madness ID"));
+    }
+    public void addTrialPortalPreset(Identifier id, com.cosmicpve.data.component.TrialPortalModifiers data) {
+        if (!data.valid()) { diagnostics.add(ContentDiagnostic.error(id.toString(), "Invalid Trial Portal preset")); return; }
+        if (trialPortalPresets.putIfAbsent(id, data) != null)
+            diagnostics.add(ContentDiagnostic.error(id.toString(), "Duplicate Trial Portal preset ID"));
+    }
 
     public void addScalingProfile(Identifier id, ScalingProfileData data) {
         ValidationResult<ScalingProfile> result = data.resolve(id);
@@ -114,7 +133,8 @@ public final class ContentCandidateBuilder {
             return ValidationResult.failure(diagnostics);
         }
         return ValidationResult.success(
-                new ContentSnapshot(0L, scalingProfiles, stackDefinitions, armorSetDefinitions, rewardTables, trialRooms, maskDefinitions),
+                new ContentSnapshot(0L, scalingProfiles, stackDefinitions, armorSetDefinitions, rewardTables, trialRooms,
+                        maskDefinitions, madnessDefinitions, trialPortalPresets),
                 diagnostics);
     }
 }

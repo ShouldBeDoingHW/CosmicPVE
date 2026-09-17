@@ -1,4 +1,8 @@
 {
+  "handler": "cosmicpve:trial/bomb_squad",
+  "loadout": "cosmicpve:trial/bomb_squad",
+  "base_weight": 5,
+  "enabled": true,
   "display_name": "Bomb Squad",
   "category": "hardcore",
   "pieces": [{"structure": "cosmicpve:trial/bomb_squad"}],

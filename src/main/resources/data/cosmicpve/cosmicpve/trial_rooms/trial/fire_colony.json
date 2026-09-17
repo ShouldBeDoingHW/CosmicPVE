@@ -1,4 +1,8 @@
 {
+  "handler": "cosmicpve:trial/fire_colony",
+  "loadout": "cosmicpve:trial/fire_colony",
+  "base_weight": 5,
+  "enabled": true,
   "display_name": "Fire Colony",
   "category": "hardcore",
   "pieces": [{"structure": "cosmicpve:trial/fire_colony"}],
