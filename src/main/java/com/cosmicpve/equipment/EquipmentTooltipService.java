@@ -21,8 +21,17 @@ public final class EquipmentTooltipService {
         if (accessorySocket != null && accessorySocket.valid()) {
             event.getToolTip().add(Component.literal("Success Rate: " + accessorySocket.successRate() + "%")
                     .withColor(AccessorySocketItem.COLOR));
+            String flavor = accessorySocket.slot() == com.cosmicpve.data.component.AccessorySlot.AMULET
+                    ? "Apply to any CHESTPLATE to gain the ability to wear amulets! Drag n'drop to apply!"
+                    : "Apply to any LEGGINGS to gain the ability to wear belts! Drag n'drop to apply!";
+            event.getToolTip().add(Component.literal(flavor)
+                    .withColor(AccessorySocketItem.COLOR));
+        }
+        var omniRate = stack.get(ModDataComponents.OMNI_SOCKET_SUCCESS.get());
+        if (omniRate != null) {
+            event.getToolTip().add(Component.literal("Success Rate: " + omniRate + "%").withColor(AccessorySocketItem.COLOR));
             event.getToolTip().add(Component.literal(
-                    "Apply to any CHESTPLATE to gain the ability to wear amulets! Drag n'drop to apply!")
+                    "Apply to any CHESTPLATE or LEGGINGS to gain the appropriate accessory socket! Drag n'drop to apply!")
                     .withColor(AccessorySocketItem.COLOR));
         }
         var looseAccessory = stack.get(ModDataComponents.ACCESSORY_ITEM.get());
@@ -32,8 +41,28 @@ public final class EquipmentTooltipService {
                 event.getToolTip().add(Component.literal("Drag n' Drop onto a socketed chestplate to apply.")
                         .withStyle(net.minecraft.ChatFormatting.GRAY));
             });
+            com.cosmicpve.equipment.accessory.BeltDefinition.find(looseAccessory.accessoryId()).ifPresent(definition -> {
+                event.getToolTip().add(Component.literal(definition.effect()).withColor(definition.color()));
+                event.getToolTip().add(Component.literal("Drag n' Drop onto socketed leggings to apply.")
+                        .withStyle(net.minecraft.ChatFormatting.GRAY));
+            });
         }
         var accessoryLoadout = stack.get(ModDataComponents.ACCESSORY_LOADOUT.get());
+        if (accessoryLoadout != null && accessoryLoadout.valid()
+                && accessoryLoadout.socketed(com.cosmicpve.data.component.AccessorySlot.BELT)) {
+            var attached = accessoryLoadout.attached(com.cosmicpve.data.component.AccessorySlot.BELT)
+                    .flatMap(com.cosmicpve.equipment.accessory.BeltDefinition::find);
+            if (attached.isPresent()) {
+                var definition = attached.orElseThrow();
+                event.getToolTip().add(Component.literal("Socketed: ").withStyle(style -> style
+                                .withColor(AccessorySocketItem.COLOR).withBold(true))
+                        .append(Component.literal(definition.displayName()).withStyle(style -> style
+                                .withColor(definition.color()).withBold(true))));
+                event.getToolTip().add(Component.literal("Right-click with an empty cursor to remove.")
+                        .withStyle(net.minecraft.ChatFormatting.GRAY));
+            } else event.getToolTip().add(Component.literal("Socketed: EMPTY")
+                    .withStyle(style -> style.withColor(AccessorySocketItem.COLOR).withBold(true)));
+        }
         if (accessoryLoadout != null && accessoryLoadout.valid()
                 && accessoryLoadout.socketed(com.cosmicpve.data.component.AccessorySlot.AMULET)) {
             var attached = accessoryLoadout.attached(com.cosmicpve.data.component.AccessorySlot.AMULET)

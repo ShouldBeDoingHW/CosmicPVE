@@ -107,6 +107,16 @@ class GearSalvageServiceTest {
                 chestplate.get(ModDataComponents.ACCESSORY_LOADOUT.get()).withAttachment(
                         AccessorySlot.AMULET, AmuletDefinition.ICICLE.id()));
         assertTrue(service.storedXp(chestplate).isEmpty());
+
+        ItemStack leggings = new ItemStack(Items.DIAMOND_LEGGINGS);
+        enchant(leggings, fixture.protection(), 1);
+        leggings.set(ModDataComponents.ACCESSORY_LOADOUT.get(),
+                AccessoryLoadout.empty().withSocket(AccessorySlot.BELT));
+        assertTrue(service.storedXp(leggings).isPresent());
+        leggings.set(ModDataComponents.ACCESSORY_LOADOUT.get(),
+                leggings.get(ModDataComponents.ACCESSORY_LOADOUT.get()).withAttachment(
+                        AccessorySlot.BELT, com.cosmicpve.equipment.accessory.BeltDefinition.JELLY_ROLL.id()));
+        assertTrue(service.storedXp(leggings).isEmpty());
     }
 
     @Test void ineligibleToolsAndUnenchantedGearAreRejectedWithoutConsumption() {

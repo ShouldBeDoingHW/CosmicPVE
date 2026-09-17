@@ -37,7 +37,8 @@ public final class StormcallerBehavior {
         }
         attacker.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, durationTicks(total), 0));
         activation.markAffected(attacker);
-        actions.deliverTrue(parent.context(), attacker,
-                TrueDamagePacket.standard(CosmicPVE.id("stormcaller"), trueDamage(total)), RecursionPolicy.NO_PROCS);
+        var owner = event.target();
+        if (owner != null) com.cosmicpve.combat.CosmicCombat.lightning().deliver(activation, owner, attacker,
+                parent.context(), CosmicPVE.id("stormcaller"), trueDamage(total), actions);
     }
 }

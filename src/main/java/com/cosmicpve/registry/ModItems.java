@@ -49,6 +49,8 @@ import com.cosmicpve.data.component.AccessorySlot;
 import com.cosmicpve.equipment.accessory.AmuletDefinition;
 import com.cosmicpve.equipment.accessory.AmuletItem;
 import com.cosmicpve.equipment.accessory.AccessorySocketItem;
+import com.cosmicpve.equipment.accessory.BeltDefinition;
+import com.cosmicpve.equipment.accessory.BeltItem;
 
 public final class ModItems {
     private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(CosmicPVE.MOD_ID);
@@ -57,11 +59,21 @@ public final class ModItems {
             AccessorySocketItem::new, properties -> properties.stacksTo(64)
                     .component(ModDataComponents.ACCESSORY_SOCKET.get(),
                             new AccessorySocketData(AccessorySocketData.DATA_VERSION, AccessorySlot.AMULET, 100)));
+    public static final DeferredItem<AccessorySocketItem> BELT_SOCKET = ITEMS.registerItem("belt_socket",
+            AccessorySocketItem::new, properties -> properties.stacksTo(64)
+                    .component(ModDataComponents.ACCESSORY_SOCKET.get(),
+                            new AccessorySocketData(AccessorySocketData.DATA_VERSION, AccessorySlot.BELT, 100)));
+    public static final DeferredItem<AccessorySocketItem> OMNI_SOCKET = ITEMS.registerItem("omni_socket",
+            AccessorySocketItem::new, properties -> properties.stacksTo(64)
+                    .component(ModDataComponents.OMNI_SOCKET_SUCCESS.get(), 100));
     public static final DeferredItem<AmuletItem> BLOOD_DIAMOND_AMULET = amulet("blood_diamond_amulet",
             AmuletDefinition.BLOOD_DIAMOND);
     public static final DeferredItem<AmuletItem> ICICLE_AMULET = amulet("icicle_amulet", AmuletDefinition.ICICLE);
     public static final DeferredItem<AmuletItem> BLACK_HEART_AMULET = amulet("black_heart_amulet",
             AmuletDefinition.BLACK_HEART);
+    public static final DeferredItem<BeltItem> SHOCK_THERAPY_BELT = belt("shock_therapy_belt", BeltDefinition.SHOCK_THERAPY);
+    public static final DeferredItem<BeltItem> BANDOLIER_BELT = belt("bandolier_belt", BeltDefinition.BANDOLIER);
+    public static final DeferredItem<BeltItem> JELLY_ROLL_BELT = belt("jelly_roll_belt", BeltDefinition.JELLY_ROLL);
 
     public static final DeferredItem<Item> FOUNDATION_TOKEN = ITEMS.registerSimpleItem(
             "foundation_token",
@@ -214,6 +226,12 @@ public final class ModItems {
         return ITEMS.registerItem(name, AmuletItem::new, properties -> properties.stacksTo(1)
                 .component(ModDataComponents.ACCESSORY_ITEM.get(), new AccessoryItemData(
                         AccessoryItemData.DATA_VERSION, AccessorySlot.AMULET, definition.id())));
+    }
+
+    private static DeferredItem<BeltItem> belt(String name, BeltDefinition definition) {
+        return ITEMS.registerItem(name, BeltItem::new, properties -> properties.stacksTo(1)
+                .component(ModDataComponents.ACCESSORY_ITEM.get(), new AccessoryItemData(
+                        AccessoryItemData.DATA_VERSION, AccessorySlot.BELT, definition.id())));
     }
 
     private static DeferredItem<CallOfForestItem> callOfForest(String name, int minutes) {

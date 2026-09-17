@@ -111,6 +111,12 @@ public final class CosmicCombat {
             new com.cosmicpve.equipment.accessory.BlackHeartStateService();
     private static final com.cosmicpve.equipment.accessory.AmuletCombatService AMULETS =
             new com.cosmicpve.equipment.accessory.AmuletCombatService(ACCESSORIES, STACKS, BLEED_RUNTIME, BLACK_HEART);
+    private static final com.cosmicpve.equipment.accessory.BandolierStateService BANDOLIER =
+            new com.cosmicpve.equipment.accessory.BandolierStateService();
+    private static final com.cosmicpve.equipment.accessory.BeltCombatService BELTS =
+            new com.cosmicpve.equipment.accessory.BeltCombatService(ACCESSORIES, BANDOLIER);
+    private static final com.cosmicpve.equipment.accessory.CosmicLightningService LIGHTNING =
+            new com.cosmicpve.equipment.accessory.CosmicLightningService(ACCESSORIES);
     private static final WeaponSkinResolver WEAPON_SKINS = new WeaponSkinResolver();
     private static final WeaponSkinCombatResolver WEAPON_SKIN_COMBAT =
             new WeaponSkinCombatResolver(WEAPON_SKINS, STACKS, CHILD_ACTIONS);
@@ -133,7 +139,7 @@ public final class CosmicCombat {
     private static final CombatEventBridge EVENTS =
             new CombatEventBridge(ENGINE, ATTRIBUTION, SEQUENCES, TRACES, ENCHANTMENTS, PROC_EVENTS,
                     OUTGOING, INCOMING, PRE_DEFENSE_BOUNDS, RECENT_COMBAT_MEMORY, WEAPON_SKINS, SIGNATURE_WEAPONS,
-                    HYSTERIA);
+                    HYSTERIA, BELTS);
     private static final ProcHookEventBridge PROC_HOOKS =
             new ProcHookEventBridge(PROC_EVENTS, EXECUTIONS, NUTRITION, SOUL_TETHERS);
     private static final CombatStackEventBridge STACK_EVENTS = new CombatStackEventBridge(STACKS, BLEED_RUNTIME);
@@ -184,6 +190,7 @@ public final class CosmicCombat {
         OUTGOING.register(NIMBLE);
         OUTGOING.register(new com.cosmicpve.combat.enchantment.LongbowBehavior());
         OUTGOING.register(AMULETS);
+        OUTGOING.register(BELTS);
         OUTGOING.register(new com.cosmicpve.trial.room.InventorCombatContributor());
         INCOMING.register(ARMOR_SET_COMBAT);
         INCOMING.register(WEAPON_SKIN_COMBAT);
@@ -194,6 +201,7 @@ public final class CosmicCombat {
         INCOMING.register(MASK_COMBAT);
         INCOMING.register(hex);
         INCOMING.register(playerUpgrades);
+        INCOMING.register(BELTS);
         PRE_DEFENSE_BOUNDS.register(new AegisBehavior(ENCHANTMENTS));
         PROC_MODIFIERS.register(new LuckBehavior(STACKS));
         PROC_MODIFIERS.register(new ArmorSetProcModifierResolver(ARMOR_SETS, ACTIVITIES));
@@ -239,6 +247,9 @@ public final class CosmicCombat {
         NeoForge.EVENT_BUS.addListener(THUNDERING_VELOCITY::onServerTick);
         NeoForge.EVENT_BUS.addListener(SELF_DESTRUCT_EVENTS::onExplosion);
         NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, SPIRIT_LINK::onDeath);
+        var beltEvents = new com.cosmicpve.equipment.accessory.BeltRuntimeEventBridge(BELTS);
+        NeoForge.EVENT_BUS.addListener(beltEvents::onPlayerTick);
+        NeoForge.EVENT_BUS.addListener(beltEvents::onDeath);
     }
 
     public static CombatTraceService traces() {
@@ -296,4 +307,6 @@ public final class CosmicCombat {
     public static WeaponSkinResolver weaponSkins() { return WEAPON_SKINS; }
     public static com.cosmicpve.equipment.accessory.AccessoryResolver accessories() { return ACCESSORIES; }
     public static com.cosmicpve.equipment.accessory.BlackHeartStateService blackHeart() { return BLACK_HEART; }
+    public static com.cosmicpve.equipment.accessory.BeltCombatService belts() { return BELTS; }
+    public static com.cosmicpve.equipment.accessory.CosmicLightningService lightning() { return LIGHTNING; }
 }

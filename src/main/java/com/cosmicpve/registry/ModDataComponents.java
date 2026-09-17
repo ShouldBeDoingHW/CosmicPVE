@@ -52,6 +52,9 @@ public final class ModDataComponents {
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<AccessoryItemData>> ACCESSORY_ITEM =
             COMPONENTS.registerComponentType("accessory_item", builder -> builder.persistent(AccessoryItemData.CODEC)
                     .networkSynchronized(ByteBufCodecs.fromCodecWithRegistries(AccessoryItemData.CODEC)).cacheEncoding());
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Integer>> OMNI_SOCKET_SUCCESS =
+            COMPONENTS.registerComponentType("omni_socket_success", builder -> builder
+                    .persistent(Codec.intRange(1, 100)).networkSynchronized(ByteBufCodecs.VAR_INT).cacheEncoding());
 
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<CustomEnchantMetadata>> CUSTOM_ENCHANT_META =
             COMPONENTS.registerComponentType(

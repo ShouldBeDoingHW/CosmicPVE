@@ -39,6 +39,7 @@ public final class LightningBehavior {
             bolt.setPos(target.getX(), target.getY(), target.getZ());
             level.addFreshEntity(bolt);
         }
-        childActions.deliverTrue(parent.context(), target, packet(), RecursionPolicy.NO_PROCS);
+        com.cosmicpve.combat.CosmicCombat.lightning().deliver(activation, event.attacker(), target,
+                parent.context(), CosmicPVE.id("lightning"), TRUE_DAMAGE, childActions);
     }
 }

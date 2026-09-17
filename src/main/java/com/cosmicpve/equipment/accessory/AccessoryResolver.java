@@ -16,4 +16,12 @@ public final class AccessoryResolver {
     public boolean hasAmulet(LivingEntity entity, AmuletDefinition definition) {
         return equippedAmulet(entity).filter(value -> value == definition).isPresent();
     }
+    public Optional<BeltDefinition> equippedBelt(LivingEntity entity) {
+        var loadout = entity.getItemBySlot(EquipmentSlot.LEGS).get(ModDataComponents.ACCESSORY_LOADOUT.get());
+        if (loadout == null || !loadout.valid()) return Optional.empty();
+        return loadout.attached(AccessorySlot.BELT).flatMap(BeltDefinition::find);
+    }
+    public boolean hasBelt(LivingEntity entity, BeltDefinition definition) {
+        return equippedBelt(entity).filter(value -> value == definition).isPresent();
+    }
 }

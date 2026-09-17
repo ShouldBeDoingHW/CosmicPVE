@@ -116,7 +116,7 @@ public final class WeaponSkinCombatResolver
                     Optional.of(activation.event().attacker().getUUID()), activation.event().serverTick())));
         }
         if (definition.id().equals(WeaponSkinDefinitions.STORMBRINGER)) {
-            return List.of(candidate(definition.id(), STORM_CHANCE, activation -> activateStorm(activation.event())));
+            return List.of(candidate(definition.id(), STORM_CHANCE, this::activateStorm));
         }
         if (definition.id().equals(WeaponSkinDefinitions.WHISK_TAKER)) {
             var committed = event.combatResult().orElseThrow();
@@ -182,7 +182,8 @@ public final class WeaponSkinCombatResolver
                 && targetHealth / targetMaximum < attackerHealth / attackerMaximum;
     }
 
-    private void activateStorm(ProcEvent event) {
+    private void activateStorm(com.cosmicpve.combat.proc.ProcActivation activation) {
+        ProcEvent event = activation.event();
         var target = event.target();
         var parent = event.combatResult().orElse(null);
         if (target == null || parent == null || target.isDeadOrDying()
@@ -195,9 +196,9 @@ public final class WeaponSkinCombatResolver
         }
         target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS,
                 STORM_SLOWNESS_TICKS, STORM_SLOWNESS_AMPLIFIER));
-        childActions.deliverTrue(parent.context(), target,
-                stormPacket(),
-                RecursionPolicy.NO_PROCS);
+        com.cosmicpve.combat.CosmicCombat.lightning().deliver(activation,
+                event.attacker(), target, parent.context(), WeaponSkinDefinitions.STORMBRINGER,
+                STORM_TRUE_DAMAGE, childActions);
     }
 
     public static TrueDamagePacket stormPacket() {

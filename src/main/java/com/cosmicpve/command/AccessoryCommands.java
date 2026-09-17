@@ -4,6 +4,8 @@ import com.cosmicpve.data.component.AccessorySocketData;
 import com.cosmicpve.data.component.AccessorySlot;
 import com.cosmicpve.equipment.accessory.AmuletDefinition;
 import com.cosmicpve.equipment.accessory.AmuletItemFactory;
+import com.cosmicpve.equipment.accessory.BeltDefinition;
+import com.cosmicpve.equipment.accessory.BeltItemFactory;
 import com.cosmicpve.registry.ModDataComponents;
 import com.cosmicpve.registry.ModItems;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -24,11 +26,33 @@ public final class AccessoryCommands {
                                     AccessorySocketData.DATA_VERSION, AccessorySlot.AMULET, rate));
                             return give(context.getSource(), EntityArgument.getPlayer(context, "player"), stack,
                                     "Amulet Socket (" + rate + "% Success)");
+                        }))))
+                .then(Commands.literal("belt_socket").then(Commands.argument("player", EntityArgument.player())
+                        .then(Commands.argument("success", IntegerArgumentType.integer(1, 100)).executes(context -> {
+                            int rate = IntegerArgumentType.getInteger(context, "success");
+                            var stack = new ItemStack(ModItems.BELT_SOCKET.get());
+                            stack.set(ModDataComponents.ACCESSORY_SOCKET.get(), new AccessorySocketData(
+                                    AccessorySocketData.DATA_VERSION, AccessorySlot.BELT, rate));
+                            return give(context.getSource(), EntityArgument.getPlayer(context, "player"), stack,
+                                    "Belt Socket (" + rate + "% Success)");
+                        }))))
+                .then(Commands.literal("omni_socket").then(Commands.argument("player", EntityArgument.player())
+                        .then(Commands.argument("success", IntegerArgumentType.integer(1, 100)).executes(context -> {
+                            int rate = IntegerArgumentType.getInteger(context, "success");
+                            var stack = new ItemStack(ModItems.OMNI_SOCKET.get());
+                            stack.set(ModDataComponents.OMNI_SOCKET_SUCCESS.get(), rate);
+                            return give(context.getSource(), EntityArgument.getPlayer(context, "player"), stack,
+                                    "Omni Socket (" + rate + "% Success)");
                         }))));
         for (var definition : AmuletDefinition.values()) {
             give.then(Commands.literal(definition.id().getPath()).then(Commands.argument("player", EntityArgument.player())
                     .executes(context -> give(context.getSource(), EntityArgument.getPlayer(context, "player"),
                             AmuletItemFactory.create(definition), definition.displayName()))));
+        }
+        for (var definition : BeltDefinition.values()) {
+            give.then(Commands.literal(definition.id().getPath()).then(Commands.argument("player", EntityArgument.player())
+                    .executes(context -> give(context.getSource(), EntityArgument.getPlayer(context, "player"),
+                            BeltItemFactory.create(definition), definition.displayName()))));
         }
         return Commands.literal("accessory").then(give);
     }

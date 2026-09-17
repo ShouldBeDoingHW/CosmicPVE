@@ -30,6 +30,8 @@ public final class CosmicPVEClient {
         modBus.addListener(MaskClientPresentation::register);
         modBus.addListener(AmuletClientPresentation::registerState);
         modBus.addListener(AmuletClientPresentation::addLayers);
+        modBus.addListener(BeltClientPresentation::registerState);
+        modBus.addListener(BeltClientPresentation::addLayers);
         modBus.addListener(ScrollableItemTooltip::registerTooltipComponents);
         var scrollingTooltips = new ScrollableItemTooltip();
         NeoForge.EVENT_BUS.addListener(scrollingTooltips::onGather);

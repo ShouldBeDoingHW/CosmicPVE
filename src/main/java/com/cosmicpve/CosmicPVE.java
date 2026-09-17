@@ -73,6 +73,7 @@ public final class CosmicPVE {
         com.cosmicpve.combat.enchantment.CleaveCurseGameTests.register(modBus);
         com.cosmicpve.combat.enchantment.OverloadSilenceLongbowGameTests.register(modBus);
         com.cosmicpve.equipment.accessory.AmuletGameTests.register(modBus);
+        com.cosmicpve.equipment.accessory.BeltGameTests.register(modBus);
         TelekinesisGameTests.register(modBus);
         com.cosmicpve.trial.room.InventorGameTests.register(modBus);
         ModItems.register(modBus);

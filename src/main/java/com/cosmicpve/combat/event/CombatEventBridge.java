@@ -49,6 +49,7 @@ public final class CombatEventBridge {
     private final WeaponSkinResolver weaponSkins;
     private final com.cosmicpve.reward.lootbox.SignatureWeaponCombatService signatureWeapons;
     private final com.cosmicpve.equipment.skin.HysteriaRedirectService hysteria;
+    private final com.cosmicpve.equipment.accessory.BeltCombatService belts;
     private final Map<DamageContainer, PendingCombat> incomingCandidates =
             Collections.synchronizedMap(new WeakHashMap<>());
     private final ThreadLocal<Deque<PendingCombat>> acceptedDamageStack =
@@ -67,7 +68,8 @@ public final class CombatEventBridge {
             RecentCombatMemoryService recentCombatMemory,
             WeaponSkinResolver weaponSkins,
             com.cosmicpve.reward.lootbox.SignatureWeaponCombatService signatureWeapons,
-            com.cosmicpve.equipment.skin.HysteriaRedirectService hysteria) {
+            com.cosmicpve.equipment.skin.HysteriaRedirectService hysteria,
+            com.cosmicpve.equipment.accessory.BeltCombatService belts) {
         this.engine = engine;
         this.attribution = attribution;
         this.sequences = sequences;
@@ -81,6 +83,7 @@ public final class CombatEventBridge {
         this.weaponSkins = weaponSkins;
         this.signatureWeapons = signatureWeapons;
         this.hysteria = hysteria;
+        this.belts = belts;
     }
 
     public void onIncomingDamage(LivingIncomingDamageEvent event) {
@@ -273,7 +276,9 @@ public final class CombatEventBridge {
         if (pending.devourActivated() && committed.isCommittedDamagingHit()
                 && committed.context().attacker() instanceof net.minecraft.world.entity.player.Player player) {
             DevourBehavior.commit(player);
+            belts.afterDevour(player);
         }
+        belts.onCommitted(committed);
         com.cosmicpve.personalvault.PersonalVaultRuntime.combatTags().onCommitted(committed);
         if (committed.isCommittedDamagingHit()
                 && committed.context().channel() == DamageChannel.ORDINARY

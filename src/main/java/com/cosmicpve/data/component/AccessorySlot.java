@@ -4,7 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import java.util.Locale;
 
-/** Stable accessory-slot identity. BELT is reserved data vocabulary, not registered content yet. */
+/** Stable concrete accessory-slot identity. Omni is deliberately not a persisted slot. */
 public enum AccessorySlot {
     AMULET,
     BELT;
