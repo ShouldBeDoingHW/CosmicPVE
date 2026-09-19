@@ -79,8 +79,8 @@ public final class OverloadSilenceLongbowGameTests {
                 "ordinary Table must remain the exact starred pool");
         helper.assertTrue(HeroicCosmicEnchantmentTableRewards.POOL.contains(
                 ModEnchantments.GODLY_OVERLOAD.identifier())
-                && HeroicCosmicEnchantmentTableRewards.ENTRY_COUNT == 33,
-                "Godly Overload must enter the generic 11-by-3 Heroic Table");
+                && HeroicCosmicEnchantmentTableRewards.ENTRY_COUNT == 36,
+                "Godly Overload must enter the generic 12-by-3 Heroic Table");
 
         var wearer = helper.makeMockPlayer(GameType.SURVIVAL);
         var overload = registry.getOrThrow(ModEnchantments.OVERLOAD);

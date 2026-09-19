@@ -172,16 +172,22 @@ public final class DenseWoodlandsSessionService {
         for(int i=0;i<player.getInventory().getContainerSize();i++) {
             var stack=player.getInventory().getItem(i);
             if(!stack.is(ModItems.ADVENTURE_COMPASS.get()))continue;
-            if(!found && owned(stack,s))found=true;else player.getInventory().setItem(i,ItemStack.EMPTY);
+            if(!found && owned(stack,s)) {
+                found=true;
+                stack.set(DataComponents.LODESTONE_TRACKER,compassTarget(s));
+            } else player.getInventory().setItem(i,ItemStack.EMPTY);
         }
         if(found)return;
         var compass=new ItemStack(ModItems.ADVENTURE_COMPASS.get());var tag=new CompoundTag();
         tag.putString("adventure_owner",s.owner().toString());tag.putString("adventure_session",s.id().toString());
         compass.set(DataComponents.CUSTOM_DATA,CustomData.of(tag));
-        compass.set(DataComponents.LODESTONE_TRACKER,new LodestoneTracker(Optional.of(GlobalPos.of(DIMENSION,s.exit())),false));
+        compass.set(DataComponents.LODESTONE_TRACKER,compassTarget(s));
         if(!player.getInventory().add(compass)) {
             var displaced=player.getInventory().removeItemNoUpdate(8);player.getInventory().setItem(8,compass);player.drop(displaced,false);
         }
+    }
+    public static LodestoneTracker compassTarget(AdventureSession session) {
+        return new LodestoneTracker(Optional.of(GlobalPos.of(DIMENSION,session.exit())),false);
     }
     public static void removeCompasses(ServerPlayer player) {
         for(int i=0;i<player.getInventory().getContainerSize();i++)if(player.getInventory().getItem(i).is(ModItems.ADVENTURE_COMPASS.get()))player.getInventory().setItem(i,ItemStack.EMPTY);

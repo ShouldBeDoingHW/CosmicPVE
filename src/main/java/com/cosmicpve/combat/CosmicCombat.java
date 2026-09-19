@@ -175,6 +175,7 @@ public final class CosmicCombat {
         OUTGOING.register(ARMOR_SET_COMBAT);
         OUTGOING.register(WEAPON_SKIN_COMBAT);
         OUTGOING.register(deathPact);
+        OUTGOING.register(new com.cosmicpve.combat.enchantment.DeathbringerBehavior(ENCHANTMENTS));
         OUTGOING.register(permafrost);
         OUTGOING.register(new DivineImmolationBehavior(COOLDOWNS));
         OUTGOING.register(SOUL_TETHERS);

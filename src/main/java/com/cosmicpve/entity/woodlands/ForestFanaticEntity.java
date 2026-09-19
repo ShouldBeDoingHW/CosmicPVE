@@ -20,13 +20,19 @@ import net.minecraft.world.level.storage.ValueOutput;
 public final class ForestFanaticEntity extends AbstractSkeleton {
     public static final float RENDER_SCALE = 1.1F;
     public static final double MAX_HEALTH = 25.0;
-    public static final double ARMOR = 3.0;
+    public static final double ARMOR = 4.0;
     public static final double MOVEMENT_SPEED = 0.22;
     public static final double DROP_CHANCE = 0.25;
     private static final String EQUIPMENT = "CosmicEquipmentInitialized";
     private boolean equipmentInitialized;
 
     public ForestFanaticEntity(EntityType<? extends ForestFanaticEntity> type, Level level) { super(type, level); }
+
+    // PathfinderMob otherwise rejects bright spawn positions through Monster's negative walk value.
+    @Override public boolean checkSpawnRules(net.minecraft.world.level.LevelAccessor level, EntitySpawnReason reason) { return true; }
+    @Override public boolean requiresCustomPersistence() {
+        return getVehicle() instanceof DreadmaneEntity ? false : super.requiresCustomPersistence();
+    }
 
     public static AttributeSupplier.Builder createAttributes() {
         return AbstractSkeleton.createAttributes().add(Attributes.MAX_HEALTH, MAX_HEALTH)

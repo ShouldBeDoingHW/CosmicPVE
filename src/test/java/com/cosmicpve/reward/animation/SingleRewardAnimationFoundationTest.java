@@ -22,7 +22,7 @@ class SingleRewardAnimationFoundationTest {
         assertEquals(2, LootAnimationTimeline.countdown(60));
         assertEquals(1, LootAnimationTimeline.countdown(80));
         assertEquals(0, LootAnimationTimeline.countdown(100));
-        assertEquals(120, LootAnimationTimeline.CLOSE_TICK);
+        assertEquals(160, LootAnimationTimeline.CLOSE_TICK);
     }
 
     @Test void previewAudioFiresTwicePerWindowAndRepeatsExactEightPitchPattern() {

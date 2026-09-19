@@ -18,7 +18,7 @@ public record RewardDescriptorData(RewardType type, Optional<Identifier> itemId,
         Optional<CosmicEnchantmentTier> rarity, Optional<Integer> successRate,
         Optional<Identifier> entityTypeId, Optional<GeneratedEquipmentDefinitionData> generatedEquipment,
         Optional<Integer> maskCount, Optional<Identifier> armorSetId, Optional<Long> experience,
-        Optional<Identifier> portalPreset) {
+        Optional<Identifier> portalPreset, Optional<Integer> trinketTier) {
     public static final Codec<RewardDescriptorData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             RewardType.CODEC.fieldOf("type").forGetter(RewardDescriptorData::type),
             Identifier.CODEC.optionalFieldOf("item").forGetter(RewardDescriptorData::itemId),
@@ -31,19 +31,36 @@ public record RewardDescriptorData(RewardType type, Optional<Identifier> itemId,
             Codec.INT.optionalFieldOf("mask_count").forGetter(RewardDescriptorData::maskCount),
             Identifier.CODEC.optionalFieldOf("armor_set").forGetter(RewardDescriptorData::armorSetId),
             Codec.LONG.optionalFieldOf("experience").forGetter(RewardDescriptorData::experience),
-            Identifier.CODEC.optionalFieldOf("portal_preset").forGetter(RewardDescriptorData::portalPreset)
+            Identifier.CODEC.optionalFieldOf("portal_preset").forGetter(RewardDescriptorData::portalPreset),
+            Codec.INT.optionalFieldOf("trinket_tier").forGetter(RewardDescriptorData::trinketTier)
     ).apply(instance, RewardDescriptorData::new));
 
     public RewardDescriptorData(RewardType type, Optional<Identifier> item, Optional<Long> cents,
             Optional<CosmicEnchantmentTier> rarity, Optional<Integer> rate, Optional<Identifier> entity,
             Optional<GeneratedEquipmentDefinitionData> equipment, Optional<Integer> masks,
+            Optional<Identifier> armor, Optional<Long> xp, Optional<Identifier> preset) {
+        this(type,item,cents,rarity,rate,entity,equipment,masks,armor,xp,preset,Optional.empty());
+    }
+
+    public RewardDescriptorData(RewardType type, Optional<Identifier> item, Optional<Long> cents,
+            Optional<CosmicEnchantmentTier> rarity, Optional<Integer> rate, Optional<Identifier> entity,
+            Optional<GeneratedEquipmentDefinitionData> equipment, Optional<Integer> masks,
             Optional<Identifier> armor, Optional<Long> xp) {
-        this(type,item,cents,rarity,rate,entity,equipment,masks,armor,xp,Optional.empty());
+        this(type,item,cents,rarity,rate,entity,equipment,masks,armor,xp,Optional.empty(),Optional.empty());
     }
 
     public ValidationResult<RewardDescriptor> resolve(String source, RegistryAccess registries) {
         try {
             return switch (type) {
+                case RANDOM_TRIAL_TRINKET -> ValidationResult.success(new RewardDescriptor.RandomTrialTrinket(
+                        required(trinketTier, "trinket_tier")));
+                case ACCESSORY_SOCKET -> {
+                    var id = required(itemId, "item");
+                    if (!List.of(Identifier.parse("cosmicpve:amulet_socket"), Identifier.parse("cosmicpve:belt_socket"),
+                            Identifier.parse("cosmicpve:omni_socket")).contains(id))
+                        yield failure(source, "accessory_socket item must be Amulet, Belt or Omni Socket");
+                    yield ValidationResult.success(new RewardDescriptor.AccessorySocket(id, rate()));
+                }
                 case TRIAL_PORTAL_PRESET -> ValidationResult.success(new RewardDescriptor.TrialPortalPreset(
                         required(portalPreset,"portal_preset")));
                 case STATIC_ITEM -> {

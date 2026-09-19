@@ -40,6 +40,7 @@ public final class CosmicPVEClient {
         NeoForge.EVENT_BUS.addListener(scrollingTooltips::onScreenClosing);
         NeoForge.EVENT_BUS.addListener(scrollingTooltips::onScreenRenderPre);
         NeoForge.EVENT_BUS.addListener(scrollingTooltips::onScreenRenderPost);
+        NeoForge.EVENT_BUS.addListener(LootPreviewInput::onInteraction);
     }
 
     private static void registerMenuScreens(RegisterMenuScreensEvent event) {

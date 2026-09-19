@@ -31,7 +31,7 @@ import net.minecraft.world.phys.AABB;
 public final class DreadmaneEntity extends ZombieHorse {
     public static final float RENDER_SCALE = 1.15F;
     public static final double MAX_HEALTH = 40.0;
-    public static final double ARMOR = 5.0;
+    public static final double ARMOR = 6.5;
     public static final double MOVEMENT_SPEED = 0.31;
     public static final double ATTACK_DAMAGE = 7.5;
     public static final float BUCK_DAMAGE = 10.0F;
@@ -74,8 +74,30 @@ public final class DreadmaneEntity extends ZombieHorse {
         getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(MOVEMENT_SPEED);
         getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(ATTACK_DAMAGE);
         setHealth((float) MAX_HEALTH);
+        if (reason == EntitySpawnReason.NATURAL
+                && level.getLevel().dimension().equals(com.cosmicpve.adventure.DenseWoodlandsSessionService.DIMENSION)
+                && shouldSpawnJockey(getRandom().nextInt(100))) {
+            createJockeyRider(level, difficulty);
+        }
         return result;
     }
+
+    public static boolean shouldSpawnJockey(int roll) {
+        if (roll < 0 || roll >= 100) throw new IllegalArgumentException("Jockey roll must be 0-99");
+        return roll < 15;
+    }
+    public ForestFanaticEntity createJockeyRider(ServerLevelAccessor level, net.minecraft.world.DifficultyInstance difficulty) {
+        if (!getPassengers().isEmpty()) return null;
+        var rider = com.cosmicpve.registry.ModEntities.FOREST_FANATIC.get().create(level.getLevel(), EntitySpawnReason.JOCKEY);
+        if (rider == null) return null;
+        rider.snapTo(getX(), getY(), getZ(), getYRot(), 0);
+        rider.finalizeSpawn(level, difficulty, EntitySpawnReason.JOCKEY, null);
+        return rider.startRiding(this, true, false) ? rider : null;
+    }
+    @Override public boolean checkSpawnRules(net.minecraft.world.level.LevelAccessor level, EntitySpawnReason reason) { return true; }
+    // The Fanatic remains a ranged passenger; it must not disable the mount's autonomous melee goals.
+    @Override public net.minecraft.world.entity.LivingEntity getControllingPassenger() { return null; }
+    @Override public boolean isMobControlled() { return false; }
 
     @Override public boolean doHurtTarget(ServerLevel level, Entity target) {
         if (target instanceof net.minecraft.world.entity.LivingEntity living && buckReady(level.getGameTime())
@@ -112,7 +134,9 @@ public final class DreadmaneEntity extends ZombieHorse {
     @Override public boolean canMate(Animal other) { return false; }
     @Override public boolean canFallInLove() { return false; }
     @Override public boolean canBeLeashed() { return false; }
-    @Override protected boolean canAddPassenger(Entity passenger) { return false; }
+    @Override protected boolean canAddPassenger(Entity passenger) {
+        return passenger instanceof ForestFanaticEntity && getPassengers().isEmpty();
+    }
 
     @Override protected void dropCustomDeathLoot(ServerLevel level, DamageSource source, boolean recentlyHit) {
         DenseWoodlandsMobLoot.drop(this, level, DROP_CHANCE);

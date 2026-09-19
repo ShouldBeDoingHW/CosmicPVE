@@ -10,7 +10,11 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
-public final class SpaceDustBundleItem extends Item {
+public final class SpaceDustBundleItem extends Item implements com.cosmicpve.reward.preview.LootPreviewProvider {
+    @Override public List<ItemStack> previewOutcomes(net.minecraft.server.level.ServerPlayer player, ItemStack source) {
+        return SpaceDustBundleRewards.WEIGHTS.stream().map(entry ->
+                com.cosmicpve.equipment.enchantment.CosmicDustService.dust(entry.tier(), 10)).toList();
+    }
     public SpaceDustBundleItem(Properties properties) { super(properties); }
     @Override public boolean isFoil(ItemStack stack) { return true; }
     @Override public Component getName(ItemStack stack) { return Component.literal("Space Dust Bundle")
@@ -23,10 +27,8 @@ public final class SpaceDustBundleItem extends Item {
         if (!(player instanceof net.minecraft.server.level.ServerPlayer serverPlayer)) return InteractionResult.FAIL;
         ItemStack source = player.getItemInHand(hand);
         var rewards = SpaceDustBundleRewards.roll(player.getRandom());
-        var previews = SpaceDustBundleRewards.WEIGHTS.stream().map(entry ->
-                com.cosmicpve.equipment.enchantment.CosmicDustService.dust(entry.tier(), 1)).toList();
         return SingleRewardAnimationService.INSTANCE.open(serverPlayer, rewards,
-                LootAnimationPreviewProvider.uniform(previews), () -> source.shrink(1))
+                SpaceDustBundleRewards::cosmeticPreview, () -> source.shrink(1))
                 ? InteractionResult.SUCCESS_SERVER : InteractionResult.FAIL;
     }
 }

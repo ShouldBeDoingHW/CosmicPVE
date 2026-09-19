@@ -20,7 +20,8 @@ public final class HeroicEnchantments {
             pair(ModEnchantments.EXECUTE, ModEnchantments.PERMANENT_EXECUTE),
             pair(ModEnchantments.CLEAVE, ModEnchantments.MIGHTY_CLEAVE),
             pair(ModEnchantments.CURSE, ModEnchantments.FORBIDDEN_CURSE),
-            pair(ModEnchantments.OVERLOAD, ModEnchantments.GODLY_OVERLOAD));
+            pair(ModEnchantments.OVERLOAD, ModEnchantments.GODLY_OVERLOAD),
+            pair(ModEnchantments.DEATHBRINGER, ModEnchantments.PLANETARY_DEATHBRINGER));
     private static final Map<Identifier, Identifier> ORDINARY_TO_HEROIC = PAIRS.stream()
             .collect(java.util.stream.Collectors.toUnmodifiableMap(Pair::ordinary, Pair::heroic));
     private static final Map<Identifier, Identifier> HEROIC_TO_ORDINARY = PAIRS.stream()

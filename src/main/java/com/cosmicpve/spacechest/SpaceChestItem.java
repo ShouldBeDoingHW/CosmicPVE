@@ -38,4 +38,12 @@ public final class SpaceChestItem extends Item {
         return List.of(Component.translatable("tooltip.cosmicpve.space_chest.purpose").withStyle(ChatFormatting.YELLOW),
                 Component.translatable("tooltip.cosmicpve.space_chest.instruction").withStyle(ChatFormatting.GRAY));
     }
+    public static List<Component> lore(com.cosmicpve.spacechest.SpaceChestTier tier) {
+        return switch (tier) {
+            case ULTIMATE, LEGENDARY, MASTERY -> List.of(Component.literal(
+                    "Contains 5 powerful " + tier.name().charAt(0) + tier.name().substring(1).toLowerCase(java.util.Locale.ROOT)
+                            + " tier items! Right click to try your luck!").withStyle(ChatFormatting.YELLOW));
+            default -> lore();
+        };
+    }
 }

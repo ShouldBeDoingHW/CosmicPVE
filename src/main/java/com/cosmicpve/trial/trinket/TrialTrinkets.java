@@ -9,6 +9,17 @@ import net.minecraft.world.item.ItemStack;
 
 public final class TrialTrinkets {
     private TrialTrinkets() {}
+    public static ItemStack randomTier(int tier, net.minecraft.util.RandomSource random) {
+        if (tier < 1 || tier > 3) throw new IllegalArgumentException("Trinket tier must be in [1,3]");
+        var types = TrialTrinketType.values();
+        var type = types[random.nextInt(types.length)];
+        int value = switch (type) {
+            case TIME -> new int[]{1,3,5}[tier-1];
+            case FAME -> new int[]{33,66,100}[tier-1];
+            case SKIP, INSURANCE, MADNESS -> tier;
+        };
+        return create(type, value, 1);
+    }
 
     public static ItemStack create(TrialTrinketType type, int value, int count) {
         TrialTrinketData data = new TrialTrinketData(type, value);

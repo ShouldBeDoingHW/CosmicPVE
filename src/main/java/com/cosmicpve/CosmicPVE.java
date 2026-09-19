@@ -92,7 +92,12 @@ public final class CosmicPVE {
         CosmicCombat.register();
         NeoForge.EVENT_BUS.addListener(CosmicCommands::register);
         var crystals = new ArmorCrystalEventBridge();
+        com.cosmicpve.reward.preview.DeathbringerCleanupGameTests.register(modBus);
         NeoForge.EVENT_BUS.addListener(crystals::onStacked);
+        NeoForge.EVENT_BUS.addListener(crystals::onChat);
+        NeoForge.EVENT_BUS.addListener(crystals::onTick);
+        NeoForge.EVENT_BUS.addListener(crystals::onLogout);
+        NeoForge.EVENT_BUS.addListener(crystals::onDeath);
         var tooltips = new EquipmentTooltipService();
         NeoForge.EVENT_BUS.addListener(tooltips::onTooltip);
         var enchanting = new EnchantingEventBridge();

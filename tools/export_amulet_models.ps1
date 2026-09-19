@@ -20,10 +20,11 @@ function Rotate-Point($point, $origin, $rotation) {
     return @(($x+[double]$origin[0]),($y+[double]$origin[1]),($z+[double]$origin[2]))
 }
 function Runtime-Point($point) {
-    # Blockbench source: +Y up and front -Z. Keep the authored torso-local geometry inside
-    # Minecraft's conventional unit cube; item rendering removes this 0.5 center offset.
-    return @((0.5+[double]$point[0]/16.0),(0.5+(10.0-[double]$point[1])/16.0),
-            (0.5+([double]$point[2]-4.0)/16.0-0.04))
+    # Center each item around its bounds. Worn placement belongs to FIXED's
+    # translation, not the geometry shared by inventory/chest/hand rendering.
+    return @((0.5+([double]$point[0]-$script:modelCenter[0])/16.0),
+            (0.5-([double]$point[1]-$script:modelCenter[1])/16.0),
+            (0.5+([double]$point[2]-$script:modelCenter[2])/16.0))
 }
 function Add-Face([Collections.Generic.List[string]]$lines, $points, $uvs, [ref]$vIndex, [ref]$tIndex) {
     $indices=@()
@@ -39,6 +40,22 @@ function Add-Face([Collections.Generic.List[string]]$lines, $points, $uvs, [ref]
 
 foreach($entry in $models) {
     $json=Get-Content -Raw (Join-Path $RepositoryRoot $entry.Source) | ConvertFrom-Json
+    $allPoints=@()
+    foreach($element in $json.elements) {
+        $rotation=if($null -eq $element.rotation){@(0,0,0)}else{$element.rotation}
+        $origin=if($null -eq $element.origin){@(0,0,0)}else{$element.origin}
+        if($element.type -eq 'cube') {
+            foreach($x in @($element.from[0],$element.to[0])) { foreach($y in @($element.from[1],$element.to[1])) {
+                foreach($z in @($element.from[2],$element.to[2])) { $allPoints+=,(Rotate-Point @($x,$y,$z) $origin $rotation) }
+            } }
+        } else { foreach($vertex in $element.vertices.PSObject.Properties) { $allPoints+=,(Rotate-Point $vertex.Value $origin $rotation) } }
+    }
+    $script:modelCenter=@(0,0,0)
+    for($axis=0;$axis -lt 3;$axis++) {
+        $bounds=$allPoints | ForEach-Object { $_[$axis] } | Measure-Object -Minimum -Maximum
+        $script:modelCenter[$axis]=($bounds.Minimum+$bounds.Maximum)/2
+    }
+    Write-Output ($entry.Runtime+' center: '+($script:modelCenter -join ', '))
     $lines=[Collections.Generic.List[string]]::new()
     $lines.Add('# Generated from ' + $entry.Source + '; do not hand-edit.')
     $lines.Add('mtllib ' + $entry.Runtime + '.mtl'); $lines.Add('usemtl amulet')

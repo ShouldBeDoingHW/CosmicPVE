@@ -15,6 +15,9 @@ public final class SpaceDustBundleRewards {
             new WeightedTier(CosmicEnchantmentTier.MASTERY, 4));
     public static final int TOTAL_WEIGHT = 92;
     private SpaceDustBundleRewards() {}
+    public static ItemStack cosmeticPreview(RandomSource random) {
+        return CosmicDustService.dust(WEIGHTS.get(random.nextInt(WEIGHTS.size())).tier(), random.nextInt(10) + 1);
+    }
     public static List<ItemStack> roll(RandomSource random) {
         return java.util.stream.IntStream.range(0, 3).mapToObj(ignored ->
                 CosmicDustService.dust(select(random.nextInt(TOTAL_WEIGHT)), random.nextInt(10) + 1)).toList();

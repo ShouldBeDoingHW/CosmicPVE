@@ -64,7 +64,7 @@ public final class DenseWoodlandsGameTests {
         fanatic.finalizeSpawn(helper.getLevel(), helper.getLevel().getCurrentDifficultyAt(fanatic.blockPosition()),
                 EntitySpawnReason.TRIGGERED, null);
         assertAttribute(helper, fanatic, Attributes.MAX_HEALTH, 25.0);
-        assertAttribute(helper, fanatic, Attributes.ARMOR, 3.0);
+        assertAttribute(helper, fanatic, Attributes.ARMOR, 4.0);
         assertAttribute(helper, fanatic, Attributes.ARMOR_TOUGHNESS, 0.0);
         assertAttribute(helper, fanatic, Attributes.MOVEMENT_SPEED, .22);
         helper.assertTrue(fanatic.equipmentInitialized(), "Fanatic must generate its equipment at spawn");
@@ -78,7 +78,7 @@ public final class DenseWoodlandsGameTests {
         dreadmane.finalizeSpawn(helper.getLevel(), helper.getLevel().getCurrentDifficultyAt(dreadmane.blockPosition()),
                 EntitySpawnReason.TRIGGERED, null);
         assertAttribute(helper, dreadmane, Attributes.MAX_HEALTH, 40.0);
-        assertAttribute(helper, dreadmane, Attributes.ARMOR, 5.0);
+        assertAttribute(helper, dreadmane, Attributes.ARMOR, 6.5);
         assertAttribute(helper, dreadmane, Attributes.ARMOR_TOUGHNESS, 0.0);
         assertAttribute(helper, dreadmane, Attributes.MOVEMENT_SPEED, .31);
         assertAttribute(helper, dreadmane, Attributes.ATTACK_DAMAGE, 7.5);
@@ -88,6 +88,16 @@ public final class DenseWoodlandsGameTests {
         helper.assertTrue(!dreadmane.isFood(Items.APPLE.getDefaultInstance()) && !dreadmane.canMate(dreadmane),
                 "Dreadmane must reject feeding and breeding");
         helper.assertTrue(!dreadmane.canUseSlot(EquipmentSlot.SADDLE), "Dreadmane must reject saddles");
+        var rider = dreadmane.createJockeyRider(helper.getLevel(), helper.getLevel().getCurrentDifficultyAt(dreadmane.blockPosition()));
+        helper.assertTrue(rider != null && rider.getVehicle() == dreadmane && rider.equipmentInitialized(),
+                "Jockey must attach a normally equipped Forest Fanatic");
+        helper.assertTrue(dreadmane.getControllingPassenger() == null && !dreadmane.isMobControlled(),
+                "Jockey rider must not disable autonomous mount AI");
+        helper.assertTrue(!com.cosmicpve.adventure.AdventureRules.restricted(rider), "Native rider is not player-restricted");
+        rider.stopRiding();
+        helper.assertTrue(!dreadmane.isVehicle() && dreadmane.interact(player, InteractionHand.MAIN_HAND) == InteractionResult.FAIL,
+                "Dismount leaves a hostile non-player-mountable Dreadmane");
+        rider.discard();
 
         helper.assertTrue(DenseWoodlandsMobSpawns.shouldSuppress(EntityType.ZOMBIE,
                 DenseWoodlandsSessionService.DIMENSION, EntitySpawnReason.NATURAL),

@@ -35,7 +35,7 @@ public abstract class SpacePirateEntity extends Monster {
                 .add(Attributes.MAX_HEALTH, health)
                 .add(Attributes.MOVEMENT_SPEED, SpacePirateDefinition.MOVEMENT_SPEED)
                 .add(Attributes.FOLLOW_RANGE, 32.0)
-                .add(Attributes.ATTACK_DAMAGE, 0.0)
+                .add(Attributes.ATTACK_DAMAGE, 1.5)
                 .add(Attributes.ARMOR, 0.0)
                 .add(Attributes.ARMOR_TOUGHNESS, 0.0);
     }

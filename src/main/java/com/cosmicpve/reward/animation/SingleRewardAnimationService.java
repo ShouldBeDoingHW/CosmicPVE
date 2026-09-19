@@ -47,6 +47,7 @@ public final class SingleRewardAnimationService {
         int elapsed = (int)Math.max(0, player.level().getServer().getTickCount() - state.startedAt);
         if (!state.revealed && elapsed >= LootAnimationTimeline.REVEAL_TICK) {
             state.revealed = true;
+            state.revealedAt = elapsed;
             state.shown = pending(player).allRewards();
             deliverPending(player);
             LootAnimationFeedback.reveal(player);
@@ -67,7 +68,7 @@ public final class SingleRewardAnimationService {
             }
         }
         menu.refresh(elapsed, state.shown, state.revealed);
-        if (elapsed >= LootAnimationTimeline.CLOSE_TICK) player.closeContainer();
+        if (state.revealed && elapsed - state.revealedAt >= LootAnimationTimeline.FINAL_HOLD_TICKS) player.closeContainer();
     }
 
     public void closed(ServerPlayer player) {
@@ -92,7 +93,7 @@ public final class SingleRewardAnimationService {
 
     private static final class RuntimeState {
         final long startedAt; final LootAnimationPreviewProvider previews;
-        java.util.List<ItemStack> shown; int lastPreviewOrdinal; int lastSoundOrdinal; boolean revealed;
+        java.util.List<ItemStack> shown; int lastPreviewOrdinal; int lastSoundOrdinal; boolean revealed; int revealedAt;
         RuntimeState(long startedAt, LootAnimationPreviewProvider previews, java.util.List<ItemStack> shown) {
             this.startedAt = startedAt; this.previews = previews; this.shown = shown;
             this.lastPreviewOrdinal = 0; this.lastSoundOrdinal = -1;

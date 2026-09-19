@@ -16,10 +16,10 @@ class EnchanterFoundationTest {
         assertEquals(9, EnchanterMenu.SLOT_COUNT);
         assertEquals(List.of(
                 new EnchanterOffer(0, CosmicEnchantmentTier.SIMPLE, 400, Items.WHITE_STAINED_GLASS_PANE, 0xFFFFFF),
-                new EnchanterOffer(2, CosmicEnchantmentTier.UNIQUE, 800, Items.LIME_STAINED_GLASS_PANE, 0x55FF55),
-                new EnchanterOffer(4, CosmicEnchantmentTier.ELITE, 1_500, Items.CYAN_STAINED_GLASS_PANE, 0xA3FFF5),
-                new EnchanterOffer(6, CosmicEnchantmentTier.ULTIMATE, 2_500, Items.YELLOW_STAINED_GLASS_PANE, 0xFFFF55),
-                new EnchanterOffer(8, CosmicEnchantmentTier.LEGENDARY, 4_000, Items.ORANGE_STAINED_GLASS_PANE, 0xFFAA00)),
+                new EnchanterOffer(2, CosmicEnchantmentTier.UNIQUE, 1_000, Items.LIME_STAINED_GLASS_PANE, 0x55FF55),
+                new EnchanterOffer(4, CosmicEnchantmentTier.ELITE, 1_800, Items.CYAN_STAINED_GLASS_PANE, 0xA3FFF5),
+                new EnchanterOffer(6, CosmicEnchantmentTier.ULTIMATE, 3_500, Items.YELLOW_STAINED_GLASS_PANE, 0xFFFF55),
+                new EnchanterOffer(8, CosmicEnchantmentTier.LEGENDARY, 6_000, Items.ORANGE_STAINED_GLASS_PANE, 0xFFAA00)),
                 EnchanterOffer.ALL);
         assertNull(EnchanterOffer.at(1));
         assertNull(EnchanterOffer.at(3));
@@ -36,14 +36,14 @@ class EnchanterFoundationTest {
         assertTrue(stack.getHoverName().getStyle().isBold());
         assertEquals(0x55FF55, stack.getHoverName().getStyle().getColor().getValue());
         var lore = stack.get(DataComponents.LORE).lines();
-        assertEquals(List.of("UNEXAMINED BOOK", "Cost: 800 XP", "You Have: 2,275 XP", "Click to purchase one."),
+        assertEquals(List.of("UNEXAMINED BOOK", "Cost: 1,000 XP", "You Have: 2,275 XP", "Click to purchase one."),
                 lore.stream().map(component -> component.getString()).toList());
         assertTrue(lore.getFirst().getStyle().isBold());
         assertTrue(lore.getLast().getStyle().isItalic());
     }
 
     @Test void exactRawXpExampleConstructsDebitsAndDeliversOncePerPurchase() {
-        AtomicInteger balance = new AtomicInteger(2_275);
+        AtomicInteger balance = new AtomicInteger(2_675);
         List<CosmicEnchantmentTier> delivered = new ArrayList<>();
         for (CosmicEnchantmentTier tier : List.of(
                 CosmicEnchantmentTier.UNIQUE, CosmicEnchantmentTier.UNIQUE, CosmicEnchantmentTier.SIMPLE)) {

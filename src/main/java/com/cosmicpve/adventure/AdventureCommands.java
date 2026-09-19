@@ -11,7 +11,20 @@ public final class AdventureCommands {
         return Commands.literal("adventure")
                 .then(Commands.literal("inspect").executes(c -> {
                     var p=c.getSource().getPlayerOrException();var s=DenseWoodlandsBootstrap.SESSIONS.session(p);
-                    c.getSource().sendSuccess(()->Component.literal("session="+s+" localZombies="+AdventureZombies.count(p)),false);return 1;
+                    c.getSource().sendSuccess(()->Component.literal("session="+s+" localZombies="+AdventureZombies.count(p)),false);
+                    var level = c.getSource().getServer().getLevel(DenseWoodlandsSessionService.DIMENSION);
+                    if (level != null) {
+                        var rules = level.getGameRules();
+                        var state = level.getChunkSource().getLastSpawnState();
+                        String diagnostics = "Woodlands spawning: difficulty=" + level.getDifficulty()
+                                + " spawn_mobs=" + rules.get(net.minecraft.world.level.gamerules.GameRules.SPAWN_MOBS)
+                                + " spawn_monsters=" + rules.get(net.minecraft.world.level.gamerules.GameRules.SPAWN_MONSTERS)
+                                + " spawnableChunks=" + (state == null ? 0 : state.getSpawnableChunkCount())
+                                + " counts=" + (state == null ? "not ticking" : state.getMobCategoryCounts())
+                                + " playerDimension=" + p.level().dimension().identifier();
+                        c.getSource().sendSuccess(() -> Component.literal(diagnostics), false);
+                    }
+                    return 1;
                 }))
                 .then(Commands.literal("features").executes(c -> {
                     c.getSource().sendSuccess(()->Component.literal(WoodlandTemplateFeature.counts().toString()),false);return 1;

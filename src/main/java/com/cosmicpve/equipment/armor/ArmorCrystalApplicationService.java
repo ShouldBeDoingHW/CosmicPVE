@@ -22,13 +22,21 @@ public final class ArmorCrystalApplicationService {
     }
 
     public Outcome apply(ItemStack carried, ItemStack expectedTarget, ItemStack currentTarget) {
+        return apply(carried, expectedTarget, currentTarget, false);
+    }
+
+    public Outcome applyConfirmedReplacement(ItemStack crystal, ItemStack expectedTarget, ItemStack currentTarget) {
+        return apply(crystal, expectedTarget, currentTarget, true);
+    }
+
+    private Outcome apply(ItemStack carried, ItemStack expectedTarget, ItemStack currentTarget, boolean confirmed) {
         if (expectedTarget != currentTarget) return Outcome.STALE_TARGET;
         ItemStack target = currentTarget;
         if (!carried.is(ModItems.ARMOR_SET_CRYSTAL.get())) return Outcome.INVALID_CRYSTAL;
         var crystal = carried.get(ModDataComponents.ARMOR_SET_CRYSTAL.get());
         if (crystal == null || crystal.successRate() < 1 || crystal.successRate() > 100) return Outcome.INVALID_CRYSTAL;
         if (!ArmorSetResolver.isArmor(target)) return Outcome.INVALID_TARGET;
-        if (target.has(ModDataComponents.ARMOR_SET_ID.get())) return Outcome.ALREADY_SET;
+        if (target.has(ModDataComponents.ARMOR_SET_ID.get()) && !confirmed) return Outcome.ALREADY_SET;
         var definition = content.findArmorSetDefinition(crystal.identity().setId());
         if (definition.isEmpty()) return Outcome.UNKNOWN_SET;
 

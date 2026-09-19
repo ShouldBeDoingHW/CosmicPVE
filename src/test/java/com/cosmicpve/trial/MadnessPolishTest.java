@@ -45,10 +45,11 @@ class MadnessPolishTest {
     }
     @Test void exactRewardRowsHaveOnlyIntendedTierWeightsAndQuantities() {
         for(var catalog:List.of(TrialRewardCatalogs.APPRENTICE,TrialRewardCatalogs.HARDCORE,TrialRewardCatalogs.IMPOSSIBLE,TrialRewardCatalogs.DEMONIC)) {
-            var actual=catalog.declared().stream().filter(row -> row.name().contains("Madness Ballot")).toList();
-            var expected=catalog==TrialRewardCatalogs.HARDCORE ? List.of(new TrialRewardCatalogs.Row("+1 Madness Ballot Trial Trinket",10,1,true),new TrialRewardCatalogs.Row("+2 Madness Ballot Trial Trinket",3,1,true))
-                    : catalog==TrialRewardCatalogs.IMPOSSIBLE ? List.of(new TrialRewardCatalogs.Row("+2 Madness Ballot Trial Trinket",8,1,true))
-                    : catalog==TrialRewardCatalogs.DEMONIC ? List.of(new TrialRewardCatalogs.Row("+3 Madness Ballot Trial Trinket",8,1,true)) : List.of();
+            var actual=catalog.declared().stream().filter(row -> row.name().startsWith("Random Tier")).toList();
+            var expected=catalog==TrialRewardCatalogs.HARDCORE ? List.of(new TrialRewardCatalogs.Row("Random Tier 1 Trial Trinket",15,1,true),new TrialRewardCatalogs.Row("Random Tier 2 Trial Trinket",10,1,true))
+                    : catalog==TrialRewardCatalogs.IMPOSSIBLE ? List.of(new TrialRewardCatalogs.Row("Random Tier 2 Trial Trinket",15,1,true),new TrialRewardCatalogs.Row("Random Tier 3 Trial Trinket",8,1,true))
+                    : catalog==TrialRewardCatalogs.DEMONIC ? List.of(new TrialRewardCatalogs.Row("Random Tier 3 Trial Trinket",10,1,true))
+                    : List.of(new TrialRewardCatalogs.Row("Random Tier 1 Trial Trinket",10,1,true));
             assertEquals(expected,actual);
         }
     }

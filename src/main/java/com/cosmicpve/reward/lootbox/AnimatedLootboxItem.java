@@ -10,7 +10,10 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
-public final class AnimatedLootboxItem extends Item {
+public final class AnimatedLootboxItem extends Item implements com.cosmicpve.reward.preview.LootPreviewProvider {
+    @Override public List<ItemStack> previewOutcomes(net.minecraft.server.level.ServerPlayer player, ItemStack source) {
+        return Step8ELootboxService.INSTANCE.previewOutcomes(player, kind);
+    }
     private final Kind kind;
     public AnimatedLootboxItem(Properties properties, Kind kind) { super(properties); this.kind = kind; }
     public Kind kind() { return kind; }

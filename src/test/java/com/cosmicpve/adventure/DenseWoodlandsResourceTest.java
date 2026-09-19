@@ -37,7 +37,11 @@ class DenseWoodlandsResourceTest {
         assertItemModel("call_of_forest_20", "minecraft:item/goat_horn");
         assertItemModel("call_of_forest_30", "minecraft:item/goat_horn");
         assertItemModel("dense_woodlands_scrap", "cosmicpve:item/dense_woodlands_scrap");
-        assertItemModel("adventure_compass", "minecraft:item/compass_16");
+        var compass = resource("assets/cosmicpve/items/adventure_compass.json").getAsJsonObject("model");
+        assertEquals("minecraft:range_dispatch", compass.get("type").getAsString());
+        assertEquals("minecraft:compass", compass.get("property").getAsString());
+        assertEquals("lodestone", compass.get("target").getAsString());
+        assertEquals(33, compass.getAsJsonArray("entries").size());
     }
 
     private static void assertItemModel(String id, String expectedModel) throws Exception {

@@ -15,7 +15,11 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.Level;
 
-public final class GodlyVKitBundleItem extends Item {
+public final class GodlyVKitBundleItem extends Item implements com.cosmicpve.reward.preview.LootPreviewProvider {
+    @Override public List<ItemStack> previewOutcomes(ServerPlayer player, ItemStack source) {
+        return List.of(new ItemStack(ModItems.PHOENIX_VKIT_CRYSTAL.get()), new ItemStack(ModItems.OGRE_VKIT_CRYSTAL.get()),
+                new ItemStack(ModItems.JUDGEMENT_VKIT_CRYSTAL.get()), new ItemStack(ModItems.SLAYER_VKIT_CRYSTAL.get()));
+    }
     public static final int MAX_STACK_SIZE = 1;
     public static final String LORE = "Found nested inside the deepest corner of the earth, there is unimaginable power within this bag. Right click to open!";
     private final RewardDeliveryService delivery = new RewardDeliveryService();

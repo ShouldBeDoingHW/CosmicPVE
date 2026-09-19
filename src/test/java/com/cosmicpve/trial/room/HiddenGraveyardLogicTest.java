@@ -70,7 +70,7 @@ class HiddenGraveyardLogicTest {
         assertEquals(3,TrialRoomLoadoutService.HIDDEN_GRAVEYARD_NUTRITION);
         assertEquals(8,TrialRoomLoadoutService.HIDDEN_GRAVEYARD_INSANITY);
         assertEquals(3,TrialRoomLoadoutService.HIDDEN_GRAVEYARD_PUMMEL);
-        assertEquals(5,TrialRoomLoadoutService.HIDDEN_GRAVEYARD_APPLES);
+        assertEquals(16,TrialRoomLoadoutService.HIDDEN_GRAVEYARD_APPLES);
         assertEquals(4,TrialRoomLoadoutService.HIDDEN_GRAVEYARD_HEALING_POTIONS);
     }
 }

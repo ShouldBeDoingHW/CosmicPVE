@@ -78,7 +78,8 @@ class UnexaminedBookOpeningServiceTest {
                 CosmicEnchantmentSpecs.BLIGHTED_VIRUS, CosmicEnchantmentSpecs.ALIEN_IMPLANTS,
                 CosmicEnchantmentSpecs.LETHAL_SNIPER, CosmicEnchantmentSpecs.ETERNAL_SNARE,
                 CosmicEnchantmentSpecs.PERMANENT_EXECUTE, CosmicEnchantmentSpecs.MIGHTY_CLEAVE,
-                CosmicEnchantmentSpecs.FORBIDDEN_CURSE, CosmicEnchantmentSpecs.GODLY_OVERLOAD)), seen);
+                CosmicEnchantmentSpecs.FORBIDDEN_CURSE, CosmicEnchantmentSpecs.GODLY_OVERLOAD,
+                CosmicEnchantmentSpecs.PLANETARY_DEATHBRINGER)), seen);
         assertTrue(service.roll(CosmicEnchantmentTier.ELITE, java.util.List.of(CosmicEnchantmentSpecs.STORMCALLER),
                 random, null).isPresent());
     }

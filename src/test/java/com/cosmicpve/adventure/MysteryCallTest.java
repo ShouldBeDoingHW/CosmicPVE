@@ -32,13 +32,13 @@ class MysteryCallTest {
             assertEquals("minecraft:model",model.get("type").getAsString());assertEquals("minecraft:item/rail",model.get("model").getAsString());
         }
     }
-    @Test void everyRegisteredProductionSkuIsUniformlyReachableAndFaithful() {
+    @Test void everyRegisteredProductionSkuIsDurationWeightedReachableAndFaithful() {
         var pool=ModItems.productionCalls();
         assertEquals(List.of("cosmicpve:call_of_forest_10","cosmicpve:call_of_forest_20","cosmicpve:call_of_forest_30"),pool.stream().map(s->BuiltInRegistries.ITEM.getKey(s.getItem()).toString()).toList());
         for(int i=0;i<pool.size();i++) {
-            final int pick=i;
+            final int pick=i==0?0:i==1?6:10;
             var reward=Step8ELootboxService.selectCall(pool,new LegacyRandomSource(0) {
-                @Override public int nextInt(int bound) {assertEquals(pool.size(),bound);return pick;}
+                @Override public int nextInt(int bound) {assertEquals(12,bound);return pick;}
             });
             assertTrue(ItemStack.matches(pool.get(i),reward));assertEquals(1,reward.getCount());
             reward.shrink(1);assertEquals(1,ModItems.productionCalls().get(i).getCount());

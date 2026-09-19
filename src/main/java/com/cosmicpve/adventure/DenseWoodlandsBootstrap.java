@@ -14,6 +14,7 @@ public final class DenseWoodlandsBootstrap {
     public static final DenseWoodlandsSessionService SESSIONS = new DenseWoodlandsSessionService();
     private DenseWoodlandsBootstrap() {}
     public static void register() {
+        NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, WoodlandsPotInteractions::onRightClick);
         NeoForge.EVENT_BUS.addListener((ServerTickEvent.Post event) -> SESSIONS.tick(event.getServer()));
         NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST,(LivingDeathEvent event) -> {
             if(!event.isCanceled() && event.getEntity() instanceof ServerPlayer p)SESSIONS.died(p);

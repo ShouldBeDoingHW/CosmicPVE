@@ -93,6 +93,10 @@ neoForge {
 
         // applies to all the run configs above
         configureEach {
+            // Opt-in isolated runtime for hotfix verification while the user's client/world remains open.
+            if (project.hasProperty('cosmicpve.verificationRunDir')) {
+                gameDirectory = project.file(project.property('cosmicpve.verificationRunDir'))
+            }
             // Recommended logging data for a userdev environment
             // The markers can be added/remove as needed separated by commas.
             // "SCAN": For mods scan.

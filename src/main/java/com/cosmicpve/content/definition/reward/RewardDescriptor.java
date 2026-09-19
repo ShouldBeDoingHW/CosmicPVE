@@ -8,7 +8,20 @@ public sealed interface RewardDescriptor permits RewardDescriptor.StaticItem, Re
         RewardDescriptor.WeaponOrb, RewardDescriptor.MobSpawner, RewardDescriptor.GeneratedEquipment,
         RewardDescriptor.SpaceChest, RewardDescriptor.Mask, RewardDescriptor.ArmorSetCrystal,
         RewardDescriptor.XpBottle, RewardDescriptor.RandomVKitCrystal, RewardDescriptor.EnchantedBlackScroll,
-        RewardDescriptor.TrialPortalPreset {
+        RewardDescriptor.TrialPortalPreset, RewardDescriptor.RandomTrialTrinket, RewardDescriptor.AccessorySocket {
+    record RandomTrialTrinket(int tier) implements RewardDescriptor {
+        public RandomTrialTrinket { if (tier < 1 || tier > 3) throw new IllegalArgumentException("trinket_tier must be in [1,3]"); }
+        public RewardType type() { return RewardType.RANDOM_TRIAL_TRINKET; }
+    }
+    record AccessorySocket(Identifier itemId, int successRate) implements RewardDescriptor {
+        public AccessorySocket {
+            if (successRate < 1 || successRate > 100) throw new IllegalArgumentException("success_rate must be in [1,100]");
+            if (!java.util.List.of(Identifier.parse("cosmicpve:amulet_socket"), Identifier.parse("cosmicpve:belt_socket"),
+                    Identifier.parse("cosmicpve:omni_socket")).contains(itemId))
+                throw new IllegalArgumentException("Unknown accessory socket item");
+        }
+        public RewardType type() { return RewardType.ACCESSORY_SOCKET; }
+    }
     RewardType type();
     record TrialPortalPreset(Identifier presetId) implements RewardDescriptor {
         public RewardType type(){return RewardType.TRIAL_PORTAL_PRESET;}

@@ -41,7 +41,7 @@ class SpacePirateFoundationTest {
     @Test void attributesKeepWeaponDamageAuthoritativeAndAvoidHiddenArmor() {
         var variantOne = SpacePirateEntity.createAttributes(25.0F).build();
         assertEquals(25.0, variantOne.getValue(Attributes.MAX_HEALTH));
-        assertEquals(0.0, variantOne.getValue(Attributes.ATTACK_DAMAGE));
+        assertEquals(1.5, variantOne.getValue(Attributes.ATTACK_DAMAGE));
         assertEquals(0.0, variantOne.getValue(Attributes.ARMOR));
         assertEquals(0.0, variantOne.getValue(Attributes.ARMOR_TOUGHNESS));
         var variantTwo = SpacePirateEntity.createAttributes(35.0F).build();

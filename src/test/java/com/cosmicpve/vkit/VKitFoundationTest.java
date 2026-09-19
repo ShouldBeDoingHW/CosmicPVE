@@ -34,7 +34,7 @@ class VKitFoundationTest {
     @Test
     void exactPointBudgetsAreSpentWithoutDuplicates() {
         var generator = new VKitEquipmentGenerator();
-        int[] expected = {5, 6, 7, 9, 10, 12, 13, 14, 16, 18};
+        int[] expected = {10, 11, 12, 13, 14, 15, 18, 20, 22, 25};
         for (int level = 1; level <= 10; level++) {
             assertEquals(expected[level - 1], VKitEquipmentGenerator.pointBudget(level));
             for (VKitDefinition definition : VKitDefinition.ALL) {
@@ -43,9 +43,11 @@ class VKitFoundationTest {
                     for (int seed = 0; seed < 20; seed++) {
                         Map<com.cosmicpve.equipment.enchantment.CosmicEnchantmentSpec, Integer> allocation =
                                 generator.allocate(pool, expected[level - 1], RandomSource.create(seed));
-                        assertEquals(expected[level - 1], allocation.values().stream().mapToInt(Integer::intValue).sum());
+                        assertEquals(Math.min(expected[level - 1], pool.stream().mapToInt(spec -> spec.maxLevel()).sum()),
+                                allocation.values().stream().mapToInt(Integer::intValue).sum());
                         assertEquals(allocation.size(), new HashSet<>(allocation.keySet()).size());
-                        assertTrue(allocation.size() <= 5);
+                        assertTrue(allocation.size() <= pool.size());
+                        assertTrue(allocation.entrySet().stream().filter(e -> e.getValue() < e.getKey().maxLevel()).count() <= 1);
                         allocation.forEach((spec, value) -> {
                             assertTrue(pool.contains(spec));
                             assertTrue(value >= 1 && value <= spec.maxLevel());
@@ -69,14 +71,14 @@ class VKitFoundationTest {
     @Test
     void everyEquipmentPoolExactlyMatchesTheCanonicalDesign() {
         assertPool(VKitDefinition.PHOENIX.weapon(), "rage", "doublestrike", "execute", "greatsword",
-                "divine_immolation");
-        assertPool(VKitDefinition.SLAYER.weapon(), "virus", "sniper", "lightning", "eagle_eye", "soul_siphon");
-        assertPool(VKitDefinition.OGRE.weapon(), "virus", "eagle_eye", "lightning", "venom", "snare");
-        assertPool(VKitDefinition.JUDGEMENT.weapon(), "rage", "devour", "pummel", "insanity", "soul_tether");
-        assertPool(VKitDefinition.SLAYER.armor(), "molten", "armored", "voodoo", "angelic", "mortal_coil");
-        assertPool(VKitDefinition.OGRE.armor(), "aegis", "armored", "angelic", "leadership");
-        assertPool(VKitDefinition.JUDGEMENT.armor(), "plague_carrier", "armored", "cactus", "self_destruct", "molten");
-        assertPool(VKitDefinition.PHOENIX.armor(), "ender_walker", "gears", "dodge", "luck", "phoenix");
+                "silence", "divine_immolation");
+        assertPool(VKitDefinition.SLAYER.weapon(), "virus", "sniper", "lightning", "eagle_eye", "silence", "soul_siphon");
+        assertPool(VKitDefinition.OGRE.weapon(), "virus", "eagle_eye", "lightning", "venom", "snare", "sniper");
+        assertPool(VKitDefinition.JUDGEMENT.weapon(), "rage", "devour", "pummel", "insanity", "hex", "soul_tether");
+        assertPool(VKitDefinition.SLAYER.armor(), "molten", "armored", "voodoo", "angelic", "deathbringer", "mortal_coil");
+        assertPool(VKitDefinition.OGRE.armor(), "aegis", "armored", "angelic", "leadership", "overload");
+        assertPool(VKitDefinition.JUDGEMENT.armor(), "plague_carrier", "armored", "cactus", "self_destruct", "molten", "luck");
+        assertPool(VKitDefinition.PHOENIX.armor(), "ender_walker", "gears", "dodge", "luck", "stormcaller", "phoenix");
     }
 
     @Test

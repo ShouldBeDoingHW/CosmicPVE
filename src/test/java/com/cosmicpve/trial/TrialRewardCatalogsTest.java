@@ -9,11 +9,49 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 class TrialRewardCatalogsTest {
+    @Test void newRewardDescriptorsValidateAndRoundTripWithoutInventingItems() {
+        var codec = com.cosmicpve.content.definition.reward.RewardDescriptorData.CODEC;
+        for (String json : List.of("{\"type\":\"random_trial_trinket\",\"trinket_tier\":3}",
+                "{\"type\":\"accessory_socket\",\"item\":\"cosmicpve:amulet_socket\",\"success_rate\":25}",
+                "{\"type\":\"accessory_socket\",\"item\":\"cosmicpve:belt_socket\",\"success_rate\":65}",
+                "{\"type\":\"accessory_socket\",\"item\":\"cosmicpve:omni_socket\",\"success_rate\":50}")) {
+            var data = codec.parse(com.mojang.serialization.JsonOps.INSTANCE, JsonParser.parseString(json)).getOrThrow();
+            assertTrue(data.resolve("test", net.minecraft.core.RegistryAccess.EMPTY).isSuccess());
+            assertEquals(data, codec.parse(com.mojang.serialization.JsonOps.INSTANCE,
+                    codec.encodeStart(com.mojang.serialization.JsonOps.INSTANCE, data).getOrThrow()).getOrThrow());
+        }
+        for (String json : List.of("{\"type\":\"random_trial_trinket\",\"trinket_tier\":0}",
+                "{\"type\":\"random_trial_trinket\",\"trinket_tier\":4}", "{\"type\":\"random_trial_trinket\"}",
+                "{\"type\":\"accessory_socket\",\"item\":\"minecraft:diamond\",\"success_rate\":25}",
+                "{\"type\":\"accessory_socket\",\"item\":\"cosmicpve:belt_socket\",\"success_rate\":101}")) {
+            var data = codec.parse(com.mojang.serialization.JsonOps.INSTANCE, JsonParser.parseString(json)).getOrThrow();
+            assertFalse(data.resolve("test", net.minecraft.core.RegistryAccess.EMPTY).isSuccess());
+        }
+    }
+    @Test void catalogsExactlyMatchTheCurrentDesignCanonicalRewardSection() throws Exception {
+        String design = java.nio.file.Files.readString(java.nio.file.Path.of(System.getProperty("cosmicpve.projectDir"), "docs", "Cosmic_Design.md"));
+        String canonical = design.substring(design.indexOf("# Canonical Reward Catalogs"));
+        var catalogs = java.util.Map.of("Apprentice", TrialRewardCatalogs.APPRENTICE, "Hardcore", TrialRewardCatalogs.HARDCORE,
+                "Impossible", TrialRewardCatalogs.IMPOSSIBLE, "Demonic", TrialRewardCatalogs.DEMONIC);
+        for (var entry : catalogs.entrySet()) {
+            String section = canonical.split("## " + entry.getKey() + "\\R", 2)[1].split("\\R## ", 2)[0];
+            var rows = new java.util.ArrayList<TrialRewardCatalogs.Row>();
+            for (String line : section.lines().toList()) {
+                if (!line.startsWith("|")) continue;
+                String[] cells = line.split("\\|", -1);
+                if (cells.length < 5 || !cells[2].trim().matches("\\d+")) continue;
+                String name = cells[1].trim().replace("†", "");
+                rows.add(new TrialRewardCatalogs.Row(name, Integer.parseInt(cells[2].trim()),
+                        Integer.parseInt(cells[3].trim()), !name.contains("Abandoned Spaceship Portal")));
+            }
+            assertEquals(rows, entry.getValue().declared(), entry.getKey());
+        }
+    }
     @Test void canonicalDeclaredAndActiveTotalsArePinned() {
-        assertCatalog(TrialRewardCatalogs.APPRENTICE,12,89,89);
-        assertCatalog(TrialRewardCatalogs.HARDCORE,21,122,117);
+        assertCatalog(TrialRewardCatalogs.APPRENTICE,14,101,101);
+        assertCatalog(TrialRewardCatalogs.HARDCORE,14,87,82);
         assertCatalog(TrialRewardCatalogs.IMPOSSIBLE,21,183,175);
-        assertCatalog(TrialRewardCatalogs.DEMONIC,19,143,139);
+        assertCatalog(TrialRewardCatalogs.DEMONIC,19,137,133);
     }
 
     @Test void runtimeTablesExactlyEqualTheirActiveCanonicalRows() throws Exception {
@@ -66,7 +104,9 @@ class TrialRewardCatalogsTest {
             case "enchanted_black_scroll"->reward.get("success_rate").getAsInt()+"% Enchanted Black Scroll";
             case "weapon_orb"->reward.get("success_rate").getAsInt()+"% Weapon Enchantment Orb";
             case "armor_orb"->reward.get("success_rate").getAsInt()+"% Armor Enchantment Orb";
-            case "random_vkit_crystal"->"Random V-Kit Unlock";
+            case "random_vkit_crystal"->"Random V-Kit Crystal";
+            case "random_trial_trinket"->"Random Tier "+reward.get("trinket_tier").getAsInt()+" Trial Trinket";
+            case "accessory_socket"->reward.get("success_rate").getAsInt()+"% "+title(reward.get("item").getAsString().split(":")[1]);
             case "armor_set_crystal"->reward.get("success_rate").getAsInt()+"% "+
                     title(reward.get("armor_set").getAsString().split(":")[1])+" Crystal";
             case "static_item"->staticName(reward.get("item").getAsString().split(":")[1]);
@@ -95,6 +135,7 @@ class TrialRewardCatalogsTest {
         case "trial_trinket_madness_3"->"+3 Madness Ballot Trial Trinket";
         case "conquest_chest_flare"->"Conquest Chest Flare"; case "mask_splicer"->"Mask Splicer";
         case "heroic_crystal"->"Heroic Crystal"; case "cosmic_enchantment_table"->"Cosmic Enchantment Table";
+        case "heroic_cosmic_enchantment_table"->"Heroic Cosmic Enchantment Table";
         case "secret_weapon_cache"->"Secret Weapon Cache"; case "admin_abuse"->"Admin Abuse";
         case "godly_vkit_bundle"->"Godly V-Kit Bundle"; default->throw new AssertionError("Unknown item "+path);
     };}

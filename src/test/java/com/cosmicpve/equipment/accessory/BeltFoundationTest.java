@@ -114,6 +114,9 @@ class BeltFoundationTest {
                 assertFalse(json.get("flip_v").getAsBoolean(),
                         "exported top-down UVs must not mirror lower palette strips into the sigil");
                 assertTrue(json.getAsJsonObject("display").has("gui"));
+                assertEquals(180, json.getAsJsonObject("display").getAsJsonObject("gui").getAsJsonArray("rotation").get(2).getAsInt(),
+                        "Correct the upside-down GUI pose without rotating the accepted worn model");
+                assertFalse(json.getAsJsonObject("display").getAsJsonObject("fixed").has("rotation"));
                 assertTrue(json.getAsJsonObject("display").has("firstperson_righthand"));
             }
         }

@@ -9,10 +9,24 @@ import org.junit.jupiter.api.Test;
 
 class SpacePirateEquipmentServiceTest {
     private final SpacePirateEquipmentService service = new SpacePirateEquipmentService();
+    @Test void silenceHitUsesEveryUniformLevelAndMissAddsNothing() {
+        for (int level = 1; level <= 4; level++) {
+            var rolls = new ScriptedRolls(new boolean[]{true,true,true,true,false,true},
+                    new int[]{0,0,0,0,level-1});
+            var plan = service.generate(SpacePirateVariant.VARIANT_1, rolls);
+            assertEquals(level, plan.silenceLevel());
+            assertFalse(plan.pummel());
+            rolls.assertExhausted();
+        }
+        var miss = service.generate(SpacePirateVariant.VARIANT_1,
+                new ScriptedRolls(new boolean[]{true,true,true,true,true,false},new int[]{0,0,0,0}));
+        assertEquals(0, miss.silenceLevel());
+        assertTrue(miss.pummel());
+    }
 
     @Test void variantOneRollsEachArmorPieceIndependentlyAndUsesFiftyPercentPummel() {
         var rolls = new ScriptedRolls(
-                new boolean[] {true, false, true, false, true},
+                new boolean[] {true, false, true, false, true, false},
                 new int[] {0, 1, 2, 3});
         var plan = service.generate(SpacePirateVariant.VARIANT_1, rolls);
         assertEquals(4, plan.armor().size());

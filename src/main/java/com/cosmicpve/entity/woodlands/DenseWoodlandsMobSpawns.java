@@ -20,14 +20,19 @@ public final class DenseWoodlandsMobSpawns {
     public static void register(IEventBus modBus) {
         modBus.addListener(DenseWoodlandsMobSpawns::registerPlacements);
         NeoForge.EVENT_BUS.addListener(DenseWoodlandsMobSpawns::suppressVanillaNaturalHostiles);
+        NeoForge.EVENT_BUS.addListener((net.neoforged.neoforge.event.server.ServerStartedEvent event) -> {
+            if (Boolean.getBoolean("cosmicpve.woodlandsSpawnProbe")) DenseWoodlandsSpawnProbe.verify(event.getServer());
+        });
     }
 
     private static void registerPlacements(RegisterSpawnPlacementsEvent event) {
         event.register(ModEntities.FOREST_FANATIC.get(), SpawnPlacementTypes.ON_GROUND,
-                Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, (type, level, reason, pos, random) -> true,
+                Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, (type, level, reason, pos, random) ->
+                        reason != EntitySpawnReason.NATURAL || level.getLevel().dimension().equals(DenseWoodlandsSessionService.DIMENSION),
                 RegisterSpawnPlacementsEvent.Operation.REPLACE);
         event.register(ModEntities.DREADMANE.get(), SpawnPlacementTypes.ON_GROUND,
-                Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, (type, level, reason, pos, random) -> true,
+                Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, (type, level, reason, pos, random) ->
+                        reason != EntitySpawnReason.NATURAL || level.getLevel().dimension().equals(DenseWoodlandsSessionService.DIMENSION),
                 RegisterSpawnPlacementsEvent.Operation.REPLACE);
     }
 

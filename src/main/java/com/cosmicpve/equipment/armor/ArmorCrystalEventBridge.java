@@ -6,12 +6,34 @@ import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.event.ItemStackedOnOtherEvent;
 
 public final class ArmorCrystalEventBridge {
+    public void onChat(net.neoforged.neoforge.event.ServerChatEvent event) {
+        if (ArmorCrystalConfirmationService.INSTANCE.chat(event.getPlayer(), event.getRawText())) event.setCanceled(true);
+    }
+    public void onTick(net.neoforged.neoforge.event.tick.PlayerTickEvent.Post event) {
+        if (event.getEntity() instanceof ServerPlayer player) ArmorCrystalConfirmationService.INSTANCE.tick(player);
+    }
+    public void onLogout(net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent event) {
+        if (event.getEntity() instanceof ServerPlayer player) ArmorCrystalConfirmationService.INSTANCE.cancel(player, false);
+    }
+    public void onDeath(net.neoforged.neoforge.event.entity.living.LivingDeathEvent event) {
+        if (event.getEntity() instanceof ServerPlayer player) ArmorCrystalConfirmationService.INSTANCE.cancel(player, false);
+    }
     public void onStacked(ItemStackedOnOtherEvent event) {
         var decision = ArmorCrystalInteractionPolicy.decide(
                 event.getCarriedItem(), event.getStackedOnItem(), event.getClickAction());
         if (decision == ArmorCrystalInteractionPolicy.Decision.VANILLA) return;
         event.setCanceled(true); // only genuine armor application gestures replace vanilla handling
         boolean logicalServer = event.getPlayer() instanceof ServerPlayer;
+        if (logicalServer) {
+            var player = (ServerPlayer) event.getPlayer();
+            if (event.getStackedOnItem().has(com.cosmicpve.registry.ModDataComponents.ARMOR_SET_ID.get())) {
+                ArmorCrystalConfirmationService.INSTANCE.begin(player, event.getCarriedItem(), event.getSlot());
+                event.getCarriedSlotAccess().set(event.getCarriedItem());
+                player.containerMenu.broadcastChanges();
+                return;
+            }
+            ArmorCrystalConfirmationService.INSTANCE.cancel(player, false);
+        }
         var result = ArmorCrystalInteractionPolicy.invokeAuthoritative(decision, logicalServer, () -> {
             var player = (ServerPlayer) event.getPlayer();
             var service = new ArmorCrystalApplicationService(

@@ -2,7 +2,8 @@ package com.cosmicpve.reward.animation;
 
 public final class LootAnimationTimeline {
     public static final int REVEAL_TICK = 100;
-    public static final int CLOSE_TICK = 120;
+    public static final int FINAL_HOLD_TICKS = 60;
+    public static final int CLOSE_TICK = REVEAL_TICK + FINAL_HOLD_TICKS;
     public static final int PREVIEW_INTERVAL = 5;
     private LootAnimationTimeline() {}
     public static int countdown(int elapsed) { return elapsed >= REVEAL_TICK ? 0 : Math.max(1, 5 - Math.max(0, elapsed) / 20); }

@@ -6,6 +6,8 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.enchantment.Enchantment;
 
 public final class ModEnchantments {
+    public static final ResourceKey<Enchantment> DEATHBRINGER = createKey("deathbringer");
+    public static final ResourceKey<Enchantment> PLANETARY_DEATHBRINGER = createKey("planetary_deathbringer");
     public static final ResourceKey<Enchantment> EXECUTE = createKey("execute");
     public static final ResourceKey<Enchantment> ANGELIC = createKey("angelic");
     public static final ResourceKey<Enchantment> LIGHTNING = createKey("lightning");

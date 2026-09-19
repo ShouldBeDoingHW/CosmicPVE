@@ -44,12 +44,12 @@ public final class ArmorSetCommands {
             net.minecraft.resources.Identifier id, int successRate) {
         var definition = CosmicContent.repository().findArmorSetDefinition(id);
         if (definition.isEmpty()) {
-            source.sendFailure(Component.translatable("command.cosmicpve.armor.unknown_set", id));
+            source.sendFailure(Component.translatable("command.cosmicpve.armor.unknown_set", id.toString()));
             return 0;
         }
         ItemStack stack = com.cosmicpve.equipment.armor.ArmorSetCrystals.create(definition.orElseThrow(), successRate);
         player.getInventory().placeItemBackInInventory(stack);
-        source.sendSuccess(() -> Component.translatable("command.cosmicpve.armor.given", id, successRate, player.getName()), true);
+        source.sendSuccess(() -> Component.translatable("command.cosmicpve.armor.given", id.toString(), successRate, player.getName()), true);
         return 1;
     }
 

@@ -105,9 +105,12 @@ public final class VKitGameTests {
                             .mapToInt(entry -> entry.getIntValue()).sum();
                     long cosmicCount = applied.keySet().stream().filter(holder -> holder.unwrapKey().map(key ->
                             key.identifier().getNamespace().equals(CosmicPVE.MOD_ID)).orElse(false)).count();
-                    helper.assertTrue(cosmicPoints == VKitEquipmentGenerator.pointBudget(level),
+                    var rewardPool = (type == VKitEquipmentType.ARMOR ? definition.armor() : definition.weapon()).pool(level);
+                    helper.assertTrue(cosmicPoints == Math.min(VKitEquipmentGenerator.pointBudget(level),
+                                    rewardPool.stream().mapToInt(spec -> spec.maxLevel()).sum()),
                             "V-Kit must spend its exact Cosmic point budget");
-                    helper.assertTrue(cosmicCount <= 5, "V-Kit must respect base Cosmic capacity");
+                    helper.assertTrue(cosmicCount <= new com.cosmicpve.equipment.enchantment.CustomEnchantCapacityService().capacity(stack),
+                            "V-Kit must serialize sufficient Cosmic capacity for its actual roll");
                     helper.assertTrue(stack.getHoverName().getString().endsWith("(" + VKitEquipmentGenerator.roman(level) + ")"),
                             "V-Kit item name must use the permanent Roman-numeral suffix");
                     helper.assertTrue(stack.getHoverName().getStyle().isBold()

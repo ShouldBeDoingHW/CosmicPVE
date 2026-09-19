@@ -35,7 +35,11 @@ public final class SpacePirateEquipmentService {
             armor.add(new SpacePirateEquipmentPlan.ArmorRoll(material, 1 + rolls.nextInt(4)));
         }
         return switch (variant) {
-            case VARIANT_1 -> new SpacePirateEquipmentPlan(variant, armor, 0, 0, rolls.nextBoolean());
+            case VARIANT_1 -> {
+                boolean pummel = rolls.nextBoolean();
+                int silence = rolls.nextBoolean() ? 1 + rolls.nextInt(4) : 0;
+                yield new SpacePirateEquipmentPlan(variant, armor, 0, 0, pummel, silence);
+            }
             case VARIANT_2 -> {
                 int poison = 1 + rolls.nextInt(3);
                 boolean execute = rolls.nextInt(4) == 0;
@@ -72,6 +76,10 @@ public final class SpacePirateEquipmentService {
             if (plan.pummel()) {
                 var pummel = enchantments.getOrThrow(ModEnchantments.PUMMEL);
                 EnchantmentHelper.updateEnchantments(weapon, mutable -> mutable.set(pummel, VARIANT_1_PUMMEL_LEVEL));
+            }
+            if (plan.silenceLevel() > 0) {
+                var silence = enchantments.getOrThrow(ModEnchantments.SILENCE);
+                EnchantmentHelper.updateEnchantments(weapon, mutable -> mutable.set(silence, plan.silenceLevel()));
             }
         } else {
             weapon = new ItemStack(Items.IRON_SWORD);

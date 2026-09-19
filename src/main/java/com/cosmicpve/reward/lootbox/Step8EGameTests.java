@@ -137,7 +137,7 @@ public final class Step8EGameTests {
                     "Heroic Table books must be maximum level");
             seenHeroics.add(data.enchantmentId());
         }
-        helper.assertTrue(seenHeroics.size() == 11, "Loaded-registry sampling must reach all eleven Heroics");
+        helper.assertTrue(seenHeroics.size() == 12, "Loaded-registry sampling must reach all twelve Heroics");
         verifyHeroicConversion(helper, enchantments);
         verifyDamageCategories(helper);
         verifyDragonReductionAndOmniActivation(helper, enchantments);

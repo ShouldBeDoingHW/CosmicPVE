@@ -87,7 +87,7 @@ class TrialResourceTest {
             return entry.get("weight").getAsInt() == 3 && reward.get("type").getAsString().equals("static_item")
                     && reward.get("item").getAsString().equals("cosmicpve:random_weapon_skin_generator");
         }).count());
-        assertTrue(ImpossibleRewardCatalog.DECLARED.stream().filter(row -> row.name().contains("Fame")).findFirst().orElseThrow().active());
+        assertTrue(ImpossibleRewardCatalog.DECLARED.stream().filter(row -> row.name().equals("Random Tier 2 Trial Trinket")).findFirst().orElseThrow().active());
         assertFalse(ImpossibleRewardCatalog.DECLARED.stream().filter(row -> row.name().contains("Abandoned")).findFirst().orElseThrow().active());
     }
     @Test void demonicDevelopmentTableUsesOnlyCurrentRealRewardPrimitivesAtCanonicalWeights() throws Exception {
@@ -97,7 +97,7 @@ class TrialResourceTest {
         var entries=JsonParser.parseReader(new InputStreamReader(stream,StandardCharsets.UTF_8))
                 .getAsJsonObject().getAsJsonArray("entries");
         assertEquals(18,entries.size());
-        assertEquals(139,entries.asList().stream().mapToInt(value->value.getAsJsonObject().get("weight").getAsInt()).sum());
+        assertEquals(133,entries.asList().stream().mapToInt(value->value.getAsJsonObject().get("weight").getAsInt()).sum());
         assertEquals(1, entries.asList().stream().filter(value -> {
             var entry = value.getAsJsonObject(); var reward = entry.getAsJsonObject("reward");
             return entry.get("weight").getAsInt() == 5 && reward.get("type").getAsString().equals("static_item")
@@ -113,8 +113,8 @@ class TrialResourceTest {
         assertNotNull(stream);
         var entries=JsonParser.parseReader(new InputStreamReader(stream,StandardCharsets.UTF_8))
                 .getAsJsonObject().getAsJsonArray("entries");
-        assertEquals(20,entries.size());
-        assertEquals(117,entries.asList().stream().mapToInt(value -> value.getAsJsonObject().get("weight").getAsInt()).sum());
+        assertEquals(13,entries.size());
+        assertEquals(82,entries.asList().stream().mapToInt(value -> value.getAsJsonObject().get("weight").getAsInt()).sum());
         assertEquals(2,entries.asList().stream().map(value->value.getAsJsonObject().getAsJsonObject("reward"))
                 .filter(reward->reward.get("type").getAsString().equals("unexamined_book")).count());
         assertTrue(entries.asList().stream().map(value->value.getAsJsonObject().getAsJsonObject("reward"))
@@ -134,8 +134,8 @@ class TrialResourceTest {
         assertNotNull(stream);
         var entries=JsonParser.parseReader(new InputStreamReader(stream,StandardCharsets.UTF_8))
                 .getAsJsonObject().getAsJsonArray("entries");
-        assertEquals(12,entries.size());
-        assertEquals(89,entries.asList().stream().mapToInt(value -> value.getAsJsonObject().get("weight").getAsInt()).sum());
+        assertEquals(14,entries.size());
+        assertEquals(101,entries.asList().stream().mapToInt(value -> value.getAsJsonObject().get("weight").getAsInt()).sum());
         var books=entries.asList().stream().map(value -> value.getAsJsonObject())
                 .filter(entry -> entry.getAsJsonObject("reward").get("type").getAsString().equals("unexamined_book")).toList();
         assertEquals(6,books.size());

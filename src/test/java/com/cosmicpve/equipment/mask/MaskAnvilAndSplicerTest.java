@@ -70,9 +70,9 @@ class MaskAnvilAndSplicerTest {
         assertEquals(1,nextSplicer.getCount()); assertEquals(1,single.getCount());
         assertEquals(MaskSplicerService.Outcome.STALE,service.split(nextSplicer,single,nextSplicer.copy(),single).outcome());
     }
-    @Test void persistedLimitDefaultsToThreeAndAcceptsOnlyTwoThroughFive() {
+    @Test void persistedLimitDefaultsToFiveAndAcceptsOnlyTwoThroughFive() {
         var defaults=MaskLimitSavedData.CODEC.parse(JsonOps.INSTANCE,new com.google.gson.JsonObject()).getOrThrow();
-        assertEquals(3,defaults.limit());
+        assertEquals(5,defaults.limit());
         for (int limit=2;limit<=5;limit++) {
             var data=new com.google.gson.JsonObject(); data.addProperty("mask_limit",limit);
             assertEquals(limit,MaskLimitSavedData.CODEC.parse(JsonOps.INSTANCE,data).getOrThrow().limit());

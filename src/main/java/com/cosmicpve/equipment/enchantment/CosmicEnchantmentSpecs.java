@@ -7,6 +7,10 @@ import net.minecraft.resources.Identifier;
 
 /** Cosmic metadata not represented by Minecraft's dynamic enchantment record. */
 public final class CosmicEnchantmentSpecs {
+    public static final CosmicEnchantmentSpec DEATHBRINGER = new CosmicEnchantmentSpec(
+            ModEnchantments.DEATHBRINGER.identifier(), 3, CosmicEnchantmentTier.LEGENDARY, "helmet");
+    public static final CosmicEnchantmentSpec PLANETARY_DEATHBRINGER = new CosmicEnchantmentSpec(
+            ModEnchantments.PLANETARY_DEATHBRINGER.identifier(), 3, CosmicEnchantmentTier.HEROIC, "helmet");
     public static final CosmicEnchantmentSpec EXECUTE = new CosmicEnchantmentSpec(
             ModEnchantments.EXECUTE.identifier(), 5, CosmicEnchantmentTier.ELITE, "sword");
     public static final CosmicEnchantmentSpec ANGELIC = new CosmicEnchantmentSpec(
@@ -172,7 +176,7 @@ public final class CosmicEnchantmentSpecs {
                     CLEAVE, SOLITUDE, CURSE, NIMBLE, THUNDERING_BLOW, NEUTRALIZE, OVERLOAD, SILENCE, LONGBOW,
                     DEEP_BLEED, MIGHTY_CACTUS, PALADIN_ARMORED, BLIGHTED_VIRUS, ALIEN_IMPLANTS,
                     LETHAL_SNIPER, ETERNAL_SNARE, PERMANENT_EXECUTE, MIGHTY_CLEAVE, FORBIDDEN_CURSE,
-                    GODLY_OVERLOAD);
+                    GODLY_OVERLOAD, DEATHBRINGER, PLANETARY_DEATHBRINGER);
 
     private CosmicEnchantmentSpecs() {}
 

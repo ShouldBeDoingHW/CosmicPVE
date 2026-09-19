@@ -86,7 +86,7 @@ public final class EquipmentTooltipService {
             event.getToolTip().addAll(com.cosmicpve.reward.lootbox.AnimatedLootboxItem.randomWeaponSkinLore());
         if (stack.is(com.cosmicpve.registry.ModItems.SPACE_CHEST.get())
                 && stack.has(ModDataComponents.SPACE_CHEST.get())) {
-            event.getToolTip().addAll(com.cosmicpve.spacechest.SpaceChestItem.lore());
+            event.getToolTip().addAll(com.cosmicpve.spacechest.SpaceChestItem.lore(stack.get(ModDataComponents.SPACE_CHEST.get()).tier()));
         }
         if (stack.is(com.cosmicpve.registry.ModItems.HEROIC_CRYSTAL.get())) {
             event.getToolTip().addAll(com.cosmicpve.equipment.heroic.HeroicCrystalItem.lore());
@@ -109,7 +109,16 @@ public final class EquipmentTooltipService {
         var book = stack.get(ModDataComponents.COSMIC_ENCHANT_BOOK.get());
         if (book != null) {
             CosmicEnchantmentSpecs.find(book.enchantmentId())
-                    .ifPresent(spec -> event.getToolTip().addAll(CosmicBookLore.lines(book, spec)));
+                    .ifPresent(spec -> {
+                        var lines = new ArrayList<>(CosmicBookLore.lines(book, spec));
+                        var preview = stack.get(net.minecraft.core.component.DataComponents.CUSTOM_DATA);
+                        if (preview != null && preview.copyTag().contains("cosmic_preview_destroy_min")) {
+                            int minimum = preview.copyTag().getInt("cosmic_preview_destroy_min").orElse(1);
+                            lines.set(1, Component.literal("Destroy Rate: " + minimum + "–100% (random)")
+                                    .withColor(ItemApplicationColors.DESTROY));
+                        }
+                        event.getToolTip().addAll(lines);
+                    });
         }
         var dust = stack.get(ModDataComponents.COSMIC_DUST.get());
         if (dust != null) {

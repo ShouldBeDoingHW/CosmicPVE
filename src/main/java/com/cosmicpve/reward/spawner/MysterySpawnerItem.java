@@ -17,7 +17,12 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.Level;
 
-public final class MysterySpawnerItem extends Item {
+public final class MysterySpawnerItem extends Item implements com.cosmicpve.reward.preview.LootPreviewProvider {
+    @Override public List<ItemStack> previewOutcomes(ServerPlayer player, ItemStack source) {
+        var data = source.get(ModDataComponents.MYSTERY_SPAWNER.get());
+        if (data == null || !data.isCurrent()) return List.of();
+        return MysterySpawners.pool(data.tier()).stream().map(id -> MobSpawners.create(id, 1)).toList();
+    }
     public static final SoundSource OPEN_SOUND_SOURCE = SoundSource.MASTER;
     public MysterySpawnerItem(Properties properties) { super(properties); }
     @Override public boolean isFoil(ItemStack stack) { return true; }

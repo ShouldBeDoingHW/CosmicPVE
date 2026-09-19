@@ -18,6 +18,37 @@ import net.minecraft.util.RandomSource;
 import org.junit.jupiter.api.Test;
 
 class Step8ELootboxTest {
+    @Test void secretWeaponCacheSelectsAllSixEquallyAndReturnsCopies() {
+        var candidates = java.util.stream.IntStream.rangeClosed(1, 6)
+                .mapToObj(count -> new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.STICK, count)).toList();
+        for (int index = 0; index < 6; index++) {
+            final int selected = index;
+            var random = new net.minecraft.world.level.levelgen.LegacyRandomSource(0) {
+                @Override public int nextInt(int bound) { assertEquals(6, bound); return selected; }
+            };
+            var result = Step8ELootboxService.selectSignatureWeapon(candidates, random);
+            assertEquals(index + 1, result.getCount());
+            result.shrink(1);
+            assertEquals(index + 1, candidates.get(index).getCount());
+        }
+    }
+    @Test void tablePreviewsCollapseDestroyRollsButRetainEverySuccessVariant() {
+        for (var kind : List.of(AnimatedLootboxItem.Kind.COSMIC_ENCHANTMENT_TABLE,
+                AnimatedLootboxItem.Kind.HEROIC_COSMIC_ENCHANTMENT_TABLE)) {
+            var outcomes = Step8ELootboxService.INSTANCE.previewOutcomes(null, kind);
+            assertEquals(kind == AnimatedLootboxItem.Kind.COSMIC_ENCHANTMENT_TABLE ? 53 : 36, outcomes.size());
+            assertEquals(1, com.cosmicpve.reward.preview.LootPreviewMenu.pages(outcomes.size()));
+            assertEquals(outcomes.size(), outcomes.stream().map(stack -> {
+                var data = stack.get(ModDataComponents.COSMIC_ENCHANT_BOOK.get());
+                assertNotNull(data);
+                var tag = stack.get(net.minecraft.core.component.DataComponents.CUSTOM_DATA).copyTag();
+                int minimum = tag.getInt("cosmic_preview_destroy_min").orElseThrow();
+                assertEquals(stack.has(ModDataComponents.COSMIC_BOOK_RATE_OVERRIDE.get()) ? 51 : 1, minimum);
+                return data.enchantmentId() + ":" + data.level() + ":" + data.successRate();
+            }).distinct().count());
+        }
+    }
+
     @Test void signaturePoolIsExactAndUniform() {
         assertEquals(6, SignatureWeaponDefinition.ALL.size());
         assertEquals(Set.of("Phantom Scythe", "Yeti Maul", "Yjiki Claw", "Ranger's Bow",
@@ -56,7 +87,7 @@ class Step8ELootboxTest {
         assertEquals(HeroicEnchantments.PAIRS.stream().map(HeroicEnchantments.Pair::heroic).toList(),
                 HeroicCosmicEnchantmentTableRewards.POOL);
         assertEquals(List.of(25, 50, 75), HeroicCosmicEnchantmentTableRewards.SUCCESS);
-        assertEquals(33, HeroicCosmicEnchantmentTableRewards.ENTRY_COUNT);
+        assertEquals(36, HeroicCosmicEnchantmentTableRewards.ENTRY_COUNT);
     }
 
     @Test void adminPoolIsExactlyFourEqualTwentyFiveWeights() {

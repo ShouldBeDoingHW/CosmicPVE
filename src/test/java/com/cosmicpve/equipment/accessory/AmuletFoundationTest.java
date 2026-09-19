@@ -150,19 +150,74 @@ class AmuletFoundationTest {
                     "/assets/cosmicpve/models/item/" + entry.getKey() + "_amulet.json")))) {
                 var json = JsonParser.parseReader(reader).getAsJsonObject();
                 assertEquals("neoforge:obj", json.get("loader").getAsString());
+                assertFalse(json.get("flip_v").getAsBoolean(), "Blockbench exports top-down UVs, just like belts");
                 assertTrue(json.get("model").getAsString().endsWith(entry.getKey() + ".obj"));
                 assertEquals("cosmicpve:item/amulet/" + entry.getKey(),
                         json.getAsJsonObject("textures").get("particle").getAsString());
                 var display = json.getAsJsonObject("display");
                 assertTrue(display.has("gui"));
+                assertTrue(display.getAsJsonObject("fixed").has("translation"), "Worn placement must not offset GUI geometry");
                 assertTrue(display.has("firstperson_righthand"));
                 assertTrue(display.has("thirdperson_righthand"));
+            }
+            var vertices = Files.readAllLines(root.resolve("src/main/resources/assets/cosmicpve/models/item/amulet/"
+                    + entry.getKey() + ".obj")).stream().filter(line -> line.startsWith("v "))
+                    .map(line -> java.util.Arrays.stream(line.split("\\s+")).skip(1).mapToDouble(Double::parseDouble).toArray()).toList();
+            for (int axis = 0; axis < 3; axis++) {
+                final int index = axis;
+                double minimum = vertices.stream().mapToDouble(v -> v[index]).min().orElseThrow();
+                double maximum = vertices.stream().mapToDouble(v -> v[index]).max().orElseThrow();
+                assertEquals(0.5, (minimum + maximum) / 2, 0.000001, "All GUI axes must be centered");
             }
         }
         try (var reader = new InputStreamReader(java.util.Objects.requireNonNull(getClass().getResourceAsStream(
                 "/assets/cosmicpve/models/item/amulet_socket.json")))) {
             assertEquals("minecraft:item/tripwire_hook", JsonParser.parseReader(reader).getAsJsonObject()
                     .get("parent").getAsString());
+        }
+    }
+
+    @Test void authoredUvsAreNotMirroredIntoAnotherPaletteRegion() throws Exception {
+        Path root = Path.of(System.getProperty("cosmicpve.projectDir"));
+        for (String[] mapping : java.util.List.of(new String[]{"blood_diamond", "blood_diamond/blood_diamond"},
+                new String[]{"icicle", "icicle/icicle"}, new String[]{"black_heart", "blackened_heart/blackened_heart"})) {
+            var source = JsonParser.parseString(Files.readString(root.resolve("blockbench/amulets/" + mapping[1] + ".bbmodel"))).getAsJsonObject();
+            var coordinates = Files.readAllLines(root.resolve("src/main/resources/assets/cosmicpve/models/item/amulet/" + mapping[0] + ".obj"))
+                    .stream().filter(line -> line.startsWith("vt ")).map(line -> {
+                        String[] values = line.split("\\s+");
+                        return new double[]{Double.parseDouble(values[1]), Double.parseDouble(values[2])};
+                    }).toList();
+            int cursor = 0;
+            for (var value : source.getAsJsonArray("elements")) {
+                var element = value.getAsJsonObject();
+                var faces = element.getAsJsonObject("faces");
+                var names = element.get("type").getAsString().equals("cube")
+                        ? java.util.List.of("north", "south", "west", "east", "up", "down") : new java.util.ArrayList<>(faces.keySet());
+                for (String name : names) {
+                    var face = faces.getAsJsonObject(name);
+                    if (face == null || !face.has("texture") || face.get("texture").isJsonNull()) continue;
+                    int count; double expectedU = 0, expectedV = 0;
+                    if (face.get("uv").isJsonArray()) {
+                        var uv = face.getAsJsonArray("uv"); count = 4;
+                        expectedU = (uv.get(0).getAsDouble() + uv.get(2).getAsDouble()) / 2;
+                        expectedV = (uv.get(1).getAsDouble() + uv.get(3).getAsDouble()) / 2;
+                    } else {
+                        var vertices = face.getAsJsonArray("vertices"); count = vertices.size();
+                        for (var vertex : vertices) {
+                            var uv = face.getAsJsonObject("uv").getAsJsonArray(vertex.getAsString());
+                            expectedU += uv.get(0).getAsDouble() / count; expectedV += uv.get(1).getAsDouble() / count;
+                        }
+                    }
+                    double actualU = 0, actualV = 0;
+                    for (int corner = 0; corner < count; corner++) {
+                        actualU += coordinates.get(cursor)[0] * 32 / count;
+                        actualV += coordinates.get(cursor++)[1] * 32 / count;
+                    }
+                    assertEquals(expectedU, actualU, 0.00001, mapping[0] + " " + name);
+                    assertEquals(expectedV, actualV, 0.00001, mapping[0] + " " + name);
+                }
+            }
+            assertEquals(coordinates.size(), cursor);
         }
     }
 

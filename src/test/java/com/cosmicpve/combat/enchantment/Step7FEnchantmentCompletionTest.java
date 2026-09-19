@@ -76,7 +76,7 @@ class Step7FEnchantmentCompletionTest {
     }
 
     @Test void contentCompletePoolContainsFortySixRealEnchantments() {
-        assertEquals(76, CosmicEnchantmentSpecs.ALL.size());
+        assertEquals(78, CosmicEnchantmentSpecs.ALL.size());
         assertTrue(CosmicEnchantmentSpecs.ENDER_WALKER.tier().extractableByBlackScroll());
         assertTrue(CosmicEnchantmentSpecs.VOODOO.tier().extractableByBlackScroll());
         assertFalse(CosmicEnchantmentSpecs.SOUL_SIPHON.tier().extractableByBlackScroll());

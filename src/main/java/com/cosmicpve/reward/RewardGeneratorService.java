@@ -18,6 +18,21 @@ public final class RewardGeneratorService {
 
     public Optional<ItemStack> generate(RewardDescriptor descriptor, RewardGenerationContext context) {
         return switch (descriptor) {
+            case RewardDescriptor.RandomTrialTrinket reward -> Optional.of(
+                    com.cosmicpve.trial.trinket.TrialTrinkets.randomTier(reward.tier(), context.random()));
+            case RewardDescriptor.AccessorySocket reward -> {
+                var stack = new ItemStack(BuiltInRegistries.ITEM.getValue(reward.itemId()));
+                if (stack.is(com.cosmicpve.registry.ModItems.OMNI_SOCKET.get()))
+                    stack.set(com.cosmicpve.registry.ModDataComponents.OMNI_SOCKET_SUCCESS.get(), reward.successRate());
+                else {
+                    var slot = stack.is(com.cosmicpve.registry.ModItems.AMULET_SOCKET.get())
+                            ? com.cosmicpve.data.component.AccessorySlot.AMULET : com.cosmicpve.data.component.AccessorySlot.BELT;
+                    stack.set(com.cosmicpve.registry.ModDataComponents.ACCESSORY_SOCKET.get(),
+                            new com.cosmicpve.data.component.AccessorySocketData(
+                                    com.cosmicpve.data.component.AccessorySocketData.DATA_VERSION, slot, reward.successRate()));
+                }
+                yield Optional.of(stack);
+            }
             case RewardDescriptor.TrialPortalPreset reward -> {
                 try { yield Optional.of(com.cosmicpve.trial.portal.TrialPortalPresets.generate(reward.presetId())); }
                 catch (IllegalArgumentException unavailable) {

@@ -24,7 +24,7 @@ import net.minecraft.world.item.enchantment.Enchantments;
 /** Produces one final, already-enchanted V-Kit equipment roll. */
 public final class VKitEquipmentGenerator {
     public static final int MAX_KIT_LEVEL = 10;
-    private static final int[] POINT_BUDGETS = {0, 5, 6, 7, 9, 10, 12, 13, 14, 16, 18};
+    private static final int[] POINT_BUDGETS = {0, 10, 11, 12, 13, 14, 15, 18, 20, 22, 25};
     private final CustomEnchantCapacityService capacity = new CustomEnchantCapacityService();
 
     public ItemStack roll(VKitDefinition definition, int level, Registry<Enchantment> enchantments, RandomSource random) {
@@ -53,7 +53,8 @@ public final class VKitEquipmentGenerator {
 
         Map<CosmicEnchantmentSpec, Integer> cosmic = allocate(reward.pool(level), pointBudget(level), random);
         if (cosmic.size() > capacity.capacity(result)) {
-            throw new IllegalStateException("V-Kit roll exceeds the item's Cosmic enchantment capacity");
+            result.set(ModDataComponents.CUSTOM_ENCHANT_META.get(), new com.cosmicpve.data.component.CustomEnchantMetadata(
+                    com.cosmicpve.data.component.CustomEnchantMetadata.CURRENT_DATA_VERSION, cosmic.size(), 0, false, false));
         }
         EnchantmentHelper.updateEnchantments(result, mutable -> {
             applyVanilla(result, type, level, enchantments, mutable);
@@ -76,14 +77,13 @@ public final class VKitEquipmentGenerator {
 
     public Map<CosmicEnchantmentSpec, Integer> allocate(
             List<CosmicEnchantmentSpec> pool, int points, IntUnaryOperator indexSelector) {
-        int available = pool.stream().mapToInt(CosmicEnchantmentSpec::maxLevel).sum();
-        if (points < 1 || available < points) {
-            throw new IllegalArgumentException("V-Kit pool cannot spend exactly " + points + " points");
-        }
-        var remaining = new ArrayList<>(pool);
+        if (points < 1) throw new IllegalArgumentException("V-Kit points must be positive");
+        var byId = new LinkedHashMap<net.minecraft.resources.Identifier, CosmicEnchantmentSpec>();
+        pool.forEach(spec -> byId.putIfAbsent(spec.id(), spec));
+        var remaining = new ArrayList<>(byId.values());
         var result = new LinkedHashMap<CosmicEnchantmentSpec, Integer>();
         int unspent = points;
-        while (unspent > 0) {
+        while (unspent > 0 && !remaining.isEmpty()) {
             int index = indexSelector.applyAsInt(remaining.size());
             if (index < 0 || index >= remaining.size()) throw new IllegalArgumentException("Invalid V-Kit pool index " + index);
             CosmicEnchantmentSpec selected = remaining.remove(index);

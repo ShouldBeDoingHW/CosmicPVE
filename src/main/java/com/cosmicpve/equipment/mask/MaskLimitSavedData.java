@@ -5,7 +5,7 @@ import net.minecraft.world.level.saveddata.SavedData;
 
 /** Persistent world-wide policy for creating new Multi-Masks. */
 public final class MaskLimitSavedData extends SavedData {
-    public static final int DEFAULT_LIMIT = 3;
+    public static final int DEFAULT_LIMIT = 5;
     public static final int MIN_LIMIT = 2;
     public static final int MAX_LIMIT = 5;
     public static final Codec<MaskLimitSavedData> CODEC = Codec.intRange(MIN_LIMIT, MAX_LIMIT)

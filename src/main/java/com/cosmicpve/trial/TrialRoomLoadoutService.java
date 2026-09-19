@@ -56,7 +56,7 @@ public final class TrialRoomLoadoutService {
     public static final int HIDDEN_GRAVEYARD_NUTRITION = 3;
     public static final int HIDDEN_GRAVEYARD_INSANITY = 8;
     public static final int HIDDEN_GRAVEYARD_PUMMEL = 3;
-    public static final int HIDDEN_GRAVEYARD_APPLES = 5;
+    public static final int HIDDEN_GRAVEYARD_APPLES = 16;
     public static final int HIDDEN_GRAVEYARD_HEALING_POTIONS = 4;
     public static final int DEADEYE_GOLDEN_APPLES = 16;
     public static final int DEADEYE_ARROWS = 1;
