@@ -2,6 +2,7 @@ package com.cosmicpve.trial.room;
 
 import static org.junit.jupiter.api.Assertions.*;
 import com.cosmicpve.instance.InstanceBounds;
+import com.cosmicpve.trial.TrialRoomLoadoutService;
 import java.util.HashSet;
 import net.minecraft.core.BlockPos;
 import org.junit.jupiter.api.Test;
@@ -20,5 +21,10 @@ class CircuitCircusLogicTest {
     }
     @Test void acceptedTargetFeedbackUsesArrowHitPlayerSound() {
         assertEquals(net.minecraft.sounds.SoundEvents.ARROW_HIT_PLAYER, CircuitCircusService.targetFeedbackSound());
+    }
+    @Test void canonicalLoadoutReservesSlotNineForBakedPotatoes() {
+        assertEquals(16,TrialRoomLoadoutService.CIRCUIT_CIRCUS_BAKED_POTATOES);
+        assertEquals(8,TrialRoomLoadoutService.CIRCUIT_CIRCUS_FOOD_SLOT);
+        assertNotEquals(net.minecraft.world.item.Items.BREAD,net.minecraft.world.item.Items.BAKED_POTATO);
     }
 }

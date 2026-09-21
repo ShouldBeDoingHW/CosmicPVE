@@ -13,6 +13,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.templatesystem.*;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
@@ -30,7 +31,7 @@ public final class WoodlandTemplateFeature extends Feature<WoodlandTemplateFeatu
     public record Config(String family, int variants) implements FeatureConfiguration {
         public static final Codec<Config> CODEC = RecordCodecBuilder.create(i -> i.group(
                 Codec.STRING.fieldOf("family").forGetter(Config::family),
-                Codec.intRange(1,3).fieldOf("variants").forGetter(Config::variants)).apply(i, Config::new));
+                Codec.intRange(1,64).fieldOf("variants").forGetter(Config::variants)).apply(i, Config::new));
     }
     public record Placement(String variant, BlockPos origin, Rotation rotation, int minSurface, int maxSurface) {}
     private static final Map<String, LongAdder> COUNTS = new ConcurrentHashMap<>();
@@ -94,6 +95,8 @@ public final class WoodlandTemplateFeature extends Feature<WoodlandTemplateFeatu
         // lowest surface instead. Remove at most two uphill soil layers inside the authored
         // floor/low-prop footprint; otherwise the corrected anchor rejects almost every rolling site.
         BlockPos origin = new BlockPos(x,camp ? campsiteOriginY(min) : max,z);
+        if (isTreeFamily(config.family())
+                && intersectsArenaFootprint(world, template.getBoundingBox(settings, origin))) return false;
         var shallowCut = new HashSet<BlockPos>();
         if(camp) for(var contact:contacts) {
             var floor=origin.offset(contact.pos());
@@ -134,6 +137,33 @@ public final class WoodlandTemplateFeature extends Feature<WoodlandTemplateFeatu
             CAMPS.addLast(placed);while(CAMPS.size()>512)CAMPS.pollFirst();
         }
         return true;
+    }
+    static boolean isTreeFamily(String family) {
+        return family.equals("small_tree")
+                || family.equals("tall_tree")
+                || family.equals("fallen_tree");
+    }
+    static boolean horizontallyIntersects(BoundingBox first, BoundingBox second) {
+        return first.maxX() >= second.minX() && first.minX() <= second.maxX()
+                && first.maxZ() >= second.minZ() && first.minZ() <= second.maxZ();
+    }
+    private static boolean intersectsArenaFootprint(net.minecraft.world.level.WorldGenLevel world,
+            BoundingBox candidate) {
+        var structure = world.registryAccess().lookupOrThrow(Registries.STRUCTURE)
+                .getValue(com.cosmicpve.adventure.ranger.WoodlandsArenaService.STRUCTURE);
+        if (structure == null) return false;
+        var manager = world instanceof net.minecraft.server.level.WorldGenRegion region
+                ? world.getLevel().structureManager().forWorldGenRegion(region)
+                : world.getLevel().structureManager();
+        var visited = new HashSet<net.minecraft.world.level.levelgen.structure.StructureStart>();
+        for (int chunkX = Math.floorDiv(candidate.minX(), 16); chunkX <= Math.floorDiv(candidate.maxX(), 16); chunkX++) {
+            for (int chunkZ = Math.floorDiv(candidate.minZ(), 16); chunkZ <= Math.floorDiv(candidate.maxZ(), 16); chunkZ++) {
+                for (var start : manager.startsForStructure(new net.minecraft.world.level.ChunkPos(chunkX, chunkZ), structure::equals)) {
+                    if (visited.add(start) && horizontallyIntersects(candidate, start.getBoundingBox())) return true;
+                }
+            }
+        }
+        return false;
     }
     private record Cell(BlockPos pos, BlockState state) {}
     public static int campsiteOriginY(int lowestSurfaceAirY) { return lowestSurfaceAirY - 1; }

@@ -11,6 +11,7 @@ import net.minecraft.world.entity.item.PrimedTnt;
 public final class SelfDestructBehavior {
     public static final double HEALTH_THRESHOLD = 0.15;
     public static final long COOLDOWN_TICKS = 1_200L;
+    public static final int TNT_FUSE_TICKS = 20;
     public static final String TNT_TAG = CosmicPVE.MOD_ID + ".self_destruct_tnt";
     public static final List<CardinalOffset> OFFSETS = List.of(
             new CardinalOffset(0, -1), new CardinalOffset(0, 1),
@@ -28,6 +29,7 @@ public final class SelfDestructBehavior {
         for (var offset : OFFSETS) {
             var tnt = new PrimedTnt(level, wearer.getX() + offset.x(), wearer.getY(),
                     wearer.getZ() + offset.z(), wearer);
+            tnt.setFuse(TNT_FUSE_TICKS);
             tnt.addTag(TNT_TAG);
             if (level.addFreshEntity(tnt)) spawned++;
         }

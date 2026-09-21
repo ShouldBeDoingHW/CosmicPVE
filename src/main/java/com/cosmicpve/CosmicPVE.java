@@ -70,6 +70,7 @@ public final class CosmicPVE {
         Step8EGameTests.register(modBus);
         Step8FGameTests.register(modBus);
         Step8G2GameTests.register(modBus);
+        com.cosmicpve.combat.enchantment.SelfDestructGameTests.register(modBus);
         com.cosmicpve.combat.enchantment.CleaveCurseGameTests.register(modBus);
         com.cosmicpve.combat.enchantment.OverloadSilenceLongbowGameTests.register(modBus);
         com.cosmicpve.equipment.accessory.AmuletGameTests.register(modBus);

@@ -1,0 +1,7 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {"S": "cosmicpve:dense_woodlands_scrap"},
+  "pattern": ["SSS", "SSS", "SSS"],
+  "result": {"id": "cosmicpve:desecrated_tomb_ranger", "count": 1}
+}

@@ -18,6 +18,16 @@ public final class RewardGeneratorService {
 
     public Optional<ItemStack> generate(RewardDescriptor descriptor, RewardGenerationContext context) {
         return switch (descriptor) {
+            case RewardDescriptor.PinpointBook ignored -> Optional.of(
+                    com.cosmicpve.adventure.ranger.AdvancedWoodlandsRewards.pinpointBook(context.random()));
+            case RewardDescriptor.RandomRangerArmor ignored -> Optional.of(
+                    com.cosmicpve.adventure.ranger.AdvancedWoodlandsRewards.randomRangerArmor(context.registries(),context.random()));
+            case RewardDescriptor.AdvancedBanknote ignored -> Optional.of(
+                    com.cosmicpve.adventure.ranger.AdvancedWoodlandsRewards.banknote(context.random()));
+            case RewardDescriptor.SkipTwoPortal ignored -> Optional.of(
+                    com.cosmicpve.adventure.ranger.AdvancedWoodlandsRewards.portal(2,0));
+            case RewardDescriptor.MadnessThreePortal ignored -> Optional.of(
+                    com.cosmicpve.adventure.ranger.AdvancedWoodlandsRewards.portal(0,3));
             case RewardDescriptor.RandomTrialTrinket reward -> Optional.of(
                     com.cosmicpve.trial.trinket.TrialTrinkets.randomTier(reward.tier(), context.random()));
             case RewardDescriptor.AccessorySocket reward -> {

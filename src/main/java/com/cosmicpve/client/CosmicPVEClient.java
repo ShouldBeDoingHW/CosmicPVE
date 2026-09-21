@@ -55,6 +55,7 @@ public final class CosmicPVEClient {
         event.register(com.cosmicpve.registry.ModMenus.PLAYER_UPGRADES.get(), PlayerUpgradesScreen::new);
         event.register(com.cosmicpve.registry.ModMenus.ENCHANTER.get(), EnchanterScreen::new);
         event.register(com.cosmicpve.registry.ModMenus.FAME_SHOP.get(), FameShopScreen::new);
+        event.register(com.cosmicpve.registry.ModMenus.ADVENTURES.get(), AdventureInfoScreen::new);
     }
 
     private static void registerEntityRenderers(EntityRenderersEvent.RegisterRenderers event) {
@@ -64,6 +65,7 @@ public final class CosmicPVEClient {
         event.registerEntityRenderer(ModEntities.INVENTOR.get(), ZombieVillagerRenderer::new);
         event.registerEntityRenderer(ModEntities.FOREST_FANATIC.get(), ForestFanaticRenderer::new);
         event.registerEntityRenderer(ModEntities.DREADMANE.get(), DreadmaneRenderer::new);
+        event.registerEntityRenderer(ModEntities.COSMIC_RANGER.get(), com.cosmicpve.client.entity.CosmicRangerRenderer::new);
         event.registerBlockEntityRenderer(ModBlockEntities.CONQUEST_CHEST.get(), ChestRenderer::new);
     }
 

@@ -105,6 +105,19 @@ public final class InventorGameTests {
                         && player.bread().getCount() == TrialRoomLoadoutService.INVENTOR_BREAD
                         && TrialRoomLoadoutService.INVENTOR_BREAD_SLOT == 8,
                 "Inventor loadout must reserve 16 Bread for Hotbar Slot 9");
+        var roomLoadouts=new TrialRoomLoadoutService(new TrialInventoryTransactionService());
+        var first=mockServerPlayer(helper);var second=mockServerPlayer(helper);
+        roomLoadouts.applyCircuitCircus(first);roomLoadouts.applyCircuitCircus(second);
+        for(var participant:List.of(first,second)){
+            var food=participant.getInventory().getItem(TrialRoomLoadoutService.CIRCUIT_CIRCUS_FOOD_SLOT);
+            helper.assertTrue(food.is(Items.BAKED_POTATO)&&food.getCount()==16,
+                    "every Circuit Circus participant receives 16 Baked Potatoes in Hotbar Slot 9");
+            helper.assertTrue(participant.getInventory().getItem(0).is(Items.BOW)
+                    &&participant.getInventory().getItem(1).is(Items.ARROW),"Circuit Circus bow and arrow remain intact");
+            roomLoadouts.clear(participant);
+            helper.assertTrue(participant.getInventory().getItem(TrialRoomLoadoutService.CIRCUIT_CIRCUS_FOOD_SLOT).isEmpty(),
+                    "normal room-transition cleanup removes supplied Baked Potatoes");
+        }
         helper.succeed();
     }
 
@@ -147,5 +160,13 @@ public final class InventorGameTests {
     private static int level(ItemStack stack, net.minecraft.core.Registry<net.minecraft.world.item.enchantment.Enchantment> registry,
             ResourceKey<net.minecraft.world.item.enchantment.Enchantment> key) {
         return EnchantmentHelper.getItemEnchantmentLevel(registry.getOrThrow(key), stack);
+    }
+    private static net.minecraft.server.level.ServerPlayer mockServerPlayer(GameTestHelper helper){
+        java.util.function.Consumer<net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent> configure=event->{
+            if(event.getEntity() instanceof net.minecraft.server.level.ServerPlayer player)
+                net.neoforged.neoforge.network.registration.NetworkRegistry.configureMockConnection(player.connection.getConnection());
+        };
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(net.neoforged.bus.api.EventPriority.HIGHEST,configure);
+        try{return helper.makeMockServerPlayerInLevel();}finally{net.neoforged.neoforge.common.NeoForge.EVENT_BUS.unregister(configure);}
     }
 }

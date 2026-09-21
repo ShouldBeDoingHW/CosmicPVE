@@ -26,6 +26,21 @@ import java.util.*;
 public final class AdventureHotfixGameTests {
     private AdventureHotfixGameTests() {}
     public static void verify(GameTestHelper h) {
+        var stale=AdventureGameTests.player(h,"staleadventure");
+        stale.setItemInHand(InteractionHand.MAIN_HAND,new ItemStack(ModItems.CALL_OF_FOREST_10.get()));
+        com.cosmicpve.combat.CosmicCombat.activities().set(stale.getUUID(),com.cosmicpve.activity.ActivityType.ADVENTURE);
+        var recovered=DenseWoodlandsBootstrap.SESSIONS.tryEnter(stale,10,InteractionHand.MAIN_HAND);
+        h.assertTrue(recovered.accepted() && DenseWoodlandsBootstrap.SESSIONS.session(stale)!=null,
+                "A process-global Adventure flag without this world's saved session self-heals");
+        AdventureSavedData.get(stale.level().getServer()).remove(stale.level().getServer(),stale.getUUID());
+        com.cosmicpve.combat.CosmicCombat.activities().clear(stale.getUUID());stale.discard();
+        var blocked=AdventureGameTests.player(h,"blockedactivity");
+        blocked.setItemInHand(InteractionHand.MAIN_HAND,new ItemStack(ModItems.CALL_OF_FOREST_10.get()));
+        com.cosmicpve.combat.CosmicCombat.activities().set(blocked.getUUID(),com.cosmicpve.activity.ActivityType.TRIAL);
+        var rejection=DenseWoodlandsBootstrap.SESSIONS.tryEnter(blocked,10,InteractionHand.MAIN_HAND);
+        h.assertTrue(!rejection.accepted() && rejection.message().contains("trial activity")
+                && blocked.getMainHandItem().getCount()==1,"Real activity rejection is precise and does not consume the Call");
+        com.cosmicpve.combat.CosmicCombat.activities().clear(blocked.getUUID());blocked.discard();
         var service=SingleRewardAnimationService.INSTANCE;
         for(var hand:InteractionHand.values()) {
             var p=AdventureGameTests.player(h,"mystery"+hand.ordinal());p.setPos(h.absolutePos(new BlockPos(3,3,3)).getCenter());

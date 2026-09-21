@@ -34,21 +34,37 @@ public final class DenseWoodlandsSessionService {
     public AdventureSession session(ServerPlayer p) { return AdventureSavedData.get(p.level().getServer()).get(p.getUUID()); }
     private long now(MinecraftServer server) { return server.overworld().getGameTime(); }
     public boolean enter(ServerPlayer player, int minutes, net.minecraft.world.InteractionHand hand) {
+        return tryEnter(player,minutes,hand).accepted();
+    }
+    public EntryResult tryEnter(ServerPlayer player, int minutes, net.minecraft.world.InteractionHand hand) {
         var server=player.level().getServer();var data=AdventureSavedData.get(server);
-        if(data.get(player.getUUID())!=null || !player.isAlive() || player.isSpectator()
-                || CosmicCombat.activities().current(player)!=ActivityType.NONE
-                || player.level().dimension().equals(DIMENSION) || server.getLevel(DIMENSION)==null
-                || com.cosmicpve.trial.TrialRuntime.sessions().active(server).map(s->s.activeParticipant(player.getUUID())).orElse(false)) return false;
+        if(data.get(player.getUUID())!=null)return EntryResult.rejected("You already have a Dense Woodlands adventure in progress.");
+        // ActivityContextService is process-global in the development client. A world switch keeps the
+        // same offline player UUID, so reconcile an Adventure flag that has no session in this server.
+        if(CosmicCombat.activities().current(player)==ActivityType.ADVENTURE)CosmicCombat.activities().clear(player.getUUID());
+        if(!player.isAlive())return EntryResult.rejected("You must be alive to begin a Dense Woodlands adventure.");
+        if(player.isSpectator())return EntryResult.rejected("Spectators cannot begin a Dense Woodlands adventure.");
+        if(player.level().dimension().equals(DIMENSION))return EntryResult.rejected("You are already in the Dense Woodlands.");
+        if(server.getLevel(DIMENSION)==null)return EntryResult.rejected("The Dense Woodlands dimension is unavailable.");
+        if(com.cosmicpve.trial.TrialRuntime.sessions().active(server).map(s->s.activeParticipant(player.getUUID())).orElse(false))
+            return EntryResult.rejected("You cannot begin a Dense Woodlands adventure while participating in a Trial.");
+        var activity=CosmicCombat.activities().current(player);
+        if(activity!=ActivityType.NONE)return EntryResult.rejected("You cannot begin a Dense Woodlands adventure during "
+                +activity.name().toLowerCase(java.util.Locale.ROOT)+" activity.");
         int slot=hand==net.minecraft.world.InteractionHand.MAIN_HAND ? player.getInventory().getSelectedSlot():40;
         var call=player.getInventory().getItem(slot);
-        if(!call.has(ModDataComponents.CALL_OF_FOREST.get()))return false;
+        if(!call.has(ModDataComponents.CALL_OF_FOREST.get()))return EntryResult.rejected("Hold a valid Call of the Forest to begin.");
         var home=new AdventureSession.ReturnPoint(player.level().dimension(),player.position(),player.getYRot(),player.getXRot(),player.gameMode.getGameModeForPlayer());
         var session=new AdventureSession(player.getUUID(),UUID.randomUUID(),minutes,PREPARED,home,BlockPos.ZERO,BlockPos.ZERO,
                 now(server)+TRANSITION_TICKS,slot,call.getCount());
         player.closeContainer();
         data.put(server,session);
         consume(player,session);
-        return true;
+        return EntryResult.success();
+    }
+    public record EntryResult(boolean accepted,String message) {
+        static EntryResult success(){return new EntryResult(true,"");}
+        static EntryResult rejected(String message){return new EntryResult(false,message);}
     }
     private void consume(ServerPlayer player, AdventureSession s) {
         var server=player.level().getServer();var stack=player.getInventory().getItem(s.callSlot());

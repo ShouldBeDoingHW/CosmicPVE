@@ -46,6 +46,7 @@ public final class GeneratedEquipmentService {
     public List<CosmicEnchantmentSpec> candidates(ItemStack stack, GeneratedEquipmentDefinition definition,
             Registry<Enchantment> enchantments) {
         return new ArrayList<>(CosmicEnchantmentSpecs.ALL.stream()
+                .filter(CosmicEnchantmentSpec::randomPoolEligible)
                 .filter(spec -> spec.tier().ordinal() <= definition.maximumRarity().ordinal())
                 .filter(spec -> enchantments.get(spec.id())
                         .filter(holder -> holder.value().canEnchant(stack)).isPresent())

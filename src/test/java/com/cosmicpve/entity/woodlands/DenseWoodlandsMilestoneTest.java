@@ -2,6 +2,7 @@ package com.cosmicpve.entity.woodlands;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.cosmicpve.combat.enchantment.DefensiveCosmicEnchantments;
@@ -116,9 +117,27 @@ class DenseWoodlandsMilestoneTest {
                 new AABB(.5, 0, .5, 1.5, 2, 1.5)), 1.0E-12);
         assertTrue(DreadmaneEntity.collisionDistanceSquared(horse,
                 new AABB(1.51, 0, 0, 2.51, 2, 1)) > DreadmaneEntity.BUCK_RANGE * DreadmaneEntity.BUCK_RANGE);
-        assertEquals(10.0F, DreadmaneEntity.BUCK_DAMAGE);
+        assertEquals(11.0F, DreadmaneEntity.BUCK_DAMAGE);
+        assertEquals(7.5, DreadmaneEntity.ATTACK_DAMAGE);
         assertEquals(1.5, DreadmaneEntity.BUCK_KNOCKBACK);
         assertEquals(35, DreadmaneEntity.BUCK_SLOWNESS_TICKS);
         assertEquals(200, DreadmaneEntity.BUCK_COOLDOWN_TICKS);
+    }
+
+    @Test
+    void ordinaryVanillaExperienceRewardsUseExactInclusiveUniformRanges() {
+        assertEquals(15, ForestFanaticEntity.MIN_EXPERIENCE);
+        assertEquals(20, ForestFanaticEntity.MAX_EXPERIENCE);
+        assertEquals(List.of(15, 16, 17, 18, 19, 20), java.util.stream.IntStream.range(0, 6)
+                .map(ForestFanaticEntity::experienceReward).boxed().toList());
+        assertThrows(IllegalArgumentException.class, () -> ForestFanaticEntity.experienceReward(-1));
+        assertThrows(IllegalArgumentException.class, () -> ForestFanaticEntity.experienceReward(6));
+
+        assertEquals(25, DreadmaneEntity.MIN_EXPERIENCE);
+        assertEquals(35, DreadmaneEntity.MAX_EXPERIENCE);
+        assertEquals(java.util.stream.IntStream.rangeClosed(25, 35).boxed().toList(),
+                java.util.stream.IntStream.range(0, 11).map(DreadmaneEntity::experienceReward).boxed().toList());
+        assertThrows(IllegalArgumentException.class, () -> DreadmaneEntity.experienceReward(-1));
+        assertThrows(IllegalArgumentException.class, () -> DreadmaneEntity.experienceReward(11));
     }
 }

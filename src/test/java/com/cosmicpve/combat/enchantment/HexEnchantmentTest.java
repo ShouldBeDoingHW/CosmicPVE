@@ -25,7 +25,7 @@ class HexEnchantmentTest {
         assertEquals(-.06, HexBehavior.outgoingPenalty(3), 1e-12);
         assertEquals(1.06, HexBehavior.incomingMultiplier(3), 1e-12);
         assertEquals(1.0, HexBehavior.incomingMultiplier(0), 1e-12);
-        assertEquals(78, CosmicEnchantmentSpecs.ALL.size());
+        assertEquals(79, CosmicEnchantmentSpecs.ALL.size());
         assertTrue(CosmicEnchantmentSpecs.find(ModEnchantments.HEX.identifier()).isPresent());
     }
 

@@ -7,6 +7,7 @@ import com.cosmicpve.entity.undeadcorpse.UndeadCorpseEntity;
 import com.cosmicpve.entity.inventor.InventorEntity;
 import com.cosmicpve.entity.woodlands.DreadmaneEntity;
 import com.cosmicpve.entity.woodlands.ForestFanaticEntity;
+import com.cosmicpve.entity.woodlands.CosmicRangerEntity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.neoforged.bus.api.IEventBus;
@@ -44,6 +45,10 @@ public final class ModEntities {
                     builder -> builder.sized(1.3965F * DreadmaneEntity.RENDER_SCALE,
                                     1.6F * DreadmaneEntity.RENDER_SCALE)
                             .clientTrackingRange(8).noLootTable().notInPeaceful());
+    public static final DeferredHolder<EntityType<?>, EntityType<CosmicRangerEntity>> COSMIC_RANGER =
+            ENTITIES.registerEntityType("cosmic_ranger", CosmicRangerEntity::new, MobCategory.MONSTER,
+                    builder -> builder.sized(0.6F * CosmicRangerEntity.SCALE,1.99F * CosmicRangerEntity.SCALE)
+                            .clientTrackingRange(10).noLootTable().notInPeaceful());
 
     private ModEntities() {}
 
@@ -59,5 +64,6 @@ public final class ModEntities {
         event.put(INVENTOR.get(), InventorEntity.createAttributes().build());
         event.put(FOREST_FANATIC.get(), ForestFanaticEntity.createAttributes().build());
         event.put(DREADMANE.get(), DreadmaneEntity.createAttributes().build());
+        event.put(COSMIC_RANGER.get(), CosmicRangerEntity.createAttributes().build());
     }
 }

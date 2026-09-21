@@ -65,6 +65,8 @@ public final class TrialRoomLoadoutService {
     public static final int DEADEYE_EAGLE_EYE = 5;
     public static final int HAZE_PUMPKIN_PIES = 32;
     public static final int CAVE_DIVING_COOKED_COD = 15;
+    public static final int CIRCUIT_CIRCUS_BAKED_POTATOES = 16;
+    public static final int CIRCUIT_CIRCUS_FOOD_SLOT = 8;
     public static final int INVENTOR_BREAD = 16;
     public static final int INVENTOR_BREAD_SLOT = 8;
     public static final int INVENTOR_HEALING_POTION_STACKS = 2;
@@ -155,6 +157,8 @@ public final class TrialRoomLoadoutService {
         EnchantmentHelper.updateEnchantments(bow, mutable -> mutable.set(registry.getOrThrow(Enchantments.INFINITY), 1));
         player.getInventory().setItem(0, bow);
         player.getInventory().setItem(1, new ItemStack(Items.ARROW));
+        player.getInventory().setItem(CIRCUIT_CIRCUS_FOOD_SLOT,
+                new ItemStack(Items.BAKED_POTATO, CIRCUIT_CIRCUS_BAKED_POTATOES));
         player.getInventory().setSelectedSlot(0);
     }
     public void applyFireColony(ServerPlayer player) {

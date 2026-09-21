@@ -30,6 +30,7 @@ public final class CosmicCommands {
         VKitCommands.registerPublic(event);
         PlayerUpgradeCommands.registerPublic(event);
         FameCommands.registerPublic(event);
+        AdventureInfoCommands.registerPublic(event);
         var combat = Commands.literal("combat")
                 .then(Commands.literal("trace")
                         .then(Commands.literal("on").executes(context -> setTrace(context.getSource(), true)))

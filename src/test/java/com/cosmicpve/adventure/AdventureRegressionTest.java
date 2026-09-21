@@ -25,7 +25,7 @@ class AdventureRegressionTest {
         for(var s:CosmicEnchantmentSpecs.ALL)assertEquals(Set.of(CosmicEnchantmentTier.SIMPLE,CosmicEnchantmentTier.UNIQUE,CosmicEnchantmentTier.ELITE).contains(s.tier()),AdventureRules.allows(s.id()),s.id().toString());
         assertTrue(AdventureRules.allows(net.minecraft.resources.Identifier.withDefaultNamespace("protection")));
     }
-    @Test void allThirteenVariantsHaveBiomeConfiguredPlacedTemplatePaths() throws Exception {
+    @Test void allFifteenVariantsHaveBiomeConfiguredPlacedTemplatePaths() throws Exception {
         var biome=resource("data/cosmicpve/worldgen/biome/dense_woodlands.json");
         var features=biome.getAsJsonArray("features").get(9).getAsJsonArray();
         assertEquals(12,features.size());int variants=0;
@@ -39,7 +39,7 @@ class AdventureRegressionTest {
             var config=configured.getAsJsonObject("config");int count=config.get("variants").getAsInt();variants+=count;
             for(int i=1;i<=count;i++)assertNotNull(getClass().getClassLoader().getResource("data/cosmicpve/structure/woodlands/"+path+i+".nbt"));
         }
-        assertEquals(13,variants);
+        assertEquals(15,variants);
     }
     @Test void whiteScrollLogicalRowsHaveExactCountQuantityAndWeight() throws Exception {
         for(String tier:List.of("ultimate","legendary")) {

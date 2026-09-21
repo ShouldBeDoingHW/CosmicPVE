@@ -34,7 +34,7 @@ public record GeneratedEquipmentDefinitionData(GeneratedEquipmentCategory catego
         var capacity = new CustomEnchantCapacityService();
         for (var item : List.of(Items.IRON_HELMET, Items.IRON_CHESTPLATE, Items.IRON_LEGGINGS, Items.IRON_BOOTS)) {
             var stack = new ItemStack(item);
-            long candidates = CosmicEnchantmentSpecs.ALL.stream()
+            long candidates = CosmicEnchantmentSpecs.ALL.stream().filter(spec -> spec.randomPoolEligible())
                     .filter(spec -> spec.tier().ordinal() <= maximumRarity.ordinal())
                     .filter(spec -> enchantments.get(spec.id()).isPresent())
                     .filter(spec -> appliesToIronArmorSlot(spec.equipmentApplicability(), item))

@@ -43,6 +43,8 @@ public final class ModMenus {
             "enchanter", () -> IMenuTypeExtension.create(EnchanterMenu::client));
     public static final DeferredHolder<MenuType<?>, MenuType<FameShopMenu>> FAME_SHOP = MENUS.register(
             "fame_shop", () -> IMenuTypeExtension.create(FameShopMenu::client));
+    public static final DeferredHolder<MenuType<?>, MenuType<com.cosmicpve.adventure.AdventureInfoMenu>> ADVENTURES = MENUS.register(
+            "adventures", () -> IMenuTypeExtension.create(com.cosmicpve.adventure.AdventureInfoMenu::client));
     private ModMenus() {}
     public static void register(IEventBus bus) { MENUS.register(bus); }
 }

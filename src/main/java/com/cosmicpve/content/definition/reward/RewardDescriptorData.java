@@ -52,6 +52,11 @@ public record RewardDescriptorData(RewardType type, Optional<Identifier> itemId,
     public ValidationResult<RewardDescriptor> resolve(String source, RegistryAccess registries) {
         try {
             return switch (type) {
+                case PINPOINT_BOOK -> ValidationResult.success(new RewardDescriptor.PinpointBook());
+                case RANDOM_RANGER_ARMOR -> ValidationResult.success(new RewardDescriptor.RandomRangerArmor());
+                case ADVANCED_BANKNOTE -> ValidationResult.success(new RewardDescriptor.AdvancedBanknote());
+                case SKIP_TWO_PORTAL -> ValidationResult.success(new RewardDescriptor.SkipTwoPortal());
+                case MADNESS_THREE_PORTAL -> ValidationResult.success(new RewardDescriptor.MadnessThreePortal());
                 case RANDOM_TRIAL_TRINKET -> ValidationResult.success(new RewardDescriptor.RandomTrialTrinket(
                         required(trinketTier, "trinket_tier")));
                 case ACCESSORY_SOCKET -> {

@@ -38,8 +38,9 @@ public final class CallOfForestItem extends Item {
         ItemStack stack = player.getItemInHand(hand);
         var data = stack.get(ModDataComponents.CALL_OF_FOREST.get());
         if (data == null || data.version() != CallOfForestData.CURRENT_DATA_VERSION) return InteractionResult.FAIL;
-        if (!DenseWoodlandsBootstrap.SESSIONS.enter(serverPlayer, data.minutes(), hand)) {
-            serverPlayer.displayClientMessage(Component.literal("A Dense Woodlands adventure is already active or unavailable."), true);
+        var entry = DenseWoodlandsBootstrap.SESSIONS.tryEnter(serverPlayer, data.minutes(), hand);
+        if (!entry.accepted()) {
+            serverPlayer.displayClientMessage(Component.literal(entry.message()), true);
             return InteractionResult.FAIL;
         }
         return InteractionResult.SUCCESS_SERVER.heldItemTransformedTo(stack);

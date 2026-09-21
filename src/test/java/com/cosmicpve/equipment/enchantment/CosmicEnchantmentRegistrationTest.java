@@ -80,7 +80,8 @@ class CosmicEnchantmentRegistrationTest {
                 Map.entry("overload", 3),
                 Map.entry("godly_overload", 3),
                 Map.entry("silence", 4),
-                Map.entry("longbow", 5));
+                Map.entry("longbow", 5),
+                Map.entry("pinpoint", 6));
         for (var entry : expected.entrySet()) {
             var resource = getClass().getClassLoader()
                     .getResourceAsStream("data/cosmicpve/enchantment/" + entry.getKey() + ".json");
@@ -135,7 +136,7 @@ class CosmicEnchantmentRegistrationTest {
                 }
             }
         }
-        assertEquals(78, CosmicEnchantmentSpecs.ALL.size());
+        assertEquals(79, CosmicEnchantmentSpecs.ALL.size());
         assertEquals(CosmicEnchantmentTier.ELITE, CosmicEnchantmentSpecs.EXECUTE.tier());
         assertEquals(CosmicEnchantmentTier.ULTIMATE, CosmicEnchantmentSpecs.ANGELIC.tier());
         assertEquals(CosmicEnchantmentTier.SIMPLE, CosmicEnchantmentSpecs.LIGHTNING.tier());

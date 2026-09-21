@@ -8,7 +8,14 @@ public sealed interface RewardDescriptor permits RewardDescriptor.StaticItem, Re
         RewardDescriptor.WeaponOrb, RewardDescriptor.MobSpawner, RewardDescriptor.GeneratedEquipment,
         RewardDescriptor.SpaceChest, RewardDescriptor.Mask, RewardDescriptor.ArmorSetCrystal,
         RewardDescriptor.XpBottle, RewardDescriptor.RandomVKitCrystal, RewardDescriptor.EnchantedBlackScroll,
-        RewardDescriptor.TrialPortalPreset, RewardDescriptor.RandomTrialTrinket, RewardDescriptor.AccessorySocket {
+        RewardDescriptor.TrialPortalPreset, RewardDescriptor.RandomTrialTrinket, RewardDescriptor.AccessorySocket,
+        RewardDescriptor.PinpointBook, RewardDescriptor.RandomRangerArmor, RewardDescriptor.AdvancedBanknote,
+        RewardDescriptor.SkipTwoPortal, RewardDescriptor.MadnessThreePortal {
+    record PinpointBook() implements RewardDescriptor { public RewardType type(){return RewardType.PINPOINT_BOOK;} }
+    record RandomRangerArmor() implements RewardDescriptor { public RewardType type(){return RewardType.RANDOM_RANGER_ARMOR;} }
+    record AdvancedBanknote() implements RewardDescriptor { public RewardType type(){return RewardType.ADVANCED_BANKNOTE;} }
+    record SkipTwoPortal() implements RewardDescriptor { public RewardType type(){return RewardType.SKIP_TWO_PORTAL;} }
+    record MadnessThreePortal() implements RewardDescriptor { public RewardType type(){return RewardType.MADNESS_THREE_PORTAL;} }
     record RandomTrialTrinket(int tier) implements RewardDescriptor {
         public RandomTrialTrinket { if (tier < 1 || tier > 3) throw new IllegalArgumentException("trinket_tier must be in [1,3]"); }
         public RewardType type() { return RewardType.RANDOM_TRIAL_TRINKET; }

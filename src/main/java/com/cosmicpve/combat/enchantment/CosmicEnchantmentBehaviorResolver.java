@@ -114,6 +114,7 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
         } else if (event.hook() == ProcHook.ON_PROJECTILE_HIT) {
             addLightning(event, result);
             addVenom(event, result);
+            addPinpoint(event, result);
             addVirus(event, result);
             addSnare(event, result);
             addDominate(event, result);
@@ -556,6 +557,17 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
                 ChildProcEligibility.ROOT_ONLY,
                 activation -> VenomBehavior.activate(activation.event()),
                 provenance(event, ModEnchantments.VENOM.identifier())));
+    }
+
+    private void addPinpoint(ProcEvent event, List<ProcCandidate> result) {
+        int level = Math.min(6, event.effectiveEnchantments().level(ModEnchantments.PINPOINT.identifier()));
+        if (level <= 0) return;
+        result.add(candidate(ModEnchantments.PINPOINT.identifier(), ProcHook.ON_PROJECTILE_HIT,
+                PinpointBehavior.chance(level), Optional.empty(), 0L, Optional.empty(),
+                ChildProcEligibility.ROOT_ONLY,
+                activation -> PinpointBehavior.activate(activation.event()),
+                provenance(event, ModEnchantments.PINPOINT.identifier()),
+                condition(CosmicPVE.id("pinpoint_committed_bow_hit"), PinpointBehavior::eligible)));
     }
 
     private void addAngelic(ProcEvent event, List<ProcCandidate> result) {

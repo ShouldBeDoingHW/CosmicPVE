@@ -97,6 +97,9 @@ neoForge {
             if (project.hasProperty('cosmicpve.verificationRunDir')) {
                 gameDirectory = project.file(project.property('cosmicpve.verificationRunDir'))
             }
+            if (project.hasProperty('cosmicpve.adventureGameTests')) {
+                systemProperty 'cosmicpve.adventureGameTests', project.property('cosmicpve.adventureGameTests')
+            }
             // Recommended logging data for a userdev environment
             // The markers can be added/remove as needed separated by commas.
             // "SCAN": For mods scan.

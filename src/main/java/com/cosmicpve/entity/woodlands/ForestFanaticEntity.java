@@ -17,19 +17,28 @@ import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 
-public final class ForestFanaticEntity extends AbstractSkeleton {
+public final class ForestFanaticEntity extends AbstractSkeleton implements net.minecraft.world.entity.OwnableEntity {
     public static final float RENDER_SCALE = 1.1F;
     public static final double MAX_HEALTH = 25.0;
     public static final double ARMOR = 4.0;
     public static final double MOVEMENT_SPEED = 0.22;
     public static final double DROP_CHANCE = 0.25;
+    public static final int MIN_EXPERIENCE = 15;
+    public static final int MAX_EXPERIENCE = 20;
     private static final String EQUIPMENT = "CosmicEquipmentInitialized";
     private boolean equipmentInitialized;
+    private net.minecraft.world.entity.EntityReference<net.minecraft.world.entity.LivingEntity> encounterOwner;
 
     public ForestFanaticEntity(EntityType<? extends ForestFanaticEntity> type, Level level) { super(type, level); }
 
     // PathfinderMob otherwise rejects bright spawn positions through Monster's negative walk value.
     @Override public boolean checkSpawnRules(net.minecraft.world.level.LevelAccessor level, EntitySpawnReason reason) { return true; }
+    /** AbstractSkeleton may ignite after a valid bright spawn; native Woodlands mobs are daylight-safe. */
+    @Override public void aiStep() {
+        super.aiStep();
+        if (!level().isClientSide() && level().dimension().equals(
+                com.cosmicpve.adventure.DenseWoodlandsSessionService.DIMENSION)) clearFire();
+    }
     @Override public boolean requiresCustomPersistence() {
         return getVehicle() instanceof DreadmaneEntity ? false : super.requiresCustomPersistence();
     }
@@ -59,6 +68,17 @@ public final class ForestFanaticEntity extends AbstractSkeleton {
         DenseWoodlandsMobLoot.drop(this, level, DROP_CHANCE);
     }
 
+    @Override protected int getBaseExperienceReward(ServerLevel level) {
+        return experienceReward(getRandom().nextInt(MAX_EXPERIENCE - MIN_EXPERIENCE + 1));
+    }
+
+    static int experienceReward(int roll) {
+        if (roll < 0 || roll > MAX_EXPERIENCE - MIN_EXPERIENCE) {
+            throw new IllegalArgumentException("Experience roll is outside the inclusive reward range");
+        }
+        return MIN_EXPERIENCE + roll;
+    }
+
     @Override protected SoundEvent getStepSound() { return SoundEvents.SKELETON_STEP; }
     @Override protected SoundEvent getAmbientSound() { return SoundEvents.BOGGED_AMBIENT; }
     @Override protected SoundEvent getHurtSound(DamageSource source) { return SoundEvents.BOGGED_HURT; }
@@ -66,9 +86,21 @@ public final class ForestFanaticEntity extends AbstractSkeleton {
 
     @Override protected void addAdditionalSaveData(ValueOutput output) {
         super.addAdditionalSaveData(output); output.putBoolean(EQUIPMENT, equipmentInitialized);
+        net.minecraft.world.entity.EntityReference.store(encounterOwner,output,"CosmicEncounterOwner");
     }
     @Override protected void readAdditionalSaveData(ValueInput input) {
         super.readAdditionalSaveData(input); equipmentInitialized = input.getBooleanOr(EQUIPMENT, false);
+        encounterOwner=net.minecraft.world.entity.EntityReference.read(input,"CosmicEncounterOwner");
+    }
+    public void markEncounterOwner(net.minecraft.world.entity.LivingEntity owner) {
+        encounterOwner=net.minecraft.world.entity.EntityReference.of(owner);setPersistenceRequired();
+    }
+    void markEncounterOwner(net.minecraft.world.entity.EntityReference<net.minecraft.world.entity.LivingEntity> owner) {
+        encounterOwner=owner;setPersistenceRequired();
+    }
+    @Override public net.minecraft.world.entity.EntityReference<net.minecraft.world.entity.LivingEntity> getOwnerReference(){return encounterOwner;}
+    @Override public boolean canAttack(net.minecraft.world.entity.LivingEntity target){
+        return !com.cosmicpve.combat.ownership.OwnedAllyResolver.allied(this,target)&&super.canAttack(target);
     }
     public boolean equipmentInitialized() { return equipmentInitialized; }
 }

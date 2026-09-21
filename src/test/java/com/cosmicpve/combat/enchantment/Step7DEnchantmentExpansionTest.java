@@ -14,6 +14,9 @@ class Step7DEnchantmentExpansionTest {
         assertFalse(SelfDestructBehavior.belowThreshold(3.0F, 20.0F));
         assertFalse(SelfDestructBehavior.belowThreshold(0.0F, 20.0F));
         assertEquals(1_200L, SelfDestructBehavior.COOLDOWN_TICKS);
+        assertEquals(20, SelfDestructBehavior.TNT_FUSE_TICKS);
+        assertNotEquals(80, SelfDestructBehavior.TNT_FUSE_TICKS,
+                "Self Destruct TNT must not retain vanilla's default fuse");
         assertEquals(4, SelfDestructBehavior.OFFSETS.size());
         assertEquals(4, new HashSet<>(SelfDestructBehavior.OFFSETS).size());
         assertEquals(Set.of(
@@ -69,7 +72,7 @@ class Step7DEnchantmentExpansionTest {
     }
 
     @Test void allFiveUseCanonicalPoolsAndMasteryBlackScrollExclusion() {
-        assertEquals(78, CosmicEnchantmentSpecs.ALL.size());
+        assertEquals(79, CosmicEnchantmentSpecs.ALL.size());
         assertTrue(CosmicEnchantmentSpecs.SELF_DESTRUCT.tier().extractableByBlackScroll());
         assertTrue(CosmicEnchantmentSpecs.VIRUS.tier().extractableByBlackScroll());
         assertTrue(CosmicEnchantmentSpecs.DEVOUR.tier().extractableByBlackScroll());

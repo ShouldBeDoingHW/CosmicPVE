@@ -9,6 +9,34 @@ public final class AdventureCommands {
     private AdventureCommands() {}
     public static com.mojang.brigadier.builder.LiteralArgumentBuilder<net.minecraft.commands.CommandSourceStack> create() {
         return Commands.literal("adventure")
+                .then(Commands.literal("locate-arena").executes(c -> {
+                    var level = c.getSource().getServer().getLevel(DenseWoodlandsSessionService.DIMENSION);
+                    if (level == null) {
+                        c.getSource().sendFailure(Component.literal("Dense Woodlands is not loaded."));
+                        return 0;
+                    }
+                    if (!c.getSource().getServer().getWorldData().worldGenOptions().generateStructures()) {
+                        c.getSource().sendFailure(Component.literal("This world was created with Generate Structures disabled; Woodlands Arenas cannot generate."));
+                        return 0;
+                    }
+                    var origin = net.minecraft.core.BlockPos.containing(c.getSource().getPosition());
+                    var position = WoodlandsArenaLocator.nearestGenerated(level, origin);
+                    if (position.isEmpty()) {
+                        c.getSource().sendFailure(Component.literal("No valid Woodlands Arena start was found in the nearby placement grid."));
+                        return 0;
+                    }
+                    var located = position.orElseThrow();
+                    var target = located.lectern();
+                    long dx = (long) target.getX() - origin.getX();
+                    long dz = (long) target.getZ() - origin.getZ();
+                    int distance = (int) Math.sqrt(dx * dx + dz * dz);
+                    c.getSource().sendSuccess(() -> Component.literal("Nearest verified Woodlands Arena lectern in "
+                            + DenseWoodlandsSessionService.DIMENSION.identifier() + ": [" + target.getX() + ", "
+                            + target.getY() + ", " + target.getZ() + "] (about " + distance + " blocks away; bounds "
+                            + located.bounds() + "; checked " + located.checkedCandidates() + " candidate"
+                            + (located.checkedCandidates() == 1 ? "" : "s") + ")."), false);
+                    return 1;
+                }))
                 .then(Commands.literal("inspect").executes(c -> {
                     var p=c.getSource().getPlayerOrException();var s=DenseWoodlandsBootstrap.SESSIONS.session(p);
                     c.getSource().sendSuccess(()->Component.literal("session="+s+" localZombies="+AdventureZombies.count(p)),false);

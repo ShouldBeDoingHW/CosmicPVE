@@ -2,6 +2,6 @@
   "type": "cosmicpve:woodland_template",
   "config": {
     "family": "tall_tree",
-    "variants": 2
+    "variants": 3
   }
 }

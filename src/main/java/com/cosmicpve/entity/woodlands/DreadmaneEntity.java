@@ -28,19 +28,22 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.phys.AABB;
 
-public final class DreadmaneEntity extends ZombieHorse {
+public final class DreadmaneEntity extends ZombieHorse implements net.minecraft.world.entity.OwnableEntity {
     public static final float RENDER_SCALE = 1.15F;
     public static final double MAX_HEALTH = 40.0;
     public static final double ARMOR = 6.5;
     public static final double MOVEMENT_SPEED = 0.31;
     public static final double ATTACK_DAMAGE = 7.5;
-    public static final float BUCK_DAMAGE = 10.0F;
+    public static final float BUCK_DAMAGE = 11.0F;
     public static final double BUCK_RANGE = 0.5;
     public static final double BUCK_KNOCKBACK = 1.5;
     public static final int BUCK_SLOWNESS_TICKS = 35;
     public static final int BUCK_COOLDOWN_TICKS = 200;
     public static final double DROP_CHANCE = 0.40;
+    public static final int MIN_EXPERIENCE = 25;
+    public static final int MAX_EXPERIENCE = 35;
     private long nextBuckTick;
+    private net.minecraft.world.entity.EntityReference<net.minecraft.world.entity.LivingEntity> encounterOwner;
 
     public DreadmaneEntity(EntityType<? extends DreadmaneEntity> type, Level level) { super(type, level); }
 
@@ -92,7 +95,24 @@ public final class DreadmaneEntity extends ZombieHorse {
         if (rider == null) return null;
         rider.snapTo(getX(), getY(), getZ(), getYRot(), 0);
         rider.finalizeSpawn(level, difficulty, EntitySpawnReason.JOCKEY, null);
+        if (encounterOwner != null) rider.markEncounterOwner(encounterOwner);
         return rider.startRiding(this, true, false) ? rider : null;
+    }
+    public void markEncounterOwner(net.minecraft.world.entity.LivingEntity owner) {
+        encounterOwner=net.minecraft.world.entity.EntityReference.of(owner); setPersistenceRequired();
+    }
+    void markEncounterOwner(net.minecraft.world.entity.EntityReference<net.minecraft.world.entity.LivingEntity> owner) {
+        encounterOwner=owner; setPersistenceRequired();
+    }
+    @Override public net.minecraft.world.entity.EntityReference<net.minecraft.world.entity.LivingEntity> getOwnerReference(){return encounterOwner;}
+    @Override protected void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput out){
+        super.addAdditionalSaveData(out);net.minecraft.world.entity.EntityReference.store(encounterOwner,out,"CosmicEncounterOwner");
+    }
+    @Override protected void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput in){
+        super.readAdditionalSaveData(in);encounterOwner=net.minecraft.world.entity.EntityReference.read(in,"CosmicEncounterOwner");
+    }
+    @Override public boolean canAttack(net.minecraft.world.entity.LivingEntity target){
+        return !com.cosmicpve.combat.ownership.OwnedAllyResolver.allied(this,target)&&super.canAttack(target);
     }
     @Override public boolean checkSpawnRules(net.minecraft.world.level.LevelAccessor level, EntitySpawnReason reason) { return true; }
     // The Fanatic remains a ranged passenger; it must not disable the mount's autonomous melee goals.
@@ -140,5 +160,16 @@ public final class DreadmaneEntity extends ZombieHorse {
 
     @Override protected void dropCustomDeathLoot(ServerLevel level, DamageSource source, boolean recentlyHit) {
         DenseWoodlandsMobLoot.drop(this, level, DROP_CHANCE);
+    }
+
+    @Override protected int getBaseExperienceReward(ServerLevel level) {
+        return experienceReward(getRandom().nextInt(MAX_EXPERIENCE - MIN_EXPERIENCE + 1));
+    }
+
+    static int experienceReward(int roll) {
+        if (roll < 0 || roll > MAX_EXPERIENCE - MIN_EXPERIENCE) {
+            throw new IllegalArgumentException("Experience roll is outside the inclusive reward range");
+        }
+        return MIN_EXPERIENCE + roll;
     }
 }

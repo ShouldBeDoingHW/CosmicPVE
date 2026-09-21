@@ -193,6 +193,9 @@ public final class ModItems {
     public static final DeferredItem<DenseWoodlandsScrapItem> DENSE_WOODLANDS_SCRAP = ITEMS.registerItem(
             "dense_woodlands_scrap", DenseWoodlandsScrapItem::new, properties -> properties.stacksTo(64)
                     .component(net.minecraft.core.component.DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true));
+    public static final DeferredItem<net.minecraft.world.item.Item> DESECRATED_TOMB_RANGER = ITEMS.registerItem(
+            "desecrated_tomb_ranger", net.minecraft.world.item.Item::new,
+            properties -> com.cosmicpve.adventure.ranger.RangerTomb.applyDefaults(properties.stacksTo(1)));
     public static final DeferredItem<AdventureCompassItem> ADVENTURE_COMPASS = ITEMS.registerItem(
             "adventure_compass", AdventureCompassItem::new, properties -> properties.stacksTo(1));
 
