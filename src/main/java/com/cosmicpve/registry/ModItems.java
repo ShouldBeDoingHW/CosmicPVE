@@ -51,6 +51,13 @@ import com.cosmicpve.equipment.accessory.AmuletItem;
 import com.cosmicpve.equipment.accessory.AccessorySocketItem;
 import com.cosmicpve.equipment.accessory.BeltDefinition;
 import com.cosmicpve.equipment.accessory.BeltItem;
+import com.cosmicpve.cosmiccrate.CosmicCrateItem;
+import com.cosmicpve.cosmiccrate.CosmicCrateHalfItem;
+import com.cosmicpve.cosmiccrate.CosmicCrateSeason;
+import com.cosmicpve.cosmiccrate.CosmicCrateSide;
+import com.cosmicpve.equipment.enchantment.HigherLoreOrbItem;
+import com.cosmicpve.equipment.enchantment.OrbType;
+import com.cosmicpve.reward.memory.MemoryChestItem;
 
 public final class ModItems {
     private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(CosmicPVE.MOD_ID);
@@ -180,6 +187,30 @@ public final class ModItems {
     public static final DeferredItem<SpaceChestItem> SPACE_CHEST = ITEMS.registerItem(
             "space_chest", SpaceChestItem::new, properties -> properties.stacksTo(1));
 
+    public static final DeferredItem<MemoryChestItem> MEMORY_CHEST = ITEMS.registerItem(
+            "memory_chest", MemoryChestItem::new, properties -> properties.stacksTo(1));
+    public static final DeferredItem<CosmicCrateItem> SPRING_COSMIC_CRATE = crate("spring_cosmic_crate", CosmicCrateSeason.SPRING);
+    public static final DeferredItem<CosmicCrateItem> SUMMER_COSMIC_CRATE = crate("summer_cosmic_crate", CosmicCrateSeason.SUMMER);
+    public static final DeferredItem<CosmicCrateItem> FALL_COSMIC_CRATE = crate("fall_cosmic_crate", CosmicCrateSeason.FALL);
+    public static final DeferredItem<CosmicCrateItem> WINTER_COSMIC_CRATE = crate("winter_cosmic_crate", CosmicCrateSeason.WINTER);
+    public static final DeferredItem<CosmicCrateHalfItem> SPRING_COSMIC_CRATE_LEFT_HALF = crateHalf("spring_cosmic_crate_left_half", CosmicCrateSeason.SPRING, CosmicCrateSide.LEFT);
+    public static final DeferredItem<CosmicCrateHalfItem> SPRING_COSMIC_CRATE_RIGHT_HALF = crateHalf("spring_cosmic_crate_right_half", CosmicCrateSeason.SPRING, CosmicCrateSide.RIGHT);
+    public static final DeferredItem<CosmicCrateHalfItem> SUMMER_COSMIC_CRATE_LEFT_HALF = crateHalf("summer_cosmic_crate_left_half", CosmicCrateSeason.SUMMER, CosmicCrateSide.LEFT);
+    public static final DeferredItem<CosmicCrateHalfItem> SUMMER_COSMIC_CRATE_RIGHT_HALF = crateHalf("summer_cosmic_crate_right_half", CosmicCrateSeason.SUMMER, CosmicCrateSide.RIGHT);
+    public static final DeferredItem<CosmicCrateHalfItem> FALL_COSMIC_CRATE_LEFT_HALF = crateHalf("fall_cosmic_crate_left_half", CosmicCrateSeason.FALL, CosmicCrateSide.LEFT);
+    public static final DeferredItem<CosmicCrateHalfItem> FALL_COSMIC_CRATE_RIGHT_HALF = crateHalf("fall_cosmic_crate_right_half", CosmicCrateSeason.FALL, CosmicCrateSide.RIGHT);
+    public static final DeferredItem<CosmicCrateHalfItem> WINTER_COSMIC_CRATE_LEFT_HALF = crateHalf("winter_cosmic_crate_left_half", CosmicCrateSeason.WINTER, CosmicCrateSide.LEFT);
+    public static final DeferredItem<CosmicCrateHalfItem> WINTER_COSMIC_CRATE_RIGHT_HALF = crateHalf("winter_cosmic_crate_right_half", CosmicCrateSeason.WINTER, CosmicCrateSide.RIGHT);
+
+    public static final DeferredItem<HigherLoreOrbItem> ARMOR_ENCHANTMENT_ORB_9_LORE = higherLoreOrb(
+            "armor_enchantment_orb_9_lore", OrbType.ARMOR, 8, 9);
+    public static final DeferredItem<HigherLoreOrbItem> ARMOR_ENCHANTMENT_ORB_10_LORE = higherLoreOrb(
+            "armor_enchantment_orb_10_lore", OrbType.ARMOR, 9, 10);
+    public static final DeferredItem<HigherLoreOrbItem> WEAPON_ENCHANTMENT_ORB_11_LORE = higherLoreOrb(
+            "weapon_enchantment_orb_11_lore", OrbType.WEAPON, 10, 11);
+    public static final DeferredItem<HigherLoreOrbItem> WEAPON_ENCHANTMENT_ORB_12_LORE = higherLoreOrb(
+            "weapon_enchantment_orb_12_lore", OrbType.WEAPON, 11, 12);
+
     public static final DeferredItem<TrialPortalItem> TRIAL_PORTAL = ITEMS.registerItem(
             "trial_portal", TrialPortalItem::new, properties -> properties.stacksTo(64));
 
@@ -226,6 +257,18 @@ public final class ModItems {
     private static DeferredItem<TrialTrinketItem> trinket(String name, TrialTrinketType type, int value) {
         return ITEMS.registerItem(name, TrialTrinketItem::new, properties -> properties.stacksTo(64)
                 .component(ModDataComponents.TRIAL_TRINKET.get(), new TrialTrinketData(type, value)));
+    }
+
+    private static DeferredItem<CosmicCrateItem> crate(String name, CosmicCrateSeason season) {
+        return ITEMS.registerItem(name, properties -> new CosmicCrateItem(properties, season), properties -> properties.stacksTo(1));
+    }
+
+    private static DeferredItem<CosmicCrateHalfItem> crateHalf(String name, CosmicCrateSeason season, CosmicCrateSide side) {
+        return ITEMS.registerItem(name, properties -> new CosmicCrateHalfItem(properties, season, side), properties -> properties.stacksTo(1));
+    }
+
+    private static DeferredItem<HigherLoreOrbItem> higherLoreOrb(String name, OrbType type, int required, int destination) {
+        return ITEMS.registerItem(name, properties -> new HigherLoreOrbItem(properties, type, required, destination), properties -> properties.stacksTo(1));
     }
 
     private static DeferredItem<AmuletItem> amulet(String name, AmuletDefinition definition) {

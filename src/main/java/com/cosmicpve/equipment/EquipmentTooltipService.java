@@ -88,6 +88,12 @@ public final class EquipmentTooltipService {
                 && stack.has(ModDataComponents.SPACE_CHEST.get())) {
             event.getToolTip().addAll(com.cosmicpve.spacechest.SpaceChestItem.lore(stack.get(ModDataComponents.SPACE_CHEST.get()).tier()));
         }
+        if (stack.is(com.cosmicpve.registry.ModItems.MEMORY_CHEST.get()))
+            event.getToolTip().addAll(com.cosmicpve.reward.memory.MemoryChestItem.lore());
+        if (stack.getItem() instanceof com.cosmicpve.cosmiccrate.CosmicCrateItem crate)
+            event.getToolTip().addAll(com.cosmicpve.cosmiccrate.CosmicCrateItem.lore(crate.season()));
+        if (stack.getItem() instanceof com.cosmicpve.equipment.enchantment.HigherLoreOrbItem higherOrb)
+            event.getToolTip().addAll(higherOrb.lore());
         if (stack.is(com.cosmicpve.registry.ModItems.HEROIC_CRYSTAL.get())) {
             event.getToolTip().addAll(com.cosmicpve.equipment.heroic.HeroicCrystalItem.lore());
         }

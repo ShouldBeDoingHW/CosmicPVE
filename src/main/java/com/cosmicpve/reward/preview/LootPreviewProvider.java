@@ -1,6 +1,7 @@
 package com.cosmicpve.reward.preview;
 
 import java.util.List;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 
@@ -11,4 +12,8 @@ import net.minecraft.world.item.ItemStack;
  */
 public interface LootPreviewProvider {
     List<ItemStack> previewOutcomes(ServerPlayer player, ItemStack source);
+
+    default Component previewTitle(ItemStack source) {
+        return source.getHoverName().copy();
+    }
 }

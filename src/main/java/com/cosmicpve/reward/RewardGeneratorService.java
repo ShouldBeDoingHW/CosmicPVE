@@ -28,6 +28,8 @@ public final class RewardGeneratorService {
                     com.cosmicpve.adventure.ranger.AdvancedWoodlandsRewards.portal(2,0));
             case RewardDescriptor.MadnessThreePortal ignored -> Optional.of(
                     com.cosmicpve.adventure.ranger.AdvancedWoodlandsRewards.portal(0,3));
+            case RewardDescriptor.MemoryChest ignored -> Optional.of(
+                    new ItemStack(com.cosmicpve.registry.ModItems.MEMORY_CHEST.get()));
             case RewardDescriptor.RandomTrialTrinket reward -> Optional.of(
                     com.cosmicpve.trial.trinket.TrialTrinkets.randomTier(reward.tier(), context.random()));
             case RewardDescriptor.AccessorySocket reward -> {

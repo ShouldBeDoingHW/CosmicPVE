@@ -34,14 +34,16 @@ public final class EnchantingEventBridge {
         boolean scroll = event.getCarriedItem().is(ModItems.WHITE_SCROLL.get());
         boolean transmog = event.getCarriedItem().is(ModItems.TRANSMOG_SCROLL.get());
         boolean orb = OrbType.fromStack(event.getCarriedItem()).isPresent();
+        boolean higherOrb = event.getCarriedItem().getItem() instanceof HigherLoreOrbItem;
         boolean blackScroll = event.getCarriedItem().is(ModItems.BLACK_SCROLL.get());
         boolean enchantedBlackScroll = event.getCarriedItem().is(ModItems.ENCHANTED_BLACK_SCROLL.get());
-        if (!book && !scroll && !transmog && !orb && !blackScroll && !enchantedBlackScroll) return;
+        if (!book && !scroll && !transmog && !orb && !higherOrb && !blackScroll && !enchantedBlackScroll) return;
         event.setCanceled(true);
         if (!(event.getPlayer() instanceof ServerPlayer player)) return;
         if (book) applyBook(event, player);
         else if (scroll) applyScroll(event, player);
         else if (transmog) applyTransmog(event, player);
+        else if (higherOrb) applyHigherLoreOrb(event, player);
         else if (orb) applyOrb(event, player);
         else if (blackScroll) applyBlackScroll(event, player);
         else openEnchantedBlackScroll(event, player);
@@ -154,6 +156,24 @@ public final class EnchantingEventBridge {
             default -> "message.cosmicpve.orb.invalid";
         };
         player.displayClientMessage(Component.translatable(key), true);
+    }
+
+    private void applyHigherLoreOrb(ItemStackedOnOtherEvent event, ServerPlayer player) {
+        var outcome = new HigherLoreOrbApplicationService(capacity).apply(
+                event.getCarriedItem(), event.getStackedOnItem(), event.getSlot().getItem());
+        event.getCarriedSlotAccess().set(event.getCarriedItem());
+        event.getSlot().set(event.getSlot().getItem());
+        if (outcome == HigherLoreOrbApplicationService.Outcome.SUCCESS) {
+            ItemApplicationFeedback.play(player, ItemApplicationFeedback.Cue.SUCCESS);
+            player.displayClientMessage(Component.literal("Higher-lore capacity unlocked."), true);
+            return;
+        }
+        String message = switch (outcome) {
+            case REJECTED_TARGET -> "That orb cannot be applied to this item.";
+            case REJECTED_CAPACITY -> "The previous lore capacity must be unlocked first.";
+            default -> "The higher-lore orb could not be applied.";
+        };
+        player.displayClientMessage(Component.literal(message), true);
     }
 
     private void applyBlackScroll(ItemStackedOnOtherEvent event, ServerPlayer player) {

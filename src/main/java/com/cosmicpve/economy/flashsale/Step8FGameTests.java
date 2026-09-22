@@ -77,17 +77,17 @@ public final class Step8FGameTests {
                     tier + " reward must construct: " + entry.reward()));
         });
         var impossible = CosmicContent.repository().requireRewardTable(CosmicPVE.id("trial/impossible"));
-        helper.assertTrue(impossible.entries().size() == 20 && impossible.totalWeight() == 175,
-                "Impossible table must include the exact weight-3 Random Weapon Skin Generator row");
+        helper.assertTrue(impossible.entries().size() == 21 && impossible.totalWeight() == 180,
+                "Impossible table must include its exact rows plus the production Memory Chest");
         impossible.entries().forEach(entry -> helper.assertTrue(generator.generate(entry.reward(), context).isPresent(),
                 "Impossible reward must construct: " + entry.reward()));
-        helper.assertTrue(FlashSaleCatalog.CANONICAL_ROWS.size() == 22, "Canonical Flash Sale row count must be 22");
-        helper.assertTrue(FlashSaleCatalog.productionRows().size() == 21,
-                "Only the unresolved Abandoned Spaceship Portal row may be nonselectable");
+        helper.assertTrue(FlashSaleCatalog.CANONICAL_ROWS.size() == 29, "Canonical Flash Sale row count must be 29");
+        helper.assertTrue(FlashSaleCatalog.productionRows().size() == 27,
+                "Only the unresolved Abandoned Spaceship Portal and future Trials Creation Kit rows may be nonselectable");
         FlashSaleCatalog.productionRows().forEach(entry -> helper.assertTrue(entry.create(random).isPresent(),
                 "Active Flash Sale reward must construct: " + entry.id()));
-        helper.assertTrue(FlashSaleCatalog.CANONICAL_ROWS.stream().noneMatch(entry -> entry.id().equals("memory_chest")),
-                "Memory Chest must never enter production Flash Sale RNG");
+        helper.assertTrue(FlashSaleCatalog.find("memory_chest").orElseThrow().productionSelectable(),
+                "Memory Chest must be a production Flash Sale row");
         helper.succeed();
     }
 

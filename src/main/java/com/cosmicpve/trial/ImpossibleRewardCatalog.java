@@ -25,7 +25,8 @@ public final class ImpossibleRewardCatalog {
             row("25% Amulet Socket",6,1,true),
             row("25% Belt Socket",6,1,true),
             row("Random Weapon Skin Generator",3,1,true),
-            row("Random Tier 3 Trial Trinket",8,1,true));
+            row("Random Tier 3 Trial Trinket",8,1,true),
+            row("Memory Chest",5,1,true));
     public static final int DECLARED_WEIGHT = DECLARED.stream().mapToInt(Row::weight).sum();
     public static final int ACTIVE_WEIGHT = DECLARED.stream().filter(Row::active).mapToInt(Row::weight).sum();
     private ImpossibleRewardCatalog() {}

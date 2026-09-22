@@ -92,6 +92,7 @@ public final class CosmicCommands {
                 .then(FoodDebugCommands.create())
                 .then(RewardCommands.create())
                 .then(SpaceChestCommands.create())
+                .then(PremiumContainerCommands.create())
                 .then(com.cosmicpve.adventure.AdventureCommands.create())
                 .then(TrialCommands.create())
                 .then(ConquestCommands.create())

@@ -12,11 +12,14 @@ public final class CustomEnchantCapacityService {
     public static final int BASE_CAPACITY = 5;
     public static final int ARMOR_MAX_ORB_BONUS = 3;
     public static final int WEAPON_MAX_ORB_BONUS = 5;
+    public static final int ARMOR_ABSOLUTE_MAX = 10;
+    public static final int WEAPON_ABSOLUTE_MAX = 12;
 
     public int capacity(ItemStack stack) {
         var metadata = stack.get(ModDataComponents.CUSTOM_ENCHANT_META.get());
         if (metadata == null) return BASE_CAPACITY;
-        return metadata.slotLimit() + Math.min(metadata.orbUpgrades(), maxOrbBonus(stack));
+        return Math.min(metadata.slotLimit() + Math.min(metadata.orbUpgrades(), maxOrbBonus(stack)),
+                absoluteMaximum(stack));
     }
 
     public int orbUpgrades(ItemStack stack) {
@@ -38,6 +41,21 @@ public final class CustomEnchantCapacityService {
         if (!canUpgrade(stack, type)) return false;
         var metadata = stack.getOrDefault(ModDataComponents.CUSTOM_ENCHANT_META.get(), CustomEnchantMetadata.DEFAULT);
         stack.set(ModDataComponents.CUSTOM_ENCHANT_META.get(), metadata.withOrbUpgrades(metadata.orbUpgrades() + 1));
+        return true;
+    }
+
+    public int absoluteMaximum(ItemStack stack) {
+        if (isArmor(stack)) return ARMOR_ABSOLUTE_MAX;
+        if (isWeapon(stack)) return WEAPON_ABSOLUTE_MAX;
+        return BASE_CAPACITY;
+    }
+
+    /** Raises the effective capacity without altering normal-orb history or protection metadata. */
+    public boolean unlockTo(ItemStack stack, int destination) {
+        if (destination != capacity(stack) + 1 || destination > absoluteMaximum(stack)) return false;
+        var metadata = stack.getOrDefault(ModDataComponents.CUSTOM_ENCHANT_META.get(), CustomEnchantMetadata.DEFAULT);
+        int upgrades = Math.min(metadata.orbUpgrades(), maxOrbBonus(stack));
+        stack.set(ModDataComponents.CUSTOM_ENCHANT_META.get(), metadata.withSlotLimit(destination - upgrades));
         return true;
     }
 

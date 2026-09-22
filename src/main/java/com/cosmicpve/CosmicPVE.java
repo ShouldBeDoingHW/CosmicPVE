@@ -19,6 +19,7 @@ import com.cosmicpve.progression.ArmorRecipeProgression;
 import com.cosmicpve.equipment.armor.ArmorCrystalEventBridge;
 import com.cosmicpve.equipment.EquipmentTooltipService;
 import com.cosmicpve.equipment.enchantment.EnchantingEventBridge;
+import com.cosmicpve.cosmiccrate.CosmicCrateEventBridge;
 import com.cosmicpve.equipment.skin.WeaponSkinEventBridge;
 import com.cosmicpve.equipment.heroic.HeroicCrystalEventBridge;
 import com.cosmicpve.equipment.enchantment.OxygenateEventBridge;
@@ -103,6 +104,8 @@ public final class CosmicPVE {
         NeoForge.EVENT_BUS.addListener(tooltips::onTooltip);
         var enchanting = new EnchantingEventBridge();
         NeoForge.EVENT_BUS.addListener(enchanting::onStacked);
+        var cosmicCrates = new CosmicCrateEventBridge();
+        NeoForge.EVENT_BUS.addListener(cosmicCrates::onStacked);
         var skins = new WeaponSkinEventBridge();
         NeoForge.EVENT_BUS.addListener(skins::onStacked);
         var heroic = new HeroicCrystalEventBridge();

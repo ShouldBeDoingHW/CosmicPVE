@@ -53,7 +53,7 @@ public final class LootPreviewMenu extends ChestMenu {
         if (!(held.getItem() instanceof LootPreviewProvider provider)) return false;
         var outcomes = provider.previewOutcomes(player, held);
         if (outcomes.isEmpty()) return false;
-        open(player, held.getHoverName().copy(), outcomes, 0);
+        open(player, provider.previewTitle(held), outcomes, 0);
         return true;
     }
     @Override public void clicked(int slot, int button, ClickType type, Player player) {

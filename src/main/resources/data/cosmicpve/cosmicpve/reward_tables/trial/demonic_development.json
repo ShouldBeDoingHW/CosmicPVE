@@ -131,6 +131,14 @@
         "type": "static_item",
         "item": "cosmicpve:random_weapon_skin_generator"
       }
+    },
+    {
+      "weight": 4,
+      "minimum_quantity": 2,
+      "maximum_quantity": 2,
+      "reward": {
+        "type": "memory_chest"
+      }
     }
   ]
 }

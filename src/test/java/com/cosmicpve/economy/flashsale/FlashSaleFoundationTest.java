@@ -18,12 +18,52 @@ import net.minecraft.network.chat.HoverEvent;
 import org.junit.jupiter.api.Test;
 
 class FlashSaleFoundationTest {
+    @Test void completeCanonicalCatalogHasExactRowsAndPricesInCents() {
+        var expected = List.of(
+                "trial_portal_1|1|20000000|35000000|50000000",
+                "trial_portal_2|2|35000000|55000000|87500000",
+                "memory_chest|1|250000000|350000000|450000000",
+                "armor_orb_100|1|30000000|50000000|60000000",
+                "weapon_orb_100|1|30000000|50000000|60000000",
+                "engineer_crystal_50|1|240000000|280000000|320000000",
+                "phantom_crystal_50|1|240000000|280000000|320000000",
+                "ranger_crystal_50|1|240000000|280000000|320000000",
+                "dragonslayer_crystal_50|1|240000000|280000000|320000000",
+                "yeti_crystal_75|1|280000000|320000000|360000000",
+                "dimensional_traveler_crystal_75|1|280000000|320000000|360000000",
+                "yjiki_crystal_75|1|280000000|320000000|360000000",
+                "ancient_crystal_75|1|280000000|320000000|360000000",
+                "abandoned_spaceship_portal|1|150000000|160000000|170000000",
+                "mystery_elite_spawner|1|60000000|80000000|100000000",
+                "mystery_simple_spawner|1|25000000|30000000|35000000",
+                "repair_scroll_1|1|5000000|7000000|9000000",
+                "repair_scroll_5|5|20000000|40000000|60000000",
+                "heroic_crystal|1|45000000|65000000|77500000",
+                "godly_vkit_bundle|1|600000000|700000000|800000000",
+                "cosmic_enchantment_table|1|90000000|100000000|120000000",
+                "white_scroll|1|10000000|12500000|17500000",
+                "mystery_call_of_adventure|1|90000000|115000000|145000000",
+                "trials_creation_kit|1|250000000|280000000|310000000",
+                "heroic_cosmic_enchantment_table|1|160000000|180000000|200000000",
+                "space_dust_bundle|1|17500000|22500000|25000000",
+                "amulet_socket_40|1|120000000|140000000|160000000",
+                "belt_socket_40|1|120000000|140000000|160000000",
+                "omni_socket_40|1|140000000|160000000|180000000");
+        assertEquals(expected, FlashSaleCatalog.CANONICAL_ROWS.stream().map(row -> row.id() + "|" + row.quantity()
+                + "|" + row.lowPrice() + "|" + row.mediumPrice() + "|" + row.highPrice()).toList());
+        assertEquals(29, expected.stream().map(row -> row.substring(0, row.indexOf('|'))).distinct().count());
+    }
+
     @Test void catalogPreservesCanonicalRowsAndExplicitDeferredDependencies() {
-        assertEquals(22, FlashSaleCatalog.CANONICAL_ROWS.size());
-        assertEquals(21, FlashSaleCatalog.productionRows().size());
+        assertEquals(29, FlashSaleCatalog.CANONICAL_ROWS.size());
+        assertEquals(27, FlashSaleCatalog.productionRows().size());
         assertFalse(FlashSaleCatalog.find("abandoned_spaceship_portal").orElseThrow().productionSelectable());
+        assertFalse(FlashSaleCatalog.find("trials_creation_kit").orElseThrow().productionSelectable());
         assertEquals("memory_chest", FlashSaleCatalog.MEMORY_CHEST.id());
-        assertTrue(FlashSaleCatalog.CANONICAL_ROWS.stream().noneMatch(row -> row.id().equals("memory_chest")));
+        assertTrue(FlashSaleCatalog.MEMORY_CHEST.productionSelectable());
+        assertEquals(250_000_000L, FlashSaleCatalog.MEMORY_CHEST.lowPrice());
+        assertEquals(350_000_000L, FlashSaleCatalog.MEMORY_CHEST.mediumPrice());
+        assertEquals(450_000_000L, FlashSaleCatalog.MEMORY_CHEST.highPrice());
     }
 
     @Test void exactCanonicalPricesAndDuplicateFamiliesRemainSeparateRows() {

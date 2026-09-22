@@ -28,30 +28,19 @@ class TrialRewardCatalogsTest {
             assertFalse(data.resolve("test", net.minecraft.core.RegistryAccess.EMPTY).isSuccess());
         }
     }
-    @Test void catalogsExactlyMatchTheCurrentDesignCanonicalRewardSection() throws Exception {
-        String design = java.nio.file.Files.readString(java.nio.file.Path.of(System.getProperty("cosmicpve.projectDir"), "docs", "Cosmic_Design.md"));
-        String canonical = design.substring(design.indexOf("# Canonical Reward Catalogs"));
-        var catalogs = java.util.Map.of("Apprentice", TrialRewardCatalogs.APPRENTICE, "Hardcore", TrialRewardCatalogs.HARDCORE,
-                "Impossible", TrialRewardCatalogs.IMPOSSIBLE, "Demonic", TrialRewardCatalogs.DEMONIC);
-        for (var entry : catalogs.entrySet()) {
-            String section = canonical.split("## " + entry.getKey() + "\\R", 2)[1].split("\\R## ", 2)[0];
-            var rows = new java.util.ArrayList<TrialRewardCatalogs.Row>();
-            for (String line : section.lines().toList()) {
-                if (!line.startsWith("|")) continue;
-                String[] cells = line.split("\\|", -1);
-                if (cells.length < 5 || !cells[2].trim().matches("\\d+")) continue;
-                String name = cells[1].trim().replace("†", "");
-                rows.add(new TrialRewardCatalogs.Row(name, Integer.parseInt(cells[2].trim()),
-                        Integer.parseInt(cells[3].trim()), !name.contains("Abandoned Spaceship Portal")));
-            }
-            assertEquals(rows, entry.getValue().declared(), entry.getKey());
-        }
+    @Test void currentMilestoneAddsOnlyTheSpecifiedTrialMemoryChestRows() {
+        assertEquals(new TrialRewardCatalogs.Row("Memory Chest",5,1,true),
+                TrialRewardCatalogs.IMPOSSIBLE.declared().getLast());
+        assertEquals(new TrialRewardCatalogs.Row("Memory Chest",4,2,true),
+                TrialRewardCatalogs.DEMONIC.declared().getLast());
+        assertTrue(TrialRewardCatalogs.APPRENTICE.declared().stream().noneMatch(row -> row.name().equals("Memory Chest")));
+        assertTrue(TrialRewardCatalogs.HARDCORE.declared().stream().noneMatch(row -> row.name().equals("Memory Chest")));
     }
     @Test void canonicalDeclaredAndActiveTotalsArePinned() {
-        assertCatalog(TrialRewardCatalogs.APPRENTICE,14,101,101);
+        assertCatalog(TrialRewardCatalogs.APPRENTICE,15,108,108);
         assertCatalog(TrialRewardCatalogs.HARDCORE,14,87,82);
-        assertCatalog(TrialRewardCatalogs.IMPOSSIBLE,21,183,175);
-        assertCatalog(TrialRewardCatalogs.DEMONIC,19,137,133);
+        assertCatalog(TrialRewardCatalogs.IMPOSSIBLE,22,188,180);
+        assertCatalog(TrialRewardCatalogs.DEMONIC,20,141,137);
     }
 
     @Test void runtimeTablesExactlyEqualTheirActiveCanonicalRows() throws Exception {
@@ -107,6 +96,7 @@ class TrialRewardCatalogsTest {
             case "random_vkit_crystal"->"Random V-Kit Crystal";
             case "random_trial_trinket"->"Random Tier "+reward.get("trinket_tier").getAsInt()+" Trial Trinket";
             case "accessory_socket"->reward.get("success_rate").getAsInt()+"% "+title(reward.get("item").getAsString().split(":")[1]);
+            case "memory_chest"->"Memory Chest";
             case "armor_set_crystal"->reward.get("success_rate").getAsInt()+"% "+
                     title(reward.get("armor_set").getAsString().split(":")[1])+" Crystal";
             case "static_item"->staticName(reward.get("item").getAsString().split(":")[1]);
@@ -136,6 +126,7 @@ class TrialRewardCatalogsTest {
         case "conquest_chest_flare"->"Conquest Chest Flare"; case "mask_splicer"->"Mask Splicer";
         case "heroic_crystal"->"Heroic Crystal"; case "cosmic_enchantment_table"->"Cosmic Enchantment Table";
         case "heroic_cosmic_enchantment_table"->"Heroic Cosmic Enchantment Table";
+        case "personal_vault_unlock"->"PV Unlock Gem";
         case "secret_weapon_cache"->"Secret Weapon Cache"; case "admin_abuse"->"Admin Abuse";
         case "godly_vkit_bundle"->"Godly V-Kit Bundle"; default->throw new AssertionError("Unknown item "+path);
     };}

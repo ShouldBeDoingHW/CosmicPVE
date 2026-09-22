@@ -99,6 +99,13 @@
         "type": "random_trial_trinket",
         "trinket_tier": 1
       }
+    },
+    {
+      "weight": 7,
+      "reward": {
+        "type": "static_item",
+        "item": "cosmicpve:personal_vault_unlock"
+      }
     }
   ]
 }

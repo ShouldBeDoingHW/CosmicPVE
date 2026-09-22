@@ -56,6 +56,10 @@ public record CustomEnchantMetadata(
         return new CustomEnchantMetadata(CURRENT_DATA_VERSION, slotLimit, value, whiteScrollProtected, transmogSorted);
     }
 
+    public CustomEnchantMetadata withSlotLimit(int value) {
+        return new CustomEnchantMetadata(CURRENT_DATA_VERSION, value, orbUpgrades, whiteScrollProtected, transmogSorted);
+    }
+
     public CustomEnchantMetadata withTransmogSorted(boolean value) {
         return new CustomEnchantMetadata(CURRENT_DATA_VERSION, slotLimit, orbUpgrades, whiteScrollProtected, value);
     }

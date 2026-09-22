@@ -146,6 +146,12 @@
         "type": "random_trial_trinket",
         "trinket_tier": 3
       }
+    },
+    {
+      "weight": 5,
+      "reward": {
+        "type": "memory_chest"
+      }
     }
   ]
 }

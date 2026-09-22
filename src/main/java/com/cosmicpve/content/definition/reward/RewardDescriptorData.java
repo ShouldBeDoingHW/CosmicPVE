@@ -57,6 +57,7 @@ public record RewardDescriptorData(RewardType type, Optional<Identifier> itemId,
                 case ADVANCED_BANKNOTE -> ValidationResult.success(new RewardDescriptor.AdvancedBanknote());
                 case SKIP_TWO_PORTAL -> ValidationResult.success(new RewardDescriptor.SkipTwoPortal());
                 case MADNESS_THREE_PORTAL -> ValidationResult.success(new RewardDescriptor.MadnessThreePortal());
+                case MEMORY_CHEST -> ValidationResult.success(new RewardDescriptor.MemoryChest());
                 case RANDOM_TRIAL_TRINKET -> ValidationResult.success(new RewardDescriptor.RandomTrialTrinket(
                         required(trinketTier, "trinket_tier")));
                 case ACCESSORY_SOCKET -> {

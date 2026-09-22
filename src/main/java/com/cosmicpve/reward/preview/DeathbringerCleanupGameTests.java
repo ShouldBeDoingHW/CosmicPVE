@@ -46,9 +46,11 @@ public final class DeathbringerCleanupGameTests {
         finally { NeoForge.EVENT_BUS.unregister(configure); }
     }
     private static ItemStack book(net.minecraft.resources.Identifier id, int level) {
+        var tier = CosmicEnchantmentSpecs.find(id).orElseThrow().tier();
         ItemStack book = new ItemStack(ModItems.COSMIC_ENCHANTMENT_BOOK.get());
         book.set(ModDataComponents.COSMIC_ENCHANT_BOOK.get(), new com.cosmicpve.data.component.CosmicEnchantmentBookData(
-                com.cosmicpve.data.component.CosmicEnchantmentBookData.CURRENT_DATA_VERSION, id, level, 100, 100));
+                com.cosmicpve.data.component.CosmicEnchantmentBookData.CURRENT_DATA_VERSION, id, level,
+                tier == CosmicEnchantmentTier.MASTERY ? 49 : 100, tier == CosmicEnchantmentTier.MASTERY ? 51 : 100));
         return book;
     }
     private static void verify(GameTestHelper helper) {
@@ -88,6 +90,20 @@ public final class DeathbringerCleanupGameTests {
             for (String tier : List.of("ultimate", "legendary", "mastery")) helper.assertTrue(server.getCommands().getDispatcher().execute(
                     "cosmic space-chest give @s " + tier + " 1", sourceStack) > 0, "Tiered Space Chest give command registered");
             helper.assertTrue(server.getCommands().getDispatcher().execute("vkit", sourceStack) > 0, "V-Kit informational menu registered");
+            helper.assertTrue(server.getCommands().getDispatcher().execute("cosmic containers memory-chest @s", sourceStack) > 0,
+                    "Memory Chest fixture command registered");
+            for (String season : List.of("spring", "summer", "fall", "winter")) {
+                helper.assertTrue(server.getCommands().getDispatcher().execute(
+                        "cosmic containers cosmic-crate give @s " + season, sourceStack) > 0,
+                        "Full placeholder crate command registered");
+                for (String side : List.of("left", "right")) helper.assertTrue(server.getCommands().getDispatcher().execute(
+                        "cosmic containers cosmic-crate give-half @s " + season + " " + side, sourceStack) > 0,
+                        "Every seasonal half command registered");
+            }
+            for (String orb : List.of("armor-9", "armor-10", "weapon-11", "weapon-12"))
+                helper.assertTrue(server.getCommands().getDispatcher().execute(
+                        "cosmic containers higher-lore-orb @s " + orb, sourceStack) > 0,
+                        "Higher-lore Orb command registered");
             player.closeContainer();
         } catch (com.mojang.brigadier.exceptions.CommandSyntaxException failure) { throw new IllegalStateException(failure); }
         player.getInventory().clearContent();
@@ -107,7 +123,7 @@ public final class DeathbringerCleanupGameTests {
                 ModItems.COSMIC_ENCHANTMENT_TABLE.get(), ModItems.HEROIC_COSMIC_ENCHANTMENT_TABLE.get(),
                 ModItems.MYSTERY_CALL_OF_ADVENTURE.get(), ModItems.RANDOM_WEAPON_SKIN_GENERATOR.get(),
                 ModItems.MYSTERY_SIMPLE_SPAWNER.get(), ModItems.MYSTERY_ELITE_SPAWNER.get(),
-                ModItems.MYSTERY_MASTERY_SPAWNER.get(), ModItems.GODLY_VKIT_BUNDLE.get())) {
+                ModItems.MYSTERY_MASTERY_SPAWNER.get(), ModItems.GODLY_VKIT_BUNDLE.get(), ModItems.MEMORY_CHEST.get())) {
             ItemStack source = new ItemStack(item);
             try {
                 helper.assertTrue(server.getCommands().getDispatcher().execute("give @s "
@@ -122,6 +138,8 @@ public final class DeathbringerCleanupGameTests {
                     "Heroic preview includes twelve enchants and three Success rates, not random Destroy permutations");
             if (item == ModItems.COSMIC_ENCHANTMENT_TABLE.get()) helper.assertTrue(outcomes.size() == 53,
                     "Cosmic preview includes only unique enchantment/level/Success variants");
+            if (item == ModItems.MEMORY_CHEST.get()) helper.assertTrue(outcomes.size() == 11,
+                    "Memory Chest preview exposes all eleven production outcomes");
             LootPreviewMenu.open(player, source.getHoverName(), outcomes, 0);
             helper.assertTrue(player.containerMenu instanceof LootPreviewMenu, "Preview uses read-only vanilla 54 slot menu");
             var menu = player.containerMenu;
@@ -130,6 +148,8 @@ public final class DeathbringerCleanupGameTests {
             helper.assertTrue(menu.getCarried().isEmpty() && ItemStack.matches(displayed, menu.getSlot(0).getItem()), "Clicks cannot remove previews");
             player.closeContainer();
         }
+        player.getInventory().clearContent();
+        verifyPremiumContainers(helper, player);
         player.getInventory().clearContent();
         var oldSet = CosmicContent.repository().findArmorSetDefinition(ArmorSetIds.YETI).orElseThrow();
         var newSet = CosmicContent.repository().findArmorSetDefinition(ArmorSetIds.PHANTOM).orElseThrow();
@@ -175,6 +195,81 @@ public final class DeathbringerCleanupGameTests {
             player.getInventory().clearContent();
             helper.succeed();
         });
+    }
+
+    private static void verifyPremiumContainers(GameTestHelper helper, ServerPlayer player) {
+        for (var season : com.cosmicpve.cosmiccrate.CosmicCrateSeason.values()) {
+            for (var side : com.cosmicpve.cosmiccrate.CosmicCrateSide.values()) {
+                var stack = com.cosmicpve.cosmiccrate.SeasonalCosmicCrates.half(season, side);
+                helper.assertTrue(stack.getItem() instanceof com.cosmicpve.cosmiccrate.CosmicCrateHalfItem half
+                        && half.season() == season && half.side() == side, "Every half has exact season and side identity");
+            }
+            var left = com.cosmicpve.cosmiccrate.SeasonalCosmicCrates.half(season, com.cosmicpve.cosmiccrate.CosmicCrateSide.LEFT);
+            var right = com.cosmicpve.cosmiccrate.SeasonalCosmicCrates.half(season, com.cosmicpve.cosmiccrate.CosmicCrateSide.RIGHT);
+            helper.assertTrue(new com.cosmicpve.cosmiccrate.CosmicCrateCombinationService().combine(left, right, right)
+                    == com.cosmicpve.cosmiccrate.CosmicCrateCombinationService.Outcome.SUCCESS
+                    && left.isEmpty() && right.isEmpty(), "Each matching half pair consumes exactly once");
+        }
+        var capacity = new CustomEnchantCapacityService();
+        var higher = new HigherLoreOrbApplicationService(capacity);
+        ItemStack armor = new ItemStack(Items.DIAMOND_HELMET);
+        armor.set(ModDataComponents.CUSTOM_ENCHANT_META.get(), new com.cosmicpve.data.component.CustomEnchantMetadata(2,5,3,true,true));
+        ItemStack armor9 = new ItemStack(ModItems.ARMOR_ENCHANTMENT_ORB_9_LORE.get());
+        ItemStack armor10 = new ItemStack(ModItems.ARMOR_ENCHANTMENT_ORB_10_LORE.get());
+        helper.assertTrue(higher.apply(armor10, armor, armor) == HigherLoreOrbApplicationService.Outcome.REJECTED_CAPACITY
+                && armor10.getCount() == 1, "10-lore Armor Orb rejects capacity 8 without consumption");
+        helper.assertTrue(higher.apply(armor9, armor, armor) == HigherLoreOrbApplicationService.Outcome.SUCCESS
+                && higher.apply(armor10, armor, armor) == HigherLoreOrbApplicationService.Outcome.SUCCESS
+                && capacity.capacity(armor) == 10, "Armor follows deterministic 8 to 9 to 10 sequence");
+        ItemStack weapon = new ItemStack(Items.NETHERITE_AXE);
+        weapon.set(ModDataComponents.CUSTOM_ENCHANT_META.get(), new com.cosmicpve.data.component.CustomEnchantMetadata(2,5,5,false,false));
+        ItemStack weapon11 = new ItemStack(ModItems.WEAPON_ENCHANTMENT_ORB_11_LORE.get());
+        ItemStack weapon12 = new ItemStack(ModItems.WEAPON_ENCHANTMENT_ORB_12_LORE.get());
+        helper.assertTrue(higher.apply(weapon12, weapon, weapon) == HigherLoreOrbApplicationService.Outcome.REJECTED_CAPACITY
+                && higher.apply(weapon11, weapon, weapon) == HigherLoreOrbApplicationService.Outcome.SUCCESS
+                && higher.apply(weapon12, weapon, weapon) == HigherLoreOrbApplicationService.Outcome.SUCCESS
+                && capacity.capacity(weapon) == 12, "Weapon follows deterministic 10 to 11 to 12 sequence");
+        verifyMaximumCapacityBooks(helper, armor, weapon, capacity);
+
+        ItemStack source = new ItemStack(ModItems.MEMORY_CHEST.get());
+        player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, source);
+        helper.assertTrue(ModItems.MEMORY_CHEST.get().use(player.level(), player, net.minecraft.world.InteractionHand.MAIN_HAND)
+                == net.minecraft.world.InteractionResult.SUCCESS_SERVER && source.isEmpty(), "Memory Chest opens shared animation and consumes once");
+        helper.assertTrue(player.getData(ModAttachments.LOOT_ANIMATION).valid()
+                && player.getData(ModAttachments.LOOT_ANIMATION).allRewards().size() == 1,
+                "Memory Chest persists exactly one final reward before animation");
+        player.closeContainer();
+        com.cosmicpve.reward.animation.SingleRewardAnimationService.INSTANCE.closed(player);
+        helper.assertTrue(!player.getData(ModAttachments.LOOT_ANIMATION).valid(), "Memory Chest early close delivers and clears obligation once");
+    }
+
+    private static void verifyMaximumCapacityBooks(GameTestHelper helper, ItemStack armor, ItemStack weapon,
+            CustomEnchantCapacityService capacity) {
+        var registry = helper.getLevel().registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
+        var application = new CosmicBookApplicationService(registry, capacity, new WhiteScrollProtectionService(), () -> 1);
+        verifyMaximumCapacityBooks(helper, armor, 10, registry, application, capacity);
+        verifyMaximumCapacityBooks(helper, weapon, 12, registry, application, capacity);
+    }
+
+    private static void verifyMaximumCapacityBooks(GameTestHelper helper, ItemStack target, int maximum,
+            net.minecraft.core.Registry<net.minecraft.world.item.enchantment.Enchantment> registry,
+            CosmicBookApplicationService application, CustomEnchantCapacityService capacity) {
+        var candidates = registry.listElements().filter(holder -> holder.unwrapKey().map(key ->
+                CosmicEnchantmentSpecs.find(key.identifier()).isPresent()
+                        && HeroicEnchantments.ordinaryFor(key.identifier()).isEmpty()).orElse(false))
+                .filter(holder -> holder.value().canEnchant(target)).limit(maximum).toList();
+        helper.assertTrue(candidates.size() == maximum, "Enough real compatible Cosmic enchantments exist for maximum-capacity proof: "
+                + candidates.size() + "/" + maximum + " on " + target.getItem());
+        EnchantmentHelper.updateEnchantments(target, mutable -> {
+            for (int index = 0; index < maximum - 2; index++) mutable.set(candidates.get(index), 1);
+        });
+        for (int index = maximum - 2; index < maximum; index++) {
+            var result = application.apply(book(candidates.get(index).unwrapKey().orElseThrow().identifier(), 1), target, target);
+            helper.assertTrue(result.outcome() == CosmicBookApplicationResult.Outcome.SUCCESS,
+                    "Actual Cosmic book occupies unlocked slot " + (index + 1));
+        }
+        helper.assertTrue(capacity.used(target) == maximum && capacity.capacity(target) == maximum,
+                "Actual distinct Cosmic enchantments fill the legitimate absolute capacity");
     }
 
     private static void verifyTrialRewards(GameTestHelper helper) {
