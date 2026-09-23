@@ -33,7 +33,10 @@ public final class SingleRewardAnimationMenu extends AbstractContainerMenu {
         for (int slot = 0; slot < SLOT_COUNT; slot++) {
             ItemStack shown;
             if (previews.size() == 1 && slot == 4) shown = previews.getFirst().copy();
-            else if (previews.size() == 3 && slot >= 3 && slot <= 5) shown = previews.get(slot - 3).copy();
+            else if ((previews.size() == 3 || previews.size() == 5)
+                    && slot >= (9 - previews.size()) / 2
+                    && slot < (9 + previews.size()) / 2)
+                shown = previews.get(slot - (9 - previews.size()) / 2).copy();
             else if (slot == 0 || slot == 8) shown = countdown(revealed ? 0 : LootAnimationTimeline.countdown(elapsed));
             else shown = pane(Items.BLACK_STAINED_GLASS_PANE, " ");
             display.setItem(slot, shown);

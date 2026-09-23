@@ -111,6 +111,7 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
             addHex(event, result);
             addDeepBleed(event, result);
             addPermanentExecute(event, result);
+            addBerserk(event, result);
         } else if (event.hook() == ProcHook.ON_PROJECTILE_HIT) {
             addLightning(event, result);
             addVenom(event, result);
@@ -120,6 +121,7 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
             addDominate(event, result);
             addBlightedVirus(event, result);
             addEternalSnare(event, result);
+            addHealing(event, result);
         } else if (event.hook() == ProcHook.ON_DAMAGE_TAKEN) {
             if (event.combatResult().map(hit -> hit.context().defensiveCosmicSuppressed()).orElse(false))
                 return List.of();
@@ -568,6 +570,28 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
                 activation -> PinpointBehavior.activate(activation.event()),
                 provenance(event, ModEnchantments.PINPOINT.identifier()),
                 condition(CosmicPVE.id("pinpoint_committed_bow_hit"), PinpointBehavior::eligible)));
+    }
+
+    private void addBerserk(ProcEvent event, List<ProcCandidate> result) {
+        int level = Math.min(5, event.effectiveEnchantments().level(ModEnchantments.BERSERK.identifier()));
+        if (level <= 0) return;
+        result.add(candidate(ModEnchantments.BERSERK.identifier(), ProcHook.ON_VALID_HIT,
+                BerserkBehavior.chance(level), Optional.empty(), 0L, Optional.empty(),
+                ChildProcEligibility.LIMITED_OFFENSIVE_REROLL,
+                activation -> BerserkBehavior.activate(activation.event(), level),
+                provenance(event, ModEnchantments.BERSERK.identifier()),
+                condition(CosmicPVE.id("berserk_committed_axe_hit"), BerserkBehavior::eligible)));
+    }
+
+    private void addHealing(ProcEvent event, List<ProcCandidate> result) {
+        int level = Math.min(2, event.effectiveEnchantments().level(ModEnchantments.HEALING.identifier()));
+        if (level <= 0) return;
+        result.add(candidate(ModEnchantments.HEALING.identifier(), ProcHook.ON_PROJECTILE_HIT,
+                HealingBehavior.chance(level), Optional.empty(), 0L, Optional.empty(),
+                ChildProcEligibility.ROOT_ONLY,
+                activation -> HealingBehavior.activate(activation.event(), level),
+                provenance(event, ModEnchantments.HEALING.identifier()),
+                condition(CosmicPVE.id("healing_committed_crossbow_hit"), HealingBehavior::eligible)));
     }
 
     private void addAngelic(ProcEvent event, List<ProcCandidate> result) {

@@ -31,7 +31,7 @@ class Step8GHeroicEnchantmentsTest {
     }
 
     @Test void heroicMetadataAndActivatedStormcallerAreCanonical() {
-        assertEquals(79, CosmicEnchantmentSpecs.ALL.size());
+        assertEquals(81, CosmicEnchantmentSpecs.ALL.size());
         assertEquals(12, CosmicEnchantmentSpecs.ALL.stream()
                 .filter(spec -> spec.tier() == CosmicEnchantmentTier.HEROIC).count());
         assertEquals(6, CosmicEnchantmentSpecs.DEEP_BLEED.maxLevel());

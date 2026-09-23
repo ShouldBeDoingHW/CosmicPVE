@@ -15,7 +15,7 @@ class ConquestResourceTest {
             assertNotNull(stream);
             var entries = JsonParser.parseReader(new InputStreamReader(stream, StandardCharsets.UTF_8))
                     .getAsJsonObject().getAsJsonArray("entries");
-            assertEquals(22, entries.size());
+            assertEquals(23, entries.size());
             int totalWeight = 0;
             int unexaminedRows = 0;
             var normalized = new java.util.ArrayList<String>();
@@ -31,7 +31,7 @@ class ConquestResourceTest {
                 int maximum = entry.has("maximum_quantity") ? entry.get("maximum_quantity").getAsInt() : minimum;
                 normalized.add(entry.get("weight").getAsInt() + "|" + minimum + "|" + maximum + "|" + reward);
             }
-            assertEquals(219, totalWeight, "production excludes only the deferred weight-3 Abandoned Spaceship row");
+            assertEquals(223, totalWeight, "production includes the Swag Bag and excludes the deferred weight-3 Abandoned Spaceship row");
             assertEquals(5, unexaminedRows);
             assertEquals(List.of(
                     "15|2|2|{\"type\":\"unexamined_book\",\"rarity\":\"simple\"}",
@@ -55,7 +55,8 @@ class ConquestResourceTest {
                     "3|1|1|{\"type\":\"static_item\",\"item\":\"cosmicpve:trial_trinket_skip_1\"}",
                     "6|1|1|{\"type\":\"enchanted_black_scroll\",\"success_rate\":50}",
                     "10|1|1|{\"type\":\"static_item\",\"item\":\"cosmicpve:personal_vault_unlock\"}",
-                    "6|2|2|{\"type\":\"static_item\",\"item\":\"cosmicpve:personal_vault_unlock\"}"), normalized);
+                    "6|2|2|{\"type\":\"static_item\",\"item\":\"cosmicpve:personal_vault_unlock\"}",
+                    "4|1|1|{\"type\":\"static_item\",\"item\":\"cosmicpve:cosmic_swag_bag\"}"), normalized);
         }
     }
 

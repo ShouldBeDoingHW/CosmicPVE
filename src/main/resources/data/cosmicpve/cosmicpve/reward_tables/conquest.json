@@ -21,6 +21,7 @@
     {"weight":3,"reward":{"type":"static_item","item":"cosmicpve:trial_trinket_skip_1"}},
     {"weight":6,"reward":{"type":"enchanted_black_scroll","success_rate":50}},
     {"weight":10,"reward":{"type":"static_item","item":"cosmicpve:personal_vault_unlock"}},
-    {"weight":6,"minimum_quantity":2,"maximum_quantity":2,"reward":{"type":"static_item","item":"cosmicpve:personal_vault_unlock"}}
+    {"weight":6,"minimum_quantity":2,"maximum_quantity":2,"reward":{"type":"static_item","item":"cosmicpve:personal_vault_unlock"}},
+    {"weight":4,"reward":{"type":"static_item","item":"cosmicpve:cosmic_swag_bag"}}
   ]
 }

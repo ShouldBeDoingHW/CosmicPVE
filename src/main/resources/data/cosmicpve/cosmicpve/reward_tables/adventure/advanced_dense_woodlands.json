@@ -22,6 +22,7 @@
     {"weight":5,"minimum_quantity":2,"maximum_quantity":2,"reward":{"type":"static_item","item":"cosmicpve:space_dust_bundle"}},
     {"weight":7,"reward":{"type":"advanced_banknote"}},
     {"weight":7,"reward":{"type":"pinpoint_book"}},
-    {"weight":6,"reward":{"type":"memory_chest"}}
+    {"weight":6,"reward":{"type":"memory_chest"}},
+    {"weight":10,"reward":{"type":"static_item","item":"cosmicpve:cosmic_swag_bag"}}
   ]
 }

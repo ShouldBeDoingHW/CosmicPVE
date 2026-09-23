@@ -96,11 +96,12 @@ class DenseWoodlands2MilestoneTest {
                   {"weight":5,"minimum_quantity":2,"maximum_quantity":2,"reward":{"type":"static_item","item":"cosmicpve:space_dust_bundle"}},
                   {"weight":7,"reward":{"type":"advanced_banknote"}},
                   {"weight":7,"reward":{"type":"pinpoint_book"}},
-                  {"weight":6,"reward":{"type":"memory_chest"}}
+                  {"weight":6,"reward":{"type":"memory_chest"}},
+                  {"weight":10,"reward":{"type":"static_item","item":"cosmicpve:cosmic_swag_bag"}}
                 ]
                 """).getAsJsonArray();
         assertEquals(expected,rows,"the complete ordered Advanced Dense Woodlands catalog must match canon exactly");
-        assertEquals(23,rows.size());int[] weights={6,6,6,5,8,6,4,5,5,5,5,5,4,4,4,5,5,15,8,5,7,7,6};
+        assertEquals(24,rows.size());int[] weights={6,6,6,5,8,6,4,5,5,5,5,5,4,4,4,5,5,15,8,5,7,7,6,10};
         for(int i=0;i<weights.length;i++)assertEquals(weights[i],rows.get(i).getAsJsonObject().get("weight").getAsInt());
         for(int i=0;i<3;i++){assertEquals(3,rows.get(i).getAsJsonObject().get("minimum_quantity").getAsInt());assertEquals(3,rows.get(i).getAsJsonObject().get("maximum_quantity").getAsInt());}
         assertEquals(2,rows.get(19).getAsJsonObject().get("minimum_quantity").getAsInt());

@@ -30,17 +30,17 @@ class TrialRewardCatalogsTest {
     }
     @Test void currentMilestoneAddsOnlyTheSpecifiedTrialMemoryChestRows() {
         assertEquals(new TrialRewardCatalogs.Row("Memory Chest",5,1,true),
-                TrialRewardCatalogs.IMPOSSIBLE.declared().getLast());
+                TrialRewardCatalogs.IMPOSSIBLE.declared().get(TrialRewardCatalogs.IMPOSSIBLE.declared().size()-2));
         assertEquals(new TrialRewardCatalogs.Row("Memory Chest",4,2,true),
-                TrialRewardCatalogs.DEMONIC.declared().getLast());
+                TrialRewardCatalogs.DEMONIC.declared().get(TrialRewardCatalogs.DEMONIC.declared().size()-2));
         assertTrue(TrialRewardCatalogs.APPRENTICE.declared().stream().noneMatch(row -> row.name().equals("Memory Chest")));
         assertTrue(TrialRewardCatalogs.HARDCORE.declared().stream().noneMatch(row -> row.name().equals("Memory Chest")));
     }
     @Test void canonicalDeclaredAndActiveTotalsArePinned() {
         assertCatalog(TrialRewardCatalogs.APPRENTICE,15,108,108);
         assertCatalog(TrialRewardCatalogs.HARDCORE,14,87,82);
-        assertCatalog(TrialRewardCatalogs.IMPOSSIBLE,22,188,180);
-        assertCatalog(TrialRewardCatalogs.DEMONIC,20,141,137);
+        assertCatalog(TrialRewardCatalogs.IMPOSSIBLE,23,192,184);
+        assertCatalog(TrialRewardCatalogs.DEMONIC,21,148,144);
     }
 
     @Test void runtimeTablesExactlyEqualTheirActiveCanonicalRows() throws Exception {
@@ -128,7 +128,9 @@ class TrialRewardCatalogsTest {
         case "heroic_cosmic_enchantment_table"->"Heroic Cosmic Enchantment Table";
         case "personal_vault_unlock"->"PV Unlock Gem";
         case "secret_weapon_cache"->"Secret Weapon Cache"; case "admin_abuse"->"Admin Abuse";
-        case "godly_vkit_bundle"->"Godly V-Kit Bundle"; default->throw new AssertionError("Unknown item "+path);
+        case "godly_vkit_bundle"->"Godly V-Kit Bundle";
+        case "cosmic_swag_bag"->"Cosmic Swag Bag";
+        default->throw new AssertionError("Unknown item "+path);
     };}
     private static String title(String value){return java.util.Arrays.stream(value.split("_"))
             .map(part->Character.toUpperCase(part.charAt(0))+part.substring(1)).collect(java.util.stream.Collectors.joining(" "));}

@@ -58,6 +58,7 @@ import com.cosmicpve.cosmiccrate.CosmicCrateSide;
 import com.cosmicpve.equipment.enchantment.HigherLoreOrbItem;
 import com.cosmicpve.equipment.enchantment.OrbType;
 import com.cosmicpve.reward.memory.MemoryChestItem;
+import com.cosmicpve.reward.nested.NestedRewardContainerItem;
 
 public final class ModItems {
     private static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(CosmicPVE.MOD_ID);
@@ -189,6 +190,12 @@ public final class ModItems {
 
     public static final DeferredItem<MemoryChestItem> MEMORY_CHEST = ITEMS.registerItem(
             "memory_chest", MemoryChestItem::new, properties -> properties.stacksTo(1));
+    public static final DeferredItem<NestedRewardContainerItem> TRIALS_CREATION_KIT = ITEMS.registerItem(
+            "trials_creation_kit", properties -> new NestedRewardContainerItem(properties,
+                    NestedRewardContainerItem.Kind.TRIALS_CREATION_KIT), properties -> properties.stacksTo(1));
+    public static final DeferredItem<NestedRewardContainerItem> COSMIC_SWAG_BAG = ITEMS.registerItem(
+            "cosmic_swag_bag", properties -> new NestedRewardContainerItem(properties,
+                    NestedRewardContainerItem.Kind.COSMIC_SWAG_BAG), properties -> properties.stacksTo(1));
     public static final DeferredItem<CosmicCrateItem> SPRING_COSMIC_CRATE = crate("spring_cosmic_crate", CosmicCrateSeason.SPRING);
     public static final DeferredItem<CosmicCrateItem> SUMMER_COSMIC_CRATE = crate("summer_cosmic_crate", CosmicCrateSeason.SUMMER);
     public static final DeferredItem<CosmicCrateItem> FALL_COSMIC_CRATE = crate("fall_cosmic_crate", CosmicCrateSeason.FALL);

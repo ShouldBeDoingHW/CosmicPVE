@@ -92,6 +92,10 @@ public final class DeathbringerCleanupGameTests {
             helper.assertTrue(server.getCommands().getDispatcher().execute("vkit", sourceStack) > 0, "V-Kit informational menu registered");
             helper.assertTrue(server.getCommands().getDispatcher().execute("cosmic containers memory-chest @s", sourceStack) > 0,
                     "Memory Chest fixture command registered");
+            helper.assertTrue(server.getCommands().getDispatcher().execute("cosmic containers trials-creation-kit @s", sourceStack) > 0,
+                    "Trials Creation Kit fixture command registered");
+            helper.assertTrue(server.getCommands().getDispatcher().execute("cosmic containers cosmic-swag-bag @s", sourceStack) > 0,
+                    "Cosmic Swag Bag fixture command registered");
             for (String season : List.of("spring", "summer", "fall", "winter")) {
                 helper.assertTrue(server.getCommands().getDispatcher().execute(
                         "cosmic containers cosmic-crate give @s " + season, sourceStack) > 0,
@@ -123,7 +127,8 @@ public final class DeathbringerCleanupGameTests {
                 ModItems.COSMIC_ENCHANTMENT_TABLE.get(), ModItems.HEROIC_COSMIC_ENCHANTMENT_TABLE.get(),
                 ModItems.MYSTERY_CALL_OF_ADVENTURE.get(), ModItems.RANDOM_WEAPON_SKIN_GENERATOR.get(),
                 ModItems.MYSTERY_SIMPLE_SPAWNER.get(), ModItems.MYSTERY_ELITE_SPAWNER.get(),
-                ModItems.MYSTERY_MASTERY_SPAWNER.get(), ModItems.GODLY_VKIT_BUNDLE.get(), ModItems.MEMORY_CHEST.get())) {
+                ModItems.MYSTERY_MASTERY_SPAWNER.get(), ModItems.GODLY_VKIT_BUNDLE.get(), ModItems.MEMORY_CHEST.get(),
+                ModItems.TRIALS_CREATION_KIT.get(), ModItems.COSMIC_SWAG_BAG.get())) {
             ItemStack source = new ItemStack(item);
             try {
                 helper.assertTrue(server.getCommands().getDispatcher().execute("give @s "
@@ -140,6 +145,12 @@ public final class DeathbringerCleanupGameTests {
                     "Cosmic preview includes only unique enchantment/level/Success variants");
             if (item == ModItems.MEMORY_CHEST.get()) helper.assertTrue(outcomes.size() == 11,
                     "Memory Chest preview exposes all eleven production outcomes");
+            if (item == ModItems.TRIALS_CREATION_KIT.get()) helper.assertTrue(outcomes.size() == 13
+                    && outcomes.stream().anyMatch(stack -> stack.is(ModItems.TRIAL_PORTAL.get()) && stack.getCount() == 3),
+                    "Kit preview merges portal quantity rows at the maximum quantity");
+            if (item == ModItems.COSMIC_SWAG_BAG.get()) helper.assertTrue(outcomes.size() == 18
+                    && outcomes.stream().anyMatch(stack -> stack.is(ModItems.REPAIR_SCROLL.get()) && stack.getCount() == 2),
+                    "Bag preview merges book and repair quantity rows at their maxima");
             LootPreviewMenu.open(player, source.getHoverName(), outcomes, 0);
             helper.assertTrue(player.containerMenu instanceof LootPreviewMenu, "Preview uses read-only vanilla 54 slot menu");
             var menu = player.containerMenu;
@@ -148,6 +159,8 @@ public final class DeathbringerCleanupGameTests {
             helper.assertTrue(menu.getCarried().isEmpty() && ItemStack.matches(displayed, menu.getSlot(0).getItem()), "Clicks cannot remove previews");
             player.closeContainer();
         }
+        player.getInventory().clearContent();
+        verifyNestedContainers(helper, player);
         player.getInventory().clearContent();
         verifyPremiumContainers(helper, player);
         player.getInventory().clearContent();
@@ -195,6 +208,42 @@ public final class DeathbringerCleanupGameTests {
             player.getInventory().clearContent();
             helper.succeed();
         });
+    }
+
+    private static void verifyNestedContainers(GameTestHelper helper, ServerPlayer player) {
+        for (var entry : List.of(new java.util.AbstractMap.SimpleEntry<>(ModItems.TRIALS_CREATION_KIT.get(), 5),
+                new java.util.AbstractMap.SimpleEntry<>(ModItems.COSMIC_SWAG_BAG.get(), 3))) {
+            player.getInventory().clearContent();
+            ItemStack source = new ItemStack(entry.getKey());
+            player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, source);
+            helper.assertTrue(entry.getKey().use(player.level(), player, net.minecraft.world.InteractionHand.MAIN_HAND)
+                    == net.minecraft.world.InteractionResult.SUCCESS_SERVER && source.isEmpty(),
+                    "Nested source consumed once after finals were journaled");
+            var obligation = player.getData(ModAttachments.LOOT_ANIMATION);
+            helper.assertTrue(obligation.valid() && obligation.allRewards().size() == entry.getValue(),
+                    "Nested reward obligation persists the exact number of final results");
+            helper.assertTrue(player.containerMenu instanceof com.cosmicpve.reward.animation.SingleRewardAnimationMenu,
+                    "Nested source uses the shared animation menu");
+            int first = entry.getValue() == 5 ? 2 : 3;
+            for (int slot = first; slot < first + entry.getValue(); slot++)
+                helper.assertTrue(!player.containerMenu.getSlot(slot).getItem().isEmpty(),
+                        "Each result has an animated display slot");
+            var finals = obligation.allRewards();
+            player.closeContainer();
+            com.cosmicpve.reward.animation.SingleRewardAnimationService.INSTANCE.closed(player);
+            helper.assertTrue(!player.getData(ModAttachments.LOOT_ANIMATION).valid(),
+                    "Early close clears durable obligation exactly once");
+            for (var expected : finals) {
+                int expectedCount = finals.stream().filter(stack -> ItemStack.isSameItemSameComponents(stack, expected))
+                        .mapToInt(ItemStack::getCount).sum();
+                int actualCount = 0;
+                for (int slot = 0; slot < player.getInventory().getContainerSize(); slot++) {
+                    ItemStack stack = player.getInventory().getItem(slot);
+                    if (ItemStack.isSameItemSameComponents(stack, expected)) actualCount += stack.getCount();
+                }
+                helper.assertTrue(actualCount == expectedCount, "Early close awards every persisted result exactly once");
+            }
+        }
     }
 
     private static void verifyPremiumContainers(GameTestHelper helper, ServerPlayer player) {
@@ -469,6 +518,31 @@ public final class DeathbringerCleanupGameTests {
                 }
                 helper.assertTrue(count == expected.getCount(), "Final awards exactly once, including duplicate close");
             }
+            var five = java.util.stream.IntStream.rangeClosed(1, 5)
+                    .mapToObj(count -> new ItemStack(Items.DIAMOND, count)).toList();
+            helper.assertTrue(animation.open(player, five, random -> new ItemStack(Items.EMERALD), () -> {}),
+                    "Shared animation accepts five persisted results");
+            var fiveMenu = (com.cosmicpve.reward.animation.SingleRewardAnimationMenu) player.containerMenu;
+            helper.runAfterDelay(260, () -> {
+                animation.tick(player, fiveMenu);
+                for (int index = 0; index < 5; index++)
+                    helper.assertTrue(ItemStack.matches(five.get(index), fiveMenu.getSlot(2 + index).getItem()),
+                            "All five result slots reveal their persisted actual stacks together");
+            });
+            helper.runAfterDelay(320, () -> {
+                animation.tick(player, fiveMenu);
+                helper.assertTrue(player.containerMenu == player.inventoryMenu,
+                        "Five-result display closes after hold tick 60");
+                animation.closed(player);
+                helper.assertTrue(!player.getData(ModAttachments.LOOT_ANIMATION).valid(),
+                        "Five-result obligation delivers and clears exactly once");
+                int diamonds = 0;
+                for (int slot = 0; slot < player.getInventory().getContainerSize(); slot++) {
+                    ItemStack stack = player.getInventory().getItem(slot);
+                    if (stack.is(Items.DIAMOND)) diamonds += stack.getCount();
+                }
+                helper.assertTrue(diamonds == 15, "Five-result delivery preserves all quantities without duplication");
+            });
         });
     }
 }

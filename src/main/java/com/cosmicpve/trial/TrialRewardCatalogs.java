@@ -57,7 +57,8 @@ public final class TrialRewardCatalogs {
             row("65% Belt Socket",5,1,true),
             row("50% Omni Socket",5,1,true),
             row("Random Weapon Skin Generator",5,1,true),
-            row("Memory Chest",4,2,true)));
+            row("Memory Chest",4,2,true),
+            row("Cosmic Swag Bag",7,1,true)));
     private TrialRewardCatalogs() {}
     private static Row row(String name,int weight,int quantity,boolean active){return new Row(name,weight,quantity,active);}
     private static Catalog catalog(List<Row> rows){return new Catalog(rows);}

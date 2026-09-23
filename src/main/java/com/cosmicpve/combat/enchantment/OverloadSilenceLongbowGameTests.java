@@ -72,6 +72,14 @@ public final class OverloadSilenceLongbowGameTests {
         assertLevel(helper, registry, ModEnchantments.GODLY_OVERLOAD, 3);
         assertLevel(helper, registry, ModEnchantments.SILENCE, 4);
         assertLevel(helper, registry, ModEnchantments.LONGBOW, 5);
+        assertLevel(helper, registry, ModEnchantments.BERSERK, 5);
+        assertLevel(helper, registry, ModEnchantments.HEALING, 2);
+        helper.assertTrue(registry.getOrThrow(ModEnchantments.BERSERK).value().canEnchant(new ItemStack(Items.DIAMOND_AXE))
+                && !registry.getOrThrow(ModEnchantments.BERSERK).value().canEnchant(new ItemStack(Items.DIAMOND_SWORD))
+                && registry.getOrThrow(ModEnchantments.HEALING).value().canEnchant(new ItemStack(Items.CROSSBOW))
+                && !registry.getOrThrow(ModEnchantments.HEALING).value().canEnchant(new ItemStack(Items.BOW)),
+                "Berserk and Healing loaded applicability matches Axe and Crossbow only");
+        verifyBerserkHealing(helper);
         helper.assertTrue(CosmicEnchantmentTableRewards.POOL.size() == 18
                 && !CosmicEnchantmentTableRewards.POOL.contains(ModEnchantments.OVERLOAD)
                 && !CosmicEnchantmentTableRewards.POOL.contains(ModEnchantments.SILENCE)
@@ -200,6 +208,88 @@ public final class OverloadSilenceLongbowGameTests {
             OptionalLong parent, RecursionPolicy recursion) {
         return contextWithEnchantment(source, target, firingWeapon, channel, parent, recursion,
                 ModEnchantments.LONGBOW.identifier(), 5);
+    }
+
+    private static void verifyBerserkHealing(GameTestHelper helper) {
+        var source = helper.makeMockPlayer(GameType.SURVIVAL);
+        var target = helper.makeMockPlayer(GameType.SURVIVAL);
+        var resolver = new CosmicEnchantmentBehaviorResolver(null, null, null, null,
+                new com.cosmicpve.combat.cooldown.CooldownService());
+        var engine = new com.cosmicpve.combat.proc.ProcEngine(
+                new com.cosmicpve.combat.cooldown.CooldownService(),
+                new com.cosmicpve.combat.proc.ProcTraceService());
+        long tick = helper.getLevel().getServer().getTickCount();
+        for (int level : List.of(1, 5)) {
+            var hit = milestoneEvent(source, target, source, AttackCategory.MELEE, Items.DIAMOND_AXE,
+                    ModEnchantments.BERSERK.identifier(), level, com.cosmicpve.combat.proc.ProcHook.ON_VALID_HIT,
+                    2.0, tick, () -> 0.0);
+            var candidates = resolver.resolve(hit);
+            helper.assertTrue(candidates.size() == 1 && candidates.getFirst().baseProbability() == .01 * level,
+                    "Berserk level controls the central proc's base chance");
+            helper.assertTrue(source.getEffect(net.minecraft.world.effect.MobEffects.STRENGTH) == null,
+                    "Triggering hit is committed before Berserk applies Strength");
+            var dispatch = engine.evaluate(hit, candidates);
+            var strength = source.getEffect(net.minecraft.world.effect.MobEffects.STRENGTH);
+            helper.assertTrue(dispatch.activationCount() == 1 && Math.abs(dispatch.evaluations().getFirst().finalChance()
+                    - .012 * level) < 1e-12 && strength != null && strength.getAmplifier() == 0
+                    && strength.getDuration() == level * 20 && hit.combatResult().orElseThrow().committedHealthDamage() == 2.0,
+                    "Berserk uses Luck and refreshes vanilla Strength I without altering committed damage");
+            source.removeEffect(net.minecraft.world.effect.MobEffects.STRENGTH);
+        }
+        var rejected = milestoneEvent(source, target, source, AttackCategory.MELEE, Items.DIAMOND_AXE,
+                ModEnchantments.BERSERK.identifier(), 5, com.cosmicpve.combat.proc.ProcHook.ON_VALID_HIT,
+                0.0, tick, () -> 0.0);
+        helper.assertTrue(engine.evaluate(rejected, resolver.resolve(rejected)).activationCount() == 0,
+                "Rejected zero-damage Axe hit cannot grant Berserk");
+
+        var arrow = net.minecraft.world.entity.EntityType.ARROW.create(helper.getLevel(),
+                net.minecraft.world.entity.EntitySpawnReason.TRIGGERED);
+        helper.assertTrue(arrow != null, "Arrow projectile fixture must construct");
+        for (int level : List.of(1, 2)) {
+            var shot = milestoneEvent(source, target, arrow, AttackCategory.PROJECTILE, Items.CROSSBOW,
+                    ModEnchantments.HEALING.identifier(), level,
+                    com.cosmicpve.combat.proc.ProcHook.ON_PROJECTILE_HIT, 2.0, tick, () -> 0.0);
+            var candidates = resolver.resolve(shot);
+            helper.assertTrue(candidates.size() == 1 && candidates.getFirst().baseProbability() == .10,
+                    "Healing base chance stays ten percent at both levels");
+            var dispatch = engine.evaluate(shot, candidates);
+            var absorption = source.getEffect(net.minecraft.world.effect.MobEffects.ABSORPTION);
+            helper.assertTrue(dispatch.activationCount() == 1 && Math.abs(dispatch.evaluations().getFirst().finalChance() - .12) < 1e-12
+                    && absorption != null && absorption.getAmplifier() == level - 1
+                    && absorption.getDuration() == 80 && source.getAbsorptionAmount() == 4 * level,
+                    "Healing uses Luck and refreshes actual Absorption I/II for four seconds");
+        }
+        for (var invalid : List.of(
+                milestoneEvent(source, target, arrow, AttackCategory.PROJECTILE, Items.BOW,
+                        ModEnchantments.HEALING.identifier(), 2, com.cosmicpve.combat.proc.ProcHook.ON_PROJECTILE_HIT,
+                        2.0, tick, () -> 0.0),
+                milestoneEvent(source, target, source, AttackCategory.MELEE, Items.CROSSBOW,
+                        ModEnchantments.HEALING.identifier(), 2, com.cosmicpve.combat.proc.ProcHook.ON_PROJECTILE_HIT,
+                        2.0, tick, () -> 0.0),
+                milestoneEvent(source, target, arrow, AttackCategory.PROJECTILE, Items.CROSSBOW,
+                        ModEnchantments.HEALING.identifier(), 2, com.cosmicpve.combat.proc.ProcHook.ON_PROJECTILE_HIT,
+                        0.0, tick, () -> 0.0)))
+            helper.assertTrue(engine.evaluate(invalid, resolver.resolve(invalid)).activationCount() == 0,
+                    "Bow, Crossbow melee, and uncommitted shots cannot trigger Healing");
+        source.discard(); target.discard(); arrow.discard();
+    }
+
+    private static com.cosmicpve.combat.proc.ProcEvent milestoneEvent(
+            net.minecraft.world.entity.LivingEntity source, net.minecraft.world.entity.LivingEntity target,
+            net.minecraft.world.entity.Entity direct, AttackCategory category, Item item, Identifier id, int level,
+            com.cosmicpve.combat.proc.ProcHook hook, double damage, long tick,
+            com.cosmicpve.combat.proc.ProcRandomSource random) {
+        var effective = new EffectiveEnchantments(Map.of(id, new EffectiveEnchantment(id, level,
+                List.of(new EnchantmentProvenance(EnchantmentSourceKind.ACTUAL, CosmicPVE.id("milestone_weapon"), level)))));
+        var context = new CombatContext(direct, source, source, target, Optional.empty(), null,
+                category, DamageChannel.ORDINARY, Set.of(), new WeaponSnapshot(new ItemStack(item)), effective,
+                2, OptionalLong.empty(), RecursionPolicy.NORMAL);
+        var breakdown = new CombatBreakdown(2, 0, List.of(), 2, List.of(), 1, 2, 2,
+                List.of(), List.of(), 1, 2, 2);
+        var result = new CombatResult(context, breakdown, List.of(), damage);
+        return new com.cosmicpve.combat.proc.ProcEvent(hook, 2, OptionalLong.empty(), RecursionPolicy.NORMAL,
+                source.getUUID(), Optional.of(source.getUUID()), tick, List.of(1.2), List.of(1.0), Set.of(),
+                effective, Optional.of(result), source, target, random);
     }
 
     private static CombatContext contextWithEnchantment(net.minecraft.world.entity.LivingEntity source,

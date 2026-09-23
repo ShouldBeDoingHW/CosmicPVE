@@ -55,7 +55,7 @@ public final class SelfDestructGameTests {
         List<PrimedTnt> tnt = helper.getEntities(EntityType.TNT);
         helper.assertTrue(tnt.size() == 4, "Self Destruct must produce exactly four TNT entities");
         for (PrimedTnt entity : tnt) {
-            helper.assertTrue(entity.getFuse() == 20, "Every Self Destruct TNT must store a 20-tick fuse");
+            helper.assertTrue(entity.getFuse() == 15, "Every Self Destruct TNT must store a 15-tick fuse");
             helper.assertTrue(SelfDestructBehavior.isEventTnt(entity) && entity.getOwner() == owner,
                     "Every Self Destruct TNT must retain event ownership and tagging");
         }
@@ -65,11 +65,11 @@ public final class SelfDestructGameTests {
                 "Unrelated vanilla TNT must retain its ordinary 80-tick fuse and remain untagged");
         ordinary.discard();
 
-        helper.runAfterDelay(18, () -> helper.assertTrue(tnt.stream().noneMatch(PrimedTnt::isRemoved),
-                "Self Destruct TNT must not explode before its 20-tick fuse elapses"));
-        helper.runAfterDelay(23, () -> {
+        helper.runAfterDelay(12, () -> helper.assertTrue(tnt.stream().noneMatch(PrimedTnt::isRemoved),
+                "Self Destruct TNT must not explode before its 15-tick fuse elapses"));
+        helper.runAfterDelay(18, () -> {
             helper.assertTrue(tnt.stream().allMatch(PrimedTnt::isRemoved),
-                    "All four Self Destruct TNT must explode after approximately one second");
+                    "All four Self Destruct TNT must explode after approximately 0.75 seconds");
             helper.assertTrue(owner.getHealth() == ownerHealth,
                     "The Self Destruct caster must remain immune to its four explosions");
             helper.assertBlockPresent(Blocks.DIRT, new BlockPos(8, 2, 8));

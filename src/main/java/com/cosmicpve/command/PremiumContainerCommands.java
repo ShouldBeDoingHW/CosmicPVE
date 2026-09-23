@@ -32,6 +32,12 @@ public final class PremiumContainerCommands {
                 .then(Commands.literal("memory-chest").then(Commands.argument("player", EntityArgument.player())
                         .executes(context -> give(EntityArgument.getPlayer(context, "player"),
                                 new ItemStack(ModItems.MEMORY_CHEST.get())))))
+                .then(Commands.literal("trials-creation-kit").then(Commands.argument("player", EntityArgument.player())
+                        .executes(context -> give(EntityArgument.getPlayer(context, "player"),
+                                new ItemStack(ModItems.TRIALS_CREATION_KIT.get())))))
+                .then(Commands.literal("cosmic-swag-bag").then(Commands.argument("player", EntityArgument.player())
+                        .executes(context -> give(EntityArgument.getPlayer(context, "player"),
+                                new ItemStack(ModItems.COSMIC_SWAG_BAG.get())))))
                 .then(Commands.literal("cosmic-crate")
                         .then(Commands.literal("give").then(Commands.argument("player", EntityArgument.player())
                                 .then(season.executes(context -> giveCrate(context.getSource(),

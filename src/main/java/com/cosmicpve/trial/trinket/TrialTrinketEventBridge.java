@@ -1,5 +1,6 @@
 package com.cosmicpve.trial.trinket;
 
+import com.cosmicpve.equipment.enchantment.ItemApplicationFeedback;
 import com.cosmicpve.registry.ModDataComponents;
 import com.cosmicpve.registry.ModItems;
 import net.minecraft.network.chat.Component;
@@ -19,6 +20,8 @@ public final class TrialTrinketEventBridge {
         var outcome = service.apply(event.getCarriedItem(), event.getStackedOnItem(), event.getSlot().getItem());
         event.getCarriedSlotAccess().set(event.getCarriedItem());
         event.getSlot().set(event.getSlot().getItem());
+        if (outcome == TrialTrinketApplicationService.Outcome.SUCCESS)
+            ItemApplicationFeedback.play(player, ItemApplicationFeedback.Cue.SUCCESS);
         player.displayClientMessage(Component.translatable(outcome == TrialTrinketApplicationService.Outcome.SUCCESS
                 ? "message.cosmicpve.trial_trinket.applied"
                 : outcome == TrialTrinketApplicationService.Outcome.REJECTED_PORTAL_STACK

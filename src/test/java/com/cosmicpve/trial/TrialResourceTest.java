@@ -76,12 +76,12 @@ class TrialResourceTest {
         assertNotNull(stream);
         var entries=JsonParser.parseReader(new InputStreamReader(stream,StandardCharsets.UTF_8))
                 .getAsJsonObject().getAsJsonArray("entries");
-        assertEquals(21, entries.size());
-        assertEquals(180, entries.asList().stream().mapToInt(value ->
+        assertEquals(22, entries.size());
+        assertEquals(184, entries.asList().stream().mapToInt(value ->
                 value.getAsJsonObject().get("weight").getAsInt()).sum());
-        assertEquals(22, ImpossibleRewardCatalog.DECLARED.size());
-        assertEquals(188, ImpossibleRewardCatalog.DECLARED_WEIGHT);
-        assertEquals(180, ImpossibleRewardCatalog.ACTIVE_WEIGHT);
+        assertEquals(23, ImpossibleRewardCatalog.DECLARED.size());
+        assertEquals(192, ImpossibleRewardCatalog.DECLARED_WEIGHT);
+        assertEquals(184, ImpossibleRewardCatalog.ACTIVE_WEIGHT);
         assertEquals(1, entries.asList().stream().filter(value -> {
             var entry = value.getAsJsonObject(); var reward = entry.getAsJsonObject("reward");
             return entry.get("weight").getAsInt() == 3 && reward.get("type").getAsString().equals("static_item")
@@ -96,8 +96,8 @@ class TrialResourceTest {
         assertNotNull(stream);
         var entries=JsonParser.parseReader(new InputStreamReader(stream,StandardCharsets.UTF_8))
                 .getAsJsonObject().getAsJsonArray("entries");
-        assertEquals(19,entries.size());
-        assertEquals(137,entries.asList().stream().mapToInt(value->value.getAsJsonObject().get("weight").getAsInt()).sum());
+        assertEquals(20,entries.size());
+        assertEquals(144,entries.asList().stream().mapToInt(value->value.getAsJsonObject().get("weight").getAsInt()).sum());
         assertEquals(1, entries.asList().stream().filter(value -> {
             var entry = value.getAsJsonObject(); var reward = entry.getAsJsonObject("reward");
             return entry.get("weight").getAsInt() == 5 && reward.get("type").getAsString().equals("static_item")

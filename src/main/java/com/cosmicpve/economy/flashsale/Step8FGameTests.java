@@ -77,13 +77,13 @@ public final class Step8FGameTests {
                     tier + " reward must construct: " + entry.reward()));
         });
         var impossible = CosmicContent.repository().requireRewardTable(CosmicPVE.id("trial/impossible"));
-        helper.assertTrue(impossible.entries().size() == 21 && impossible.totalWeight() == 180,
-                "Impossible table must include its exact rows plus the production Memory Chest");
+        helper.assertTrue(impossible.entries().size() == 22 && impossible.totalWeight() == 184,
+                "Impossible table must include its exact rows plus the production Memory Chest and Swag Bag");
         impossible.entries().forEach(entry -> helper.assertTrue(generator.generate(entry.reward(), context).isPresent(),
                 "Impossible reward must construct: " + entry.reward()));
         helper.assertTrue(FlashSaleCatalog.CANONICAL_ROWS.size() == 29, "Canonical Flash Sale row count must be 29");
-        helper.assertTrue(FlashSaleCatalog.productionRows().size() == 27,
-                "Only the unresolved Abandoned Spaceship Portal and future Trials Creation Kit rows may be nonselectable");
+        helper.assertTrue(FlashSaleCatalog.productionRows().size() == 28,
+                "Only the unresolved Abandoned Spaceship Portal row may be nonselectable");
         FlashSaleCatalog.productionRows().forEach(entry -> helper.assertTrue(entry.create(random).isPresent(),
                 "Active Flash Sale reward must construct: " + entry.id()));
         helper.assertTrue(FlashSaleCatalog.find("memory_chest").orElseThrow().productionSelectable(),

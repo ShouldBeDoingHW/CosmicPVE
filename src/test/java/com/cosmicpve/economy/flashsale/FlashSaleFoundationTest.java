@@ -56,9 +56,9 @@ class FlashSaleFoundationTest {
 
     @Test void catalogPreservesCanonicalRowsAndExplicitDeferredDependencies() {
         assertEquals(29, FlashSaleCatalog.CANONICAL_ROWS.size());
-        assertEquals(27, FlashSaleCatalog.productionRows().size());
+        assertEquals(28, FlashSaleCatalog.productionRows().size());
         assertFalse(FlashSaleCatalog.find("abandoned_spaceship_portal").orElseThrow().productionSelectable());
-        assertFalse(FlashSaleCatalog.find("trials_creation_kit").orElseThrow().productionSelectable());
+        assertTrue(FlashSaleCatalog.find("trials_creation_kit").orElseThrow().productionSelectable());
         assertEquals("memory_chest", FlashSaleCatalog.MEMORY_CHEST.id());
         assertTrue(FlashSaleCatalog.MEMORY_CHEST.productionSelectable());
         assertEquals(250_000_000L, FlashSaleCatalog.MEMORY_CHEST.lowPrice());

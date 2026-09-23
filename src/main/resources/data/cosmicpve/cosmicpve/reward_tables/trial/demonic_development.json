@@ -139,6 +139,13 @@
       "reward": {
         "type": "memory_chest"
       }
+    },
+    {
+      "weight": 7,
+      "reward": {
+        "type": "static_item",
+        "item": "cosmicpve:cosmic_swag_bag"
+      }
     }
   ]
 }
