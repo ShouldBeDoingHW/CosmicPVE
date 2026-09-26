@@ -25,6 +25,10 @@ import com.cosmicpve.trial.room.HazeAndSeekService;
 import com.cosmicpve.trial.room.WarzoneGiantsService;
 import com.cosmicpve.trial.room.CaveDivingService;
 import com.cosmicpve.trial.room.InventorService;
+import com.cosmicpve.trial.room.CinderWolfService;
+import com.cosmicpve.entity.cinderwolf.CinderWolfEntity;
+import com.cosmicpve.content.definition.reward.RewardEntry;
+import com.cosmicpve.content.definition.reward.RewardDescriptor;
 import com.cosmicpve.entity.inventor.InventorEntity;
 import com.cosmicpve.combat.CosmicCombat;
 import com.cosmicpve.combat.execution.ExecutionCause;
@@ -75,13 +79,16 @@ public final class TrialSessionService {
     public static final Identifier WARZONE_GIANTS = CosmicPVE.id("trial/warzone_giants");
     public static final Identifier CAVE_DIVING = CosmicPVE.id("trial/cave_diving");
     public static final Identifier INVENTOR = CosmicPVE.id("trial/inventor");
+    public static final Identifier CINDER_WOLF = CosmicPVE.id("trial/cinder_wolf");
     static final long HIDDEN_GRAVEYARD_WORLD_TIME = 18_000L;
     public static final Identifier APPRENTICE_REWARDS = CosmicPVE.id("trial/apprentice");
     public static final Identifier HARDCORE_REWARDS = CosmicPVE.id("trial/hardcore_development");
     public static final Identifier IMPOSSIBLE_REWARDS = CosmicPVE.id("trial/impossible");
     public static final Identifier DEMONIC_REWARDS = CosmicPVE.id("trial/demonic_development");
     static final List<Identifier> APPRENTICE_NATIVE_ROOMS = List.of(COLD_SNAP, CIRCUIT_CIRCUS, RAIDING_RAINBOW, ZERO_G);
-    static final List<Identifier> HARDCORE_NATIVE_ROOMS = List.of(HAZE_AND_SEEK, BOMB_SQUAD, FIRE_COLONY);
+    static final List<Identifier> HARDCORE_NATIVE_ROOMS = List.of(HAZE_AND_SEEK, BOMB_SQUAD, FIRE_COLONY, CINDER_WOLF);
+    public static final RewardEntry CINDERWOLF_BELT_REWARD = new RewardEntry(5, 1, 1,
+            new RewardDescriptor.StaticItem(CosmicPVE.id("cinderwolf_belt")));
     static final List<Identifier> IMPOSSIBLE_NATIVE_ROOMS = List.of(HIDDEN_GRAVEYARD, CAVE_DIVING, INVENTOR);
     static final List<Identifier> DEMONIC_NATIVE_ROOMS = List.of(WARZONE_GIANTS, DEADEYE);
     static final int APPRENTICE_REWARD_TIME = 600;
@@ -111,6 +118,7 @@ public final class TrialSessionService {
     private final WarzoneGiantsService warzone = new WarzoneGiantsService();
     private final CaveDivingService caveDiving = new CaveDivingService();
     private final InventorService inventor = new InventorService();
+    private final CinderWolfService cinderWolf = new CinderWolfService();
     private final TrialTimerDisplayService timerDisplay = new TrialTimerDisplayService();
     private final TrialCelebrationService celebrations = new TrialCelebrationService();
     private final TrialDecisionEntryService decisionEntries = new TrialDecisionEntryService();
@@ -136,6 +144,7 @@ public final class TrialSessionService {
         handlers.register(WARZONE_GIANTS,loadouts::applyWarzoneGiants);
         handlers.register(CAVE_DIVING,loadouts::applyCaveDiving);
         handlers.register(INVENTOR,loadouts::applyInventor);
+        handlers.register(CINDER_WOLF,loadouts::applyCinderWolf);
         handlers.register(HIDDEN_GRAVEYARD,loadouts::applyHiddenGraveyard);
         handlers.registerStarter(RAIDING_RAINBOW,(level,session,p) -> new TrialRoomHandlerRegistry.Start(
                 rainbow.initialize(level,session,p.bounds(),net.minecraft.util.RandomSource.create()),p.participantSpawn()));
@@ -165,6 +174,10 @@ public final class TrialSessionService {
         });
         handlers.registerStarter(FIRE_COLONY,(level,session,p) -> {
             fireColony.initialize(level,session,p.bounds());
+            return new TrialRoomHandlerRegistry.Start(TrialEncounterState.EMPTY,p.participantSpawn());
+        });
+        handlers.registerStarter(CINDER_WOLF,(level,session,p) -> {
+            cinderWolf.initialize(level, session, ROOM_ORIGIN, p.bounds());
             return new TrialRoomHandlerRegistry.Start(TrialEncounterState.EMPTY,p.participantSpawn());
         });
     }
@@ -259,6 +272,9 @@ public final class TrialSessionService {
                 }
                 if (maintenanceTick && FIRE_COLONY.equals(room)) fireColony.tick(level, session);
                 if (INVENTOR.equals(room)) inventor.tick(level, session);
+                if (CINDER_WOLF.equals(room) && cinderWolf.tick(level, session)) {
+                    completeProductionRoom(server); return;
+                }
                 TrialSession current = session;
                 if (HAZE_AND_SEEK.equals(room)) {
                     var result = haze.tick(level, session);
@@ -353,6 +369,8 @@ public final class TrialSessionService {
                 haze.activate(server.getLevel(TrialRuntime.INSTANCE_DIMENSION), active);
             if (active.currentRoom().filter(INVENTOR::equals).isPresent())
                 inventor.activate(server.getLevel(TrialRuntime.INSTANCE_DIMENSION), active);
+            if (active.currentRoom().filter(CINDER_WOLF::equals).isPresent())
+                cinderWolf.activate(server.getLevel(TrialRuntime.INSTANCE_DIMENSION), active);
         } else publishTick(server, session.withStateTicks(next));
     }
 
@@ -406,8 +424,11 @@ public final class TrialSessionService {
         try {
             Identifier rewardTable = rewardTableFor(session.progress().phase());
             /* The active run phase is authoritative even when a lower-tier native room was selected. */
-            List<ItemStack> reward = rewards.roll(rewardTable, 1,
-                    new RewardGenerationContext(server.registryAccess(), net.minecraft.util.RandomSource.create(), null));
+            var rewardContext = new RewardGenerationContext(server.registryAccess(), net.minecraft.util.RandomSource.create(), null);
+            List<ItemStack> reward = session.currentRoom().filter(CINDER_WOLF::equals).isPresent()
+                    && cinderWolf.physicallyCompleted(session.sessionId())
+                    ? rewards.rollWithExtra(rewardTable, CINDERWOLF_BELT_REWARD, 1, rewardContext)
+                    : rewards.roll(rewardTable, 1, rewardContext);
             long fameAward = fame.roll(session.progress().phase(), net.minecraft.util.RandomSource.create());
             TrialProgress nextProgress = session.progress().completeRoom(reward, fameAward).beginDecision(session.participants());
             int bonus = completionTimeBonus(session.progress(), nextProgress);
@@ -521,7 +542,15 @@ public final class TrialSessionService {
         TrialProgress progress = session.progress();
         for (UUID participant : session.participants())
             if (progress.decision(participant) == TrialDecision.UNDECIDED) progress = progress.decide(participant, TrialDecision.NO_DEAL);
-        TrialSession next = session.withProgress(progress); repository.publish(server, next); resolveIfReady(server, next);
+        TrialSession next = session.withProgress(progress); repository.publish(server, next);
+        closeDecisionMenus(server, next);
+        resolveIfReady(server, next);
+    }
+
+    static void closeDecisionMenus(MinecraftServer server, TrialSession session) {
+        forOnline(server, session, player -> {
+            if (player.containerMenu instanceof TrialDecisionMenu) player.closeContainer();
+        });
     }
 
     private void resolveIfReady(MinecraftServer server, TrialSession session) {
@@ -731,6 +760,24 @@ public final class TrialSessionService {
         if (session == null || session.state() != TrialLifecycleState.ROOM_ACTIVE
                 || session.currentRoom().filter(INVENTOR::equals).isEmpty()) return;
         completeProductionRoom(level.getServer());
+    }
+
+    public void onCinderWolfDeath(CinderWolfEntity boss) {
+        if (!(boss.level() instanceof ServerLevel level)) return;
+        TrialSession session = active(level.getServer()).orElse(null);
+        if (session != null && session.state() == TrialLifecycleState.ROOM_ACTIVE
+                && session.currentRoom().filter(CINDER_WOLF::equals).isPresent())
+            cinderWolf.bossDeath(level, session, boss);
+    }
+
+    public boolean onCinderWolfProjectileImpact(ServerLevel level, net.minecraft.world.entity.projectile.hurtingprojectile.SmallFireball ball) {
+        if (!ball.getTags().contains(CinderWolfService.PROJECTILE_TAG)) return false;
+        TrialSession session = active(level.getServer()).orElse(null);
+        if (session == null || session.state() != TrialLifecycleState.ROOM_ACTIVE
+                || session.currentRoom().filter(CINDER_WOLF::equals).isEmpty()) {
+            ball.discard(); return true;
+        }
+        return cinderWolf.projectileImpact(level, ball, session);
     }
 
     public boolean allowsWarzoneGiantDamage(Zombie zombie) {
@@ -1149,7 +1196,9 @@ public final class TrialSessionService {
         TrialPhase phase = DEMONIC_NATIVE_ROOMS.contains(room) ? TrialPhase.DEMONIC
                 : IMPOSSIBLE_NATIVE_ROOMS.contains(room) ? TrialPhase.IMPOSSIBLE
                 : HARDCORE_NATIVE_ROOMS.contains(room) ? TrialPhase.HARDCORE : TrialPhase.APPRENTICE;
-        TrialSession prepared = session.withProgress(session.progress().debugEnterPhase(phase));
+        TrialPhase activePhase = session.progress().phase();
+        TrialPhase selectedPhase = activePhase.ordinal() >= phase.ordinal() ? activePhase : phase;
+        TrialSession prepared = session.withProgress(session.progress().debugEnterPhase(selectedPhase));
         beginRoom(server, prepared, room);
         return TrialOperationResult.ok("Forced Trial room " + room + ".");
     }
@@ -1177,6 +1226,7 @@ public final class TrialSessionService {
             if (session.currentRoom().filter(WARZONE_GIANTS::equals).isPresent()) warzone.cleanup(instance, session.sessionId());
             if (session.currentRoom().filter(CAVE_DIVING::equals).isPresent()) caveDiving.cleanup(session.sessionId());
             if (session.currentRoom().filter(INVENTOR::equals).isPresent()) inventor.cleanup(instance, session.sessionId());
+            if (session.currentRoom().filter(CINDER_WOLF::equals).isPresent()) cinderWolf.cleanup(instance, session.sessionId());
             fireColony.cleanup(session.sessionId()); coldSnap.cleanup(session.sessionId());
             session.protectedBounds().forEach(bounds -> structures.cleanup(instance, bounds));
         }
@@ -1193,6 +1243,7 @@ public final class TrialSessionService {
         if (session.currentRoom().filter(WARZONE_GIANTS::equals).isPresent()) warzone.cleanup(level, session.sessionId());
         if (session.currentRoom().filter(CAVE_DIVING::equals).isPresent()) caveDiving.cleanup(session.sessionId());
         if (session.currentRoom().filter(INVENTOR::equals).isPresent()) inventor.cleanup(level, session.sessionId());
+        if (session.currentRoom().filter(CINDER_WOLF::equals).isPresent()) cinderWolf.cleanup(level, session.sessionId());
         InstanceBounds decision = InstanceBounds.from(CosmicContent.repository().requireTrialRoom(DECISION_ROOM).bounds().at(DECISION_ORIGIN));
         session.protectedBounds().stream().filter(bounds -> !bounds.equals(decision)).forEach(bounds -> structures.cleanup(level, bounds));
     }

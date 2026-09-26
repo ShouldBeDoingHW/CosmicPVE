@@ -14,6 +14,7 @@ import net.minecraft.world.entity.monster.Shulker;
 import net.minecraft.world.entity.monster.Creeper;
 import com.cosmicpve.entity.undeadcorpse.UndeadCorpseEntity;
 import com.cosmicpve.entity.inventor.InventorEntity;
+import com.cosmicpve.entity.cinderwolf.CinderWolfEntity;
 import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 import net.minecraft.world.phys.BlockHitResult;
 import net.neoforged.neoforge.event.level.BlockEvent;
@@ -40,6 +41,7 @@ public final class TrialEventBridge {
         if (event.getEntity() instanceof Zombie zombie) TrialRuntime.sessions().onWarzoneGiantDeath(zombie);
         if (event.getEntity() instanceof UndeadCorpseEntity corpse) TrialRuntime.sessions().onUndeadCorpseDeath(corpse);
         if (event.getEntity() instanceof InventorEntity inventor) TrialRuntime.sessions().onInventorDeath(inventor);
+        if (event.getEntity() instanceof CinderWolfEntity wolf) TrialRuntime.sessions().onCinderWolfDeath(wolf);
         if (event.getEntity() instanceof ServerPlayer player) TrialRuntime.sessions().onDeath(player);
     }
     public void onDrops(LivingDropsEvent event) {
@@ -53,6 +55,7 @@ public final class TrialEventBridge {
                 && com.cosmicpve.trial.room.BombSquadService.encounterCreeper(creeper)) event.getDrops().clear();
         if (event.getEntity() instanceof UndeadCorpseEntity corpse && corpse.trialSession().isPresent()) event.getDrops().clear();
         if (event.getEntity() instanceof InventorEntity) event.getDrops().clear();
+        if (event.getEntity() instanceof CinderWolfEntity) event.getDrops().clear();
     }
     public void onExperience(LivingExperienceDropEvent event) {
         if (event.getEntity() instanceof Zombie zombie
@@ -65,9 +68,15 @@ public final class TrialEventBridge {
                 && com.cosmicpve.trial.room.BombSquadService.encounterCreeper(creeper)) event.setDroppedExperience(0);
         if (event.getEntity() instanceof UndeadCorpseEntity corpse && corpse.trialSession().isPresent()) event.setDroppedExperience(0);
         if (event.getEntity() instanceof InventorEntity) event.setDroppedExperience(0);
+        if (event.getEntity() instanceof CinderWolfEntity) event.setDroppedExperience(0);
     }
     public void onBlockDrops(BlockDropsEvent event) { TrialRuntime.sessions().onCaveDivingDrops(event); }
     public void onProjectileImpact(ProjectileImpactEvent event) {
+        if (event.getProjectile() instanceof net.minecraft.world.entity.projectile.hurtingprojectile.SmallFireball ball
+                && ball.level() instanceof net.minecraft.server.level.ServerLevel level
+                && TrialRuntime.sessions().onCinderWolfProjectileImpact(level, ball)) {
+            event.setCanceled(true); return;
+        }
         if (event.getProjectile() instanceof AbstractArrow arrow && arrow.getOwner() instanceof ServerPlayer player
                 && event.getRayTraceResult() instanceof BlockHitResult hit) {
             boolean accepted = TrialRuntime.sessions().onCircuitTarget(player, hit.getBlockPos())

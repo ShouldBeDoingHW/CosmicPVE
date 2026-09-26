@@ -48,6 +48,7 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
     private final com.cosmicpve.equipment.armor.ArmorSetSuppressionService armorSetSuppression;
     private final SnareRootService snareRoots;
     private final CleaveBehavior cleave;
+    private final DeathCoffinBehavior deathCoffin;
 
     public CosmicEnchantmentBehaviorResolver(
             ChildCombatActionService childActions,
@@ -83,6 +84,8 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
         this.snareRoots = snareRoots;
         this.cleave = new CleaveBehavior(
                 com.cosmicpve.combat.ownership.GeneralAllyResolver.production(), childActions);
+        this.deathCoffin = new DeathCoffinBehavior(
+                com.cosmicpve.combat.ownership.GeneralAllyResolver.production(), childActions);
     }
 
     public CosmicEnchantmentBehaviorResolver(
@@ -112,6 +115,8 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
             addDeepBleed(event, result);
             addPermanentExecute(event, result);
             addBerserk(event, result);
+            addDeathCoffin(event, result);
+            addPyre(event, result);
         } else if (event.hook() == ProcHook.ON_PROJECTILE_HIT) {
             addLightning(event, result);
             addVenom(event, result);
@@ -122,6 +127,7 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
             addBlightedVirus(event, result);
             addEternalSnare(event, result);
             addHealing(event, result);
+            addDeathCoffin(event, result);
         } else if (event.hook() == ProcHook.ON_DAMAGE_TAKEN) {
             if (event.combatResult().map(hit -> hit.context().defensiveCosmicSuppressed()).orElse(false))
                 return List.of();
@@ -143,6 +149,34 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
             addDevour(event, result);
         }
         return List.copyOf(result);
+    }
+
+    private void addDeathCoffin(ProcEvent event, List<ProcCandidate> result) {
+        int level = Math.min(3, event.effectiveEnchantments().level(ModEnchantments.DEATH_COFFIN.identifier()));
+        if (level <= 0) return;
+        result.add(deterministicCandidate(ModEnchantments.DEATH_COFFIN.identifier(), event.hook(),
+                1.0, Optional.empty(), 0L, Optional.empty(), ChildProcEligibility.ROOT_ONLY,
+                activation -> activation.event().combatResult().ifPresent(parent ->
+                        deathCoffin.activate(parent, level).forEach(activation::markAffected)),
+                provenance(event, ModEnchantments.DEATH_COFFIN.identifier()),
+                condition(CosmicPVE.id("death_coffin_valid_low_health_parent"), procEvent ->
+                        procEvent.combatResult().filter(DeathCoffinBehavior::eligible).isPresent()
+                        && procEvent.attacker() != null && procEvent.target() != null
+                        && !com.cosmicpve.combat.ownership.GeneralAllyResolver.production()
+                                .isAlly(procEvent.attacker(), procEvent.target())
+                        && (procEvent.hook() == ProcHook.ON_PROJECTILE_HIT
+                                || procEvent.combatResult().map(hit -> hit.context().category()
+                                        != com.cosmicpve.combat.api.AttackCategory.PROJECTILE).orElse(false)))));
+    }
+
+    private void addPyre(ProcEvent event, List<ProcCandidate> result) {
+        int level = Math.min(3, event.effectiveEnchantments().level(ModEnchantments.PYRE.identifier()));
+        if (level <= 0) return;
+        result.add(candidate(ModEnchantments.PYRE.identifier(), ProcHook.ON_VALID_HIT,
+                PyreBehavior.chance(level), Optional.empty(), 0L, Optional.empty(), ChildProcEligibility.ROOT_ONLY,
+                activation -> PyreBehavior.activate(activation.event()),
+                provenance(event, ModEnchantments.PYRE.identifier()),
+                condition(CosmicPVE.id("pyre_committed_axe_parent"), PyreBehavior::eligible)));
     }
 
     private void addCleaveFamily(ProcEvent event, List<ProcCandidate> result) {

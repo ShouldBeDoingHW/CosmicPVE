@@ -26,9 +26,13 @@ class MadnessStateTest {
         for (var row : Map.of("inventory_shuffle",360,"owl_gene",400,"statues",600,"rocket_man",500).entrySet())
             assertEquals(row.getValue().intValue(),definitions.stream().filter(d -> d.handler().getPath().equals(row.getKey())).findFirst().orElseThrow().interval(0));
         var breeze=definitions.stream().filter(d -> d.handler().getPath().equals("gentle_breeze")).findFirst().orElseThrow();
-        assertEquals(0.004,breeze.parameter("acceleration",0));
+        assertEquals(0.002,breeze.parameter("acceleration",0));
+        assertEquals(0.002,MadnessRuntime.breezeAcceleration(breeze));
+        var persisted = new MadnessDefinition(breeze.id(),breeze.name(),breeze.description(),breeze.icon(),
+                breeze.handler(),Map.of("acceleration",0.004),true);
+        assertEquals(0.002,MadnessRuntime.breezeAcceleration(persisted));
         assertEquals(0.15,breeze.parameter("maximum_horizontal_speed",0));
-        var oldVelocity=MadnessRuntime.breezeVelocity(net.minecraft.world.phys.Vec3.ZERO,new net.minecraft.world.phys.Vec3(1,0,0),false,0.008,0.15);
+        var oldVelocity=MadnessRuntime.breezeVelocity(net.minecraft.world.phys.Vec3.ZERO,new net.minecraft.world.phys.Vec3(1,0,0),false,0.004,0.15);
         var newVelocity=MadnessRuntime.breezeVelocity(net.minecraft.world.phys.Vec3.ZERO,new net.minecraft.world.phys.Vec3(1,0,0),false,breeze.parameter("acceleration",0),0.15);
         assertEquals(oldVelocity.x*0.5,newVelocity.x);
     }

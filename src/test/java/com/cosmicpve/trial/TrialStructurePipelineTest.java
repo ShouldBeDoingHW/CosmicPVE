@@ -32,6 +32,7 @@ class TrialStructurePipelineTest {
         STRUCTURES.put("decision_box.nbt", "cosmicpve:trial/decision_box");
         STRUCTURES.put("development_room.nbt", "cosmicpve:trial/development_room");
         STRUCTURES.put("fire_colony.nbt", "cosmicpve:trial/fire_colony");
+        STRUCTURES.put("cinderwolf.nbt", "cosmicpve:trial/cinderwolf");
         STRUCTURES.put("haze_seek.nbt", "cosmicpve:trial/haze_seek");
         STRUCTURES.put("hidden_graveyard.nbt", "cosmicpve:trial/hidden_graveyard");
         STRUCTURES.put("the_inventor.nbt", "cosmicpve:trial/inventor");

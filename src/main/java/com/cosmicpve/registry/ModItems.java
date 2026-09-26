@@ -82,6 +82,7 @@ public final class ModItems {
     public static final DeferredItem<BeltItem> SHOCK_THERAPY_BELT = belt("shock_therapy_belt", BeltDefinition.SHOCK_THERAPY);
     public static final DeferredItem<BeltItem> BANDOLIER_BELT = belt("bandolier_belt", BeltDefinition.BANDOLIER);
     public static final DeferredItem<BeltItem> JELLY_ROLL_BELT = belt("jelly_roll_belt", BeltDefinition.JELLY_ROLL);
+    public static final DeferredItem<BeltItem> CINDERWOLF_BELT = belt("cinderwolf_belt", BeltDefinition.CINDERWOLF);
 
     public static final DeferredItem<Item> FOUNDATION_TOKEN = ITEMS.registerSimpleItem(
             "foundation_token",

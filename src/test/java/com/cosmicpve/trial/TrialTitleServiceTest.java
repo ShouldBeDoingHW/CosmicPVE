@@ -16,6 +16,12 @@ class TrialTitleServiceTest {
         assertEquals("30 seconds to choose!",TrialTitleService.decisionSubtitle(false,30).getString());
         assertEquals("1 second to choose!",TrialTitleService.decisionSubtitle(false,1).getString());
     }
+    @Test void cinderWolfDefeatTitleIsExactBoldOrange() {
+        var title = TrialTitleService.cinderWolfDownTitle();
+        assertEquals("Cinderwolf down! Find the exit portal!", title.getString());
+        assertEquals(0xFFAA00, title.getStyle().getColor().getValue());
+        assertTrue(title.getStyle().isBold());
+    }
     @Test void genericCountdownAndRoomStartSoundsArePinned() {
         assertSame(SoundEvents.NOTE_BLOCK_BASEDRUM.value(), TrialTitleService.countdownSound());
         assertSame(SoundEvents.ENDER_DRAGON_GROWL, TrialTitleService.roomStartSound());

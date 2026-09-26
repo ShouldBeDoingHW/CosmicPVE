@@ -77,6 +77,61 @@ public final class TrialRoomLoadoutService {
     private final TrialInventoryTransactionService inventories;
     public TrialRoomLoadoutService(TrialInventoryTransactionService inventories) { this.inventories = inventories; }
     public void clear(ServerPlayer player) { inventories.clearTrialInventory(player); }
+    public void applyCinderWolf(ServerPlayer player) {
+        clear(player);
+        CinderWolfLoadout loadout = cinderWolfLoadout(player.registryAccess());
+        player.setItemSlot(EquipmentSlot.HEAD, loadout.helmet());
+        player.setItemSlot(EquipmentSlot.CHEST, loadout.chestplate());
+        player.setItemSlot(EquipmentSlot.LEGS, loadout.leggings());
+        player.setItemSlot(EquipmentSlot.FEET, loadout.boots());
+        player.getInventory().setItem(0, loadout.axe());
+        for (int slot = 1; slot <= 6; slot++) player.getInventory().setItem(slot, loadout.water().copy());
+        player.getInventory().setItem(7, loadout.goldenApples());
+        player.getInventory().setItem(8, loadout.potatoes());
+        player.getInventory().setSelectedSlot(0);
+    }
+
+    public static CinderWolfLoadout cinderWolfLoadout(net.minecraft.core.RegistryAccess access) {
+        var registry = access.lookupOrThrow(Registries.ENCHANTMENT);
+        ItemStack helmet = cinderWolfArmor(Items.IRON_HELMET, registry, Map.of(
+                ModEnchantments.ENDER_SHIFT, 3, ModEnchantments.PLANETARY_DEATHBRINGER, 3), true);
+        ItemStack chest = cinderWolfArmor(Items.IRON_CHESTPLATE, registry, Map.of(
+                ModEnchantments.GODLY_OVERLOAD, 3, ModEnchantments.AEGIS, 6), true);
+        ItemStack legs = cinderWolfArmor(Items.IRON_LEGGINGS, registry, Map.of(
+                ModEnchantments.NUTRITION, 3, ModEnchantments.CACTUS, 2), false);
+        ItemStack boots = cinderWolfArmor(Items.IRON_BOOTS, registry, Map.of(ModEnchantments.GEARS, 3), false);
+        ItemStack axe = new ItemStack(Items.DIAMOND_AXE);
+        EnchantmentHelper.updateEnchantments(axe, mutable -> {
+            mutable.set(registry.getOrThrow(Enchantments.SHARPNESS), 5);
+            mutable.set(registry.getOrThrow(Enchantments.UNBREAKING), 3);
+            mutable.set(registry.getOrThrow(ModEnchantments.DEATH_COFFIN), 3);
+            mutable.set(registry.getOrThrow(ModEnchantments.HEX), 5);
+            mutable.set(registry.getOrThrow(ModEnchantments.INSANITY), 8);
+            mutable.set(registry.getOrThrow(ModEnchantments.PUMMEL), 3);
+        });
+        ItemStack water = net.minecraft.world.item.alchemy.PotionContents.createItemStack(
+                Items.SPLASH_POTION, net.minecraft.world.item.alchemy.Potions.WATER);
+        return new CinderWolfLoadout(helmet, chest, legs, boots, axe, water,
+                new ItemStack(Items.GOLDEN_APPLE, 5), new ItemStack(Items.BAKED_POTATO, 32));
+    }
+
+    private static ItemStack cinderWolfArmor(net.minecraft.world.item.Item item,
+            net.minecraft.core.Registry<net.minecraft.world.item.enchantment.Enchantment> registry,
+            Map<net.minecraft.resources.ResourceKey<net.minecraft.world.item.enchantment.Enchantment>, Integer> cosmic,
+            boolean heroic) {
+        ItemStack stack = new ItemStack(item);
+        if (heroic) HeroicApplicationService.applyState(stack, HeroicEquipmentKind.ARMOR);
+        EnchantmentHelper.updateEnchantments(stack, mutable -> {
+            mutable.set(registry.getOrThrow(Enchantments.PROTECTION), 2);
+            mutable.set(registry.getOrThrow(Enchantments.UNBREAKING), 3);
+            cosmic.forEach((key, level) -> mutable.set(registry.getOrThrow(key), level));
+        });
+        return stack;
+    }
+
+    public record CinderWolfLoadout(ItemStack helmet, ItemStack chestplate, ItemStack leggings,
+                                   ItemStack boots, ItemStack axe, ItemStack water,
+                                   ItemStack goldenApples, ItemStack potatoes) {}
     public void applyCaveDiving(ServerPlayer player) {
         clear(player);
         player.getInventory().setItem(0, new ItemStack(Items.WOODEN_SWORD));

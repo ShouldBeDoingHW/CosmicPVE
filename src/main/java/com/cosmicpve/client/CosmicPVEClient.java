@@ -66,6 +66,8 @@ public final class CosmicPVEClient {
         event.registerEntityRenderer(ModEntities.FOREST_FANATIC.get(), ForestFanaticRenderer::new);
         event.registerEntityRenderer(ModEntities.DREADMANE.get(), DreadmaneRenderer::new);
         event.registerEntityRenderer(ModEntities.COSMIC_RANGER.get(), com.cosmicpve.client.entity.CosmicRangerRenderer::new);
+        event.registerEntityRenderer(ModEntities.CINDER_WOLF.get(), context -> new com.cosmicpve.client.entity.CinderWolfRenderer(context, 2.25F));
+        event.registerEntityRenderer(ModEntities.CINDER_PUP.get(), context -> new com.cosmicpve.client.entity.CinderWolfRenderer(context, .75F));
         event.registerBlockEntityRenderer(ModBlockEntities.CONQUEST_CHEST.get(), ChestRenderer::new);
     }
 

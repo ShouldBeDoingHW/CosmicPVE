@@ -23,6 +23,10 @@ public final class ModBlocks {
     public static final DeferredBlock<com.cosmicpve.adventure.AdventureGatewayBlock> ADVENTURE_GATEWAY = BLOCKS.registerBlock(
             "adventure_gateway", com.cosmicpve.adventure.AdventureGatewayBlock::new,
             properties -> properties.noCollision().noOcclusion().strength(-1F,3600000F).noLootTable().lightLevel(s -> 11));
+    /** Uses the authored mangrove texture, with the nonflammable behavior of a Nether stem. */
+    public static final DeferredBlock<net.minecraft.world.level.block.RotatedPillarBlock> CINDERPROOF_MANGROVE_WOOD = BLOCKS.registerBlock(
+            "cinderproof_mangrove_wood", net.minecraft.world.level.block.RotatedPillarBlock::new,
+            properties -> properties.ofFullCopy(Blocks.CRIMSON_STEM).noLootTable());
     private ModBlocks() {}
     public static void register(IEventBus modBus) { BLOCKS.register(modBus); }
 }

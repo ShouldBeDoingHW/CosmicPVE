@@ -48,6 +48,7 @@ public final class ProcEngine {
             chanceMultipliers.addAll(event.chanceMultipliers());
             candidate.classifications().stream().map(event.namedChanceMultipliers()::get)
                     .filter(java.util.Objects::nonNull).forEach(chanceMultipliers::add);
+            chanceMultipliers.add(com.cosmicpve.equipment.accessory.CinderwolfProcFactor.multiplier(event, candidate));
         }
         double multiplier = ProcChance.multiplierProduct(chanceMultipliers);
         double finalChance = ProcChance.calculate(candidate.baseProbability(), chanceMultipliers);

@@ -72,7 +72,7 @@ class Step7DEnchantmentExpansionTest {
     }
 
     @Test void allFiveUseCanonicalPoolsAndMasteryBlackScrollExclusion() {
-        assertEquals(81, CosmicEnchantmentSpecs.ALL.size());
+        assertEquals(83, CosmicEnchantmentSpecs.ALL.size());
         assertTrue(CosmicEnchantmentSpecs.SELF_DESTRUCT.tier().extractableByBlackScroll());
         assertTrue(CosmicEnchantmentSpecs.VIRUS.tier().extractableByBlackScroll());
         assertTrue(CosmicEnchantmentSpecs.DEVOUR.tier().extractableByBlackScroll());

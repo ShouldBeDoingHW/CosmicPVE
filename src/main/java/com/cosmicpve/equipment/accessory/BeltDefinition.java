@@ -11,7 +11,9 @@ public enum BeltDefinition {
     BANDOLIER("bandolier", "Belt: Bandolier", 0x5C4D04,
             "Deal +12% outgoing damage every fourth hit with a sword."),
     JELLY_ROLL("jelly_roll", "Belt: Jelly Roll", 0xC999FF,
-            "Take 2% less incoming damage and Devour procs increase saturation by 20% more.");
+            "Take 2% less incoming damage and Devour procs increase saturation by 20% more."),
+    CINDERWOLF("cinderwolf", "Belt: Cinderwolf", 0x852C14,
+            "Take 15% less fire and lava damage; Divine Immolation, Molten, and Pyre gain +15% Luck factor.");
 
     private final Identifier id;
     private final String displayName;

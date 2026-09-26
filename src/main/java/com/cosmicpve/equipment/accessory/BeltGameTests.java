@@ -79,6 +79,41 @@ public final class BeltGameTests {
         wearer.getFoodData().setSaturation(0); combat.afterDevour(wearer);
         helper.assertTrue(wearer.getFoodData().getSaturationLevel() == 0, "zero saturation must remain zero");
 
+        equip(wearer, BeltDefinition.CINDERWOLF);
+        var fireContext = context(target, wearer, DamageChannel.ORDINARY,
+                new ItemStack(Items.DIAMOND_SWORD)).withDamageSource(helper.getLevel().damageSources().inFire());
+        var lavaContext = context(target, wearer, DamageChannel.ORDINARY,
+                new ItemStack(Items.DIAMOND_SWORD)).withDamageSource(helper.getLevel().damageSources().lava());
+        var fallContext = context(target, wearer, DamageChannel.ORDINARY,
+                new ItemStack(Items.DIAMOND_SWORD)).withDamageSource(helper.getLevel().damageSources().fall());
+        helper.assertTrue(combat.resolveIncoming(fireContext).size() == 1
+                && close(combat.resolveIncoming(fireContext).getFirst().multiplier(), .85)
+                && combat.resolveIncoming(lavaContext).size() == 1
+                && close(combat.resolveIncoming(lavaContext).getFirst().multiplier(), .85),
+                "Cinderwolf Belt reduces actual fire/lava ordinary damage by 15%");
+        helper.assertTrue(combat.resolveIncoming(fallContext).isEmpty()
+                && combat.resolveIncoming(context(target, wearer, DamageChannel.TRUE,
+                        new ItemStack(Items.DIAMOND_SWORD)).withDamageSource(
+                                helper.getLevel().damageSources().inFire())).isEmpty(),
+                "Cinderwolf Belt does not reduce unrelated or true damage");
+        helper.assertTrue(close(procChance(wearer, target,
+                        com.cosmicpve.registry.ModEnchantments.PYRE.identifier(),
+                        com.cosmicpve.combat.proc.ProcHook.ON_VALID_HIT, 1.0), .115)
+                && close(procChance(wearer, target,
+                        com.cosmicpve.registry.ModEnchantments.PYRE.identifier(),
+                        com.cosmicpve.combat.proc.ProcHook.ON_VALID_HIT, 1.2), .135),
+                "Cinderwolf adds 15% to Luck factor, never 15 flat chance points");
+        helper.assertTrue(close(procChance(wearer, target,
+                        com.cosmicpve.registry.ModEnchantments.DIVINE_IMMOLATION.identifier(),
+                        com.cosmicpve.combat.proc.ProcHook.ON_VALID_HIT, 1.0), .115)
+                && close(procChance(target, wearer,
+                        com.cosmicpve.registry.ModEnchantments.MOLTEN.identifier(),
+                        com.cosmicpve.combat.proc.ProcHook.ON_DAMAGE_TAKEN, 1.0), .115)
+                && close(procChance(wearer, target,
+                        com.cosmicpve.registry.ModEnchantments.HEALING.identifier(),
+                        com.cosmicpve.combat.proc.ProcHook.ON_VALID_HIT, 1.0), .10),
+                "only the three named fire enchantments receive the Belt factor");
+
         equip(wearer, BeltDefinition.SHOCK_THERAPY); wearer.setHealth(10); target.setHealth(20); secondTarget.setHealth(20);
         var lightningParent = context(wearer, target, DamageChannel.ORDINARY, new ItemStack(Items.BOW));
         var activation = activation(wearer, target, result(lightningParent));
@@ -172,4 +207,22 @@ public final class BeltGameTests {
                 Optional.of(result), owner, target, () -> 0.0);
     }
     private static boolean close(double actual, double expected) { return Math.abs(actual - expected) < 1e-6; }
+    private static double procChance(net.minecraft.world.entity.LivingEntity attacker,
+            net.minecraft.world.entity.LivingEntity target, net.minecraft.resources.Identifier id,
+            com.cosmicpve.combat.proc.ProcHook hook, double luck) {
+        var event = new com.cosmicpve.combat.proc.ProcEvent(hook, 10L, OptionalLong.empty(),
+                RecursionPolicy.NORMAL, hook == com.cosmicpve.combat.proc.ProcHook.ON_DAMAGE_TAKEN
+                        ? target.getUUID() : attacker.getUUID(), Optional.empty(), 0L,
+                List.of(luck), java.util.Map.of(com.cosmicpve.registry.ModEnchantments.LUCK.identifier(), luck),
+                List.of(1.0), Set.of(), EffectiveEnchantments.EMPTY, Optional.empty(), attacker, target, () -> .99);
+        var candidate = new com.cosmicpve.combat.proc.ProcCandidate(id, hook, .10,
+                Optional.empty(), 0L, com.cosmicpve.combat.cooldown.CooldownScope.EPHEMERAL_COMBAT,
+                Optional.empty(), List.of(), List.of(), Optional.empty(),
+                com.cosmicpve.combat.proc.ChildProcEligibility.ROOT_ONLY, Set.of(), id, ignored -> {},
+                new com.cosmicpve.combat.proc.ProcProvenance(
+                        com.cosmicpve.combat.proc.ProcSourceKind.ACTUAL_ENCHANTMENT, id));
+        return new com.cosmicpve.combat.proc.ProcEngine(new com.cosmicpve.combat.cooldown.CooldownService(),
+                new com.cosmicpve.combat.proc.ProcTraceService()).evaluate(event, List.of(candidate))
+                .evaluations().getFirst().finalChance();
+    }
 }

@@ -32,6 +32,13 @@ public final class TrialTitleService {
         if (!newPresentation(player, "room_started")) return;
         playForPlayer(player, roomStartSound());
     }
+    public static void cinderWolfDown(ServerPlayer player) {
+        send(player, cinderWolfDownTitle(), Component.empty(), 10, 80, 20);
+    }
+    static Component cinderWolfDownTitle() {
+        return Component.literal("Cinderwolf down! Find the exit portal!")
+                .withStyle(style -> style.withColor(ORANGE).withBold(true));
+    }
     public void warzoneWarning(ServerPlayer player,
             com.cosmicpve.trial.room.WarzoneGiantsService.FloorColor first,
             com.cosmicpve.trial.room.WarzoneGiantsService.FloorColor second, int seconds) {

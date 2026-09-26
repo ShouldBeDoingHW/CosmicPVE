@@ -1,0 +1,13 @@
+{
+  "handler": "cosmicpve:trial/cinder_wolf",
+  "loadout": "cosmicpve:trial/cinder_wolf",
+  "base_weight": 5,
+  "enabled": true,
+  "display_name": "Cinder Wolf",
+  "category": "hardcore",
+  "pieces": [{"structure": "cosmicpve:trial/cinderwolf"}],
+  "spawn_marker": "emerald_block",
+  "spawn_marker_position": [14, 0, 1],
+  "spawn_marker_replacement": "minecraft:nether_bricks",
+  "bounds": {"min": [0, 0, 0], "max": [32, 19, 33]}
+}

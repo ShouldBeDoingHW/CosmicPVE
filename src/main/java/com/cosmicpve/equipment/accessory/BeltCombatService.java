@@ -15,6 +15,7 @@ import net.minecraft.world.entity.player.Player;
 public final class BeltCombatService implements OutgoingDamageContributor, IncomingDamageContributor {
     public static final double BANDOLIER_BONUS = 0.12;
     public static final double JELLY_INCOMING = 0.98;
+    public static final double CINDERWOLF_FIRE_INCOMING = 0.85;
     private final AccessoryResolver accessories;
     private final BandolierStateService bandolier;
     public BeltCombatService(AccessoryResolver accessories, BandolierStateService bandolier) {
@@ -27,9 +28,15 @@ public final class BeltCombatService implements OutgoingDamageContributor, Incom
                 ? List.of(new OutgoingDamageContribution(BeltDefinition.BANDOLIER.id(), BANDOLIER_BONUS)) : List.of();
     }
     @Override public List<IncomingDamageContribution> resolveIncoming(CombatContext context) {
-        if (context.channel() != DamageChannel.ORDINARY || context.target() == null
-                || !accessories.hasBelt(context.target(), BeltDefinition.JELLY_ROLL)) return List.of();
-        return List.of(new IncomingDamageContribution(BeltDefinition.JELLY_ROLL.id(), JELLY_INCOMING));
+        if (context.channel() != DamageChannel.ORDINARY || context.target() == null) return List.of();
+        var result = new java.util.ArrayList<IncomingDamageContribution>();
+        if (accessories.hasBelt(context.target(), BeltDefinition.JELLY_ROLL))
+            result.add(new IncomingDamageContribution(BeltDefinition.JELLY_ROLL.id(), JELLY_INCOMING));
+        if (accessories.hasBelt(context.target(), BeltDefinition.CINDERWOLF)
+                && context.damageSource() != null
+                && context.damageSource().is(net.minecraft.tags.DamageTypeTags.IS_FIRE))
+            result.add(new IncomingDamageContribution(BeltDefinition.CINDERWOLF.id(), CINDERWOLF_FIRE_INCOMING));
+        return List.copyOf(result);
     }
     public void onCommitted(CombatResult result) {
         if (!(result.context().attacker() instanceof Player player)) return;

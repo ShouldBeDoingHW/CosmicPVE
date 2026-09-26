@@ -6,6 +6,7 @@ import com.cosmicpve.combat.CosmicCombat;
 import com.cosmicpve.combat.execution.ExecutionCause;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.ButtonBlock;
@@ -47,10 +48,11 @@ public final class MadnessRuntime {
                 state.room = room; state.stillness = 0; state.statueWarning = 0; state.owlWarning = 0;
                 state.breeze = roomBreeze;
             }
-            for (var definition : session.progress().madness().active()) apply(player,state,definition);
+            for (var definition : session.progress().madness().active())
+                apply(player,state,definition,session.currentRoom().orElse(null));
         }
     }
-    private void apply(ServerPlayer player, PlayerState state, MadnessDefinition definition) {
+    private void apply(ServerPlayer player, PlayerState state, MadnessDefinition definition, Identifier room) {
         String handler = definition.handler().getPath();
         int tick = state.clocks.merge(handler,1,Integer::sum);
         switch (handler) {
@@ -96,8 +98,8 @@ public final class MadnessRuntime {
                 }
             }
             case "gentle_breeze" -> {
-                if (player.isShiftKeyDown()) return;
-                double acceleration = Math.min(0.02,definition.parameter("acceleration",0.004));
+                if (!breezeApplies(room, player.isShiftKeyDown())) return;
+                double acceleration = breezeAcceleration(definition);
                 double max = Math.min(0.2,definition.parameter("maximum_horizontal_speed",0.15));
                 Vec3 velocity = player.getDeltaMovement();
                 Vec3 next = breezeVelocity(velocity,state.breeze,false,acceleration,max);
@@ -176,6 +178,15 @@ public final class MadnessRuntime {
         if (crouching) return velocity;
         double along=velocity.x*direction.x+velocity.z*direction.z;
         return along >= maximum ? velocity : velocity.add(direction.scale(Math.min(acceleration,maximum-along)));
+    }
+    public static boolean breezeApplies(Identifier room, boolean shifting) {
+        return !shifting && room != null
+                && !TrialSessionService.COLD_SNAP.equals(room)
+                && !TrialSessionService.DEADEYE.equals(room);
+    }
+    public static double breezeAcceleration(MadnessDefinition definition) {
+        // Also bounds a persisted selection carrying the previous 0.004 acceleration.
+        return Math.max(0.0, Math.min(0.002, definition.parameter("acceleration", 0.002)));
     }
     public static boolean timerReadable(TrialSession session,int serverTick) {
         return !session.progress().madness().has("time_glitch") || Math.floorDiv(serverTick,20)%15 == 0;

@@ -8,6 +8,7 @@ import com.cosmicpve.entity.inventor.InventorEntity;
 import com.cosmicpve.entity.woodlands.DreadmaneEntity;
 import com.cosmicpve.entity.woodlands.ForestFanaticEntity;
 import com.cosmicpve.entity.woodlands.CosmicRangerEntity;
+import com.cosmicpve.entity.cinderwolf.CinderWolfEntity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.neoforged.bus.api.IEventBus;
@@ -49,6 +50,13 @@ public final class ModEntities {
             ENTITIES.registerEntityType("cosmic_ranger", CosmicRangerEntity::new, MobCategory.MONSTER,
                     builder -> builder.sized(0.6F * CosmicRangerEntity.SCALE,1.99F * CosmicRangerEntity.SCALE)
                             .clientTrackingRange(10).noLootTable().notInPeaceful());
+    public static final DeferredHolder<EntityType<?>, EntityType<CinderWolfEntity>> CINDER_WOLF =
+            ENTITIES.registerEntityType("cinder_wolf", CinderWolfEntity::new, MobCategory.MONSTER,
+                    builder -> builder.sized(.6F * 2.25F, .85F * 2.25F).clientTrackingRange(10)
+                            .fireImmune().noLootTable().notInPeaceful());
+    public static final DeferredHolder<EntityType<?>, EntityType<CinderWolfEntity>> CINDER_PUP =
+            ENTITIES.registerEntityType("cinder_pup", CinderWolfEntity::new, MobCategory.MONSTER,
+                    builder -> builder.sized(.6F, .85F).clientTrackingRange(10).fireImmune().noLootTable().notInPeaceful());
 
     private ModEntities() {}
 
@@ -65,5 +73,7 @@ public final class ModEntities {
         event.put(FOREST_FANATIC.get(), ForestFanaticEntity.createAttributes().build());
         event.put(DREADMANE.get(), DreadmaneEntity.createAttributes().build());
         event.put(COSMIC_RANGER.get(), CosmicRangerEntity.createAttributes().build());
+        event.put(CINDER_WOLF.get(), CinderWolfEntity.createAttributes().build());
+        event.put(CINDER_PUP.get(), CinderWolfEntity.createAttributes().build());
     }
 }

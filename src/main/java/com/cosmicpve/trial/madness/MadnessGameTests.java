@@ -160,11 +160,13 @@ public final class MadnessGameTests {
     private static void verifySoundScheduler(GameTestHelper helper,net.minecraft.server.level.ServerPlayer player,net.minecraft.server.level.ServerPlayer spectator,List<MadnessDefinition> definitions) throws Exception {
         var stateClass=Class.forName("com.cosmicpve.trial.madness.MadnessRuntime$PlayerState");
         var constructor=stateClass.getDeclaredConstructor(); constructor.setAccessible(true);
-        var apply=MadnessRuntime.class.getDeclaredMethod("apply",net.minecraft.server.level.ServerPlayer.class,stateClass,MadnessDefinition.class); apply.setAccessible(true);
+        var apply=MadnessRuntime.class.getDeclaredMethod("apply",net.minecraft.server.level.ServerPlayer.class,
+                stateClass,MadnessDefinition.class,net.minecraft.resources.Identifier.class); apply.setAccessible(true);
         for(String handler:List.of("owl_gene","statues","rocket_man")) {
             var d=definitions.stream().filter(row -> row.handler().getPath().equals(handler)).findFirst().orElseThrow();
             var state=constructor.newInstance(); packets(player); packets(spectator);
-            for(int tick=0;tick<d.interval(0)+(handler.equals("rocket_man")?0:60);tick++) apply.invoke(MadnessRuntime.INSTANCE,player,state,d);
+            for(int tick=0;tick<d.interval(0)+(handler.equals("rocket_man")?0:60);tick++)
+                apply.invoke(MadnessRuntime.INSTANCE,player,state,d,com.cosmicpve.trial.TrialSessionService.CINDER_WOLF);
             var sounds=packets(player).stream().filter(net.minecraft.network.protocol.game.ClientboundSoundPacket.class::isInstance)
                     .map(net.minecraft.network.protocol.game.ClientboundSoundPacket.class::cast).toList();
             if(handler.equals("rocket_man")) helper.assertTrue(sounds.size()==1 && sounds.getFirst().getSound().value()==net.minecraft.sounds.SoundEvents.FIREWORK_ROCKET_BLAST,"one Firework Blast per Rocket activation");

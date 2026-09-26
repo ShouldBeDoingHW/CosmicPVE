@@ -31,7 +31,8 @@ public final class BeltClientPresentation {
     private BeltClientPresentation() {}
     public static void registerState(RegisterRenderStateModifiersEvent event) {
         event.registerEntityModifier(new TypeToken<AvatarRenderer<?>>() {}, (LivingEntity avatar, AvatarRenderState state) ->
-                ACCESSORIES.equippedBelt(avatar).filter(value -> value != BeltDefinition.JELLY_ROLL).ifPresent(definition -> {
+                ACCESSORIES.equippedBelt(avatar).filter(value -> value != BeltDefinition.JELLY_ROLL
+                        && value != BeltDefinition.CINDERWOLF).ifPresent(definition -> {
                     var itemState = new ItemStackRenderState();
                     Minecraft.getInstance().getItemModelResolver().updateForLiving(
                             itemState, BeltItemFactory.create(definition), ItemDisplayContext.FIXED, avatar);

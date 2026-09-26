@@ -136,7 +136,7 @@ class CosmicEnchantmentRegistrationTest {
                 }
             }
         }
-        assertEquals(81, CosmicEnchantmentSpecs.ALL.size());
+        assertEquals(83, CosmicEnchantmentSpecs.ALL.size());
         assertEquals(CosmicEnchantmentTier.ELITE, CosmicEnchantmentSpecs.EXECUTE.tier());
         assertEquals(CosmicEnchantmentTier.ULTIMATE, CosmicEnchantmentSpecs.ANGELIC.tier());
         assertEquals(CosmicEnchantmentTier.SIMPLE, CosmicEnchantmentSpecs.LIGHTNING.tier());

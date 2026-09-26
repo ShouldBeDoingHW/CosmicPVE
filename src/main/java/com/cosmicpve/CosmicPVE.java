@@ -79,6 +79,8 @@ public final class CosmicPVE {
         com.cosmicpve.trial.madness.MadnessGameTests.register(modBus);
         TelekinesisGameTests.register(modBus);
         com.cosmicpve.trial.room.InventorGameTests.register(modBus);
+        com.cosmicpve.trial.room.CinderWolfGameTests.register(modBus);
+        com.cosmicpve.trial.TrialDecisionTimeoutGameTests.register(modBus);
         ModItems.register(modBus);
         com.cosmicpve.adventure.WoodlandTemplateFeature.register(modBus);
         com.cosmicpve.adventure.AdventureGameTests.register(modBus);

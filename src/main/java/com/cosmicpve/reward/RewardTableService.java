@@ -18,8 +18,22 @@ public final class RewardTableService {
     }
 
     public List<ItemStack> roll(Identifier tableId, int rolls, RewardGenerationContext context) {
+        return roll(repository.requireRewardTable(tableId), rolls, context);
+    }
+
+    /** Ephemeral per-completion rows never mutate the shared data-driven reward catalog. */
+    public List<ItemStack> rollWithExtra(Identifier tableId, RewardEntry extra, int rolls, RewardGenerationContext context) {
+        return roll(withExtra(repository.requireRewardTable(tableId), extra), rolls, context);
+    }
+
+    public static RewardTable withExtra(RewardTable base, RewardEntry extra) {
+        var rows = new ArrayList<>(base.entries());
+        rows.add(extra);
+        return new RewardTable(base.id(), rows, base.totalWeight() + extra.weight());
+    }
+
+    private List<ItemStack> roll(RewardTable table, int rolls, RewardGenerationContext context) {
         if (rolls < 1) throw new IllegalArgumentException("rolls must be positive");
-        RewardTable table = repository.requireRewardTable(tableId);
         var results = new ArrayList<ItemStack>();
         for (int roll = 0; roll < rolls; roll++) {
             var bundle = new ArrayList<ItemStack>();

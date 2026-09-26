@@ -13,6 +13,7 @@ public final class BeltItemFactory {
             case SHOCK_THERAPY -> ModItems.SHOCK_THERAPY_BELT.get();
             case BANDOLIER -> ModItems.BANDOLIER_BELT.get();
             case JELLY_ROLL -> ModItems.JELLY_ROLL_BELT.get();
+            case CINDERWOLF -> ModItems.CINDERWOLF_BELT.get();
         };
         var stack = new ItemStack(item);
         stack.set(ModDataComponents.ACCESSORY_ITEM.get(), new AccessoryItemData(
