@@ -49,6 +49,7 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
     private final SnareRootService snareRoots;
     private final CleaveBehavior cleave;
     private final DeathCoffinBehavior deathCoffin;
+    private final PacifyBehavior pacify;
 
     public CosmicEnchantmentBehaviorResolver(
             ChildCombatActionService childActions,
@@ -86,6 +87,7 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
                 com.cosmicpve.combat.ownership.GeneralAllyResolver.production(), childActions);
         this.deathCoffin = new DeathCoffinBehavior(
                 com.cosmicpve.combat.ownership.GeneralAllyResolver.production(), childActions);
+        this.pacify = new PacifyBehavior(stacks);
     }
 
     public CosmicEnchantmentBehaviorResolver(
@@ -127,6 +129,7 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
             addBlightedVirus(event, result);
             addEternalSnare(event, result);
             addHealing(event, result);
+            addPacify(event, result);
             addDeathCoffin(event, result);
         } else if (event.hook() == ProcHook.ON_DAMAGE_TAKEN) {
             if (event.combatResult().map(hit -> hit.context().defensiveCosmicSuppressed()).orElse(false))
@@ -626,6 +629,17 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
                 activation -> HealingBehavior.activate(activation.event(), level),
                 provenance(event, ModEnchantments.HEALING.identifier()),
                 condition(CosmicPVE.id("healing_committed_crossbow_hit"), HealingBehavior::eligible)));
+    }
+
+    private void addPacify(ProcEvent event, List<ProcCandidate> result) {
+        int level = Math.min(4, event.effectiveEnchantments().level(ModEnchantments.PACIFY.identifier()));
+        if (level <= 0) return;
+        result.add(candidate(ModEnchantments.PACIFY.identifier(), ProcHook.ON_PROJECTILE_HIT,
+                PacifyBehavior.chance(level), Optional.empty(), 0L, Optional.empty(),
+                ChildProcEligibility.ROOT_ONLY,
+                activation -> pacify.activate(activation.event(), level),
+                provenance(event, ModEnchantments.PACIFY.identifier()),
+                condition(CosmicPVE.id("pacify_committed_bow_hit"), PacifyBehavior::eligible)));
     }
 
     private void addAngelic(ProcEvent event, List<ProcCandidate> result) {

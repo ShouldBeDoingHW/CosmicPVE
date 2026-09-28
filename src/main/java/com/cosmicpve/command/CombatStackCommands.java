@@ -151,6 +151,7 @@ final class CombatStackCommands {
                 .map(stack -> "{remaining=" + Math.max(0L, stack.expirationTick() - tick) + "t"
                         + ",source=" + stack.originalSourceEntityId().map(Object::toString).orElse("none")
                         + ",credited=" + stack.creditedPlayerId().map(Object::toString).orElse("none")
+                        + (stack.potency() > 0 ? ",potency=" + stack.potency() : "")
                         + ",applied=" + stack.applicationTick() + "}")
                 .collect(java.util.stream.Collectors.joining(",", "[", "]"));
         String effect = active.definitionId().equals(BleedBehavior.STACK_ID)

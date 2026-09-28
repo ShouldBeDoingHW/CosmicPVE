@@ -78,6 +78,8 @@ public final class ModEnchantments {
     public static final ResourceKey<Enchantment> HEALING = createKey("healing");
     public static final ResourceKey<Enchantment> DEATH_COFFIN = createKey("death_coffin");
     public static final ResourceKey<Enchantment> PYRE = createKey("pyre");
+    public static final ResourceKey<Enchantment> ANTI_GANK = createKey("anti_gank");
+    public static final ResourceKey<Enchantment> PACIFY = createKey("pacify");
     public static final ResourceKey<Enchantment> DEEP_BLEED = createKey("deep_bleed");
     public static final ResourceKey<Enchantment> MIGHTY_CACTUS = createKey("mighty_cactus");
     public static final ResourceKey<Enchantment> PALADIN_ARMORED = createKey("paladin_armored");

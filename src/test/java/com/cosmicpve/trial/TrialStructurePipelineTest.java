@@ -35,6 +35,7 @@ class TrialStructurePipelineTest {
         STRUCTURES.put("cinderwolf.nbt", "cosmicpve:trial/cinderwolf");
         STRUCTURES.put("haze_seek.nbt", "cosmicpve:trial/haze_seek");
         STRUCTURES.put("hidden_graveyard.nbt", "cosmicpve:trial/hidden_graveyard");
+        STRUCTURES.put("pitch_perfect.nbt", "cosmicpve:trial/pitch_perfect");
         STRUCTURES.put("the_inventor.nbt", "cosmicpve:trial/inventor");
         STRUCTURES.put("raiding_rainbow.nbt", "cosmicpve:trial/raiding_rainbow");
         STRUCTURES.put("warzone_giants_east.nbt", "cosmicpve:trial/warzone_giants");

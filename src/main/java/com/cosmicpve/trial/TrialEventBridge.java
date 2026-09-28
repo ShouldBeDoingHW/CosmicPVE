@@ -33,7 +33,8 @@ public final class TrialEventBridge {
         if (event.getEntity() instanceof ServerPlayer player) TrialRuntime.sessions().onDisconnect(player);
     }
     public void onRespawn(PlayerEvent.PlayerRespawnEvent event) {
-        if (event.getEntity() instanceof ServerPlayer player) TrialRuntime.sessions().onRespawn(player);
+        if (event.getEntity() instanceof ServerPlayer player)
+            TrialRuntime.sessions().onRespawn(player, !event.isEndConquered());
     }
     public void onDeath(LivingDeathEvent event) {
         if (event.isCanceled()) return;
@@ -96,6 +97,8 @@ public final class TrialEventBridge {
             TrialRuntime.sessions().onDeadeyeLever(player, event.getPos());
             if (event.getHand() == net.minecraft.world.InteractionHand.MAIN_HAND)
                 TrialRuntime.sessions().onInventorControl(player, event.getPos());
+            if (event.getHand() == net.minecraft.world.InteractionHand.MAIN_HAND)
+                TrialRuntime.sessions().onPitchPerfectButton(player, event.getPos());
         }
     }
     public void onNeighborNotify(BlockEvent.NeighborNotifyEvent event) {
@@ -103,6 +106,7 @@ public final class TrialEventBridge {
             TrialRuntime.sessions().onColdSnapPlate(level, event.getPos(), event.getState());
             TrialRuntime.sessions().onBombSquadPlate(level, event.getPos(), event.getState());
             TrialRuntime.sessions().onInventorPlate(level, event.getPos(), event.getState());
+            TrialRuntime.sessions().onPitchPerfectPlate(level, event.getPos(), event.getState());
         }
     }
     public void onEntityJoin(EntityJoinLevelEvent event) {

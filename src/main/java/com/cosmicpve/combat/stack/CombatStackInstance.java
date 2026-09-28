@@ -22,7 +22,17 @@ public record CombatStackInstance(
         CombatStackScope scope,
         Optional<Identifier> scopeId,
         Optional<UUID> lastTransferredBy,
-        Optional<Long> lastTransferTick) {
+        Optional<Long> lastTransferTick,
+        int potency) {
+    public CombatStackInstance(UUID instanceId, Identifier definitionId, long definitionRevision,
+            Optional<UUID> originalSourceEntityId, Optional<UUID> creditedPlayerId,
+            long applicationTick, long lastRefreshTick, long expirationTick,
+            CombatStackScope scope, Optional<Identifier> scopeId,
+            Optional<UUID> lastTransferredBy, Optional<Long> lastTransferTick) {
+        this(instanceId, definitionId, definitionRevision, originalSourceEntityId, creditedPlayerId,
+                applicationTick, lastRefreshTick, expirationTick, scope, scopeId,
+                lastTransferredBy, lastTransferTick, 0);
+    }
     public static final Comparator<CombatStackInstance> EXPIRATION_ORDER = Comparator
             .comparingLong(CombatStackInstance::expirationTick)
             .thenComparingLong(CombatStackInstance::applicationTick)
@@ -40,7 +50,8 @@ public record CombatStackInstance(
             CombatStackScope.CODEC.fieldOf("scope").forGetter(CombatStackInstance::scope),
             Identifier.CODEC.optionalFieldOf("scope_id").forGetter(CombatStackInstance::scopeId),
             UUIDUtil.CODEC.optionalFieldOf("last_transferred_by").forGetter(CombatStackInstance::lastTransferredBy),
-            Codec.LONG.optionalFieldOf("last_transfer_tick").forGetter(CombatStackInstance::lastTransferTick)
+            Codec.LONG.optionalFieldOf("last_transfer_tick").forGetter(CombatStackInstance::lastTransferTick),
+            Codec.INT.optionalFieldOf("potency", 0).forGetter(CombatStackInstance::potency)
     ).apply(instance, CombatStackInstance::new));
 
     public CombatStackInstance {
@@ -56,6 +67,7 @@ public record CombatStackInstance(
         scopeId = scopeId == null ? Optional.empty() : scopeId;
         lastTransferredBy = lastTransferredBy == null ? Optional.empty() : lastTransferredBy;
         lastTransferTick = lastTransferTick == null ? Optional.empty() : lastTransferTick;
+        if (potency < 0) throw new IllegalArgumentException("Stack potency cannot be negative");
         if (scope == CombatStackScope.INSTANCE_SESSION && scopeId.isEmpty()) {
             throw new IllegalArgumentException("Instance stack state requires a scope ID");
         }
@@ -64,15 +76,19 @@ public record CombatStackInstance(
         }
     }
 
-    CombatStackInstance refreshed(long revision, long tick, long newExpirationTick) {
+    CombatStackInstance refreshed(long revision, long tick, long newExpirationTick, StackApplication application) {
         return new CombatStackInstance(
-                instanceId, definitionId, revision, originalSourceEntityId, creditedPlayerId,
-                applicationTick, tick, newExpirationTick, scope, scopeId, lastTransferredBy, lastTransferTick);
+                instanceId, definitionId, revision,
+                application.potency() > 0 ? application.sourceEntityId() : originalSourceEntityId,
+                application.potency() > 0 ? application.creditedPlayerId() : creditedPlayerId,
+                application.potency() > 0 ? tick : applicationTick,
+                tick, newExpirationTick, scope, scopeId, lastTransferredBy, lastTransferTick,
+                application.potency() > 0 ? application.potency() : potency);
     }
 
     CombatStackInstance transferred(Optional<UUID> actorId, long tick, long preservedExpirationTick) {
         return new CombatStackInstance(
                 instanceId, definitionId, definitionRevision, originalSourceEntityId, creditedPlayerId,
-                applicationTick, lastRefreshTick, preservedExpirationTick, scope, scopeId, actorId, Optional.of(tick));
+                applicationTick, lastRefreshTick, preservedExpirationTick, scope, scopeId, actorId, Optional.of(tick), potency);
     }
 }

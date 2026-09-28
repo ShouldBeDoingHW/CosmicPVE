@@ -101,7 +101,7 @@ public final class TrialCommands {
                                                 ctx.getSource().getServer(), com.mojang.brigadier.arguments.LongArgumentType.getLong(ctx, "amount")))))))
                         .then(Commands.literal("force-room").then(Commands.argument("room", StringArgumentType.word())
                                 .suggests((ctx, builder) -> net.minecraft.commands.SharedSuggestionProvider.suggest(
-                                        new String[]{"raiding_rainbow","circuit_circus","cold_snap","zero_g","fire_colony","bomb_squad","haze_seek","cinder_wolf","hidden_graveyard","cave_diving","inventor","deadeye","warzone_giants"}, builder))
+                                        new String[]{"raiding_rainbow","circuit_circus","cold_snap","zero_g","pitch_perfect","fire_colony","bomb_squad","haze_seek","cinder_wolf","hidden_graveyard","cave_diving","inventor","deadeye","warzone_giants"}, builder))
                                 .executes(ctx -> forceRoom(ctx.getSource(), StringArgumentType.getString(ctx, "room")))))
                         .then(Commands.literal("timer")
                                 .then(Commands.literal("set").then(Commands.argument("seconds", IntegerArgumentType.integer(0))

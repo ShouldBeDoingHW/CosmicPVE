@@ -26,6 +26,7 @@ import com.cosmicpve.trial.room.WarzoneGiantsService;
 import com.cosmicpve.trial.room.CaveDivingService;
 import com.cosmicpve.trial.room.InventorService;
 import com.cosmicpve.trial.room.CinderWolfService;
+import com.cosmicpve.trial.room.PitchPerfectService;
 import com.cosmicpve.entity.cinderwolf.CinderWolfEntity;
 import com.cosmicpve.content.definition.reward.RewardEntry;
 import com.cosmicpve.content.definition.reward.RewardDescriptor;
@@ -80,12 +81,13 @@ public final class TrialSessionService {
     public static final Identifier CAVE_DIVING = CosmicPVE.id("trial/cave_diving");
     public static final Identifier INVENTOR = CosmicPVE.id("trial/inventor");
     public static final Identifier CINDER_WOLF = CosmicPVE.id("trial/cinder_wolf");
+    public static final Identifier PITCH_PERFECT = CosmicPVE.id("trial/pitch_perfect");
     static final long HIDDEN_GRAVEYARD_WORLD_TIME = 18_000L;
     public static final Identifier APPRENTICE_REWARDS = CosmicPVE.id("trial/apprentice");
     public static final Identifier HARDCORE_REWARDS = CosmicPVE.id("trial/hardcore_development");
     public static final Identifier IMPOSSIBLE_REWARDS = CosmicPVE.id("trial/impossible");
     public static final Identifier DEMONIC_REWARDS = CosmicPVE.id("trial/demonic_development");
-    static final List<Identifier> APPRENTICE_NATIVE_ROOMS = List.of(COLD_SNAP, CIRCUIT_CIRCUS, RAIDING_RAINBOW, ZERO_G);
+    static final List<Identifier> APPRENTICE_NATIVE_ROOMS = List.of(COLD_SNAP, CIRCUIT_CIRCUS, RAIDING_RAINBOW, ZERO_G, PITCH_PERFECT);
     static final List<Identifier> HARDCORE_NATIVE_ROOMS = List.of(HAZE_AND_SEEK, BOMB_SQUAD, FIRE_COLONY, CINDER_WOLF);
     public static final RewardEntry CINDERWOLF_BELT_REWARD = new RewardEntry(5, 1, 1,
             new RewardDescriptor.StaticItem(CosmicPVE.id("cinderwolf_belt")));
@@ -119,6 +121,7 @@ public final class TrialSessionService {
     private final CaveDivingService caveDiving = new CaveDivingService();
     private final InventorService inventor = new InventorService();
     private final CinderWolfService cinderWolf = new CinderWolfService();
+    private final PitchPerfectService pitchPerfect = new PitchPerfectService();
     private final TrialTimerDisplayService timerDisplay = new TrialTimerDisplayService();
     private final TrialCelebrationService celebrations = new TrialCelebrationService();
     private final TrialDecisionEntryService decisionEntries = new TrialDecisionEntryService();
@@ -145,6 +148,7 @@ public final class TrialSessionService {
         handlers.register(CAVE_DIVING,loadouts::applyCaveDiving);
         handlers.register(INVENTOR,loadouts::applyInventor);
         handlers.register(CINDER_WOLF,loadouts::applyCinderWolf);
+        handlers.register(PITCH_PERFECT,loadouts::clear);
         handlers.register(HIDDEN_GRAVEYARD,loadouts::applyHiddenGraveyard);
         handlers.registerStarter(RAIDING_RAINBOW,(level,session,p) -> new TrialRoomHandlerRegistry.Start(
                 rainbow.initialize(level,session,p.bounds(),net.minecraft.util.RandomSource.create()),p.participantSpawn()));
@@ -178,6 +182,10 @@ public final class TrialSessionService {
         });
         handlers.registerStarter(CINDER_WOLF,(level,session,p) -> {
             cinderWolf.initialize(level, session, ROOM_ORIGIN, p.bounds());
+            return new TrialRoomHandlerRegistry.Start(TrialEncounterState.EMPTY,p.participantSpawn());
+        });
+        handlers.registerStarter(PITCH_PERFECT,(level,session,p) -> {
+            pitchPerfect.initialize(level, session, ROOM_ORIGIN, p.bounds());
             return new TrialRoomHandlerRegistry.Start(TrialEncounterState.EMPTY,p.participantSpawn());
         });
     }
@@ -243,6 +251,13 @@ public final class TrialSessionService {
     public void tick(MinecraftServer server) {
         celebrations.tick(server);
         TrialSession session = active(server).orElse(null);
+        if (session != null) {
+            for (UUID id : session.participants()) {
+                ServerPlayer player = server.getPlayerList().getPlayer(id);
+                if (player != null && (player.isDeadOrDying() || !player.isAlive())) onDeath(player);
+            }
+            session = active(server).orElse(null);
+        }
         com.cosmicpve.trial.madness.MadnessRuntime.INSTANCE.tick(server,session);
         session = active(server).orElse(null); if (session == null) return;
         long started = System.nanoTime();
@@ -273,6 +288,9 @@ public final class TrialSessionService {
                 if (maintenanceTick && FIRE_COLONY.equals(room)) fireColony.tick(level, session);
                 if (INVENTOR.equals(room)) inventor.tick(level, session);
                 if (CINDER_WOLF.equals(room) && cinderWolf.tick(level, session)) {
+                    completeProductionRoom(server); return;
+                }
+                if (PITCH_PERFECT.equals(room) && pitchPerfect.tick(level, session, ROOM_ORIGIN)) {
                     completeProductionRoom(server); return;
                 }
                 TrialSession current = session;
@@ -988,6 +1006,21 @@ public final class TrialSessionService {
         if (result.accepted()) repository.publish(level.getServer(), session.withProgress(session.progress().withEncounter(result.state())));
     }
 
+    public void onPitchPerfectPlate(ServerLevel level, BlockPos pos, BlockState state) {
+        TrialSession session = active(level.getServer()).orElse(null);
+        if (session != null && session.state() == TrialLifecycleState.ROOM_ACTIVE
+                && session.currentRoom().filter(PITCH_PERFECT::equals).isPresent())
+            pitchPerfect.replayTargetPlate(level, session, ROOM_ORIGIN, pos, state);
+    }
+
+    public void onPitchPerfectButton(ServerPlayer player, BlockPos pos) {
+        TrialSession session = active(player.level().getServer()).orElse(null);
+        if (session != null && session.state() == TrialLifecycleState.ROOM_ACTIVE
+                && session.currentRoom().filter(PITCH_PERFECT::equals).isPresent()
+                && player.level() instanceof ServerLevel level)
+            pitchPerfect.replayButton(level, session, ROOM_ORIGIN, player, pos);
+    }
+
     public void onBombSquadPlate(ServerLevel level, BlockPos pos, BlockState state) {
         if (!state.hasProperty(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWER)
                 || state.getValue(net.minecraft.world.level.block.state.properties.BlockStateProperties.POWER) <= 0) return;
@@ -1160,7 +1193,13 @@ public final class TrialSessionService {
             if (next.participants().isEmpty()) cleanupAndClose(player.level().getServer(), next); else repository.publish(player.level().getServer(), next);
         });
     }
-    public void onRespawn(ServerPlayer player) { if (inventories.pending(player).isPresent()) inventories.recover(player, delivery); }
+    public void onRespawn(ServerPlayer player, boolean afterDeath) {
+        // A respawn can follow a death event that another listener consumed; reconcile before restoring gear.
+        if (afterDeath) onDeath(player);
+        if (active(player.level().getServer()).filter(session -> session.activeParticipant(player.getUUID())).isEmpty())
+            timerDisplay.hide(player);
+        if (inventories.pending(player).isPresent()) inventories.recover(player, delivery);
+    }
     public boolean emergencyRestore(ServerPlayer player) { return inventories.recover(player, delivery); }
     boolean prepareInsurance(ServerPlayer player, TrialSession session, net.minecraft.util.RandomSource random) {
         int level = session.progress().portalModifiers().insuranceLevel();
@@ -1227,6 +1266,7 @@ public final class TrialSessionService {
             if (session.currentRoom().filter(CAVE_DIVING::equals).isPresent()) caveDiving.cleanup(session.sessionId());
             if (session.currentRoom().filter(INVENTOR::equals).isPresent()) inventor.cleanup(instance, session.sessionId());
             if (session.currentRoom().filter(CINDER_WOLF::equals).isPresent()) cinderWolf.cleanup(instance, session.sessionId());
+            if (session.currentRoom().filter(PITCH_PERFECT::equals).isPresent()) pitchPerfect.cleanup(session.sessionId());
             fireColony.cleanup(session.sessionId()); coldSnap.cleanup(session.sessionId());
             session.protectedBounds().forEach(bounds -> structures.cleanup(instance, bounds));
         }
@@ -1244,6 +1284,7 @@ public final class TrialSessionService {
         if (session.currentRoom().filter(CAVE_DIVING::equals).isPresent()) caveDiving.cleanup(session.sessionId());
         if (session.currentRoom().filter(INVENTOR::equals).isPresent()) inventor.cleanup(level, session.sessionId());
         if (session.currentRoom().filter(CINDER_WOLF::equals).isPresent()) cinderWolf.cleanup(level, session.sessionId());
+        if (session.currentRoom().filter(PITCH_PERFECT::equals).isPresent()) pitchPerfect.cleanup(session.sessionId());
         InstanceBounds decision = InstanceBounds.from(CosmicContent.repository().requireTrialRoom(DECISION_ROOM).bounds().at(DECISION_ORIGIN));
         session.protectedBounds().stream().filter(bounds -> !bounds.equals(decision)).forEach(bounds -> structures.cleanup(level, bounds));
     }

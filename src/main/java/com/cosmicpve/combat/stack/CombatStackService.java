@@ -80,7 +80,7 @@ public final class CombatStackService {
                     long expiry = expiration(currentTick, durationTicks);
                     var existing = new ArrayList<>(container.existingInstances(definitionId));
                     if (!existing.isEmpty()) {
-                        existing.replaceAll(stack -> stack.refreshed(value.revision(), currentTick, expiry));
+                        existing.replaceAll(stack -> stack.refreshed(value.revision(), currentTick, expiry, application));
                         container.replaceInternal(definitionId, existing);
                         refreshed += existing.size();
                     }
@@ -98,7 +98,7 @@ public final class CombatStackService {
                         var existing = new ArrayList<>(container.existingInstances(definitionId));
                         var selected = existing.stream().min(INSTANCE_ORDER).orElseThrow();
                         existing.set(existing.indexOf(selected), selected.refreshed(
-                                value.revision(), currentTick, expiration(currentTick, durationTicks)));
+                                value.revision(), currentTick, expiration(currentTick, durationTicks), application));
                         container.replaceInternal(definitionId, existing);
                         refreshed++;
                     }
@@ -463,7 +463,7 @@ public final class CombatStackService {
         return new CombatStackInstance(
                 UUID.randomUUID(), resolved.definition().id(), resolved.revision(), application.sourceEntityId(),
                 application.creditedPlayerId(), currentTick, currentTick, expirationTick,
-                scope, scopeId, Optional.empty(), Optional.empty());
+                scope, scopeId, Optional.empty(), Optional.empty(), application.potency());
     }
 
     private static long expiration(long currentTick, int durationTicks) {

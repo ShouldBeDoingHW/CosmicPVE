@@ -29,7 +29,7 @@ class TrialRoomSelectionServiceTest {
     @Test void hardcorePoolUsesTheSharedWeightingServiceAndContainsOnlyProductionRooms() {
         var pool=TrialSessionService.roomPool(TrialPhase.HARDCORE);
         assertEquals(List.of(TrialSessionService.COLD_SNAP, TrialSessionService.CIRCUIT_CIRCUS,
-                TrialSessionService.RAIDING_RAINBOW, TrialSessionService.ZERO_G,
+                TrialSessionService.RAIDING_RAINBOW, TrialSessionService.ZERO_G, TrialSessionService.PITCH_PERFECT,
                 TrialSessionService.HAZE_AND_SEEK, TrialSessionService.BOMB_SQUAD,
                 TrialSessionService.FIRE_COLONY, TrialSessionService.CINDER_WOLF),pool);
         var service=new TrialRoomSelectionService(); var current=session(TrialProgress.EMPTY.debugEnterPhase(TrialPhase.HARDCORE));
@@ -43,7 +43,7 @@ class TrialRoomSelectionServiceTest {
     @Test void apprenticePoolContainsZeroGAndColdSnapUsesNormalWeighting() {
         var pool=TrialSessionService.roomPool(TrialPhase.APPRENTICE);
         assertEquals(List.of(TrialSessionService.COLD_SNAP, TrialSessionService.CIRCUIT_CIRCUS,
-                TrialSessionService.RAIDING_RAINBOW, TrialSessionService.ZERO_G),pool);
+                TrialSessionService.RAIDING_RAINBOW, TrialSessionService.ZERO_G, TrialSessionService.PITCH_PERFECT),pool);
         var service=new TrialRoomSelectionService(); var current=session(TrialProgress.EMPTY);
         assertEquals(5,service.weight(current,TrialSessionService.COLD_SNAP));
         var afterCold=session(current.progress().beginRoom(TrialSessionService.COLD_SNAP,TrialEncounterState.EMPTY));
@@ -52,7 +52,7 @@ class TrialRoomSelectionServiceTest {
     }
     @Test void demonicPoolAddsAllProductionDemonicRoomsWithoutDiscardingEarlierEligibleRooms() {
         var pool=TrialSessionService.roomPool(TrialPhase.DEMONIC);
-        assertEquals(13,pool.size());
+        assertEquals(14,pool.size());
         assertTrue(pool.containsAll(TrialSessionService.roomPool(TrialPhase.APPRENTICE)));
         assertTrue(pool.containsAll(TrialSessionService.roomPool(TrialPhase.HARDCORE)));
         assertTrue(pool.contains(TrialSessionService.HIDDEN_GRAVEYARD));
@@ -71,7 +71,7 @@ class TrialRoomSelectionServiceTest {
 
     @Test void impossiblePoolAddsAllProductionImpossibleRoomsAndLowerTiers() {
         var pool = TrialSessionService.roomPool(TrialPhase.IMPOSSIBLE);
-        assertEquals(11, pool.size());
+        assertEquals(12, pool.size());
         assertTrue(pool.containsAll(TrialSessionService.roomPool(TrialPhase.HARDCORE)));
         assertTrue(pool.contains(TrialSessionService.HIDDEN_GRAVEYARD));
         assertTrue(pool.contains(TrialSessionService.CAVE_DIVING));

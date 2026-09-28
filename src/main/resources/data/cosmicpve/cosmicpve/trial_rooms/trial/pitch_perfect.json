@@ -1,0 +1,13 @@
+{
+  "handler": "cosmicpve:trial/pitch_perfect",
+  "loadout": "cosmicpve:trial/pitch_perfect",
+  "base_weight": 5,
+  "enabled": true,
+  "display_name": "Pitch Perfect",
+  "category": "apprentice",
+  "pieces": [{"structure": "cosmicpve:trial/pitch_perfect"}],
+  "spawn_marker": "emerald_block",
+  "spawn_marker_position": [8, 1, 10],
+  "spawn_marker_replacement": "minecraft:blackstone",
+  "bounds": {"min": [0, 0, 0], "max": [16, 9, 20]}
+}

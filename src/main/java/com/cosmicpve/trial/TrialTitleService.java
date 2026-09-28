@@ -33,10 +33,14 @@ public final class TrialTitleService {
         playForPlayer(player, roomStartSound());
     }
     public static void cinderWolfDown(ServerPlayer player) {
-        send(player, cinderWolfDownTitle(), Component.empty(), 10, 80, 20);
+        send(player, cinderWolfDownTitle(), cinderWolfDownSubtitle(), 10, 80, 20);
     }
     static Component cinderWolfDownTitle() {
-        return Component.literal("Cinderwolf down! Find the exit portal!")
+        return Component.literal("Cinderwolf down!")
+                .withStyle(style -> style.withColor(ORANGE).withBold(true));
+    }
+    static Component cinderWolfDownSubtitle() {
+        return Component.literal("Find the exit portal!")
                 .withStyle(style -> style.withColor(ORANGE).withBold(true));
     }
     public void warzoneWarning(ServerPlayer player,

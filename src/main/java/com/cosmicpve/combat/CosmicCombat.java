@@ -166,6 +166,9 @@ public final class CosmicCombat {
         OUTGOING.register(new ExecuteBehavior());
         OUTGOING.register(new com.cosmicpve.combat.enchantment.PermanentExecuteBehavior());
         OUTGOING.register(new GreatswordBehavior());
+        OUTGOING.register(new com.cosmicpve.combat.enchantment.AntiGankBehavior(
+                com.cosmicpve.combat.ownership.GeneralAllyResolver.production()));
+        OUTGOING.register(new com.cosmicpve.combat.enchantment.PacifyBehavior(STACKS));
         OUTGOING.register(new InsanityBehavior());
         OUTGOING.register(new EagleEyeBehavior());
         OUTGOING.register(new com.cosmicpve.combat.enchantment.SniperBehavior(PROJECTILE_IMPACTS));

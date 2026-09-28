@@ -152,6 +152,10 @@ public final class CosmicEnchantmentSpecs {
             ModEnchantments.DEATH_COFFIN.identifier(), 3, CosmicEnchantmentTier.LEGENDARY, "all_weapons");
     public static final CosmicEnchantmentSpec PYRE = new CosmicEnchantmentSpec(
             ModEnchantments.PYRE.identifier(), 3, CosmicEnchantmentTier.SIMPLE, "axe");
+    public static final CosmicEnchantmentSpec ANTI_GANK = new CosmicEnchantmentSpec(
+            ModEnchantments.ANTI_GANK.identifier(), 4, CosmicEnchantmentTier.ELITE, "axe");
+    public static final CosmicEnchantmentSpec PACIFY = new CosmicEnchantmentSpec(
+            ModEnchantments.PACIFY.identifier(), 4, CosmicEnchantmentTier.ULTIMATE, "bow");
     public static final CosmicEnchantmentSpec DEEP_BLEED = new CosmicEnchantmentSpec(
             ModEnchantments.DEEP_BLEED.identifier(), 6, CosmicEnchantmentTier.HEROIC, "axe");
     public static final CosmicEnchantmentSpec MIGHTY_CACTUS = new CosmicEnchantmentSpec(
@@ -185,7 +189,7 @@ public final class CosmicEnchantmentSpecs {
                     HERO_KILLER, SOUL_SIPHON, BLACKOUT, ENDER_WALKER, VOODOO,
                     SNIPER, SNARE, PLAGUE_CARRIER, OBSIDIAN_DESTROYER, DOMINATE, HEX, STORMCALLER, INVERSION, SPIRIT_LINK,
                     CLEAVE, SOLITUDE, CURSE, NIMBLE, THUNDERING_BLOW, NEUTRALIZE, OVERLOAD, SILENCE, LONGBOW, PINPOINT,
-                    BERSERK, HEALING, DEATH_COFFIN, PYRE,
+                    BERSERK, HEALING, DEATH_COFFIN, PYRE, ANTI_GANK, PACIFY,
                     DEEP_BLEED, MIGHTY_CACTUS, PALADIN_ARMORED, BLIGHTED_VIRUS, ALIEN_IMPLANTS,
                     LETHAL_SNIPER, ETERNAL_SNARE, PERMANENT_EXECUTE, MIGHTY_CLEAVE, FORBIDDEN_CURSE,
                     GODLY_OVERLOAD, DEATHBRINGER, PLANETARY_DEATHBRINGER);

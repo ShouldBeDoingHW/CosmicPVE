@@ -18,9 +18,13 @@ class TrialTitleServiceTest {
     }
     @Test void cinderWolfDefeatTitleIsExactBoldOrange() {
         var title = TrialTitleService.cinderWolfDownTitle();
-        assertEquals("Cinderwolf down! Find the exit portal!", title.getString());
+        var subtitle = TrialTitleService.cinderWolfDownSubtitle();
+        assertEquals("Cinderwolf down!", title.getString());
+        assertEquals("Find the exit portal!", subtitle.getString());
         assertEquals(0xFFAA00, title.getStyle().getColor().getValue());
+        assertEquals(0xFFAA00, subtitle.getStyle().getColor().getValue());
         assertTrue(title.getStyle().isBold());
+        assertTrue(subtitle.getStyle().isBold());
     }
     @Test void genericCountdownAndRoomStartSoundsArePinned() {
         assertSame(SoundEvents.NOTE_BLOCK_BASEDRUM.value(), TrialTitleService.countdownSound());

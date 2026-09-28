@@ -27,6 +27,7 @@ public final class TrialDecisionTimeoutGameTests {
     private static final DeferredRegister<Consumer<GameTestHelper>> FUNCTIONS =
             DeferredRegister.create(Registries.TEST_FUNCTION, CosmicPVE.MOD_ID);
     static { FUNCTIONS.register("trial_decision_timeout_menu", ignored -> TrialDecisionTimeoutGameTests::verify); }
+    static { FUNCTIONS.register("trial_solo_death_cleanup", ignored -> TrialDecisionTimeoutGameTests::verifyDeathCleanup); }
 
     private TrialDecisionTimeoutGameTests() {}
     public static void register(IEventBus bus) {
@@ -38,6 +39,10 @@ public final class TrialDecisionTimeoutGameTests {
                 CosmicPVE.id("trial_decision_timeout_environment"), new TestEnvironmentDefinition.AllOf());
         event.registerTest(CosmicPVE.id("trial_decision_timeout_menu"), new FunctionGameTestInstance(
                 ResourceKey.create(Registries.TEST_FUNCTION, CosmicPVE.id("trial_decision_timeout_menu")),
+                new TestData<>(environment, CosmicPVE.id("trial/development_room"), 100, 0, true,
+                        Rotation.NONE, false, 1, 1, false)));
+        event.registerTest(CosmicPVE.id("trial_solo_death_cleanup"), new FunctionGameTestInstance(
+                ResourceKey.create(Registries.TEST_FUNCTION, CosmicPVE.id("trial_solo_death_cleanup")),
                 new TestData<>(environment, CosmicPVE.id("trial/development_room"), 100, 0, true,
                         Rotation.NONE, false, 1, 1, false)));
     }
@@ -62,6 +67,34 @@ public final class TrialDecisionTimeoutGameTests {
         } finally {
             player.closeContainer();
             helper.getLevel().getServer().getPlayerList().remove(player);
+        }
+        helper.succeed();
+    }
+
+    private static void verifyDeathCleanup(GameTestHelper helper) {
+        ServerPlayer player = mockPlayer(helper);
+        var server = helper.getLevel().getServer();
+        var repository = new com.cosmicpve.trial.persistence.TrialSessionRepository();
+        try {
+            helper.assertTrue(TrialRuntime.sessions().active(server).isEmpty(), "test starts without a Trial");
+            for (boolean respawnFallback : new boolean[]{false, true}) {
+                TrialSession session = TrialSession.joining(UUID.randomUUID(),
+                        net.minecraft.resources.Identifier.withDefaultNamespace("overworld"), BlockPos.ZERO,
+                        List.of(), List.of()).addParticipant(player.getUUID()).withState(
+                                TrialLifecycleState.ROOM_ACTIVE, 0,
+                                java.util.Optional.of(TrialSessionService.INVENTOR), false, List.of());
+                repository.publish(server, session);
+                if (respawnFallback) TrialRuntime.sessions().onRespawn(player, true);
+                else TrialRuntime.sessions().onDeath(player);
+                helper.assertTrue(TrialRuntime.sessions().active(server).isEmpty(),
+                        "last player's death must close Inventor Trial");
+                helper.assertTrue(!TrialRuntime.sessions().completeProductionRoom(server).success(),
+                        "debug completion must not transition a dead player's room");
+            }
+        } finally {
+            TrialRuntime.sessions().active(server).ifPresent(ignored ->
+                    TrialRuntime.sessions().abort(server, "GameTest cleanup"));
+            server.getPlayerList().remove(player);
         }
         helper.succeed();
     }

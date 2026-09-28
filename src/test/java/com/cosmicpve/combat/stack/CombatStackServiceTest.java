@@ -28,6 +28,24 @@ class CombatStackServiceTest {
     private static final Identifier NON_TRANSFERABLE = CosmicPVE.id("test/non_transferable");
     private static final Identifier PERSISTENT = CosmicPVE.id("test/persistent");
     private static final Identifier BLEED = CosmicPVE.id("bleed");
+    private static final Identifier PACIFY = CosmicPVE.id("pacify");
+
+    @Test void pacifyReapplicationReplacesLevelAndSourceWithoutStacking() {
+        var fixture = fixture();
+        var target = new CombatStackContainer();
+        UUID firstSource = UUID.randomUUID();
+        UUID secondSource = UUID.randomUUID();
+        fixture.service.addStack(target, PACIFY, 1,
+                StackApplication.ephemeral(Optional.of(firstSource), Optional.of(firstSource)).withPotency(1), 10);
+        fixture.service.addStack(target, PACIFY, 1,
+                StackApplication.ephemeral(Optional.of(secondSource), Optional.of(secondSource)).withPotency(4), 30);
+        assertEquals(1, target.count(PACIFY));
+        var active = target.snapshot().get(PACIFY).getFirst();
+        assertEquals(4, active.potency());
+        assertEquals(Optional.of(secondSource), active.originalSourceEntityId());
+        assertEquals(90L, active.expirationTick());
+        assertEquals(0, fixture.service.count(target, PACIFY, 90));
+    }
 
     @Test
     void bleedKeepsTenIndependentAttributedUnitsWithExactLifetimes() {
@@ -264,6 +282,8 @@ class CombatStackServiceTest {
         definitions = new java.util.HashMap<>(definitions);
         definitions.put(BLEED, definition(
                 BLEED, StackPolarity.NEGATIVE, 10, 100, StackRefreshPolicy.INDEPENDENT, false, true, false));
+        definitions.put(PACIFY, definition(
+                PACIFY, StackPolarity.NEGATIVE, 1, 60, StackRefreshPolicy.REFRESH_ALL, false, true, false));
         var repository = new CosmicContentRepository();
         assertTrue(repository.publish(ValidationResult.success(new ContentSnapshot(0, Map.of(), definitions))));
         return new Fixture(new CombatStackService(repository));

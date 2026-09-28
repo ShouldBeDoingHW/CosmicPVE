@@ -27,8 +27,8 @@ class TrialRoomDataRefactorTest {
                 }
             }
         }
-        assertEquals(15,total);
-        assertEquals(Map.of(TrialRoomCategory.APPRENTICE,4,TrialRoomCategory.HARDCORE,4,
+        assertEquals(16,total);
+        assertEquals(Map.of(TrialRoomCategory.APPRENTICE,5,TrialRoomCategory.HARDCORE,4,
                 TrialRoomCategory.IMPOSSIBLE,3,TrialRoomCategory.DEMONIC,2),counts);
     }
     @Test void nativeTierIntroductionRetainsLowerTiersAndExcludesAdministrativeRooms() {
