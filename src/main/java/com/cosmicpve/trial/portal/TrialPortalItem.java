@@ -25,13 +25,11 @@ public final class TrialPortalItem extends Item {
         var modifiers = context.getItemInHand().getOrDefault(
                 ModDataComponents.TRIAL_PORTAL_MODIFIERS.get(), TrialPortalModifiers.EMPTY);
         if (!modifiers.valid() || (!modifiers.isEmpty() && context.getItemInHand().getCount() != 1)) {
-            player.displayClientMessage(Component.literal("That Trial Portal contains invalid modifier data."), true);
             return InteractionResult.FAIL;
         }
         var result = TrialRuntime.sessions().createPortal(player,
                 context.getClickedPos().relative(context.getClickedFace()), modifiers);
         if (!result.success()) {
-            player.displayClientMessage(Component.literal(result.message()), true);
             return InteractionResult.FAIL;
         }
         if (!player.isCreative()) context.getItemInHand().shrink(1);

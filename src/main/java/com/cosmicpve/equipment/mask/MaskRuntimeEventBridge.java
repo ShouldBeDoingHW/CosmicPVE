@@ -53,8 +53,7 @@ public final class MaskRuntimeEventBridge {
                 equipped.stream().anyMatch(d -> d.behavior() == MaskBehavior.GUCCI)
                         && activities.isDungeonParkour(entity),
                 GUCCI_LEASE_TICKS, GUCCI_REFRESH_AT);
-        double health = equipped.stream().anyMatch(d -> d.behavior() == MaskBehavior.SANTA) ? 2.0 : 0.0;
-        reconcile(entity, Attributes.MAX_HEALTH, MAX_HEALTH_ID, health, AttributeModifier.Operation.ADD_VALUE);
+        reconcileHealth(entity);
         boolean lover = equipped.stream().anyMatch(d -> d.behavior() == MaskBehavior.LOVER);
         boolean scarecrow = equipped.stream().anyMatch(d -> d.behavior() == MaskBehavior.SCARECROW) && entity instanceof Player;
         if (!lover && !scarecrow) { schedules.remove(entity); return; }
@@ -66,6 +65,11 @@ public final class MaskRuntimeEventBridge {
         if (scarecrow && now >= nextFood) { ((Player) entity).getFoodData().eat(1, .25F); nextFood = now + SCARECROW_INTERVAL_TICKS; }
         schedules.put(entity, new Schedule(lover ? nextHeal : now + LOVER_INTERVAL_TICKS,
                 scarecrow ? nextFood : now + SCARECROW_INTERVAL_TICKS));
+    }
+
+    public void reconcileHealth(LivingEntity entity) {
+        double health = masks.resolve(entity).stream().anyMatch(d -> d.behavior() == MaskBehavior.SANTA) ? 2.0 : 0.0;
+        reconcile(entity, Attributes.MAX_HEALTH, MAX_HEALTH_ID, health, AttributeModifier.Operation.ADD_VALUE);
     }
 
     public void onTargeted(LivingDamageEvent.Pre event) {

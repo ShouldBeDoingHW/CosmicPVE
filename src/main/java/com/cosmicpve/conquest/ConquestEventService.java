@@ -193,8 +193,6 @@ public final class ConquestEventService {
         if (existing.isEmpty() || existing.orElseThrow().interacted()) return false;
         List<SpacePirateEntity> pirates = preparePirates(player.level(), existing.orElseThrow(), player.getRandom());
         if (pirates.size() < 3) {
-            player.displayClientMessage(Component.literal(
-                    "The Conquest Chest cannot summon its guards here. Clear nearby space and try again."), true);
             return false;
         }
         ConquestEvent discovered = existing.orElseThrow().discovered();

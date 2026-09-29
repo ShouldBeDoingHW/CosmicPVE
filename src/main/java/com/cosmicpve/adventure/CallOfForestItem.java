@@ -40,7 +40,6 @@ public final class CallOfForestItem extends Item {
         if (data == null || data.version() != CallOfForestData.CURRENT_DATA_VERSION) return InteractionResult.FAIL;
         var entry = DenseWoodlandsBootstrap.SESSIONS.tryEnter(serverPlayer, data.minutes(), hand);
         if (!entry.accepted()) {
-            serverPlayer.displayClientMessage(Component.literal(entry.message()), true);
             return InteractionResult.FAIL;
         }
         return InteractionResult.SUCCESS_SERVER.heldItemTransformedTo(stack);

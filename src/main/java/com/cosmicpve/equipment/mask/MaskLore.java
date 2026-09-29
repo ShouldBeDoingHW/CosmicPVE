@@ -1,6 +1,7 @@
 package com.cosmicpve.equipment.mask;
 
 import com.cosmicpve.data.component.MaskPresentation;
+import com.cosmicpve.equipment.CosmeticEffectStyle;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.ChatFormatting;
@@ -17,7 +18,7 @@ public final class MaskLore {
             if (presentations.size() > 1) lines.add(Component.literal("• ").withColor(presentation.color())
                     .append(presentation.displayName().copy().withColor(presentation.color())));
             lines.add((presentations.size() > 1 ? Component.literal("  ") : Component.empty())
-                    .append(presentation.effectSummary().copy().withStyle(ChatFormatting.YELLOW)));
+                    .append(CosmeticEffectStyle.apply(presentation.effectSummary())));
         }
         if (applicationItem) {
             lines.add(Component.translatable("tooltip.cosmicpve.mask.applies_to").withStyle(ChatFormatting.GRAY));

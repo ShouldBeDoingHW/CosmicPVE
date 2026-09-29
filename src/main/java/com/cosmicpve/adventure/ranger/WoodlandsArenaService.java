@@ -28,21 +28,21 @@ public final class WoodlandsArenaService {
                 ||!(level.getBlockEntity(event.getPos()) instanceof LecternBlockEntity))return;
         event.setCanceled(true);event.setCancellationResult(InteractionResult.SUCCESS);
         var structure=level.registryAccess().lookupOrThrow(Registries.STRUCTURE).getValue(STRUCTURE);
-        if(structure==null){reject(player,"This arena is unavailable.");return;}
+        if(structure==null)return;
         var start=level.structureManager().getStructureWithPieceAt(event.getPos(),structure);
-        if(!start.isValid()){reject(player,"The Tomb can only be used in a generated Woodlands Arena.");return;}
+        if(!start.isValid())return;
         var box=start.getBoundingBox();long arenaId=start.getChunkPos().toLong();
         boolean active=false;for(var entity:level.getAllEntities())if(entity instanceof CosmicRangerEntity ranger&&ranger.isAlive()&&ranger.arenaId()==arenaId){active=true;break;}
         if(active){
-            reject(player,"This Woodlands Arena already has a living Cosmic Ranger.");return;}
+            return;}
         List<BlockPos> markers=findMarkers(level,box);
         if(markers.size()!=4){CosmicPVE.LOGGER.error("Woodlands Arena at {} has {} Light markers; expected exactly four",box,markers.size());
-            reject(player,"This Woodlands Arena is missing its four Ranger markers.");return;}
+            return;}
         var ranger=com.cosmicpve.registry.ModEntities.COSMIC_RANGER.get().create(level,EntitySpawnReason.TRIGGERED);
-        if(ranger==null){reject(player,"The Cosmic Ranger could not be summoned.");return;}
+        if(ranger==null)return;
         BlockPos spawn=event.getPos().above();ranger.snapTo(spawn.getX()+.5,spawn.getY(),spawn.getZ()+.5,player.getYRot()+180,0);
         ranger.initializeArena(markers,arenaId,box,player);ranger.finalizeSpawn(level,level.getCurrentDifficultyAt(spawn),EntitySpawnReason.TRIGGERED,null);
-        if(!level.addFreshEntity(ranger)){reject(player,"The Cosmic Ranger could not be summoned.");return;}
+        if(!level.addFreshEntity(ranger))return;
         event.getItemStack().shrink(1);
         ((LecternBlockEntity)level.getBlockEntity(event.getPos())).clearContent();
     }
@@ -52,5 +52,4 @@ public final class WoodlandsArenaService {
             var p=new BlockPos(x,y,z);if(level.getBlockState(p).is(Blocks.LIGHT))result.add(p.immutable());}
         return List.copyOf(result);
     }
-    private static void reject(ServerPlayer player,String text){player.displayClientMessage(Component.literal(text).withColor(0x43B03C),true);}
 }

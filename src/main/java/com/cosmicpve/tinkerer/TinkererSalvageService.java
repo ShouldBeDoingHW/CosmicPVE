@@ -6,7 +6,6 @@ import com.cosmicpve.registry.ModDataComponents;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.List;
-import java.util.ArrayList;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 
@@ -21,7 +20,7 @@ public final class TinkererSalvageService {
         var totals = new EnumMap<CosmicEnchantmentTier, Integer>(CosmicEnchantmentTier.class);
         int consumed = 0;
         int consumedGear = 0;
-        var bottles = new ArrayList<ItemStack>();
+        long totalGearXp = 0;
         var gear = new GearSalvageService();
         for (int slot = firstSlot; slot < endExclusive; slot++) {
             ItemStack stack = input.getItem(slot);
@@ -32,7 +31,17 @@ public final class TinkererSalvageService {
                 consumed += stack.getCount();
             } else {
                 var xp = gear.storedXp(stack);
-                if (xp.isPresent()) { bottles.add(gear.bottle(xp.getAsLong())); consumedGear++; }
+                if (xp.isPresent()) {
+                    try {
+                        totalGearXp = Math.addExact(totalGearXp, xp.getAsLong());
+                        if (totalGearXp > Integer.MAX_VALUE)
+                            return new Result(Map.of(), List.of(), 0, 0);
+                    } catch (ArithmeticException overflow) {
+                        // Reject the entire confirmation without consuming any input.
+                        return new Result(Map.of(), List.of(), 0, 0);
+                    }
+                    consumedGear++;
+                }
             }
         }
         if (consumed == 0 && consumedGear == 0) return new Result(Map.of(), List.of(), 0, 0);
@@ -42,6 +51,6 @@ public final class TinkererSalvageService {
                 input.setItem(slot, ItemStack.EMPTY);
             }
         }
-        return new Result(totals, bottles, consumed, consumedGear);
+        return new Result(totals, totalGearXp > 0 ? List.of(gear.bottle(totalGearXp)) : List.of(), consumed, consumedGear);
     }
 }

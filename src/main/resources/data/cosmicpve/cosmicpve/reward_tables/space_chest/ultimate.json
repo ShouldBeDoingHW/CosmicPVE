@@ -10,16 +10,15 @@
     {"weight":4,"reward":{"type":"static_item","item":"cosmicpve:mystery_simple_spawner"}},
     {"weight":8,"minimum_quantity":16,"maximum_quantity":16,"reward":{"type":"static_item","item":"minecraft:golden_apple"}},
     {"weight":12,"reward":{"type":"static_item","item":"cosmicpve:repair_scroll"}},
-    {"weight":7,"reward":{"type":"generated_equipment","generated_equipment":{"category":"random_iron_armor_piece","minimum_enchantments":1,"maximum_enchantments":2,"maximum_rarity":"ultimate","level_mode":"random_valid"}}},
+    {"weight":7,"reward":{"type":"generated_equipment","generated_equipment":{"category":"random_iron_armor_piece","minimum_enchantments":1,"maximum_enchantments":3,"maximum_rarity":"ultimate","level_mode":"random_valid","limit_to_available":true,"vanilla_armor_enchant_profile":"protection_unbreaking"}}},
+    {"weight":7,"reward":{"type":"generated_equipment","generated_equipment":{"category":"random_weapon","minimum_enchantments":1,"maximum_enchantments":3,"maximum_rarity":"ultimate","level_mode":"random_valid","limit_to_available":true,"vanilla_weapon_enchant_profile":"standard"}}},
     {"weight":9,"reward":{"type":"static_item","item":"cosmicpve:transmog_scroll"}},
     {"weight":10,"reward":{"type":"banknote","cents":5000000}},
     {"weight":5,"reward":{"type":"banknote","cents":7500000}},
     {"weight":8,"reward":{"type":"xp_bottle","experience":2000}},
     {"weight":6,"reward":{"type":"xp_bottle","experience":4000}},
     {"weight":12,"reward":{"type":"static_item","item":"cosmicpve:trial_portal"}},
-    {"weight":2,"reward":{"type":"static_item","item":"cosmicpve:trial_trinket_time_1"}},
-    {"weight":2,"reward":{"type":"static_item","item":"cosmicpve:trial_trinket_insurance_1"}},
-    {"weight":2,"reward":{"type":"static_item","item":"cosmicpve:trial_trinket_skip_1"}},
+    {"weight":10,"reward":{"type":"random_trial_trinket","trinket_tier":1}},
     {"weight":3,"reward":{"type":"static_item","item":"cosmicpve:personal_vault_unlock"}}
   ]
 }

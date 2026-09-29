@@ -18,11 +18,11 @@ class SpaceChestProductionResourcesTest {
                 r(10,"unexamined_book","ultimate"), r(10,"unexamined_book","legendary"), rq(10,2,"unexamined_book","elite"),
                 r(8,"unexamined_book","unique"), r(8,"black_scroll","50"), r(4,"black_scroll","75"),
                 r(4,"static_item","cosmicpve:mystery_simple_spawner"), rq(8,16,"static_item","minecraft:golden_apple"),
-                r(12,"static_item","cosmicpve:repair_scroll"), r(7,"generated_equipment","1-2:ultimate:random_valid"),
+                r(12,"static_item","cosmicpve:repair_scroll"), r(7,"generated_equipment","random_iron_armor_piece:1-3:ultimate:random_valid:protection_unbreaking"),
+                r(7,"generated_equipment","random_weapon:1-3:ultimate:random_valid:standard"),
                 r(9,"static_item","cosmicpve:transmog_scroll"), r(10,"banknote","5000000"), r(5,"banknote","7500000"),
                 r(8,"xp_bottle","2000"), r(6,"xp_bottle","4000"), r(12,"static_item","cosmicpve:trial_portal"),
-                r(2,"static_item","cosmicpve:trial_trinket_time_1"), r(2,"static_item","cosmicpve:trial_trinket_insurance_1"),
-                r(2,"static_item","cosmicpve:trial_trinket_skip_1"), r(3,"static_item","cosmicpve:personal_vault_unlock")));
+                r(10,"random_trial_trinket","1"), r(3,"static_item","cosmicpve:personal_vault_unlock")));
     }
 
     @Test void legendaryTableMatchesStep8FExactly() {
@@ -30,9 +30,10 @@ class SpaceChestProductionResourcesTest {
                 rq(5,2,"unexamined_book","ultimate"), r(10,"unexamined_book","legendary"), rq(5,3,"unexamined_book","elite"),
                 r(20,"static_item","cosmicpve:white_scroll"), r(8,"black_scroll","60"), r(4,"black_scroll","80"),
                 r(5,"static_item","cosmicpve:mystery_elite_spawner"), r(3,"static_item","cosmicpve:conquest_chest_flare"),
-                r(4,"static_item","cosmicpve:trial_trinket_time_1"), r(4,"static_item","cosmicpve:trial_trinket_insurance_1"),
-                r(4,"static_item","cosmicpve:trial_trinket_skip_1"), r(10,"static_item","cosmicpve:repair_scroll"),
-                r(8,"generated_equipment","1-3:legendary:random_valid"), r(10,"banknote","10000000"), r(5,"banknote","25000000"),
+                r(20,"random_trial_trinket","1"), r(10,"static_item","cosmicpve:repair_scroll"),
+                r(8,"generated_equipment","random_iron_armor_piece:2-4:legendary:random_valid:protection_unbreaking"),
+                r(8,"generated_equipment","random_weapon:2-4:legendary:random_valid:standard"),
+                r(10,"banknote","10000000"), r(5,"banknote","25000000"),
                 r(8,"armor_orb","50"), r(8,"weapon_orb","50"), r(6,"xp_bottle","5000"), r(3,"xp_bottle","10000"),
                 r(5,"random_vkit_crystal",""), r(15,"static_item","cosmicpve:trial_portal"),
                 r(8,"static_item","cosmicpve:personal_vault_unlock")));
@@ -42,12 +43,12 @@ class SpaceChestProductionResourcesTest {
         assertRows("mastery", List.of(
                 rq(10,2,"unexamined_book","legendary"), r(8,"unexamined_book","mastery"), r(10,"black_scroll","75"),
                 r(8,"black_scroll","100"), r(6,"static_item","cosmicpve:mystery_mastery_spawner"),
-                rq(10,2,"static_item","cosmicpve:repair_scroll"), r(10,"generated_equipment","2-3:legendary:random_valid"),
+                rq(10,2,"static_item","cosmicpve:repair_scroll"), r(10,"generated_equipment","random_iron_armor_piece:4-5:legendary:random_valid:protection_unbreaking_mending"),
+                r(10,"generated_equipment","random_weapon:4-5:legendary:random_valid:standard_mastery"),
                 r(12,"banknote","30000000"), r(6,"banknote","50000000"), r(8,"weapon_orb","75"), r(8,"armor_orb","75"),
                 r(7,"xp_bottle","12000"), r(3,"xp_bottle","15000"), r(5,"static_item","cosmicpve:conquest_chest_flare"),
                 r(12,"random_vkit_crystal",""), r(5,"static_item","cosmicpve:trial_portal"), rq(9,2,"static_item","cosmicpve:trial_portal"),
-                r(4,"static_item","cosmicpve:trial_trinket_time_3"), r(4,"static_item","cosmicpve:trial_trinket_insurance_2"),
-                r(4,"static_item","cosmicpve:trial_trinket_skip_2"), rq(10,2,"static_item","cosmicpve:white_scroll"),
+                r(20,"random_trial_trinket","2"), rq(10,2,"static_item","cosmicpve:white_scroll"),
                 r(8,"mask","1"), r(5,"static_item","cosmicpve:cosmic_enchantment_table"),
                 r(8,"enchanted_black_scroll","50"), r(5,"static_item","cosmicpve:personal_vault_unlock")));
         assertFalse(resource("mastery").toString().contains("abandoned_spaceship"));
@@ -75,10 +76,15 @@ class SpaceChestProductionResourcesTest {
             case "banknote" -> reward.get("cents").getAsString();
             case "xp_bottle" -> reward.get("experience").getAsString();
             case "mask" -> reward.get("mask_count").getAsString();
+            case "random_trial_trinket" -> reward.get("trinket_tier").getAsString();
             case "generated_equipment" -> {
                 JsonObject generated = reward.getAsJsonObject("generated_equipment");
-                yield generated.get("minimum_enchantments").getAsString() + "-" + generated.get("maximum_enchantments").getAsString()
-                        + ":" + generated.get("maximum_rarity").getAsString() + ":" + generated.get("level_mode").getAsString();
+                yield generated.get("category").getAsString() + ":"
+                        + generated.get("minimum_enchantments").getAsString() + "-" + generated.get("maximum_enchantments").getAsString()
+                        + ":" + generated.get("maximum_rarity").getAsString() + ":" + generated.get("level_mode").getAsString()
+                        + ":" + (generated.has("vanilla_armor_enchant_profile")
+                                ? generated.get("vanilla_armor_enchant_profile").getAsString()
+                                : generated.get("vanilla_weapon_enchant_profile").getAsString());
             }
             default -> "";
         };

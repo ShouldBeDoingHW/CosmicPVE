@@ -1,5 +1,6 @@
 package com.cosmicpve.equipment.skin;
 
+import com.cosmicpve.equipment.CosmeticEffectStyle;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.ChatFormatting;
@@ -12,14 +13,17 @@ public final class WeaponSkinLore {
     public static List<Component> applicationItem(WeaponSkinDefinition definition) {
         var lines = new ArrayList<Component>();
         definition.effectDescription().stream()
-                .map(Component::copy)
-                .map(line -> line.withStyle(ChatFormatting.YELLOW))
+                .map(CosmeticEffectStyle::apply)
                 .forEach(lines::add);
-        lines.add(Component.translatable("tooltip.cosmicpve.skin.kind."
-                + definition.weaponKind().name().toLowerCase(java.util.Locale.ROOT))
-                .withStyle(ChatFormatting.GRAY));
-        lines.add(Component.translatable("tooltip.cosmicpve.skin.attach").withStyle(ChatFormatting.GRAY));
-        lines.add(Component.translatable("tooltip.cosmicpve.skin.detach").withStyle(ChatFormatting.GRAY));
+        lines.add(Component.empty());
+        lines.add(Component.literal("Attach this skin to any ").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC)
+                .append(Component.literal(definition.weaponKind().name()).withStyle(style -> style
+                        .withColor(ChatFormatting.WHITE).withItalic(true).withUnderlined(true))));
+        lines.add(Component.literal("to over-ride its visual appearance.")
+                .withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC));
+        lines.add(Component.empty());
+        lines.add(Component.literal("Drag n' Drop onto item to attach.").withStyle(ChatFormatting.GRAY));
+        lines.add(Component.literal("Right-Click item to detach skin.").withStyle(ChatFormatting.GRAY));
         return List.copyOf(lines);
     }
 

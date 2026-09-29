@@ -18,6 +18,11 @@ import net.minecraft.util.RandomSource;
 import org.junit.jupiter.api.Test;
 
 class Step8ELootboxTest {
+    @Test void cacheContainerForcesGlint() {
+        var cache = new net.minecraft.world.item.ItemStack(com.cosmicpve.registry.ModItems.SECRET_WEAPON_CACHE.get());
+        assertTrue(cache.hasFoil());
+    }
+
     @Test void secretWeaponCacheSelectsAllSixEquallyAndReturnsCopies() {
         var candidates = java.util.stream.IntStream.rangeClosed(1, 6)
                 .mapToObj(count -> new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.STICK, count)).toList();

@@ -30,6 +30,19 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import org.junit.jupiter.api.Test;
 
 class BlackScrollExtractionTest {
+    @Test void ordinaryBlackScrollSeparatesRatePurposeAndInstruction() {
+        var lines = com.cosmicpve.equipment.EquipmentTooltipService.blackScrollLore(75);
+        assertEquals(5, lines.size());
+        assertEquals("tooltip.cosmicpve.black_scroll.rate", assertInstanceOf(
+                net.minecraft.network.chat.contents.TranslatableContents.class, lines.get(0).getContents()).getKey());
+        assertEquals("", lines.get(1).getString());
+        assertEquals("tooltip.cosmicpve.black_scroll.purpose", assertInstanceOf(
+                net.minecraft.network.chat.contents.TranslatableContents.class, lines.get(2).getContents()).getKey());
+        assertEquals("", lines.get(3).getString());
+        assertEquals("tooltip.cosmicpve.black_scroll.instruction", assertInstanceOf(
+                net.minecraft.network.chat.contents.TranslatableContents.class, lines.get(4).getContents()).getKey());
+    }
+
     @Test
     void typedDataAndCodecEnforceInclusiveReturnedSuccessRange() {
         assertEquals(1, new BlackScrollData(1, 1).returnedSuccessRate());

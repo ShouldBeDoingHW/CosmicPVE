@@ -47,6 +47,9 @@ public final class VKitCrystalItem extends Item {
             Consumer<Component> consumer, TooltipFlag flag) {
         VKitDefinition definition = definition(stack);
         if (definition != null) {
+            consumer.accept(Component.translatable(definition.flavorTranslation() + ".lore")
+                    .withStyle(style -> style.withColor(definition.color()).withItalic(true)));
+            consumer.accept(Component.empty());
             consumer.accept(flavor(definition));
         }
     }

@@ -28,13 +28,10 @@ public final class BanknoteItem extends Item {
         var money = new MoneyService();
         if (data == null || data.dataVersion() != com.cosmicpve.data.component.BanknoteData.CURRENT_DATA_VERSION
                 || !money.add(serverPlayer, data.valueCents())) {
-            player.displayClientMessage(Component.translatable("message.cosmicpve.banknote.invalid"), true);
             return InteractionResult.FAIL;
         }
         held.shrink(1);
         level.playSound(null, player.blockPosition(), SoundEvents.ARROW_HIT_PLAYER, SoundSource.PLAYERS, 1F, 1F);
-        player.displayClientMessage(Component.translatable("message.cosmicpve.banknote.redeemed",
-                MoneyAmount.format(data.valueCents()), MoneyAmount.format(money.balance(serverPlayer))), true);
         return InteractionResult.SUCCESS_SERVER.heldItemTransformedTo(held);
     }
 }

@@ -37,12 +37,12 @@ public final class EquipmentTooltipService {
         var looseAccessory = stack.get(ModDataComponents.ACCESSORY_ITEM.get());
         if (looseAccessory != null && looseAccessory.valid()) {
             com.cosmicpve.equipment.accessory.AmuletDefinition.find(looseAccessory.accessoryId()).ifPresent(definition -> {
-                event.getToolTip().add(Component.literal(definition.effect()).withColor(definition.color()));
+                event.getToolTip().add(CosmeticEffectStyle.apply(Component.literal(definition.effect())));
                 event.getToolTip().add(Component.literal("Drag n' Drop onto a socketed chestplate to apply.")
                         .withStyle(net.minecraft.ChatFormatting.GRAY));
             });
             com.cosmicpve.equipment.accessory.BeltDefinition.find(looseAccessory.accessoryId()).ifPresent(definition -> {
-                event.getToolTip().add(Component.literal(definition.effect()).withColor(definition.color()));
+                event.getToolTip().add(CosmeticEffectStyle.apply(Component.literal(definition.effect())));
                 event.getToolTip().add(Component.literal("Drag n' Drop onto socketed leggings to apply.")
                         .withStyle(net.minecraft.ChatFormatting.GRAY));
             });
@@ -130,8 +130,6 @@ public final class EquipmentTooltipService {
         }
         var dust = stack.get(ModDataComponents.COSMIC_DUST.get());
         if (dust != null) {
-            event.getToolTip().add(Component.translatable("tooltip.cosmicpve.cosmic_dust.effect")
-                    .withColor(dust.tier().tooltipColor()));
             event.getToolTip().add(Component.translatable("tooltip.cosmicpve.cosmic_dust.instruction")
                     .withStyle(net.minecraft.ChatFormatting.GRAY));
         }
@@ -176,11 +174,7 @@ public final class EquipmentTooltipService {
         }
         var blackScroll = stack.get(ModDataComponents.BLACK_SCROLL.get());
         if (blackScroll != null) {
-            event.getToolTip().add(Component.translatable(
-                    "tooltip.cosmicpve.black_scroll.rate", blackScroll.returnedSuccessRate())
-                    .withColor(ItemApplicationColors.SUCCESS));
-            event.getToolTip().add(Component.translatable("tooltip.cosmicpve.black_scroll.purpose"));
-            event.getToolTip().add(Component.translatable("tooltip.cosmicpve.black_scroll.instruction"));
+            event.getToolTip().addAll(blackScrollLore(blackScroll.returnedSuccessRate()));
         }
         var enchantedBlackScroll = stack.get(ModDataComponents.ENCHANTED_BLACK_SCROLL.get());
         if (enchantedBlackScroll != null) {
@@ -239,6 +233,16 @@ public final class EquipmentTooltipService {
             event.getToolTip().add(capacityLine(capacity.capacity(stack)));
         sortTransmogEnchantments(event);
         recolorCosmicEnchantments(event);
+    }
+
+    public static java.util.List<Component> blackScrollLore(int returnedSuccessRate) {
+        return java.util.List.of(
+                Component.translatable("tooltip.cosmicpve.black_scroll.rate", returnedSuccessRate)
+                        .withColor(ItemApplicationColors.SUCCESS),
+                Component.empty(),
+                Component.translatable("tooltip.cosmicpve.black_scroll.purpose"),
+                Component.empty(),
+                Component.translatable("tooltip.cosmicpve.black_scroll.instruction"));
     }
 
     public static Component holyMarker() {

@@ -145,7 +145,7 @@ public final class DeathbringerCleanupGameTests {
                     "Cosmic preview includes only unique enchantment/level/Success variants");
             if (item == ModItems.MEMORY_CHEST.get()) helper.assertTrue(outcomes.size() == 11,
                     "Memory Chest preview exposes all eleven production outcomes");
-            if (item == ModItems.TRIALS_CREATION_KIT.get()) helper.assertTrue(outcomes.size() == 13
+            if (item == ModItems.TRIALS_CREATION_KIT.get()) helper.assertTrue(outcomes.size() == 16
                     && outcomes.stream().anyMatch(stack -> stack.is(ModItems.TRIAL_PORTAL.get()) && stack.getCount() == 3),
                     "Kit preview merges portal quantity rows at the maximum quantity");
             if (item == ModItems.COSMIC_SWAG_BAG.get()) helper.assertTrue(outcomes.size() == 18

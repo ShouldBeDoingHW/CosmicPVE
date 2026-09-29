@@ -26,7 +26,8 @@ public final class ArmorSetResolver {
 
     public Optional<ArmorSetDefinition> resolve(LivingEntity entity) {
         return suppression.isSuppressed(entity) ? Optional.empty() : resolvePotential(entity)
-                .filter(d -> !com.cosmicpve.adventure.AdventureRules.restricted(entity) || d.id().equals(ArmorSetIds.DIMENSIONAL_TRAVELER));
+                .filter(d -> !com.cosmicpve.adventure.AdventureRules.restricted(entity)
+                        || com.cosmicpve.adventure.AdventureRules.allowsArmorSet(d.id()));
     }
 
     /** Resolves equipment identity without applying temporary activation suppression. */

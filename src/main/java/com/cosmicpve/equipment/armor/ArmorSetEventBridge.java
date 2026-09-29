@@ -33,6 +33,8 @@ public final class ArmorSetEventBridge {
 
     private void tick(LivingEntity entity) { protectFromFreeze(entity); attributes.reconcile(entity); }
 
+    public void reconcileAttributes(LivingEntity entity) { attributes.reconcile(entity); }
+
     private void protectFromFreeze(LivingEntity entity) {
         if (immunities.isImmune(entity, ArmorSetIds.FREEZE)) entity.clearFreeze();
     }

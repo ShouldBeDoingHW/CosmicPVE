@@ -13,6 +13,14 @@ import net.minecraft.sounds.SoundEvents;
 import org.junit.jupiter.api.Test;
 
 class SpaceChestPresentationTest {
+    @Test void standardChestFlavorIsCanonicalLightGray() {
+        for (var tier : SpaceChestTier.values()) {
+            var lore = SpaceChestItem.lore(tier);
+            assertEquals(1, lore.size());
+            assertEquals(0xC7C7C7, lore.getFirst().getStyle().getColor().getValue());
+        }
+    }
+
     @Test void everyTierCreatesAnIndependentNonStackableChest() {
         for (SpaceChestTier tier : SpaceChestTier.values()) {
             var first = SpaceChests.create(tier);

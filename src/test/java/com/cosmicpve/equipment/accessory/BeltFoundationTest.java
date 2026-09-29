@@ -103,7 +103,7 @@ class BeltFoundationTest {
                 "src/main/java/com/cosmicpve/client/BeltClientPresentation.java"));
         assertTrue(layerText.contains("BODY_TO_WAIST = 12.0 / 16.0"));
         assertTrue(layerText.contains("poseStack.translate(0.0, BODY_TO_WAIST, 0.0)"));
-        for (String id : List.of("bandolier", "shock_therapy")) {
+        for (String id : List.of("bandolier", "shock_therapy", "jelly_roll")) {
             assertNotNull(getClass().getResource("/assets/cosmicpve/models/item/belt/" + id + ".obj"));
             assertNotNull(getClass().getResource("/assets/cosmicpve/models/item/belt/" + id + ".mtl"));
             assertNotNull(getClass().getResource("/assets/cosmicpve/textures/item/belt/" + id + ".png"));
@@ -114,13 +114,42 @@ class BeltFoundationTest {
                 assertFalse(json.get("flip_v").getAsBoolean(),
                         "exported top-down UVs must not mirror lower palette strips into the sigil");
                 assertTrue(json.getAsJsonObject("display").has("gui"));
-                assertEquals(180, json.getAsJsonObject("display").getAsJsonObject("gui").getAsJsonArray("rotation").get(2).getAsInt(),
-                        "Correct the upside-down GUI pose without rotating the accepted worn model");
+                assertEquals(0, json.getAsJsonObject("display").getAsJsonObject("gui").getAsJsonArray("rotation").get(2).getAsInt(),
+                        "Only the GUI pose changes; the accepted worn model stays fixed");
                 assertFalse(json.getAsJsonObject("display").getAsJsonObject("fixed").has("rotation"));
                 assertTrue(json.getAsJsonObject("display").has("firstperson_righthand"));
             }
         }
         assertNull(getClass().getResource("/assets/cosmicpve/models/item/belt/candy_buckle.obj"));
+        assertFalse(layerText.contains("value != BeltDefinition.JELLY_ROLL"),
+                "Jelly Roll now participates in the worn waist overlay");
+    }
+
+    @Test void jellyRollExporterIncludesAuthoredFacetedMeshesAndPalette() throws Exception {
+        Path root = Path.of(System.getProperty("cosmicpve.projectDir"));
+        var source = JsonParser.parseString(Files.readString(root.resolve(
+                "blockbench/belts/jelly_roll/jelly_roll.bbmodel"))).getAsJsonObject();
+        var elements = source.getAsJsonArray("elements");
+        int authoredFaces = 0, meshCount = 0;
+        for (var elementValue : elements) {
+            var element = elementValue.getAsJsonObject();
+            if (element.get("type").getAsString().equals("mesh")) meshCount++;
+            for (var face : element.getAsJsonObject("faces").entrySet())
+                if (face.getValue().getAsJsonObject().has("texture")
+                        && !face.getValue().getAsJsonObject().get("texture").isJsonNull()) authoredFaces++;
+        }
+        var obj = Files.readAllLines(root.resolve("src/main/resources/assets/cosmicpve/models/item/belt/jelly_roll.obj"));
+        assertEquals(2, meshCount);
+        assertEquals(authoredFaces, obj.stream().filter(line -> line.startsWith("f ")).count());
+        assertEquals(obj.stream().filter(line -> line.startsWith("v ")).count(),
+                obj.stream().filter(line -> line.startsWith("vt ")).count());
+        var texture = ImageIO.read(java.util.Objects.requireNonNull(getClass().getResource(
+                "/assets/cosmicpve/textures/item/belt/jelly_roll.png")));
+        assertEquals(16, texture.getWidth()); assertEquals(16, texture.getHeight());
+        var authoredTexture = ImageIO.read(root.resolve("blockbench/belts/jelly_roll/jelly_roll.png").toFile());
+        for (int y = 0; y < 16; y++) for (int x = 0; x < 16; x++)
+            assertEquals(authoredTexture.getRGB(x, y), texture.getRGB(x, y),
+                    "runtime palette must match the supplied Jelly Roll texture pixel-for-pixel");
     }
 
     @Test void exportedUvsSampleEveryAuthoredBeltFaceWithoutPaletteMirroring() throws Exception {

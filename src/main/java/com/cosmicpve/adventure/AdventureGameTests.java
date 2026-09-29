@@ -108,6 +108,52 @@ public final class AdventureGameTests {
                 helper.assertTrue(p.gameMode.getGameModeForPlayer()==GameType.ADVENTURE,"Adventure mode");
                 long compasses=p.getInventory().getNonEquipmentItems().stream().filter(i->DenseWoodlandsSessionService.owned(i,s)).count();
                 helper.assertTrue(compasses==1,"Exactly one session-owned compass");
+                if (p == players.getFirst()) {
+                    var sets=com.cosmicpve.combat.CosmicCombat.armorSets();
+                    var slots=List.of(net.minecraft.world.entity.EquipmentSlot.HEAD,
+                            net.minecraft.world.entity.EquipmentSlot.CHEST,
+                            net.minecraft.world.entity.EquipmentSlot.LEGS,
+                            net.minecraft.world.entity.EquipmentSlot.FEET);
+                    for(var slot:slots) p.setItemSlot(slot,
+                            com.cosmicpve.adventure.ranger.CosmicRangerEquipment.armor(slot,p.registryAccess()));
+                    helper.assertTrue(sets.resolve(p).map(d -> d.id().equals(com.cosmicpve.equipment.armor.ArmorSetIds.RANGER)).orElse(false),
+                            "active Woodlands participant retains Ranger full-set bonus");
+                    for(var id:List.of(com.cosmicpve.equipment.armor.ArmorSetIds.PHANTOM,
+                            com.cosmicpve.equipment.armor.ArmorSetIds.YETI,
+                            com.cosmicpve.equipment.armor.ArmorSetIds.ENGINEER,
+                            com.cosmicpve.equipment.armor.ArmorSetIds.DIMENSIONAL_TRAVELER,
+                            com.cosmicpve.equipment.armor.ArmorSetIds.YJIKI,
+                            com.cosmicpve.equipment.armor.ArmorSetIds.ANCIENT,
+                            com.cosmicpve.equipment.armor.ArmorSetIds.DRAGONSLAYER)) {
+                        var identity=com.cosmicpve.data.component.ArmorSetIdentity.from(CosmicContent.repository().requireArmorSetDefinition(id));
+                        for(var slot:slots) p.getItemBySlot(slot).set(com.cosmicpve.registry.ModDataComponents.ARMOR_SET_ID.get(),identity);
+                        helper.assertTrue(sets.resolve(p).isEmpty(),"non-Ranger set remains suppressed in Woodlands: "+id);
+                    }
+                    var rangerIdentity=com.cosmicpve.data.component.ArmorSetIdentity.from(CosmicContent.repository()
+                            .requireArmorSetDefinition(com.cosmicpve.equipment.armor.ArmorSetIds.RANGER));
+                    for(var slot:slots) p.getItemBySlot(slot).set(com.cosmicpve.registry.ModDataComponents.ARMOR_SET_ID.get(),rangerIdentity);
+                    var chest=p.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.CHEST);
+                    var legs=p.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.LEGS);
+                    chest.set(com.cosmicpve.registry.ModDataComponents.ACCESSORY_LOADOUT.get(),
+                            com.cosmicpve.data.component.AccessoryLoadout.empty()
+                                    .withSocket(com.cosmicpve.data.component.AccessorySlot.AMULET)
+                                    .withAttachment(com.cosmicpve.data.component.AccessorySlot.AMULET,
+                                            com.cosmicpve.equipment.accessory.AmuletDefinition.BLOOD_DIAMOND.id()));
+                    legs.set(com.cosmicpve.registry.ModDataComponents.ACCESSORY_LOADOUT.get(),
+                            com.cosmicpve.data.component.AccessoryLoadout.empty()
+                                    .withSocket(com.cosmicpve.data.component.AccessorySlot.BELT)
+                                    .withAttachment(com.cosmicpve.data.component.AccessorySlot.BELT,
+                                            com.cosmicpve.equipment.accessory.BeltDefinition.BANDOLIER.id()));
+                    p.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.HEAD).set(
+                            com.cosmicpve.registry.ModDataComponents.MASK_LOADOUT.get(),
+                            new com.cosmicpve.data.component.MaskLoadout(List.of(CosmicPVE.id("dragon"))));
+                    var accessories=com.cosmicpve.combat.CosmicCombat.accessories();
+                    helper.assertTrue(accessories.equippedAmulet(p).isPresent() && accessories.equippedBelt(p).isPresent()
+                                    && !accessories.hasAmulet(p,com.cosmicpve.equipment.accessory.AmuletDefinition.BLOOD_DIAMOND)
+                                    && !accessories.hasBelt(p,com.cosmicpve.equipment.accessory.BeltDefinition.BANDOLIER)
+                                    && new com.cosmicpve.equipment.mask.MaskResolver(CosmicContent.repository()).resolve(p).isEmpty(),
+                            "Woodlands suppresses Mask/Amulet/Belt gameplay without stripping attached presentation data");
+                }
                 helper.assertTrue(!service.extract(p,s.exit().offset(50,0,0)),"Foreign exit cannot extract");
                 var level=(ServerLevel)p.level();level.setDayTime(1000);
                 boolean zombie=false;for(int i=0;i<10&&!zombie;i++)zombie=AdventureZombies.spawn(p,s);
@@ -131,6 +177,14 @@ public final class AdventureGameTests {
                 }
                 helper.assertTrue(service.extract(p,s.exit()),"Own exit extracts");
                 helper.assertTrue(service.session(p)==null && p.getY()==s.home().position().y && p.gameMode.getGameModeForPlayer()==GameType.SURVIVAL,"Restores source and mode and closes session");
+                if (p == players.getFirst()) helper.assertTrue(com.cosmicpve.combat.CosmicCombat.armorSets().resolve(p)
+                        .map(d -> d.id().equals(com.cosmicpve.equipment.armor.ArmorSetIds.RANGER)).orElse(false),
+                        "Adventure exit restores normal equipped Ranger resolution without stripping gear");
+                if (p == players.getFirst()) helper.assertTrue(
+                        com.cosmicpve.combat.CosmicCombat.accessories().hasAmulet(p,com.cosmicpve.equipment.accessory.AmuletDefinition.BLOOD_DIAMOND)
+                                && com.cosmicpve.combat.CosmicCombat.accessories().hasBelt(p,com.cosmicpve.equipment.accessory.BeltDefinition.BANDOLIER)
+                                && !new com.cosmicpve.equipment.mask.MaskResolver(CosmicContent.repository()).resolve(p).isEmpty(),
+                        "Adventure exit restores normal accessory and Mask gameplay from untouched components");
             }
             // Temporary Cave Diving loadout uses the production clear/grant/clear lifecycle.
             var p=players.getFirst();var loadout=new com.cosmicpve.trial.TrialRoomLoadoutService(new com.cosmicpve.trial.persistence.TrialInventoryTransactionService());

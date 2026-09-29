@@ -19,4 +19,10 @@ public final class PlayerUtilityService {
     }
 
     public static void restore(ServerPlayer player) { heal(player); feed(player); }
+
+    /** Trial room entry is a state reset, not a heal proc; Cursed Life must not reduce it. */
+    public static void restoreForTrialRoom(ServerPlayer player) {
+        player.setHealth(player.getMaxHealth());
+        feed(player);
+    }
 }

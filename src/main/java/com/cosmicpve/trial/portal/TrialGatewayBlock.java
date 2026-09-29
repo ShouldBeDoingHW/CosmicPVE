@@ -20,7 +20,6 @@ public final class TrialGatewayBlock extends Block {
             var result = TrialRuntime.sessions().join(player, pos);
             int now = player.level().getServer().getTickCount();
             if (!result.success() && now >= NEXT_REJECTION_MESSAGE.getOrDefault(player.getUUID(), 0)) {
-                player.displayClientMessage(net.minecraft.network.chat.Component.literal(result.message()), true);
                 NEXT_REJECTION_MESSAGE.put(player.getUUID(), now + 20);
             }
         }

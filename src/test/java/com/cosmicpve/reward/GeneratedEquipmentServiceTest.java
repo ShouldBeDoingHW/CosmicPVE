@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.cosmicpve.content.definition.reward.EnchantmentLevelMode;
 import com.cosmicpve.content.definition.reward.GeneratedEquipmentCategory;
 import com.cosmicpve.content.definition.reward.GeneratedEquipmentDefinition;
+import com.cosmicpve.content.definition.reward.VanillaArmorEnchantProfile;
 import com.cosmicpve.equipment.enchantment.CosmicEnchantmentSpecs;
 import com.cosmicpve.equipment.enchantment.CosmicEnchantmentTier;
 import com.cosmicpve.registry.ModEnchantments;
@@ -24,11 +25,33 @@ import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.Enchantments;
 import org.junit.jupiter.api.Test;
 
 class GeneratedEquipmentServiceTest {
     private static final Set<net.minecraft.world.item.Item> IRON = Set.of(
             Items.IRON_HELMET, Items.IRON_CHESTPLATE, Items.IRON_LEGGINGS, Items.IRON_BOOTS);
+
+    @Test void spaceChestIronArmorAddsFixedVanillaEnchantmentsWithoutChangingCosmicCount() {
+        var registry = registryWithVanilla();
+        var service = new GeneratedEquipmentService();
+        for (var profile : List.of(VanillaArmorEnchantProfile.PROTECTION_UNBREAKING,
+                VanillaArmorEnchantProfile.PROTECTION_UNBREAKING_MENDING)) {
+            var definition = new GeneratedEquipmentDefinition(GeneratedEquipmentCategory.RANDOM_IRON_ARMOR_PIECE,
+                    2, 3, CosmicEnchantmentTier.LEGENDARY, EnchantmentLevelMode.RANDOM_VALID, false, profile);
+            for (int seed = 0; seed < 40; seed++) {
+                var stack = service.generate(definition, registry, RandomSource.create(seed));
+                var applied = EnchantmentHelper.getEnchantmentsForCrafting(stack);
+                assertEquals(3, EnchantmentHelper.getItemEnchantmentLevel(registry.getOrThrow(Enchantments.UNBREAKING), stack));
+                assertEquals(4, EnchantmentHelper.getItemEnchantmentLevel(registry.getOrThrow(Enchantments.PROTECTION), stack));
+                assertEquals(profile == VanillaArmorEnchantProfile.PROTECTION_UNBREAKING_MENDING ? 1 : 0,
+                        EnchantmentHelper.getItemEnchantmentLevel(registry.getOrThrow(Enchantments.MENDING), stack));
+                int vanillaCount = profile == VanillaArmorEnchantProfile.PROTECTION_UNBREAKING_MENDING ? 3 : 2;
+                assertTrue(applied.size() >= definition.minimumEnchantments() + vanillaCount);
+                assertTrue(applied.size() <= definition.maximumEnchantments() + vanillaCount);
+            }
+        }
+    }
 
     @Test void futureSpaceChestPatternsProduceDistinctCompatibleCapacityBoundEnchantments() {
         var registry = registry();
@@ -69,6 +92,20 @@ class GeneratedEquipmentServiceTest {
         register(registry, ModEnchantments.ENDER_SHIFT, 3);
         register(registry, ModEnchantments.GLOWING, 1);
         register(registry, ModEnchantments.NUTRITION, 3);
+        return registry.freeze();
+    }
+
+    private static net.minecraft.core.Registry<Enchantment> registryWithVanilla() {
+        var registry = new MappedRegistry<Enchantment>(Registries.ENCHANTMENT, Lifecycle.stable());
+        register(registry, ModEnchantments.ANGELIC, 5);
+        register(registry, ModEnchantments.MOLTEN, 4);
+        register(registry, ModEnchantments.ARMORED, 4);
+        register(registry, ModEnchantments.ENDER_SHIFT, 3);
+        register(registry, ModEnchantments.GLOWING, 1);
+        register(registry, ModEnchantments.NUTRITION, 3);
+        register(registry, Enchantments.UNBREAKING, 3);
+        register(registry, Enchantments.PROTECTION, 4);
+        register(registry, Enchantments.MENDING, 1);
         return registry.freeze();
     }
 

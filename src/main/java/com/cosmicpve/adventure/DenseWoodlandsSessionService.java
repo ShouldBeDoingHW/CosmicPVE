@@ -94,9 +94,6 @@ public final class DenseWoodlandsSessionService {
                     ensureCompass(player,s);
                     if(time>=s.deadline()) {
                         CosmicCombat.executions().execute(player,new com.cosmicpve.combat.execution.ExecutionCause(com.cosmicpve.CosmicPVE.id("adventure_timeout")),null,null);
-                    } else if(time%20==0) {
-                        long seconds=(s.deadline()-time+19)/20;
-                        player.displayClientMessage(Component.literal("Dense Woodlands: "+seconds/60+":"+String.format(java.util.Locale.ROOT,"%02d",seconds%60)),true);
                     }
                 }
                 case RETURNING -> restore(player,s);
@@ -159,7 +156,7 @@ public final class DenseWoodlandsSessionService {
     }
     private void restore(ServerPlayer player,AdventureSession s) {
         var server=player.level().getServer();var level=server.getLevel(s.home().dimension());
-        if(level==null) { player.displayClientMessage(Component.literal("Adventure return dimension unavailable; recovery is pending."),true);return; }
+        if(level==null) return;
         removeCompasses(player);CosmicCombat.activities().clear(s.owner());player.getPersistentData().remove(COMPASS_NEXT_HINT);
         if(!s.exit().equals(BlockPos.ZERO)) { AdventureExit.remove(server.getLevel(DIMENSION),s.exit());AdventureZombies.cleanup(server.getLevel(DIMENSION),s.id()); }
         var p=s.home().position();player.setGameMode(s.home().mode());

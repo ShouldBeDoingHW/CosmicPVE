@@ -218,16 +218,26 @@ public final class DenseWoodlandsGameTests {
         helper.assertTrue(participant.getHealth()==participantHealth&&participant.getInventory().getItem(4).is(Items.DIAMOND)
                 &&participant.getInventory().getItem(4).getCount()==3&&participant.hasEffect(MobEffects.SPEED),
                 "player correction preserves health, inventory, and effects");
+        BlockPos obstructed=ranger.blockPosition().offset(0,0,-4);
+        var previousBlock=level.getBlockState(obstructed);
+        level.setBlockAndUpdate(obstructed,net.minecraft.world.level.block.Blocks.STONE.defaultBlockState());
         helper.assertTrue(ranger.hurtServer(level,level.damageSources().mobAttack(attacker),10_000),"Overkill threshold hit accepted");
         helper.assertTrue(ranger.phaseState()==1,"66% hit must enter wave one; state="+ranger.phaseState()+", health="+ranger.getHealth());
         helper.assertTrue(Math.abs(ranger.getHealth()-231)<.1,"Wave one must clamp at 66% health; health="+ranger.getHealth());
         helper.assertTrue(ranger.waveMembers().size()==8,"66% wave has four complete jockeys; tracked="+ranger.waveMembers().size());
-        var expectedCardinals=Set.of(ranger.blockPosition().offset(0,0,-4),ranger.blockPosition().offset(4,0,0),
-                ranger.blockPosition().offset(0,0,4),ranger.blockPosition().offset(-4,0,0));
         var actualMounts=ranger.waveMembers().stream().map(level::getEntity)
                 .filter(com.cosmicpve.entity.woodlands.DreadmaneEntity.class::isInstance)
                 .map(Entity::blockPosition).collect(java.util.stream.Collectors.toSet());
-        helper.assertTrue(actualMounts.equals(expectedCardinals),"Outside Dense Woodlands, four mounts spawn exactly four blocks in each cardinal direction: "+actualMounts);
+        helper.assertTrue(actualMounts.size()==4 && !actualMounts.contains(obstructed)
+                        && actualMounts.stream().allMatch(pos -> Math.abs(pos.getX()-ranger.blockPosition().getX())<=8
+                                && Math.abs(pos.getZ()-ranger.blockPosition().getZ())<=8),
+                "Obstructed preferred marker relocates four mounts within the bounded neighborhood: "+actualMounts);
+        for(var id:ranger.waveMembers()) {
+            var entity=level.getEntity(id);
+            if(entity instanceof DreadmaneEntity) helper.assertTrue(level.noCollision(entity,entity.getBoundingBox()),
+                    "relocated Dreadmane must not intersect terrain");
+        }
+        level.setBlockAndUpdate(obstructed,previousBlock);
         for(var id:ranger.waveMembers())helper.assertTrue(com.cosmicpve.combat.ownership.OwnedAllyResolver.ownerId(level.getEntity(id)).orElseThrow().equals(ranger.getUUID()),"Every component is Ranger-owned");
         float boundaryHealth=ranger.getHealth();int boundaryPhase=ranger.phaseState();var safe=ranger.position();
         ranger.snapTo(max.getX()+10,max.getY()+10,max.getZ()+10,ranger.getYRot(),ranger.getXRot());ranger.setDeltaMovement(2,2,2);ranger.tick();

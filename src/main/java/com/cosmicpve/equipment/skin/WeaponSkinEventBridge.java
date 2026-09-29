@@ -22,12 +22,6 @@ public final class WeaponSkinEventBridge {
             event.getCarriedSlotAccess().set(event.getCarriedItem());
             event.getSlot().set(event.getSlot().getItem());
             if (outcome == WeaponSkinApplicationService.ApplyOutcome.SUCCESS) WeaponSkinFeedback.play(player, true);
-            player.displayClientMessage(Component.translatable(switch (outcome) {
-                case SUCCESS -> "message.cosmicpve.skin.applied";
-                case REJECTED_ALREADY_SKINNED -> "message.cosmicpve.skin.already";
-                case REJECTED_TARGET -> "message.cosmicpve.skin.incompatible";
-                default -> "message.cosmicpve.skin.invalid";
-            }), true);
             return;
         }
 
@@ -41,7 +35,6 @@ public final class WeaponSkinEventBridge {
                 event.getSlot().set(event.getSlot().getItem());
                 event.getCarriedSlotAccess().set(result.returnedSkin());
                 WeaponSkinFeedback.play(player, false);
-                player.displayClientMessage(Component.translatable("message.cosmicpve.skin.removed"), true);
             }
         }
     }

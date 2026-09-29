@@ -49,7 +49,7 @@ public final class EquippedPersistentEffectService {
         reconcileOverloadHealth(entity);
     }
 
-    void reconcileOverloadHealth(LivingEntity entity) {
+    public void reconcileOverloadHealth(LivingEntity entity) {
         OverloadBehavior.reconcile(entity, OverloadBehavior.effectiveBonus(entity, enchantments, virtualGrants));
     }
 

@@ -14,6 +14,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Relative;
@@ -37,10 +38,12 @@ public final class PitchPerfectService {
             List.of(new BlockPos(14, 3, 15), new BlockPos(14, 3, 19)));
     private static final int[] PORTAL_CENTERS_Z = {3, 10, 17};
     private final Map<UUID, Attempt> attempts = new HashMap<>();
+    private final List<SuccessCue> successCues = new java.util.ArrayList<>();
+    public static final List<Float> SUCCESS_PITCHES = List.of(.8F, 1.0F, 1.2F, 1.4F, 1.6F);
 
     public static int requiredRounds(int participants) {
         if (participants < 1 || participants > 4) throw new IllegalArgumentException("Pitch Perfect party size must be 1–4");
-        return participants + 2;
+        return participants + 3;
     }
 
     public static Round newRound(RandomSource random, int generation) {
@@ -101,6 +104,7 @@ public final class PitchPerfectService {
             GuessResult result = guess(attempt, portal, generation, tick, RandomSource.create());
             if (!result.accepted()) return false;
             if (result.correct()) {
+                scheduleSuccessCue(session.sessionId(), session.participants(), tick);
                 Component message = successMessage(attempt.completed, attempt.required);
                 for (UUID participant : session.participants()) {
                     ServerPlayer member = level.getServer().getPlayerList().getPlayer(participant);
@@ -180,6 +184,7 @@ public final class PitchPerfectService {
         try {
             boolean correct = attempt.round.portalNotes().get(portal) == attempt.round.targetNote();
             if (correct) attempt.completed++;
+            else attempt.completed = Math.max(0, attempt.completed - 1);
             attempt.lastResolutionTick = tick;
             attempt.complete = attempt.completed == attempt.required;
             if (!attempt.complete) attempt.round = newRound(random, generation + 1);
@@ -190,6 +195,31 @@ public final class PitchPerfectService {
     }
 
     public void cleanup(UUID sessionId) { attempts.remove(sessionId); }
+
+    void scheduleSuccessCue(UUID sessionId, List<UUID> participants, long tick) {
+        successCues.add(new SuccessCue(sessionId, List.copyOf(participants), tick, 0));
+    }
+
+    /** Independent of room completion, so the final five-note cue can finish in the Decision Box. */
+    public void tickSuccessCues(MinecraftServer server) { tickSuccessCues(server, server.getTickCount()); }
+
+    void tickSuccessCues(MinecraftServer server, long now) {
+        for (var iterator = successCues.listIterator(); iterator.hasNext();) {
+            SuccessCue cue = iterator.next();
+            if (now < cue.startedTick() + cue.nextNote() * 2L) continue;
+            for (UUID id : cue.participants()) {
+                ServerPlayer player = server.getPlayerList().getPlayer(id);
+                if (player != null && player.isAlive()) TrialTitleService.playForPlayer(player,
+                        SoundEvents.NOTE_BLOCK_PLING.value(), 1.0F, SUCCESS_PITCHES.get(cue.nextNote()));
+            }
+            if (cue.nextNote() == SUCCESS_PITCHES.size() - 1) iterator.remove();
+            else iterator.set(new SuccessCue(cue.sessionId(), cue.participants(), cue.startedTick(), cue.nextNote() + 1));
+        }
+    }
+
+    public void clearSuccessCues(UUID sessionId) { successCues.removeIf(cue -> cue.sessionId().equals(sessionId)); }
+
+    private record SuccessCue(UUID sessionId, List<UUID> participants, long startedTick, int nextNote) {}
 
     public record Round(List<Integer> portalNotes, int targetNote, int generation) {
         public Round {
@@ -212,7 +242,7 @@ public final class PitchPerfectService {
         private boolean complete;
 
         public Attempt(int required, Round round, BlockPos spawn) {
-            if (required < 3 || required > 6) throw new IllegalArgumentException("Invalid round target");
+            if (required < 4 || required > 7) throw new IllegalArgumentException("Invalid round target");
             this.required = required; this.round = round; this.spawn = spawn;
         }
         public int required() { return required; }

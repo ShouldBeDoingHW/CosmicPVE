@@ -48,6 +48,18 @@ public final class MadnessGameTests {
         var originalSession=sessions.active(server); var content=CosmicContent.repository(); var original=content.snapshot();
         var a=mockPlayer(helper); var b=mockPlayer(helper); var spectator=mockPlayer(helper);
         try {
+            var health=a.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.MAX_HEALTH);
+            var roomHealthId=CosmicPVE.id("gametest_room_restore_health");
+            health.addTransientModifier(new net.minecraft.world.entity.ai.attributes.AttributeModifier(roomHealthId,6,
+                    net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation.ADD_VALUE));
+            a.setHealth(2); a.getFoodData().setFoodLevel(3); a.getFoodData().setSaturation(0);
+            com.cosmicpve.command.PlayerUtilityService.restoreForTrialRoom(a);
+            helper.assertTrue(a.getMaxHealth()==26 && a.getHealth()==26 && a.getFoodData().getFoodLevel()==20
+                    && a.getFoodData().getSaturationLevel()==com.cosmicpve.command.PlayerUtilityService.RESTORE_SATURATION,
+                    "physical room reset fills current effective 26 HP and established food/saturation values");
+            health.removeModifier(roomHealthId); a.setHealth(4);
+            com.cosmicpve.command.PlayerUtilityService.restoreForTrialRoom(a);
+            helper.assertTrue(a.getMaxHealth()==20 && a.getHealth()==20,"ordinary 20 HP room reset also reaches full health");
             var definitions=List.copyOf(original.madnessDefinitions().values());
             helper.assertTrue(definitions.size()==10,"ten production Madness definitions");
             var fixture=com.cosmicpve.trial.TrialSession.joining(UUID.randomUUID(),CosmicPVE.id("unused"),net.minecraft.core.BlockPos.ZERO,List.of(),List.of())
@@ -162,21 +174,22 @@ public final class MadnessGameTests {
         var constructor=stateClass.getDeclaredConstructor(); constructor.setAccessible(true);
         var apply=MadnessRuntime.class.getDeclaredMethod("apply",net.minecraft.server.level.ServerPlayer.class,
                 stateClass,MadnessDefinition.class,net.minecraft.resources.Identifier.class); apply.setAccessible(true);
-        for(String handler:List.of("owl_gene","statues","rocket_man")) {
+        for(String handler:List.of("inventory_shuffle","owl_gene","statues","rocket_man")) {
             var d=definitions.stream().filter(row -> row.handler().getPath().equals(handler)).findFirst().orElseThrow();
             var state=constructor.newInstance(); packets(player); packets(spectator);
             for(int tick=0;tick<d.interval(0)+(handler.equals("rocket_man")?0:60);tick++)
                 apply.invoke(MadnessRuntime.INSTANCE,player,state,d,com.cosmicpve.trial.TrialSessionService.CINDER_WOLF);
             var sounds=packets(player).stream().filter(net.minecraft.network.protocol.game.ClientboundSoundPacket.class::isInstance)
                     .map(net.minecraft.network.protocol.game.ClientboundSoundPacket.class::cast).toList();
-            if(handler.equals("rocket_man")) helper.assertTrue(sounds.size()==1 && sounds.getFirst().getSound().value()==net.minecraft.sounds.SoundEvents.FIREWORK_ROCKET_BLAST,"one Firework Blast per Rocket activation");
+            if(handler.equals("rocket_man")) helper.assertTrue(sounds.size()==4 && sounds.getLast().getSound().value()==net.minecraft.sounds.SoundEvents.FIREWORK_ROCKET_BLAST,"three warning notes and one Firework Blast per Rocket activation");
             else {
                 int offset=handler.equals("statues")?1:0;
                 helper.assertTrue(sounds.size()==3+offset,"one countdown sequence per effect");
                 if(offset==1) helper.assertTrue(sounds.getFirst().getSound().value()==net.minecraft.sounds.SoundEvents.WITHER_SPAWN,"Statues starts with Wither Spawn before notes");
-                for(int i=0;i<3;i++) helper.assertTrue(sounds.get(i+offset).getSound().value()==net.minecraft.sounds.SoundEvents.NOTE_BLOCK_PLING.value()
-                        && sounds.get(i+offset).getPitch()==(float)i,"actual sound packet retains exact PLING pitch "+i+" (including zero)");
             }
+            int offset=handler.equals("statues")?1:0;
+            for(int i=0;i<3;i++) helper.assertTrue(sounds.get(i+offset).getSound().value()==net.minecraft.sounds.SoundEvents.NOTE_BLOCK_PLING.value()
+                    && sounds.get(i+offset).getPitch()==(float)i,"actual sound packet retains exact PLING pitch "+i+" (including zero)");
             helper.assertTrue(packets(spectator).isEmpty(),"Madness sounds never broadcast to unrelated players");
         }
         MadnessRuntime.INSTANCE.tick(helper.getLevel().getServer(),null);

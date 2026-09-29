@@ -62,7 +62,7 @@ class WeaponSkinFoundationTest {
                 .accepts(new ItemStack(Items.NETHERITE_SWORD)));
     }
 
-    @Test void canonicalLoreUsesPerSkinNameColorsAndSharedYellowGrayPresentation() {
+    @Test void canonicalLoreUsesPerSkinNameColorsAndSharedRedGrayPresentation() {
         assertSkinLore(WeaponSkinDefinitions.BOOSTED_CHAINSAW, 0xCCA00A,
                 WeaponSkinDefinition.WeaponKind.AXE, 1);
         assertSkinLore(WeaponSkinDefinitions.MAUIS_HOOK, 0x404242,
@@ -75,6 +75,20 @@ class WeaponSkinFoundationTest {
         assertSkinLore(WeaponSkinDefinitions.WHISK_TAKER, 0xB08E00, WeaponSkinDefinition.WeaponKind.AXE, 2);
         assertSkinLore(WeaponSkinDefinitions.SPINAL_TAP, 0x00F02C, WeaponSkinDefinition.WeaponKind.SWORD, 1);
         assertSkinLore(WeaponSkinDefinitions.THE_CARVER, 0xDBD70B, WeaponSkinDefinition.WeaponKind.SWORD, 2);
+    }
+
+    @Test void revisedGrimAxeAndCarverDescriptionsRemainSeparate() throws Exception {
+        try (var reader = new InputStreamReader(java.util.Objects.requireNonNull(getClass().getResourceAsStream(
+                "/assets/cosmicpve/lang/en_us.json")))) {
+            var language = JsonParser.parseReader(reader).getAsJsonObject();
+            assertEquals("5% chance to suppress enemy unique and elite enchantments.",
+                    language.get("weapon_skin.cosmicpve.grim_axe.effect").getAsString());
+            assertEquals("Devour IV", language.get("weapon_skin.cosmicpve.the_carver.effect.devour").getAsString());
+            assertEquals("Deal +3.3% damage to enemies at a lower health percentage.",
+                    language.get("weapon_skin.cosmicpve.the_carver.effect.damage").getAsString());
+        }
+        assertEquals(2, WeaponSkinDefinitions.find(WeaponSkinDefinitions.THE_CARVER)
+                .orElseThrow().effectDescription().size(), "Carver's other effect remains on its own lore line");
     }
 
     @Test void typedDataCodecsRejectInvalidVersions() {
@@ -317,15 +331,28 @@ class WeaponSkinFoundationTest {
         assertEquals(color, definition.nameColor());
         assertEquals(kind, definition.weaponKind());
         var lines = WeaponSkinLore.applicationItem(definition);
-        assertEquals(effectLines + 3, lines.size());
+        var title = WeaponSkinItemFactory.create(id).getHoverName();
+        assertEquals("Item Skin (" + definition.displayName().getString() + ")", title.getString());
+        assertEquals(color, title.getSiblings().getFirst().getStyle().getColor().getValue());
+        assertEquals(effectLines + 6, lines.size());
         for (int index = 0; index < effectLines; index++) {
-            assertEquals(net.minecraft.ChatFormatting.YELLOW.getColor(),
+            assertEquals(0xFF5555,
                     lines.get(index).getStyle().getColor().getValue());
         }
-        for (int index = effectLines; index < lines.size(); index++) {
+        assertEquals("", lines.get(effectLines).getString());
+        assertEquals("Attach this skin to any " + kind.name(), lines.get(effectLines + 1).getString());
+        var applicabilityClass = lines.get(effectLines + 1).getSiblings().getFirst();
+        assertEquals(0xFFFFFF, applicabilityClass.getStyle().getColor().getValue());
+        assertTrue(applicabilityClass.getStyle().isUnderlined());
+        assertTrue(applicabilityClass.getStyle().isItalic());
+        assertEquals("to over-ride its visual appearance.", lines.get(effectLines + 2).getString());
+        assertEquals("", lines.get(effectLines + 3).getString());
+        for (int index = effectLines + 4; index < lines.size(); index++) {
             assertEquals(net.minecraft.ChatFormatting.GRAY.getColor(),
                     lines.get(index).getStyle().getColor().getValue());
         }
+        assertEquals("Drag n' Drop onto item to attach.", lines.get(effectLines + 4).getString());
+        assertEquals("Right-Click item to detach skin.", lines.get(effectLines + 5).getString());
         assertEquals(color, WeaponSkinLore.active(definition).getStyle().getColor().getValue());
         assertTrue(WeaponSkinLore.active(definition).getStyle().isBold());
         assertEquals(effectLines, definition.effectDescription().size());

@@ -250,6 +250,7 @@ public final class TrialSessionService {
 
     public void tick(MinecraftServer server) {
         celebrations.tick(server);
+        pitchPerfect.tickSuccessCues(server);
         TrialSession session = active(server).orElse(null);
         if (session != null) {
             for (UUID id : session.participants()) {
@@ -727,6 +728,8 @@ public final class TrialSessionService {
         forOnline(server, next, player -> {
             handlers.apply(CosmicContent.repository().requireTrialRoom(room).loadout(),player);
             teleport(player, roomSpawns.get(session.sessionId()));
+            CosmicCombat.reconcileRoomEntryMaxHealth(player);
+            com.cosmicpve.command.PlayerUtilityService.restoreForTrialRoom(player);
         });
     }
 
@@ -1252,6 +1255,7 @@ public final class TrialSessionService {
     }
     private void cleanupAndClose(MinecraftServer server, TrialSession session) {
         timerDisplay.hideAll(server); cleanupWorldState(server, session); repository.clear(server); decisionSpawns.remove(session.sessionId());
+        pitchPerfect.clearSuccessCues(session.sessionId());
         roomSpawns.remove(session.sessionId()); protection.clearExplicitAllows();
     }
     private void cleanupWorldState(MinecraftServer server, TrialSession session) {

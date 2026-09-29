@@ -69,12 +69,52 @@ public final class Step8FGameTests {
         var generator = new RewardGeneratorService();
         var random = helper.getLevel().getRandom();
         var context = new RewardGenerationContext(helper.getLevel().registryAccess(), random, null);
-        var expectedCounts = Map.of("ultimate", 21, "legendary", 22, "mastery", 25);
+        var expectedCounts = Map.of("ultimate", 20, "legendary", 21, "mastery", 24);
         expectedCounts.forEach((tier, expected) -> {
             var table = CosmicContent.repository().requireRewardTable(CosmicPVE.id("space_chest/" + tier));
             helper.assertTrue(table.entries().size() == expected, tier + " Space Chest row count must be exact");
             table.entries().forEach(entry -> helper.assertTrue(generator.generate(entry.reward(), context).isPresent(),
                     tier + " reward must construct: " + entry.reward()));
+            var equipment = table.entries().stream().filter(entry -> entry.reward()
+                    instanceof com.cosmicpve.content.definition.reward.RewardDescriptor.GeneratedEquipment).toList();
+            helper.assertTrue(equipment.size() == 2, tier + " must have exactly one armor and one weapon row");
+            var categories = new java.util.HashSet<com.cosmicpve.content.definition.reward.GeneratedEquipmentCategory>();
+            for (var row : equipment) {
+                var definition = ((com.cosmicpve.content.definition.reward.RewardDescriptor.GeneratedEquipment) row.reward()).definition();
+                categories.add(definition.category());
+                int expectedWeight = switch (tier) { case "ultimate" -> 7; case "legendary" -> 8; default -> 10; };
+                helper.assertTrue(row.weight() == expectedWeight, tier + " equipment row weight");
+                var service = new com.cosmicpve.reward.GeneratedEquipmentService();
+                var enchantments = helper.getLevel().registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
+                var observedTypes = new java.util.HashSet<net.minecraft.world.item.Item>();
+                var sampleRandom = net.minecraft.util.RandomSource.create(12345 + tier.hashCode());
+                for (int seed = 0; seed < 100; seed++) {
+                    var item = service.generate(definition, enchantments, sampleRandom);
+                    observedTypes.add(item.getItem());
+                    helper.assertTrue(item.get(net.minecraft.core.component.DataComponents.CUSTOM_NAME) != null
+                            && !item.getHoverName().getString().isBlank()
+                            && !item.getHoverName().getStyle().isItalic(), "Generated name must be stable and non-italic");
+                    helper.assertTrue(com.cosmicpve.reward.GeneratedEquipmentNames.nouns(item.getItem()).stream()
+                            .anyMatch(noun -> item.getHoverName().getString().contains(" " + noun)),
+                            "Generated name must use an equipment-compatible noun");
+                    var cosmic = net.minecraft.world.item.enchantment.EnchantmentHelper.getEnchantmentsForCrafting(item)
+                            .entrySet().stream().filter(entry -> entry.getKey().unwrapKey().map(key ->
+                                    key.identifier().getNamespace().equals(CosmicPVE.MOD_ID)).orElse(false)).toList();
+                    helper.assertTrue(cosmic.size() >= Math.min(definition.minimumEnchantments(),
+                                    service.candidates(item, definition, enchantments).size())
+                            && cosmic.size() <= definition.maximumEnchantments(), "Cosmic count must be within available range");
+                    cosmic.forEach(entry -> {
+                        var spec = com.cosmicpve.equipment.enchantment.CosmicEnchantmentSpecs.find(
+                                entry.getKey().unwrapKey().orElseThrow().identifier()).orElseThrow();
+                        helper.assertTrue(spec.randomPoolEligible() && spec.tier().ordinal() <= definition.maximumRarity().ordinal()
+                                && entry.getIntValue() >= 1 && entry.getIntValue() <= spec.maxLevel()
+                                && entry.getKey().value().canEnchant(item), "Generated Cosmic enchant must be valid");
+                    });
+                    assertStandardEnchants(helper, item, tier, enchantments);
+                }
+                helper.assertTrue(observedTypes.size() == 4, "Every generated equipment category must reach all four item types");
+            }
+            helper.assertTrue(categories.size() == 2, tier + " needs distinct armor and weapon categories");
         });
         var impossible = CosmicContent.repository().requireRewardTable(CosmicPVE.id("trial/impossible"));
         helper.assertTrue(impossible.entries().size() == 22 && impossible.totalWeight() == 184,
@@ -182,6 +222,44 @@ public final class Step8FGameTests {
         return inventory.getNonEquipmentItems().stream()
                 .filter(stack -> stack.is(ModItems.MOB_SPAWNER.get())
                         && stack.has(ModDataComponents.MOB_SPAWNER.get())).count();
+    }
+
+    private static void assertStandardEnchants(GameTestHelper helper, net.minecraft.world.item.ItemStack stack,
+            String tier, net.minecraft.core.Registry<net.minecraft.world.item.enchantment.Enchantment> registry) {
+        var item = stack.getItem();
+        helper.assertTrue(vanillaLevel(registry, stack, net.minecraft.world.item.enchantment.Enchantments.UNBREAKING) == 3,
+                "Generated equipment needs Unbreaking III");
+        boolean mastery = tier.equals("mastery");
+        boolean bow = item == net.minecraft.world.item.Items.BOW;
+        helper.assertTrue(vanillaLevel(registry, stack, net.minecraft.world.item.enchantment.Enchantments.MENDING)
+                == (mastery && !bow ? 1 : 0), "Only eligible Mastery gear receives Mending");
+        if (item == net.minecraft.world.item.Items.IRON_HELMET || item == net.minecraft.world.item.Items.IRON_CHESTPLATE
+                || item == net.minecraft.world.item.Items.IRON_LEGGINGS || item == net.minecraft.world.item.Items.IRON_BOOTS) {
+            helper.assertTrue(vanillaLevel(registry, stack, net.minecraft.world.item.enchantment.Enchantments.PROTECTION) == 4,
+                    "Armor needs Protection IV");
+        } else if (item == net.minecraft.world.item.Items.DIAMOND_SWORD || item == net.minecraft.world.item.Items.DIAMOND_AXE) {
+            helper.assertTrue(vanillaLevel(registry, stack, net.minecraft.world.item.enchantment.Enchantments.SHARPNESS) == 5,
+                    "Diamond melee needs Sharpness V");
+            helper.assertTrue(vanillaLevel(registry, stack, net.minecraft.world.item.enchantment.Enchantments.FIRE_ASPECT)
+                    == (item == net.minecraft.world.item.Items.DIAMOND_SWORD ? 2 : 0), "Only Sword gets Fire Aspect II");
+        } else if (bow) {
+            helper.assertTrue(vanillaLevel(registry, stack, net.minecraft.world.item.enchantment.Enchantments.POWER) == 5
+                    && vanillaLevel(registry, stack, net.minecraft.world.item.enchantment.Enchantments.INFINITY) == 1
+                    && vanillaLevel(registry, stack, net.minecraft.world.item.enchantment.Enchantments.FLAME) == 1,
+                    "Bow needs Power V, Infinity I, Flame I");
+        } else {
+            helper.assertTrue(item == net.minecraft.world.item.Items.CROSSBOW
+                    && vanillaLevel(registry, stack, net.minecraft.world.item.enchantment.Enchantments.QUICK_CHARGE) == 3
+                    && vanillaLevel(registry, stack, net.minecraft.world.item.enchantment.Enchantments.PIERCING) == 0
+                    && vanillaLevel(registry, stack, net.minecraft.world.item.enchantment.Enchantments.MULTISHOT) == 0,
+                    "Crossbow needs Quick Charge III without Piercing or Multishot");
+        }
+    }
+
+    private static int vanillaLevel(net.minecraft.core.Registry<net.minecraft.world.item.enchantment.Enchantment> registry,
+            net.minecraft.world.item.ItemStack stack,
+            net.minecraft.resources.ResourceKey<net.minecraft.world.item.enchantment.Enchantment> key) {
+        return net.minecraft.world.item.enchantment.EnchantmentHelper.getItemEnchantmentLevel(registry.getOrThrow(key), stack);
     }
 
     private static TestPlayerContext connectedTestPlayer(GameTestHelper helper) {

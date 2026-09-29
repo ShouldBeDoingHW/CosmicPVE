@@ -47,7 +47,6 @@ public final class UnexaminedEnchantmentBookItem extends Item {
         ItemStack held = player.getItemInHand(hand);
         var data = held.get(ModDataComponents.UNEXAMINED_BOOK.get());
         if (data == null) {
-            player.displayClientMessage(Component.translatable("message.cosmicpve.unexamined.invalid"), true);
             return InteractionResult.FAIL;
         }
         var registry = player.registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
@@ -56,7 +55,6 @@ public final class UnexaminedEnchantmentBookItem extends Item {
                 .toList();
         var result = UnexaminedBooks.openingService().roll(data.tier(), available, serverLevel.getRandom(), serverPlayer);
         if (result.isEmpty()) {
-            player.displayClientMessage(Component.translatable("message.cosmicpve.unexamined.empty"), true);
             return InteractionResult.FAIL;
         }
 
@@ -64,10 +62,6 @@ public final class UnexaminedEnchantmentBookItem extends Item {
         ItemStack heldAfter = UnexaminedRewardDelivery.deliver(
                 held, revealed, player.getInventory()::placeItemBackInInventory);
         launchFeedback(serverLevel, serverPlayer);
-        var rolled = result.orElseThrow();
-        player.displayClientMessage(Component.translatable("message.cosmicpve.unexamined.revealed",
-                rolled.enchantment().displayName(),
-                Component.translatable("enchantment.level." + rolled.level())), true);
         return InteractionResult.SUCCESS_SERVER.heldItemTransformedTo(heldAfter);
     }
 

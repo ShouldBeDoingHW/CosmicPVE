@@ -3,6 +3,7 @@ package com.cosmicpve.entity.woodlands;
 import com.cosmicpve.adventure.ranger.CosmicRangerEquipment;
 import java.util.*;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -25,16 +26,15 @@ import net.minecraft.world.phys.Vec3;
 public final class CosmicRangerEntity extends Bogged {
     public static final float SCALE=1.25F;
     public static final double MAX_HEALTH=350,ARMOR=3,TOUGHNESS=1,MOVEMENT_SPEED=.28;
-    public static final String INVULNERABLE_MESSAGE="The boss cannot be damaged until it’s lackeys are defeated! Get after it!";
     private final List<BlockPos> markers=new ArrayList<>();
     private final Set<UUID> waveMembers=new HashSet<>();
-    private final Map<UUID,Long> messageCooldowns=new HashMap<>();
     private final Map<UUID,Vec3> participantSafePositions=new HashMap<>();
     private final Map<UUID,Vec3> waveSafePositions=new HashMap<>();
     private int phaseState;
     private long arenaId=Long.MIN_VALUE;
     private BoundingBox arenaBounds;
     private Vec3 rangerSafePosition;
+    private long lastWaveFailureTick = -1000;
 
     public CosmicRangerEntity(EntityType<? extends Bogged> type,Level level){super(type,level);}
     public static AttributeSupplier.Builder createAttributes(){return Bogged.createAttributes().add(Attributes.MAX_HEALTH,MAX_HEALTH)
@@ -61,7 +61,7 @@ public final class CosmicRangerEntity extends Bogged {
     public Set<UUID> participants(){return Set.copyOf(participantSafePositions.keySet());}
     public boolean phaseInvulnerable(){return phaseState==1||phaseState==3;}
     @Override public boolean hurtServer(ServerLevel level,DamageSource source,float amount){
-        if(phaseInvulnerable()&&!source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)){message(level,source);return false;}
+        if(phaseInvulnerable()&&!source.is(DamageTypeTags.BYPASSES_INVULNERABILITY))return false;
         float floor=healthFloor(source);
         boolean hit=amount>0&&super.hurtServer(level,source,amount);
         if(hit&&floor>0&&getHealth()<=floor+.01F)startWave(level,phaseState==0?1:2);
@@ -77,14 +77,16 @@ public final class CosmicRangerEntity extends Bogged {
         if(source.is(DamageTypeTags.BYPASSES_INVULNERABILITY))return 0;
         return phaseState==0?(float)(MAX_HEALTH*.66):phaseState==2?(float)(MAX_HEALTH*.33):0;
     }
-    private void message(ServerLevel level,DamageSource source){
-        if(!(source.getEntity() instanceof ServerPlayer p))return;long now=level.getGameTime(),next=messageCooldowns.getOrDefault(p.getUUID(),0L);
-        if(now>=next){p.displayClientMessage(Component.literal(INVULNERABLE_MESSAGE).withColor(0x43B03C),true);messageCooldowns.put(p.getUUID(),now+60);}
-    }
     private void startWave(ServerLevel level,int wave){
         waveMembers.clear();waveSafePositions.clear();
-        for(BlockPos spawn:waveSpawnPositions(level)){
+        var occupied = new ArrayList<AABB>();
+        int pairs = 0;
+        for(BlockPos preferred:waveSpawnPositions(level)){
             var mount=com.cosmicpve.registry.ModEntities.DREADMANE.get().create(level,EntitySpawnReason.TRIGGERED);if(mount==null)continue;
+            var riderProbe=com.cosmicpve.registry.ModEntities.FOREST_FANATIC.get().create(level,EntitySpawnReason.JOCKEY);
+            if(riderProbe==null)break;
+            BlockPos spawn=findSafeWaveSpawn(level,preferred,mount,riderProbe.getBbHeight(),occupied);
+            if(spawn==null)break;
             mount.snapTo(spawn.getX()+.5,spawn.getY(),spawn.getZ()+.5,0,0);mount.finalizeSpawn(level,level.getCurrentDifficultyAt(spawn),EntitySpawnReason.TRIGGERED,null);
             mount.markEncounterOwner(this);
             // A rider cannot attach reliably until its vehicle has joined the level. Add the
@@ -94,8 +96,45 @@ public final class CosmicRangerEntity extends Bogged {
             if(rider==null||!level.addFreshEntity(rider)){if(rider!=null)rider.discard();mount.discard();continue;}
             waveMembers.add(mount.getUUID());waveMembers.add(rider.getUUID());
             waveSafePositions.put(mount.getUUID(),mount.position());waveSafePositions.put(rider.getUUID(),rider.position());
+            occupied.add(pairVolume(mount,rider.getBbHeight())); pairs++;
+        }
+        if(pairs!=4){
+            for(UUID id:waveMembers){var entity=level.getEntity(id);if(entity!=null)entity.discard();}
+            waveMembers.clear();waveSafePositions.clear();
+            if(level.getGameTime()-lastWaveFailureTick>100){
+                com.cosmicpve.CosmicPVE.LOGGER.error("Cosmic Ranger wave {} could not safely place four jockey pairs at arena {}; phase remains retryable",wave,arenaId);
+                lastWaveFailureTick=level.getGameTime();
+            }
+            return;
         }
         phaseState=wave==1?1:3;
+    }
+    private BlockPos findSafeWaveSpawn(ServerLevel level,BlockPos preferred,Entity mount,float riderHeight,List<AABB> occupied){
+        for(BlockPos candidate:waveCandidates(preferred)){
+            if(arenaBounds!=null && !arenaBounds.isInside(candidate))continue;
+            BlockPos floor=candidate.below();
+            if(!level.getBlockState(floor).isFaceSturdy(level,floor,Direction.UP))continue;
+            mount.snapTo(candidate.getX()+.5,candidate.getY(),candidate.getZ()+.5,0,0);
+            AABB volume=pairVolume(mount,riderHeight);
+            if(arenaBounds!=null&&!contains(arenaBounds,volume))continue;
+            if(occupied.stream().anyMatch(box->box.intersects(volume.inflate(.25))))continue;
+            if(!level.noCollision(mount,volume))continue;
+            return candidate;
+        }
+        return null;
+    }
+    private static AABB pairVolume(Entity mount,float riderHeight){
+        AABB box=mount.getBoundingBox();
+        return new AABB(box.minX,box.minY,box.minZ,box.maxX,box.maxY+riderHeight+.5,box.maxZ);
+    }
+    public static List<BlockPos> waveCandidates(BlockPos preferred){
+        var result=new ArrayList<BlockPos>();
+        for(int dy:new int[]{0,1,-1,2,-2,3,-3}){
+            result.add(preferred.offset(0,dy,0));
+            for(int radius=1;radius<=4;radius++)for(int dx=-radius;dx<=radius;dx++)for(int dz=-radius;dz<=radius;dz++)
+                if(Math.max(Math.abs(dx),Math.abs(dz))==radius)result.add(preferred.offset(dx,dy,dz));
+        }
+        return result;
     }
     private List<BlockPos> waveSpawnPositions(ServerLevel level){
         if(!level.dimension().equals(com.cosmicpve.adventure.DenseWoodlandsSessionService.DIMENSION)){

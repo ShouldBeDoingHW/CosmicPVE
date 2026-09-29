@@ -22,11 +22,5 @@ public final class TrialTrinketEventBridge {
         event.getSlot().set(event.getSlot().getItem());
         if (outcome == TrialTrinketApplicationService.Outcome.SUCCESS)
             ItemApplicationFeedback.play(player, ItemApplicationFeedback.Cue.SUCCESS);
-        player.displayClientMessage(Component.translatable(outcome == TrialTrinketApplicationService.Outcome.SUCCESS
-                ? "message.cosmicpve.trial_trinket.applied"
-                : outcome == TrialTrinketApplicationService.Outcome.REJECTED_PORTAL_STACK
-                ? "message.cosmicpve.trial_trinket.portal_stack"
-                : outcome == TrialTrinketApplicationService.Outcome.REJECTED_EQUAL_OR_WEAKER
-                ? "message.cosmicpve.trial_trinket.weaker" : "message.cosmicpve.trial_trinket.invalid"), true);
     }
 }

@@ -304,6 +304,12 @@ public final class CosmicCombat {
     }
 
     public static ArmorSetResolver armorSets() { return ARMOR_SETS; }
+    /** Resolve equipment-owned maximum HP before a physical Trial room resets current HP. */
+    public static void reconcileRoomEntryMaxHealth(net.minecraft.server.level.ServerPlayer player) {
+        ARMOR_SET_EVENTS.reconcileAttributes(player);
+        MASK_EVENTS.reconcileHealth(player);
+        EQUIPPED_EFFECTS.reconcileOverloadHealth(player);
+    }
     public static com.cosmicpve.activity.ActivityContextService activities() { return ACTIVITIES; }
     public static com.cosmicpve.equipment.armor.CosmicMovementBonusService movement() { return MOVEMENT; }
     public static com.cosmicpve.equipment.armor.ArmorSetSuppressionService armorSetSuppression() {

@@ -21,7 +21,7 @@ import net.minecraft.world.item.ItemDisplayContext;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.renderstate.RegisterRenderStateModifiersEvent;
 
-/** Body-local waist overlay. Jelly Roll is omitted until its canonical source model is supplied. */
+/** Body-local waist overlay for authored belt models. */
 public final class BeltClientPresentation {
     // LivingEntityRenderer has already flipped X/Y for HumanoidModel coordinates:
     // body Y=0 is the shoulders and Y=12 pixels is the waist (positive down-body).
@@ -31,8 +31,7 @@ public final class BeltClientPresentation {
     private BeltClientPresentation() {}
     public static void registerState(RegisterRenderStateModifiersEvent event) {
         event.registerEntityModifier(new TypeToken<AvatarRenderer<?>>() {}, (LivingEntity avatar, AvatarRenderState state) ->
-                ACCESSORIES.equippedBelt(avatar).filter(value -> value != BeltDefinition.JELLY_ROLL
-                        && value != BeltDefinition.CINDERWOLF).ifPresent(definition -> {
+                ACCESSORIES.equippedBelt(avatar).filter(value -> value != BeltDefinition.CINDERWOLF).ifPresent(definition -> {
                     var itemState = new ItemStackRenderState();
                     Minecraft.getInstance().getItemModelResolver().updateForLiving(
                             itemState, BeltItemFactory.create(definition), ItemDisplayContext.FIXED, avatar);

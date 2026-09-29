@@ -36,6 +36,47 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import org.junit.jupiter.api.Test;
 
 class GearSalvageServiceTest {
+    @Test void multipleGearPiecesProduceOneSummedBottleAlongsideBookDust() {
+        var fixture = fixture();
+        var input = new SimpleContainer(5);
+        for (int slot = 1; slot <= 3; slot++) {
+            ItemStack boots = new ItemStack(Items.IRON_BOOTS);
+            enchant(boots, fixture.protection(), 3);
+            enchant(boots, fixture.molten(), 1);
+            assertEquals(200, new GearSalvageService().storedXp(boots).orElseThrow());
+            input.setItem(slot, boots);
+        }
+        ItemStack book = new ItemStack(ModItems.COSMIC_ENCHANTMENT_BOOK.get());
+        book.set(ModDataComponents.COSMIC_ENCHANT_BOOK.get(), new CosmicEnchantmentBookData(
+                1, ModEnchantments.MOLTEN.identifier(), 1, 50, 50));
+        input.setItem(4, book);
+
+        var result = new TinkererSalvageService().confirm(input, 1, 5);
+        assertEquals(3, result.consumedGear());
+        assertEquals(1, result.consumedBooks());
+        assertEquals(1, result.xpBottles().size());
+        assertEquals(600, result.xpBottles().getFirst()
+                .get(ModDataComponents.STORED_XP_BOTTLE.get()).storedXp());
+        assertFalse(result.dust().isEmpty());
+        for (int slot = 1; slot <= 4; slot++) assertTrue(input.getItem(slot).isEmpty());
+    }
+
+    @Test void differentGearValuesStillProduceExactlyOneBottle() {
+        var fixture = fixture();
+        var input = new SimpleContainer(3);
+        ItemStack first = new ItemStack(Items.IRON_BOOTS);
+        enchant(first, fixture.protection(), 3);
+        enchant(first, fixture.molten(), 1);
+        ItemStack second = new ItemStack(Items.IRON_BOOTS);
+        enchant(second, fixture.protection(), 4);
+        input.setItem(1, first);
+        input.setItem(2, second);
+        var result = new TinkererSalvageService().confirm(input, 1, 3);
+        assertEquals(1, result.xpBottles().size());
+        assertEquals(300, result.xpBottles().getFirst()
+                .get(ModDataComponents.STORED_XP_BOTTLE.get()).storedXp());
+    }
+
     @Test void canonicalMixedBootsProduceExactlyOneTypedBottleWorth2275Xp() {
         var fixture = fixture();
         ItemStack boots = new ItemStack(Items.IRON_BOOTS);

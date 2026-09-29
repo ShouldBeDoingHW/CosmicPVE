@@ -32,11 +32,7 @@ public final class DodgeProcResolver implements ProcCandidateResolver {
         if (chance <= 0) return List.of();
         return List.of(new ProcCandidate(CANDIDATE, ProcHook.ON_TARGETED, chance, Optional.empty(), 0,
                 CooldownScope.EPHEMERAL_COMBAT, Optional.empty(), List.of(), List.of(), Optional.of(CANDIDATE),
-                ChildProcEligibility.LIMITED_DEFENSIVE_REACTION, Set.of(), CANDIDATE, activation -> {
-                    if (activation.event().ownerId().equals(activation.event().target().getUUID())
-                            && activation.event().target() instanceof net.minecraft.server.level.ServerPlayer player)
-                        player.displayClientMessage(net.minecraft.network.chat.Component.literal("* Dodge *").withColor(0xFFFF55), true);
-                },
+                ChildProcEligibility.LIMITED_DEFENSIVE_REACTION, Set.of(), CANDIDATE, activation -> {},
                 new ProcProvenance(level > 0 ? ProcSourceKind.ACTUAL_ENCHANTMENT : ProcSourceKind.OTHER,
                         level > 0 ? ModEnchantments.DODGE.identifier() : CosmicPVE.id("turkey_mask"))));
     }

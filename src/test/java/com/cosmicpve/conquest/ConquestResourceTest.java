@@ -15,7 +15,7 @@ class ConquestResourceTest {
             assertNotNull(stream);
             var entries = JsonParser.parseReader(new InputStreamReader(stream, StandardCharsets.UTF_8))
                     .getAsJsonObject().getAsJsonArray("entries");
-            assertEquals(23, entries.size());
+            assertEquals(21, entries.size());
             int totalWeight = 0;
             int unexaminedRows = 0;
             var normalized = new java.util.ArrayList<String>();
@@ -50,9 +50,7 @@ class ConquestResourceTest {
                     "10|1|1|{\"type\":\"space_chest\",\"rarity\":\"legendary\"}",
                     "12|1|1|{\"type\":\"space_chest\",\"rarity\":\"ultimate\"}",
                     "5|1|1|{\"type\":\"static_item\",\"item\":\"cosmicpve:heroic_crystal\"}",
-                    "3|1|1|{\"type\":\"static_item\",\"item\":\"cosmicpve:trial_trinket_time_1\"}",
-                    "3|1|1|{\"type\":\"static_item\",\"item\":\"cosmicpve:trial_trinket_insurance_1\"}",
-                    "3|1|1|{\"type\":\"static_item\",\"item\":\"cosmicpve:trial_trinket_skip_1\"}",
+                    "9|1|1|{\"type\":\"random_trial_trinket\",\"trinket_tier\":1}",
                     "6|1|1|{\"type\":\"enchanted_black_scroll\",\"success_rate\":50}",
                     "10|1|1|{\"type\":\"static_item\",\"item\":\"cosmicpve:personal_vault_unlock\"}",
                     "6|2|2|{\"type\":\"static_item\",\"item\":\"cosmicpve:personal_vault_unlock\"}",

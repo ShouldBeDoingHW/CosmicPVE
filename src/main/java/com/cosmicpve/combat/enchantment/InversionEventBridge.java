@@ -52,8 +52,6 @@ public final class InversionEventBridge {
                     activated[0] = true;
                     procs.dispatchInvertedOffense(event.getEntity(), attacker, capturedWeapon,
                             parentDamage, event.getSource());
-                    if (event.getEntity() instanceof ServerPlayer player)
-                        player.displayClientMessage(Component.literal("You inverted the attack! Nice!").withColor(0xFFFF55), true);
                 }, new ProcProvenance(ProcSourceKind.ACTUAL_ENCHANTMENT, ModEnchantments.INVERSION.identifier()));
         procs.dispatchTargetedCandidate(event.getEntity(), attacker, event.getEntity(), candidate);
         if (activated[0]) event.setNewDamage(0.0F);

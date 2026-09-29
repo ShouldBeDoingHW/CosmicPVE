@@ -20,11 +20,12 @@ class NestedRewardMilestoneTest {
                 "skip_1|6|1", "skip_2|4|1", "skip_3|2|1",
                 "time_1|6|1", "time_3|4|1", "time_5|2|1",
                 "fame_33|6|1", "fame_66|4|1", "fame_100|2|1",
-                "madness_1|6|1", "madness_2|4|1", "madness_3|2|1"),
+                "madness_1|6|1", "madness_2|4|1", "madness_3|2|1",
+                "insurance_1|6|1", "insurance_2|4|1", "insurance_3|2|1"),
                 describe(TrialsCreationKitRewards.ROWS));
         Set<String> ids = TrialsCreationKitRewards.ROWS.stream().map(WeightedNestedRewards.Row::id).collect(Collectors.toSet());
-        assertEquals(15, ids.size());
-        assertTrue(ids.stream().noneMatch(id -> id.contains("insurance")));
+        assertEquals(18, ids.size());
+        assertTrue(ids.stream().anyMatch(id -> id.contains("insurance")));
         boolean distinctPortalRowsCoexist = false;
         for (int seed = 0; seed < 1_000; seed++) {
             var drawn = WeightedNestedRewards.selectRows(TrialsCreationKitRewards.ROWS, 5, true, RandomSource.create(seed));

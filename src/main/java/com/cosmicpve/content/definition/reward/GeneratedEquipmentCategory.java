@@ -5,7 +5,7 @@ import com.mojang.serialization.DataResult;
 import java.util.Locale;
 
 public enum GeneratedEquipmentCategory {
-    RANDOM_IRON_ARMOR_PIECE;
+    RANDOM_IRON_ARMOR_PIECE, RANDOM_WEAPON;
     public static final Codec<GeneratedEquipmentCategory> CODEC = Codec.STRING.comapFlatMap(value -> {
         try { return DataResult.success(valueOf(value.toUpperCase(Locale.ROOT))); }
         catch (IllegalArgumentException exception) { return DataResult.error(() -> "Unknown equipment category: " + value); }

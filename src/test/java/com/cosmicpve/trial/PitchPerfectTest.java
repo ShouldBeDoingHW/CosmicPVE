@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 class PitchPerfectTest {
     @Test void registrationAndPartyRoundSnapshot() {
         assertTrue(TrialSessionService.roomPool(TrialPhase.APPRENTICE).contains(TrialSessionService.PITCH_PERFECT));
-        for (int party = 1; party <= 4; party++) assertEquals(party + 2, PitchPerfectService.requiredRounds(party));
+        for (int party = 1; party <= 4; party++) assertEquals(party + 3, PitchPerfectService.requiredRounds(party));
         assertEquals(4, PitchPerfectService.TARGET_PLATES.size());
         assertEquals(6, PitchPerfectService.PORTAL_BUTTONS.size());
         for (int portal = 0; portal < 6; portal++) {
@@ -47,33 +47,61 @@ class PitchPerfectTest {
 
     @Test void wrongAnswerRerollsOnlyCurrentRoundAndStaleGuessesAreIgnored() {
         var round = PitchPerfectService.newRound(RandomSource.create(4), 1);
-        var attempt = new PitchPerfectService.Attempt(3, round, new BlockPos(8, 2, 10));
+        var attempt = new PitchPerfectService.Attempt(4, round, new BlockPos(8, 2, 10));
         int wrong = java.util.stream.IntStream.range(0, 6)
                 .filter(i -> round.portalNotes().get(i) != round.targetNote()).findFirst().orElseThrow();
         var result = PitchPerfectService.guess(attempt, wrong, 1, 10, RandomSource.create(8));
         assertTrue(result.accepted()); assertFalse(result.correct());
-        assertEquals(0, attempt.completed()); assertEquals(3, attempt.required());
+        assertEquals(0, attempt.completed()); assertEquals(4, attempt.required());
         assertEquals(2, attempt.round().generation()); assertNotSame(round, attempt.round());
         assertFalse(PitchPerfectService.guess(attempt, wrong, 1, 11, RandomSource.create(9)).accepted());
         assertFalse(PitchPerfectService.guess(attempt, wrong, 2, 10, RandomSource.create(9)).accepted());
     }
 
+    @Test void wrongAnswerRollsProgressBackOnceAtEveryBoundary() {
+        for (int before : new int[]{0, 1, 2, 6}) {
+            var attempt = new PitchPerfectService.Attempt(7,
+                    PitchPerfectService.newRound(RandomSource.create(7), 1), BlockPos.ZERO);
+            for (int i = 0; i < before; i++) {
+                var round = attempt.round();
+                assertTrue(PitchPerfectService.guess(attempt, round.portalNotes().indexOf(round.targetNote()),
+                        round.generation(), i + 1, RandomSource.create(i + 10)).correct());
+            }
+            var round = attempt.round();
+            int wrong = java.util.stream.IntStream.range(0, 6)
+                    .filter(i -> round.portalNotes().get(i) != round.targetNote()).findFirst().orElseThrow();
+            assertFalse(PitchPerfectService.guess(attempt, wrong, round.generation(), 100,
+                    RandomSource.create(99)).correct());
+            assertEquals(Math.max(0, before - 1), attempt.completed());
+            assertEquals(7, attempt.required());
+            assertFalse(PitchPerfectService.guess(attempt, wrong, round.generation(), 100,
+                    RandomSource.create(100)).accepted());
+            assertTrue(attempt.round().generation() > round.generation());
+        }
+    }
+
+    @Test void successCueIsFiveStrictlyAscendingNotes() {
+        assertEquals(5, PitchPerfectService.SUCCESS_PITCHES.size());
+        for (int i = 1; i < 5; i++)
+            assertTrue(PitchPerfectService.SUCCESS_PITCHES.get(i) > PitchPerfectService.SUCCESS_PITCHES.get(i - 1));
+    }
+
     @Test void correctAnswerAdvancesOnceAndFinalAnswerCompletesWithoutBonusRound() {
-        var attempt = new PitchPerfectService.Attempt(3,
+        var attempt = new PitchPerfectService.Attempt(4,
                 PitchPerfectService.newRound(RandomSource.create(1), 1), BlockPos.ZERO);
-        for (int completed = 1; completed <= 3; completed++) {
+        for (int completed = 1; completed <= 4; completed++) {
             var round = attempt.round();
             int portal = round.portalNotes().indexOf(round.targetNote());
             var result = PitchPerfectService.guess(attempt, portal, round.generation(), completed * 2,
                     RandomSource.create(50 + completed));
             assertTrue(result.accepted()); assertTrue(result.correct());
-            assertEquals(completed, attempt.completed()); assertEquals(completed == 3, result.complete());
+            assertEquals(completed, attempt.completed()); assertEquals(completed == 4, result.complete());
             assertFalse(PitchPerfectService.guess(attempt, portal, round.generation(), completed * 2,
                     RandomSource.create()).accepted());
         }
-        assertEquals(3, attempt.round().generation());
-        var message = PitchPerfectService.successMessage(1, 3);
-        assertEquals("Pitch number 1 identified! Only 2 more to go!", message.getString());
+        assertEquals(4, attempt.round().generation());
+        var message = PitchPerfectService.successMessage(1, 4);
+        assertEquals("Pitch number 1 identified! Only 3 more to go!", message.getString());
         assertTrue(message.getStyle().isBold()); assertTrue(message.getStyle().isItalic());
         assertEquals(0xE1BAE8, message.getStyle().getColor().getValue());
     }

@@ -15,6 +15,19 @@ import com.cosmicpve.tinkerer.TinkererSalvageService;
 import org.junit.jupiter.api.Test;
 
 class CosmicDustFoundationTest {
+    @Test void everyDustRarityGlintsAndInstructionIsExact() throws Exception {
+        for (var tier : CosmicEnchantmentTier.values()) {
+            var dust = CosmicDustService.dust(tier, 1);
+            assertTrue(dust.hasFoil());
+        }
+        try (var reader = new InputStreamReader(Objects.requireNonNull(getClass().getResourceAsStream(
+                "/assets/cosmicpve/lang/en_us.json")))) {
+            var language = JsonParser.parseReader(reader).getAsJsonObject();
+            assertEquals("Drag n' drop onto a matching rarity enchantment book to add +1% success rate!",
+                    language.get("tooltip.cosmicpve.cosmic_dust.instruction").getAsString());
+        }
+    }
+
     @Test void salvageFormulaUsesCompletedTensAndCapsAtTen() {
         assertEquals(2, CosmicDustService.yield(1, 9));
         assertEquals(3, CosmicDustService.yield(1, 10));

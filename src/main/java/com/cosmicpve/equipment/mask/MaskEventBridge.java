@@ -25,7 +25,6 @@ public final class MaskEventBridge {
             event.getSlot().set(event.getSlot().getItem());
             event.getCarriedSlotAccess().set(event.getCarriedItem());
             if (result.outcome() == MaskSplicerService.Outcome.SUCCESS) rewards.deliver(player, result.outputs());
-            player.displayClientMessage(Component.translatable("message.cosmicpve.mask_splicer." + result.outcome().name().toLowerCase()), true);
             return;
         }
         if (event.getClickAction() == ClickAction.PRIMARY && event.getCarriedItem().is(ModItems.MASK.get())) {
@@ -39,7 +38,6 @@ public final class MaskEventBridge {
             event.getSlot().set(event.getSlot().getItem());
             if (outcome == MaskApplicationService.ApplyOutcome.SUCCESS)
                 com.cosmicpve.equipment.skin.WeaponSkinFeedback.play(player, true);
-            player.displayClientMessage(Component.translatable("message.cosmicpve.mask." + outcome.name().toLowerCase()), true);
             return;
         }
         if (event.getClickAction() == ClickAction.SECONDARY && event.getCarriedItem().isEmpty()
@@ -52,7 +50,6 @@ public final class MaskEventBridge {
                 event.getCarriedSlotAccess().set(result.returnedMask());
                 com.cosmicpve.equipment.skin.WeaponSkinFeedback.play(player, false);
             }
-            player.displayClientMessage(Component.translatable("message.cosmicpve.mask.remove_" + result.outcome().name().toLowerCase()), true);
         }
     }
 }

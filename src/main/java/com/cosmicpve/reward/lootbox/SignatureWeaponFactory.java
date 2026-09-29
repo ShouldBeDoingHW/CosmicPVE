@@ -25,11 +25,16 @@ public final class SignatureWeaponFactory {
                 mutable.set(registry.getOrThrow(Enchantments.SHARPNESS), 5);
             } else if (definition == SignatureWeaponDefinition.RANGERS_BOW) {
                 mutable.set(registry.getOrThrow(Enchantments.POWER), 5);
+                mutable.set(registry.getOrThrow(Enchantments.INFINITY), 1);
+                mutable.set(registry.getOrThrow(Enchantments.FLAME), 1);
             } else {
                 mutable.set(registry.getOrThrow(Enchantments.QUICK_CHARGE), 3);
                 mutable.set(registry.getOrThrow(Enchantments.PIERCING), 4);
             }
             mutable.set(registry.getOrThrow(Enchantments.UNBREAKING), 3);
+            if (definition != SignatureWeaponDefinition.RANGERS_BOW) {
+                mutable.set(registry.getOrThrow(Enchantments.MENDING), 1);
+            }
         });
         return stack;
     }

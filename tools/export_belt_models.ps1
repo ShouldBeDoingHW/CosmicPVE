@@ -2,7 +2,8 @@ param([string]$RepositoryRoot = (Split-Path -Parent $PSScriptRoot))
 $ErrorActionPreference = 'Stop'
 $models = @(
     @{ Source='blockbench/belts/bandolier/bandolier_belt.bbmodel'; Runtime='bandolier' },
-    @{ Source='blockbench/belts/shock_therapy/Shock_Therapy.bbmodel'; Runtime='shock_therapy' }
+    @{ Source='blockbench/belts/shock_therapy/Shock_Therapy.bbmodel'; Runtime='shock_therapy' },
+    @{ Source='blockbench/belts/jelly_roll/jelly_roll.bbmodel'; Runtime='jelly_roll' }
 )
 $modelDir=Join-Path $RepositoryRoot 'src/main/resources/assets/cosmicpve/models/item/belt'
 $textureDir=Join-Path $RepositoryRoot 'src/main/resources/assets/cosmicpve/textures/item/belt'
@@ -27,7 +28,10 @@ function Add-Face($lines,$points,$uvs,[ref]$vi,[ref]$ti,$width,$height) {
     $indices=@()
     for($i=0;$i -lt $points.Count;$i++) {
         $p=Runtime-Point $points[$i]
-        $lines.Add(('v {0:F7} {1:F7} {2:F7}' -f $p[0],$p[1],$p[2]))
+        $lines.Add(('v {0:F7} {1:F7} {2:F7}' -f
+                [Math]::Round([decimal]$p[0],7,[MidpointRounding]::AwayFromZero),
+                [Math]::Round([decimal]$p[1],7,[MidpointRounding]::AwayFromZero),
+                [Math]::Round([decimal]$p[2],7,[MidpointRounding]::AwayFromZero)))
         # These are top-down Blockbench UVs, not bottom-up Wavefront UVs. Runtime
         # wrapper models must use flip_v=false or lower palette rows sample the sigil.
         $lines.Add(('vt {0:F7} {1:F7}' -f ($uvs[$i][0]/$width),($uvs[$i][1]/$height)))
@@ -41,7 +45,22 @@ foreach($entry in $models) {
     $lines.Add('mtllib '+$entry.Runtime+'.mtl');$lines.Add('usemtl belt');$vi=1;$ti=1
     foreach($element in $json.elements) {
         $rotation=if($null -eq $element.rotation){@(0,0,0)}else{$element.rotation}
-        $origin=if($null -eq $element.origin){@(0,0,0)}else{$element.origin};$a=$element.from;$b=$element.to
+        $origin=if($null -eq $element.origin){@(0,0,0)}else{$element.origin}
+        if($element.type -eq 'mesh') {
+            foreach($entryFace in $element.faces.PSObject.Properties) {
+                $face=$entryFace.Value
+                if($null -eq $face.texture){continue}
+                $pts=[Collections.Generic.List[object]]::new()
+                $uvs=[Collections.Generic.List[object]]::new()
+                foreach($vertexName in $face.vertices) {
+                    $pts.Add((Rotate-Point $element.vertices.$vertexName $origin $rotation))
+                    $uvs.Add($face.uv.$vertexName)
+                }
+                Add-Face $lines $pts $uvs ([ref]$vi) ([ref]$ti) $json.resolution.width $json.resolution.height
+            }
+            continue
+        }
+        $a=$element.from;$b=$element.to
         $corners=@(@($a[0],$a[1],$a[2]),@($b[0],$a[1],$a[2]),@($b[0],$b[1],$a[2]),@($a[0],$b[1],$a[2]),@($a[0],$a[1],$b[2]),@($b[0],$a[1],$b[2]),@($b[0],$b[1],$b[2]),@($a[0],$b[1],$b[2]))
         for($i=0;$i -lt 8;$i++){$corners[$i]=Rotate-Point $corners[$i] $origin $rotation}
         $map=@{north=@(1,0,3,2);south=@(4,5,6,7);west=@(0,4,7,3);east=@(5,1,2,6);up=@(3,7,6,2);down=@(0,1,5,4)}

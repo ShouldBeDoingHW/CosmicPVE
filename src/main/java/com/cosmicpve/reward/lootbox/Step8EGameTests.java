@@ -52,9 +52,15 @@ public final class Step8EGameTests {
             if (definition.kind() == com.cosmicpve.data.component.SignatureWeaponIdentity.Kind.MELEE)
                 helper.assertTrue(applied.getLevel(access.lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.SHARPNESS)) == 5,
                         "Melee signature needs Sharpness V");
-            if (definition == SignatureWeaponDefinition.RANGERS_BOW)
+            if (definition == SignatureWeaponDefinition.RANGERS_BOW) {
                 helper.assertTrue(applied.getLevel(access.lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.POWER)) == 5,
                         "Ranger's Bow needs Power V");
+                helper.assertTrue(applied.getLevel(access.lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.INFINITY)) == 1
+                        && applied.getLevel(access.lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.FLAME)) == 1
+                        && applied.getLevel(access.lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.MENDING)) == 0,
+                        "Ranger's Bow needs Infinity and Flame but not Mending");
+            } else helper.assertTrue(applied.getLevel(access.lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.MENDING)) == 1,
+                    "Every non-Ranger signature weapon needs Mending I");
             if (definition == SignatureWeaponDefinition.TRAVELERS_SPACE_BLASTER) {
                 helper.assertTrue(applied.getLevel(access.lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.QUICK_CHARGE)) == 3,
                         "Space Blaster needs Quick Charge III");

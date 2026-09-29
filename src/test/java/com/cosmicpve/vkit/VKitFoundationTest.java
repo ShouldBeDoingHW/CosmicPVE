@@ -206,6 +206,20 @@ class VKitFoundationTest {
         }
     }
 
+    @Test void everyCrystalSeparatesLoreFromRightClickInstruction() {
+        for (var item : java.util.List.of(ModItems.PHOENIX_VKIT_CRYSTAL.get(), ModItems.OGRE_VKIT_CRYSTAL.get(),
+                ModItems.JUDGEMENT_VKIT_CRYSTAL.get(), ModItems.SLAYER_VKIT_CRYSTAL.get())) {
+            var stack = new ItemStack(item);
+            var lines = new java.util.ArrayList<net.minecraft.network.chat.Component>();
+            item.appendHoverText(stack, null, null, lines::add, null);
+            assertEquals(3, lines.size());
+            assertFalse(lines.getFirst().getString().isBlank());
+            assertEquals("", lines.get(1).getString());
+            assertEquals(2, lines.get(2).getSiblings().size());
+            assertTrue(lines.get(2).getSiblings().getFirst().getString().endsWith(" Vkit"));
+        }
+    }
+
     @Test
     void crystalModelsUseTheCanonicalVanillaDyes() throws Exception {
         Path root = Path.of(System.getProperty("cosmicpve.projectDir"),

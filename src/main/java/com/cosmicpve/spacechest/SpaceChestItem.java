@@ -28,7 +28,6 @@ public final class SpaceChestItem extends Item {
         ItemStack stack = player.getItemInHand(hand);
         var data = stack.get(ModDataComponents.SPACE_CHEST.get());
         if (data == null || !SpaceChestSessionService.INSTANCE.open(serverPlayer, stack, data.tier())) {
-            player.displayClientMessage(Component.translatable("message.cosmicpve.space_chest.invalid"), true);
             return InteractionResult.FAIL;
         }
         return InteractionResult.SUCCESS_SERVER;
@@ -42,7 +41,7 @@ public final class SpaceChestItem extends Item {
         return switch (tier) {
             case ULTIMATE, LEGENDARY, MASTERY -> List.of(Component.literal(
                     "Contains 5 powerful " + tier.name().charAt(0) + tier.name().substring(1).toLowerCase(java.util.Locale.ROOT)
-                            + " tier items! Right click to try your luck!").withStyle(ChatFormatting.YELLOW));
+                            + " tier items! Right click to try your luck!").withColor(0xC7C7C7));
             default -> lore();
         };
     }

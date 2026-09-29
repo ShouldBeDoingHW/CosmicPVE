@@ -1,6 +1,7 @@
 package com.cosmicpve.adventure;
 
 import com.cosmicpve.equipment.enchantment.*;
+import com.cosmicpve.equipment.armor.ArmorSetIds;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.LivingEntity;
 
@@ -18,6 +19,7 @@ public final class AdventureRules {
             case SIMPLE, UNIQUE, ELITE -> true; default -> false;
         }).orElse(true);
     }
+    public static boolean allowsArmorSet(Identifier id) { return ArmorSetIds.RANGER.equals(id); }
     public static EffectiveEnchantments filter(LivingEntity owner,EffectiveEnchantments input) {
         if(!restricted(owner))return input;
         var result=new java.util.HashMap<Identifier,EffectiveEnchantment>();

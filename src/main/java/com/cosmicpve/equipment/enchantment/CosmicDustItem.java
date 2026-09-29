@@ -8,6 +8,8 @@ import net.minecraft.world.item.ItemStack;
 public final class CosmicDustItem extends Item {
     public CosmicDustItem(Properties properties) { super(properties); }
 
+    @Override public boolean isFoil(ItemStack stack) { return true; }
+
     @Override public Component getName(ItemStack stack) {
         var data = stack.get(ModDataComponents.COSMIC_DUST.get());
         if (data == null) return super.getName(stack).copy().withStyle(style -> style.withBold(true));

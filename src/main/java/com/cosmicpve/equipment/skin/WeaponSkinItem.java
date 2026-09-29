@@ -13,9 +13,10 @@ public final class WeaponSkinItem extends Item {
         var data = stack.get(ModDataComponents.WEAPON_SKIN_ITEM.get());
         if (data == null) return super.getName(stack);
         var definition = WeaponSkinDefinitions.find(data.skinId());
-        return definition.isPresent()
-                ? Component.translatable("item.cosmicpve.weapon_skin.named", definition.orElseThrow().displayName())
-                        .withColor(definition.orElseThrow().nameColor())
-                : super.getName(stack);
+        if (definition.isEmpty()) return super.getName(stack);
+        var skin = definition.orElseThrow();
+        return Component.literal("Item Skin (").withColor(0xFFFFFF)
+                .append(skin.displayName().copy().withColor(skin.nameColor()))
+                .append(Component.literal(")").withColor(0xFFFFFF));
     }
 }

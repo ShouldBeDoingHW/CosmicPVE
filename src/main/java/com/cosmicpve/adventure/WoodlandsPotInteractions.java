@@ -24,8 +24,6 @@ public final class WoodlandsPotInteractions {
         event.setCancellationResult(InteractionResult.SUCCESS);
         if (!(player instanceof ServerPlayer serverPlayer) || event.getHand() != InteractionHand.MAIN_HAND) return;
         if (player.getMainHandItem().isEmpty()) recover(serverPlayer, pot);
-        else player.displayClientMessage(Component.literal(
-                "Woodlands pots cannot store items. Right-click with an empty hand to recover stored items."), true);
     }
     public static int recover(ServerPlayer player, DecoratedPotBlockEntity pot) {
         ItemStack stored = pot.getTheItem();
@@ -38,7 +36,6 @@ public final class WoodlandsPotInteractions {
         player.level().sendBlockUpdated(pot.getBlockPos(), state, state, 3);
         player.getInventory().placeItemBackInInventory(stored);
         player.containerMenu.broadcastChanges();
-        player.displayClientMessage(Component.literal("Recovered " + count + " item(s) from the pot."), true);
         return count;
     }
 }

@@ -21,6 +21,10 @@ import net.minecraft.world.item.Items;
 import org.junit.jupiter.api.Test;
 
 class CosmicContainerMilestoneTest {
+    @Test void memoryChestContainerForcesGlint() {
+        assertTrue(new ItemStack(ModItems.MEMORY_CHEST.get()).hasFoil());
+    }
+
     @Test void memoryTableIsExactAndAllHalvesRemainIndependentOutcomes() {
         assertEquals(11, MemoryChestRewards.ENTRIES.size());
         assertEquals(104, MemoryChestRewards.totalWeight());

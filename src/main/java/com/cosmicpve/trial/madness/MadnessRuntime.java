@@ -22,6 +22,7 @@ public final class MadnessRuntime {
     private String breezeRoom = "";
     private Vec3 roomBreeze = Vec3.ZERO;
     private final Map<UUID, PlayerState> players = new HashMap<>();
+    private final Map<UUID, String> displayedCountdowns = new HashMap<>();
     private static final ExecutionCause STATUES = new ExecutionCause(CosmicPVE.id("trial_statues"));
     private static final class PlayerState {
         final Map<String,Integer> clocks = new HashMap<>();
@@ -29,10 +30,11 @@ public final class MadnessRuntime {
         Vec3 statueOrigin; Vec3 breeze = Vec3.ZERO; String room = "";
     }
     public void tick(MinecraftServer server, TrialSession session) {
-        if (session == null) { sessionId = null; players.clear(); return; }
-        if (!session.sessionId().equals(sessionId)) { players.clear(); sessionId = session.sessionId(); breezeRoom = ""; }
+        if (session == null) { clearCountdowns(server); sessionId = null; players.clear(); return; }
+        if (!session.sessionId().equals(sessionId)) { clearCountdowns(server); players.clear(); sessionId = session.sessionId(); breezeRoom = ""; }
         players.keySet().removeIf(id -> !session.activeParticipant(id));
-        if (session.state() != TrialLifecycleState.ROOM_ACTIVE) return;
+        for (UUID id : List.copyOf(displayedCountdowns.keySet())) if (!session.activeParticipant(id)) clearCountdown(server,id);
+        if (session.state() != TrialLifecycleState.ROOM_ACTIVE) { clearCountdowns(server); return; }
         String actualRoom = session.currentRoom().map(r -> r + ":" + session.progress().appearances(r)).orElse("");
         if (!actualRoom.equals(breezeRoom)) {
             breezeRoom = actualRoom;
@@ -41,7 +43,9 @@ public final class MadnessRuntime {
         }
         for (UUID id : List.copyOf(session.participants())) {
             ServerPlayer player = server.getPlayerList().getPlayer(id);
-            if (player == null || player.isDeadOrDying() || !player.level().dimension().equals(TrialRuntime.INSTANCE_DIMENSION)) continue;
+            if (player == null || player.isDeadOrDying() || !player.level().dimension().equals(TrialRuntime.INSTANCE_DIMENSION)) {
+                clearCountdown(server, id); continue;
+            }
             var state = players.computeIfAbsent(id, ignored -> new PlayerState());
             String room = session.currentRoom().map(r -> r + ":" + session.progress().appearances(r)).orElse("");
             if (!room.equals(state.room)) {
@@ -50,7 +54,31 @@ public final class MadnessRuntime {
             }
             for (var definition : session.progress().madness().active())
                 apply(player,state,definition,session.currentRoom().orElse(null));
+            var seconds = new HashMap<String, Integer>();
+            for (var definition : session.progress().madness().active()) {
+                String handler = definition.handler().getPath();
+                int remaining = definition.interval(360) - state.clocks.getOrDefault(handler, 0);
+                if ((handler.equals("inventory_shuffle") || handler.equals("rocket_man")) && remaining > 0 && remaining <= 60)
+                    seconds.put(handler, (remaining + 19) / 20);
+                if (handler.equals("owl_gene") && state.owlWarning > 0)
+                    seconds.put(handler, (state.owlWarning + 19) / 20);
+                if (handler.equals("statues") && state.statueWarning > 0)
+                    seconds.put(handler, (state.statueWarning + 19) / 20);
+            }
+            var message = MadnessCountdownComposer.compose(seconds);
+            if (message.getString().isEmpty()) clearCountdown(server, id);
+            else if (!message.getString().equals(displayedCountdowns.get(id))) {
+                MadnessCountdownComposer.send(player, message); displayedCountdowns.put(id, message.getString());
+            }
         }
+    }
+    private void clearCountdowns(MinecraftServer server) {
+        for (UUID id : List.copyOf(displayedCountdowns.keySet())) clearCountdown(server, id);
+    }
+    private void clearCountdown(MinecraftServer server, UUID id) {
+        if (displayedCountdowns.remove(id) == null) return;
+        ServerPlayer player = server.getPlayerList().getPlayer(id);
+        if (player != null) MadnessCountdownComposer.send(player, net.minecraft.network.chat.Component.empty());
     }
     private void apply(ServerPlayer player, PlayerState state, MadnessDefinition definition, Identifier room) {
         String handler = definition.handler().getPath();
@@ -58,6 +86,8 @@ public final class MadnessRuntime {
         switch (handler) {
             case "inventory_shuffle" -> {
                 int interval = definition.interval(360);
+                if (interval - tick == 60 || interval - tick == 40 || interval - tick == 20)
+                    MadnessSounds.countdown(player, (interval - tick) / 20);
                 if (tick >= interval && player.containerMenu == player.inventoryMenu && player.containerMenu.getCarried().isEmpty()) {
                     shuffle(player); state.clocks.put(handler,0);
                 }
@@ -66,13 +96,15 @@ public final class MadnessRuntime {
                 if (state.owlWarning > 0) {
                     --state.owlWarning;
                     if (state.owlWarning > 0 && state.owlWarning % 20 == 0) {
-                        warn(player,"Owl Gene: " + state.owlWarning/20); MadnessSounds.countdown(player,state.owlWarning/20);
+                        MadnessSounds.countdown(player,state.owlWarning/20);
                     }
-                    if (state.owlWarning == 0) player.connection.teleport(player.getX(),player.getY(),player.getZ(),
-                            player.getYRot()+180,player.getXRot());
-                } else if (tick >= definition.interval(400)) {
-                    state.clocks.put(handler,0); state.owlWarning = boundedTicks(definition,"warning_ticks",60,200);
-                    warn(player,"Owl Gene: 3");
+                    if (state.owlWarning == 0) {
+                        player.connection.teleport(player.getX(),player.getY(),player.getZ(),
+                                player.getYRot()+180,player.getXRot());
+                        state.clocks.put(handler,0);
+                    }
+                } else if (tick >= definition.interval(400)-60) {
+                    state.owlWarning = 60;
                     MadnessSounds.countdown(player,3);
                 }
             }
@@ -85,15 +117,14 @@ public final class MadnessRuntime {
                 } else if (state.statueWarning > 0) {
                     --state.statueWarning;
                     if (state.statueWarning > 0 && state.statueWarning % 20 == 0) {
-                        warn(player,"Statues: " + state.statueWarning/20); MadnessSounds.countdown(player,state.statueWarning/20);
+                        MadnessSounds.countdown(player,state.statueWarning/20);
                     }
                     if (state.statueWarning == 0) {
                         state.statueOrigin = player.position(); state.stillness = boundedTicks(definition,"stillness_ticks",15,60);
-                        warn(player,"Statues: HOLD STILL");
+                        state.clocks.put(handler,0);
                     }
-                } else if (tick >= definition.interval(600)) {
-                    state.clocks.put(handler,0); state.statueWarning = boundedTicks(definition,"warning_ticks",60,200);
-                    warn(player,"Statues: 3");
+                } else if (tick >= definition.interval(600)-60) {
+                    state.statueWarning = 60;
                     MadnessSounds.statues(player); MadnessSounds.countdown(player,3);
                 }
             }
@@ -109,6 +140,9 @@ public final class MadnessRuntime {
                 }
             }
             case "rocket_man" -> {
+                int remaining = definition.interval(500) - tick;
+                if (remaining == 60 || remaining == 40 || remaining == 20)
+                    MadnessSounds.countdown(player, remaining / 20);
                 if (tick >= definition.interval(500)) {
                     state.clocks.put(handler,0);
                     Vec3 velocity = player.getDeltaMovement();
@@ -122,9 +156,6 @@ public final class MadnessRuntime {
     }
     private static int boundedTicks(MadnessDefinition definition,String key,int fallback,int max) {
         return (int)Math.max(1,Math.min(max,definition.parameter(key,fallback)));
-    }
-    private static void warn(ServerPlayer player,String text) {
-        player.displayClientMessage(net.minecraft.network.chat.Component.literal(text).withColor(0x8C1708),true);
     }
     private static void penalty(ServerPlayer player,MadnessDefinition definition) {
         float amount = penaltyAmount(player.getMaxHealth(),definition.parameter("penalty_max_health_fraction",0.5));

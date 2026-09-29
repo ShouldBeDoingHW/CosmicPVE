@@ -14,6 +14,7 @@ public final class AccessoryResolver {
         return loadout.attached(AccessorySlot.AMULET).flatMap(AmuletDefinition::find);
     }
     public boolean hasAmulet(LivingEntity entity, AmuletDefinition definition) {
+        if (com.cosmicpve.adventure.AdventureRules.restricted(entity)) return false;
         return equippedAmulet(entity).filter(value -> value == definition).isPresent();
     }
     public Optional<BeltDefinition> equippedBelt(LivingEntity entity) {
@@ -22,6 +23,7 @@ public final class AccessoryResolver {
         return loadout.attached(AccessorySlot.BELT).flatMap(BeltDefinition::find);
     }
     public boolean hasBelt(LivingEntity entity, BeltDefinition definition) {
+        if (com.cosmicpve.adventure.AdventureRules.restricted(entity)) return false;
         return equippedBelt(entity).filter(value -> value == definition).isPresent();
     }
 }

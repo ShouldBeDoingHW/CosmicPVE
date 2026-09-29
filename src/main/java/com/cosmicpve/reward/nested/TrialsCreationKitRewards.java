@@ -16,7 +16,9 @@ public final class TrialsCreationKitRewards {
             trinket(TrialTrinketType.FAME, 33, 6), trinket(TrialTrinketType.FAME, 66, 4),
             trinket(TrialTrinketType.FAME, 100, 2),
             trinket(TrialTrinketType.MADNESS, 1, 6), trinket(TrialTrinketType.MADNESS, 2, 4),
-            trinket(TrialTrinketType.MADNESS, 3, 2));
+            trinket(TrialTrinketType.MADNESS, 3, 2),
+            trinket(TrialTrinketType.INSURANCE, 1, 6), trinket(TrialTrinketType.INSURANCE, 2, 4),
+            trinket(TrialTrinketType.INSURANCE, 3, 2));
 
     private TrialsCreationKitRewards() {}
 

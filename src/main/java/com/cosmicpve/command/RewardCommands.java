@@ -1,5 +1,6 @@
 package com.cosmicpve.command;
 
+import com.cosmicpve.CosmicPVE;
 import com.cosmicpve.content.CosmicContent;
 import com.cosmicpve.content.definition.reward.EnchantmentLevelMode;
 import com.cosmicpve.content.definition.reward.GeneratedEquipmentCategory;
@@ -106,6 +107,20 @@ public final class RewardCommands {
                                 .executes(context -> forceHeroicTable(context.getSource(),
                                         StringArgumentType.getString(context, "enchantment"),
                                         IntegerArgumentType.getInteger(context, "success"))))));
+        var equipmentSample = Commands.literal("sample")
+                .then(Commands.argument("player", EntityArgument.player())
+                        .then(Commands.argument("tier", StringArgumentType.word())
+                                .suggests((context, builder) -> SharedSuggestionProvider.suggest(
+                                        List.of("ultimate", "legendary", "mastery"), builder))
+                                .then(Commands.argument("category", StringArgumentType.word())
+                                        .suggests((context, builder) -> SharedSuggestionProvider.suggest(
+                                                List.of("armor", "weapon"), builder))
+                                        .then(Commands.argument("count", IntegerArgumentType.integer(1, 8))
+                                                .executes(context -> sampleEquipment(context.getSource(),
+                                                        EntityArgument.getPlayer(context, "player"),
+                                                        StringArgumentType.getString(context, "tier"),
+                                                        StringArgumentType.getString(context, "category"),
+                                                        IntegerArgumentType.getInteger(context, "count")))))));
         return Commands.literal("reward")
                 .then(Commands.literal("list").executes(context -> list(context.getSource())))
                 .then(Commands.literal("inspect").then(tableId.executes(context -> inspect(
@@ -160,7 +175,7 @@ public final class RewardCommands {
                                                         EntityArgument.getPlayer(context, "player"),
                                                         StringArgumentType.getString(context, "rarity"),
                                                         IntegerArgumentType.getInteger(context, "count"))))))))
-                .then(Commands.literal("equipment").then(Commands.literal("give")
+                .then(Commands.literal("equipment").then(equipmentSample).then(Commands.literal("give")
                         .then(Commands.argument("player", EntityArgument.player())
                                 .then(Commands.argument("maximum_rarity", StringArgumentType.word())
                                         .suggests((context, builder) -> SharedSuggestionProvider.suggest(
@@ -331,6 +346,40 @@ public final class RewardCommands {
         source.sendSuccess(() -> Component.literal("Set spawner delay at " + position.toShortString()
                 + " to " + ticks + " tick(s). Normal future delays remain vanilla."), true);
         return 1;
+    }
+
+    private static int sampleEquipment(net.minecraft.commands.CommandSourceStack source,
+            net.minecraft.server.level.ServerPlayer player, String tierName, String categoryName, int count) {
+        if (!List.of("ultimate", "legendary", "mastery").contains(tierName)
+                || !List.of("armor", "weapon").contains(categoryName)) {
+            source.sendFailure(Component.literal("Use ultimate/legendary/mastery and armor/weapon."));
+            return 0;
+        }
+        var table = CosmicContent.repository().requireRewardTable(CosmicPVE.id("space_chest/" + tierName));
+        var category = categoryName.equals("armor") ? GeneratedEquipmentCategory.RANDOM_IRON_ARMOR_PIECE
+                : GeneratedEquipmentCategory.RANDOM_WEAPON;
+        var matches = table.entries().stream().map(entry -> entry.reward())
+                .filter(com.cosmicpve.content.definition.reward.RewardDescriptor.GeneratedEquipment.class::isInstance)
+                .map(com.cosmicpve.content.definition.reward.RewardDescriptor.GeneratedEquipment.class::cast)
+                .filter(reward -> reward.definition().category() == category).toList();
+        if (matches.size() != 1) {
+            source.sendFailure(Component.literal("Expected exactly one generated equipment row for this category."));
+            return 0;
+        }
+        var definition = matches.getFirst().definition();
+        var service = new GeneratedEquipmentService();
+        var results = new java.util.ArrayList<net.minecraft.world.item.ItemStack>();
+        try {
+            for (int index = 0; index < count; index++) results.add(service.generate(definition,
+                    source.registryAccess().lookupOrThrow(Registries.ENCHANTMENT), player.getRandom()));
+        } catch (RuntimeException failure) {
+            source.sendFailure(Component.literal("Sample generation failed: " + failure.getMessage()));
+            return 0;
+        }
+        DELIVERY.deliver(player, results);
+        source.sendSuccess(() -> Component.literal("Delivered " + count + " " + tierName + " " + categoryName
+                + " samples from the production generator."), false);
+        return count;
     }
 
     private static int giveEquipment(net.minecraft.commands.CommandSourceStack source,

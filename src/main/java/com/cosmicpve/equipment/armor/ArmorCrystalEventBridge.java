@@ -47,15 +47,5 @@ public final class ArmorCrystalEventBridge {
         event.getSlot().set(event.getSlot().getItem());
         var outcome = result.orElseThrow();
         ArmorCrystalFeedback.play(player, outcome);
-        String key = switch (outcome) {
-            case SUCCESS -> "message.cosmicpve.armor_crystal.success";
-            case FAILED_DESTROYED -> "message.cosmicpve.armor_crystal.failure";
-            case FAILED_PROTECTED -> "message.cosmicpve.armor_crystal.protected";
-            case ALREADY_SET -> "message.cosmicpve.armor_crystal.already_set";
-            case INVALID_TARGET -> "message.cosmicpve.armor_crystal.invalid_target";
-            case STALE_TARGET -> "message.cosmicpve.armor_crystal.stale";
-            default -> "message.cosmicpve.armor_crystal.invalid";
-        };
-        player.displayClientMessage(Component.translatable(key), true);
     }
 }
