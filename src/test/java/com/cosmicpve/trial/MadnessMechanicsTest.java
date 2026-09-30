@@ -38,11 +38,13 @@ class MadnessMechanicsTest {
         assertEquals(falling,MadnessRuntime.breezeVelocity(falling,direction,true,.008,.15));
         assertEquals(-.5,MadnessRuntime.breezeVelocity(falling,direction,false,.008,.15).y);
     }
-    @Test void breezeOnlyRunsForNonShiftingPlayersOutsideColdSnapAndDeadeye() {
+    @Test void breezeOnlyRunsForNonShiftingPlayersOutsideSuppressedRooms() {
         assertTrue(MadnessRuntime.breezeApplies(TrialSessionService.CINDER_WOLF, false));
         assertFalse(MadnessRuntime.breezeApplies(TrialSessionService.CINDER_WOLF, true));
         assertFalse(MadnessRuntime.breezeApplies(TrialSessionService.COLD_SNAP, false));
         assertFalse(MadnessRuntime.breezeApplies(TrialSessionService.DEADEYE, false));
+        assertFalse(MadnessRuntime.breezeApplies(TrialSessionService.FIRE_COLONY, false));
+        assertFalse(MadnessRuntime.breezeApplies(TrialSessionService.FIRE_COLONY, true));
         assertFalse(MadnessRuntime.breezeApplies(null, false));
     }
     @Test void rocketVelocityHasEightBlockPotentialUnderVanillaGravity() {

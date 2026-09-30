@@ -21,13 +21,22 @@ public final class MaskCombatResolver implements OutgoingDamageContributor, Inco
     /** Legacy diagnostic ID retained for compatibility; Turkey now contributes to Dodge's single roll. */
     public static final net.minecraft.resources.Identifier TURKEY_DODGE = CosmicPVE.id("turkey_mask_dodge");
     private final MaskResolver masks;
-    public MaskCombatResolver(MaskResolver masks) { this.masks = masks; }
+    private final com.cosmicpve.activity.ActivityContextService activities;
+    public MaskCombatResolver(MaskResolver masks) {
+        this(masks, new com.cosmicpve.activity.ActivityContextService());
+    }
+    public MaskCombatResolver(MaskResolver masks, com.cosmicpve.activity.ActivityContextService activities) {
+        this.masks = masks;
+        this.activities = activities;
+    }
 
     @Override public List<OutgoingDamageContribution> resolve(CombatContext context) {
         if (context.attacker() == null || context.channel() != DamageChannel.ORDINARY) return List.of();
         var equippedMasks = masks.resolve(context.attacker());
         double bonus = equippedMasks.stream().mapToDouble(definition -> switch (definition.behavior()) {
-            case PURGE -> .03; case PARTY -> .01; case DRAGON -> .02; default -> 0.0;
+            case PURGE -> .03; case PARTY -> .01; case DRAGON -> .02;
+            case BANDIT -> activities.isAdventure(context.attacker()) ? .08 : 0.0;
+            default -> 0.0;
         }).sum();
         if (equippedMasks.stream().anyMatch(definition -> definition.behavior() == MaskBehavior.THANOS)
                 && targetHasActualMastery(context.target())) bonus += .06;

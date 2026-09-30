@@ -546,13 +546,19 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
     }
 
     private void addTrap(ProcEvent event, List<ProcCandidate> result) {
-        int level = event.effectiveEnchantments().level(ModEnchantments.TRAP.identifier());
+        int titanLevel = Math.min(3, event.effectiveEnchantments().level(ModEnchantments.TITAN_TRAP.identifier()));
+        int ordinaryLevel = Math.min(3, event.effectiveEnchantments().level(ModEnchantments.TRAP.identifier()));
+        boolean titan = titanLevel > 0;
+        int level = titan ? titanLevel : ordinaryLevel;
         if (level <= 0) return;
-        result.add(candidate(ModEnchantments.TRAP.identifier(), ProcHook.ON_VALID_HIT,
-                TrapBehavior.chance(level), Optional.empty(), 0L, Optional.empty(),
+        Identifier id = titan ? ModEnchantments.TITAN_TRAP.identifier() : ModEnchantments.TRAP.identifier();
+        result.add(candidate(id, ProcHook.ON_VALID_HIT,
+                titan ? TrapBehavior.titanChance(level) : TrapBehavior.chance(level),
+                Optional.empty(), 0L, Optional.empty(),
                 ChildProcEligibility.LIMITED_OFFENSIVE_REROLL,
-                activation -> TrapBehavior.activate(activation.event(), level),
-                provenance(event, ModEnchantments.TRAP.identifier()),
+                activation -> TrapBehavior.activate(activation.event(),
+                        titan ? TrapBehavior.TITAN_DURATION_TICKS : TrapBehavior.durationTicks(level), stacks, snareRoots),
+                provenance(event, id),
                 meleeCondition(CosmicPVE.id("trap_melee_hit"))));
     }
 
@@ -795,7 +801,8 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
 
     private static ProcProvenance provenance(ProcEvent event, Identifier enchantmentId) {
         return event.effectiveEnchantments().get(enchantmentId)
-                .flatMap(enchantment -> enchantment.provenance().stream().findFirst())
+                .flatMap(enchantment -> enchantment.provenance().stream()
+                        .filter(source -> source.level() == enchantment.level()).findFirst())
                 .map(source -> new ProcProvenance(
                         source.kind() == EnchantmentSourceKind.VIRTUAL
                                 ? ProcSourceKind.VIRTUAL_ENCHANTMENT : ProcSourceKind.ACTUAL_ENCHANTMENT,

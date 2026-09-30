@@ -127,7 +127,7 @@ public final class CosmicCombat {
     private static final com.cosmicpve.combat.enchantment.SnareRootService SNARE_ROOTS =
             new com.cosmicpve.combat.enchantment.SnareRootService();
     private static final com.cosmicpve.combat.enchantment.SnareEventBridge SNARE_EVENTS =
-            new com.cosmicpve.combat.enchantment.SnareEventBridge(SNARE_ROOTS);
+            new com.cosmicpve.combat.enchantment.SnareEventBridge(SNARE_ROOTS, STACKS);
     private static final com.cosmicpve.combat.enchantment.ProjectileImpactContextService PROJECTILE_IMPACTS =
             new com.cosmicpve.combat.enchantment.ProjectileImpactContextService();
     private static final CosmicEnchantmentBehaviorResolver ENCHANTMENT_BEHAVIORS =
@@ -143,7 +143,7 @@ public final class CosmicCombat {
     private static final ProcHookEventBridge PROC_HOOKS =
             new ProcHookEventBridge(PROC_EVENTS, EXECUTIONS, NUTRITION, SOUL_TETHERS);
     private static final CombatStackEventBridge STACK_EVENTS = new CombatStackEventBridge(STACKS, BLEED_RUNTIME);
-    private static final MaskCombatResolver MASK_COMBAT = new MaskCombatResolver(MASKS);
+    private static final MaskCombatResolver MASK_COMBAT = new MaskCombatResolver(MASKS, ACTIVITIES);
     private static final MaskRuntimeEventBridge MASK_EVENTS = new MaskRuntimeEventBridge(
             MASKS, PROC_EVENTS, ENCHANTMENTS, ACTIVITIES, EQUIPPED_EFFECTS, EVENTS);
     private static final com.cosmicpve.combat.enchantment.DodgeProcResolver DODGE =
@@ -168,6 +168,8 @@ public final class CosmicCombat {
         OUTGOING.register(new GreatswordBehavior());
         OUTGOING.register(new com.cosmicpve.combat.enchantment.AntiGankBehavior(
                 com.cosmicpve.combat.ownership.GeneralAllyResolver.production()));
+        OUTGOING.register(new com.cosmicpve.combat.enchantment.BossSlayerBehavior());
+        OUTGOING.register(new com.cosmicpve.combat.enchantment.TitanTrapBehavior(STACKS));
         OUTGOING.register(new com.cosmicpve.combat.enchantment.PacifyBehavior(STACKS));
         OUTGOING.register(new InsanityBehavior());
         OUTGOING.register(new EagleEyeBehavior());
@@ -200,6 +202,7 @@ public final class CosmicCombat {
         OUTGOING.register(madness);
         INCOMING.register(madness);
         INCOMING.register(ARMOR_SET_COMBAT);
+        INCOMING.register(new com.cosmicpve.combat.enchantment.TankBehavior(ARMOR_SETS, ENCHANTMENTS));
         INCOMING.register(WEAPON_SKIN_COMBAT);
         INCOMING.register(deathPact);
         INCOMING.register(new com.cosmicpve.equipment.armor.CategoryDamageReductionBehavior(ARMOR_SETS, ENCHANTMENTS, MASKS));
@@ -238,6 +241,7 @@ public final class CosmicCombat {
         NeoForge.EVENT_BUS.addListener(PROC_HOOKS::onPlayerTick);
         NeoForge.EVENT_BUS.addListener(PROC_HOOKS::onEntityTick);
         NeoForge.EVENT_BUS.addListener(SNARE_EVENTS::onEntityTick);
+        NeoForge.EVENT_BUS.addListener(SNARE_EVENTS::onTeleport);
         NeoForge.EVENT_BUS.addListener(PROJECTILE_IMPACTS::onImpact);
         NeoForge.EVENT_BUS.addListener(STACK_EVENTS::onPlayerTick);
         NeoForge.EVENT_BUS.addListener(STACK_EVENTS::onEntityTick);

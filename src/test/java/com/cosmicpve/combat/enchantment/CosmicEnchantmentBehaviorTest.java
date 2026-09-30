@@ -222,7 +222,7 @@ class CosmicEnchantmentBehaviorTest {
         var candidates = behaviorResolver().resolve(procEvent(effective));
         assertEquals(1, candidates.size());
         assertEquals(ModEnchantments.TRAP.identifier(), candidates.getFirst().effectId());
-        assertEquals(0.04, candidates.getFirst().baseProbability(), 1.0E-12);
+        assertEquals(0.03, candidates.getFirst().baseProbability(), 1.0E-12);
         assertEquals(ChildProcEligibility.LIMITED_OFFENSIVE_REROLL, candidates.getFirst().childEligibility());
         assertTrue(behaviorResolver().resolve(procEvent(ProcHook.ON_PROJECTILE_HIT, effective)).isEmpty());
     }

@@ -64,10 +64,10 @@ class CleaveCurseMilestoneTest {
     }
 
     @Test void registryMetadataAndHeroicReplacementPairsContainExactlyTheFiveAdditions() {
-        assertEquals(85, CosmicEnchantmentSpecs.ALL.size());
-        assertEquals(73, CosmicEnchantmentSpecs.ALL.stream()
+        assertEquals(88, CosmicEnchantmentSpecs.ALL.size());
+        assertEquals(75, CosmicEnchantmentSpecs.ALL.stream()
                 .filter(spec -> spec.tier() != CosmicEnchantmentTier.HEROIC).count());
-        assertEquals(12, CosmicEnchantmentSpecs.ALL.stream()
+        assertEquals(13, CosmicEnchantmentSpecs.ALL.stream()
                 .filter(spec -> spec.tier() == CosmicEnchantmentTier.HEROIC).count());
         assertEquals(CosmicEnchantmentTier.ULTIMATE, CosmicEnchantmentSpecs.CLEAVE.tier());
         assertEquals(CosmicEnchantmentTier.ELITE, CosmicEnchantmentSpecs.SOLITUDE.tier());

@@ -44,6 +44,9 @@ class CosmicEnchantmentRegistrationTest {
                 Map.entry("blessed", 4),
                 Map.entry("implants", 3),
                 Map.entry("trap", 3),
+                Map.entry("titan_trap", 3),
+                Map.entry("boss_slayer", 3),
+                Map.entry("tank", 4),
                 Map.entry("cactus", 2),
                 Map.entry("gears", 3),
                 Map.entry("permafrost", 6),
@@ -136,7 +139,7 @@ class CosmicEnchantmentRegistrationTest {
                 }
             }
         }
-        assertEquals(85, CosmicEnchantmentSpecs.ALL.size());
+        assertEquals(88, CosmicEnchantmentSpecs.ALL.size());
         assertEquals(CosmicEnchantmentTier.ELITE, CosmicEnchantmentSpecs.EXECUTE.tier());
         assertEquals(CosmicEnchantmentTier.ULTIMATE, CosmicEnchantmentSpecs.ANGELIC.tier());
         assertEquals(CosmicEnchantmentTier.SIMPLE, CosmicEnchantmentSpecs.LIGHTNING.tier());

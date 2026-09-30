@@ -213,7 +213,8 @@ public final class MadnessRuntime {
     public static boolean breezeApplies(Identifier room, boolean shifting) {
         return !shifting && room != null
                 && !TrialSessionService.COLD_SNAP.equals(room)
-                && !TrialSessionService.DEADEYE.equals(room);
+                && !TrialSessionService.DEADEYE.equals(room)
+                && !TrialSessionService.FIRE_COLONY.equals(room);
     }
     public static double breezeAcceleration(MadnessDefinition definition) {
         // Also bounds a persisted selection carrying the previous 0.004 acceleration.

@@ -17,6 +17,7 @@ public final class HeroicEnchantments {
             pair(ModEnchantments.IMPLANTS, ModEnchantments.ALIEN_IMPLANTS),
             pair(ModEnchantments.SNIPER, ModEnchantments.LETHAL_SNIPER),
             pair(ModEnchantments.SNARE, ModEnchantments.ETERNAL_SNARE),
+            pair(ModEnchantments.TRAP, ModEnchantments.TITAN_TRAP),
             pair(ModEnchantments.EXECUTE, ModEnchantments.PERMANENT_EXECUTE),
             pair(ModEnchantments.CLEAVE, ModEnchantments.MIGHTY_CLEAVE),
             pair(ModEnchantments.CURSE, ModEnchantments.FORBIDDEN_CURSE),

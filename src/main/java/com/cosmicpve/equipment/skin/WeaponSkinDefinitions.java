@@ -22,6 +22,7 @@ public final class WeaponSkinDefinitions {
     public static final Identifier WHISK_TAKER = CosmicPVE.id("whisk_taker");
     public static final Identifier THE_CARVER = CosmicPVE.id("the_carver");
     public static final Identifier SPINAL_TAP = CosmicPVE.id("spinal_tap");
+    public static final Identifier FIREWORK_ROCKET = CosmicPVE.id("firework_rocket");
 
     private static final Map<Identifier, WeaponSkinDefinition> DEFINITIONS = List.of(
             definition(BOOSTED_CHAINSAW, 0xCCA00A, WeaponSkinDefinition.WeaponKind.AXE,
@@ -47,7 +48,11 @@ public final class WeaponSkinDefinitions {
                             Component.translatable("weapon_skin.cosmicpve.the_carver.effect.damage")),
                     List.of(new VirtualEnchantmentGrant(ModEnchantments.DEVOUR.identifier(), 4, THE_CARVER))),
             definition(SPINAL_TAP, 0x00F02C, WeaponSkinDefinition.WeaponKind.SWORD,
-                    List.of(Component.translatable("weapon_skin.cosmicpve.spinal_tap.effect")), List.of())
+                    List.of(Component.translatable("weapon_skin.cosmicpve.spinal_tap.effect")), List.of()),
+            definition(FIREWORK_ROCKET, 0xD43700, WeaponSkinDefinition.WeaponKind.AXE,
+                    List.of(Component.translatable("weapon_skin.cosmicpve.firework_rocket.effect")),
+                    List.of(new VirtualEnchantmentGrant(
+                            ModEnchantments.TITAN_TRAP.identifier(), 3, FIREWORK_ROCKET)))
     ).stream().collect(Collectors.toUnmodifiableMap(WeaponSkinDefinition::id, Function.identity()));
 
     private WeaponSkinDefinitions() {}

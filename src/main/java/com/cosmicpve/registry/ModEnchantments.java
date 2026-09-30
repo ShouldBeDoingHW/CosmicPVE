@@ -80,6 +80,8 @@ public final class ModEnchantments {
     public static final ResourceKey<Enchantment> PYRE = createKey("pyre");
     public static final ResourceKey<Enchantment> ANTI_GANK = createKey("anti_gank");
     public static final ResourceKey<Enchantment> PACIFY = createKey("pacify");
+    public static final ResourceKey<Enchantment> BOSS_SLAYER = createKey("boss_slayer");
+    public static final ResourceKey<Enchantment> TANK = createKey("tank");
     public static final ResourceKey<Enchantment> DEEP_BLEED = createKey("deep_bleed");
     public static final ResourceKey<Enchantment> MIGHTY_CACTUS = createKey("mighty_cactus");
     public static final ResourceKey<Enchantment> PALADIN_ARMORED = createKey("paladin_armored");
@@ -91,6 +93,7 @@ public final class ModEnchantments {
     public static final ResourceKey<Enchantment> MIGHTY_CLEAVE = createKey("mighty_cleave");
     public static final ResourceKey<Enchantment> FORBIDDEN_CURSE = createKey("forbidden_curse");
     public static final ResourceKey<Enchantment> GODLY_OVERLOAD = createKey("godly_overload");
+    public static final ResourceKey<Enchantment> TITAN_TRAP = createKey("titan_trap");
 
     private ModEnchantments() {}
 

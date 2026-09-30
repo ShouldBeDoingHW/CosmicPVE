@@ -1,0 +1,11 @@
+{
+  "anvil_cost": 8,
+  "description": {"translate": "enchantment.cosmicpve.boss_slayer"},
+  "effects": {},
+  "max_cost": {"base": 1, "per_level_above_first": 0},
+  "max_level": 3,
+  "min_cost": {"base": 1, "per_level_above_first": 0},
+  "slots": ["mainhand"],
+  "supported_items": "#cosmicpve:enchantable/sword_or_axe",
+  "weight": 1
+}

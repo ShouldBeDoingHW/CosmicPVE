@@ -156,6 +156,10 @@ public final class CosmicEnchantmentSpecs {
             ModEnchantments.ANTI_GANK.identifier(), 4, CosmicEnchantmentTier.ELITE, "axe");
     public static final CosmicEnchantmentSpec PACIFY = new CosmicEnchantmentSpec(
             ModEnchantments.PACIFY.identifier(), 4, CosmicEnchantmentTier.ULTIMATE, "bow");
+    public static final CosmicEnchantmentSpec BOSS_SLAYER = new CosmicEnchantmentSpec(
+            ModEnchantments.BOSS_SLAYER.identifier(), 3, CosmicEnchantmentTier.LEGENDARY, "sword_or_axe");
+    public static final CosmicEnchantmentSpec TANK = new CosmicEnchantmentSpec(
+            ModEnchantments.TANK.identifier(), 4, CosmicEnchantmentTier.ULTIMATE, "any_armor");
     public static final CosmicEnchantmentSpec DEEP_BLEED = new CosmicEnchantmentSpec(
             ModEnchantments.DEEP_BLEED.identifier(), 6, CosmicEnchantmentTier.HEROIC, "axe");
     public static final CosmicEnchantmentSpec MIGHTY_CACTUS = new CosmicEnchantmentSpec(
@@ -178,6 +182,8 @@ public final class CosmicEnchantmentSpecs {
             ModEnchantments.FORBIDDEN_CURSE.identifier(), 5, CosmicEnchantmentTier.HEROIC, "chestplate");
     public static final CosmicEnchantmentSpec GODLY_OVERLOAD = new CosmicEnchantmentSpec(
             ModEnchantments.GODLY_OVERLOAD.identifier(), 3, CosmicEnchantmentTier.HEROIC, "chestplate");
+    public static final CosmicEnchantmentSpec TITAN_TRAP = new CosmicEnchantmentSpec(
+            ModEnchantments.TITAN_TRAP.identifier(), 3, CosmicEnchantmentTier.HEROIC, "sword");
 
     public static final List<CosmicEnchantmentSpec> ALL =
             List.of(EXECUTE, ANGELIC, LIGHTNING, ENDER_SHIFT, DOUBLESTRIKE, BLEED, LUCK, POISON, PUMMEL,
@@ -189,10 +195,10 @@ public final class CosmicEnchantmentSpecs {
                     HERO_KILLER, SOUL_SIPHON, BLACKOUT, ENDER_WALKER, VOODOO,
                     SNIPER, SNARE, PLAGUE_CARRIER, OBSIDIAN_DESTROYER, DOMINATE, HEX, STORMCALLER, INVERSION, SPIRIT_LINK,
                     CLEAVE, SOLITUDE, CURSE, NIMBLE, THUNDERING_BLOW, NEUTRALIZE, OVERLOAD, SILENCE, LONGBOW, PINPOINT,
-                    BERSERK, HEALING, DEATH_COFFIN, PYRE, ANTI_GANK, PACIFY,
+                    BERSERK, HEALING, DEATH_COFFIN, PYRE, ANTI_GANK, PACIFY, BOSS_SLAYER, TANK,
                     DEEP_BLEED, MIGHTY_CACTUS, PALADIN_ARMORED, BLIGHTED_VIRUS, ALIEN_IMPLANTS,
                     LETHAL_SNIPER, ETERNAL_SNARE, PERMANENT_EXECUTE, MIGHTY_CLEAVE, FORBIDDEN_CURSE,
-                    GODLY_OVERLOAD, DEATHBRINGER, PLANETARY_DEATHBRINGER);
+                    GODLY_OVERLOAD, TITAN_TRAP, DEATHBRINGER, PLANETARY_DEATHBRINGER);
 
     private CosmicEnchantmentSpecs() {}
 

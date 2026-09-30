@@ -41,7 +41,7 @@ class Step8ELootboxTest {
         for (var kind : List.of(AnimatedLootboxItem.Kind.COSMIC_ENCHANTMENT_TABLE,
                 AnimatedLootboxItem.Kind.HEROIC_COSMIC_ENCHANTMENT_TABLE)) {
             var outcomes = Step8ELootboxService.INSTANCE.previewOutcomes(null, kind);
-            assertEquals(kind == AnimatedLootboxItem.Kind.COSMIC_ENCHANTMENT_TABLE ? 53 : 36, outcomes.size());
+            assertEquals(kind == AnimatedLootboxItem.Kind.COSMIC_ENCHANTMENT_TABLE ? 53 : 39, outcomes.size());
             assertEquals(1, com.cosmicpve.reward.preview.LootPreviewMenu.pages(outcomes.size()));
             assertEquals(outcomes.size(), outcomes.stream().map(stack -> {
                 var data = stack.get(ModDataComponents.COSMIC_ENCHANT_BOOK.get());
@@ -92,7 +92,7 @@ class Step8ELootboxTest {
         assertEquals(HeroicEnchantments.PAIRS.stream().map(HeroicEnchantments.Pair::heroic).toList(),
                 HeroicCosmicEnchantmentTableRewards.POOL);
         assertEquals(List.of(25, 50, 75), HeroicCosmicEnchantmentTableRewards.SUCCESS);
-        assertEquals(36, HeroicCosmicEnchantmentTableRewards.ENTRY_COUNT);
+        assertEquals(39, HeroicCosmicEnchantmentTableRewards.ENTRY_COUNT);
     }
 
     @Test void adminPoolIsExactlyFourEqualTwentyFiveWeights() {

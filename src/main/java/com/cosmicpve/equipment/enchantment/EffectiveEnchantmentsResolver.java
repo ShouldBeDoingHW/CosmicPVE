@@ -60,9 +60,9 @@ public final class EffectiveEnchantmentsResolver {
             int effectiveLevel = provenance.stream().mapToInt(EnchantmentProvenance::level).max().orElseThrow();
             resolved.put(id, new EffectiveEnchantment(id, effectiveLevel, provenance));
         });
-        // Invalid/externally authored gear must not reactivate ordinary Deathbringer when its Heroic is suppressed.
-        if (resolved.containsKey(com.cosmicpve.registry.ModEnchantments.PLANETARY_DEATHBRINGER.identifier()))
-            resolved.remove(com.cosmicpve.registry.ModEnchantments.DEATHBRINGER.identifier());
+        // A Heroic replaces its ordinary counterpart even on externally authored or virtual-grant gear.
+        for (var pair : HeroicEnchantments.PAIRS)
+            if (resolved.containsKey(pair.heroic())) resolved.remove(pair.ordinary());
         return new EffectiveEnchantments(resolved);
     }
 

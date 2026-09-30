@@ -36,7 +36,8 @@ class WeaponSkinFoundationTest {
         assertEquals(List.of(WeaponSkinDefinitions.BOOSTED_CHAINSAW, WeaponSkinDefinitions.MAUIS_HOOK,
                 WeaponSkinDefinitions.GRIM_AXE, WeaponSkinDefinitions.SEASONS_BEATINGS,
                 WeaponSkinDefinitions.SPINAL_TAP, WeaponSkinDefinitions.STORMBRINGER,
-                WeaponSkinDefinitions.THE_CARVER, WeaponSkinDefinitions.WHISK_TAKER).stream()
+                WeaponSkinDefinitions.THE_CARVER, WeaponSkinDefinitions.WHISK_TAKER,
+                WeaponSkinDefinitions.FIREWORK_ROCKET).stream()
                 .sorted(java.util.Comparator.comparing(Identifier::toString)).toList(), WeaponSkinDefinitions.ids());
         assertTrue(WeaponSkinDefinitions.find(WeaponSkinDefinitions.BOOSTED_CHAINSAW).orElseThrow()
                 .accepts(new ItemStack(Items.WOODEN_AXE)));
