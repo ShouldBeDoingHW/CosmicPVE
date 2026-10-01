@@ -41,7 +41,7 @@ class Step8ELootboxTest {
         for (var kind : List.of(AnimatedLootboxItem.Kind.COSMIC_ENCHANTMENT_TABLE,
                 AnimatedLootboxItem.Kind.HEROIC_COSMIC_ENCHANTMENT_TABLE)) {
             var outcomes = Step8ELootboxService.INSTANCE.previewOutcomes(null, kind);
-            assertEquals(kind == AnimatedLootboxItem.Kind.COSMIC_ENCHANTMENT_TABLE ? 53 : 39, outcomes.size());
+            assertEquals(kind == AnimatedLootboxItem.Kind.COSMIC_ENCHANTMENT_TABLE ? 53 : 42, outcomes.size());
             assertEquals(1, com.cosmicpve.reward.preview.LootPreviewMenu.pages(outcomes.size()));
             assertEquals(outcomes.size(), outcomes.stream().map(stack -> {
                 var data = stack.get(ModDataComponents.COSMIC_ENCHANT_BOOK.get());
@@ -92,33 +92,40 @@ class Step8ELootboxTest {
         assertEquals(HeroicEnchantments.PAIRS.stream().map(HeroicEnchantments.Pair::heroic).toList(),
                 HeroicCosmicEnchantmentTableRewards.POOL);
         assertEquals(List.of(25, 50, 75), HeroicCosmicEnchantmentTableRewards.SUCCESS);
-        assertEquals(39, HeroicCosmicEnchantmentTableRewards.ENTRY_COUNT);
+        assertEquals(42, HeroicCosmicEnchantmentTableRewards.ENTRY_COUNT);
     }
 
-    @Test void adminPoolIsExactlyFourEqualTwentyFiveWeights() {
-        assertEquals(4, AdminAbuseRewards.ALL.size());
-        assertTrue(AdminAbuseRewards.ALL.stream().allMatch(value -> value.weight() == 25));
-        assertEquals(100, AdminAbuseRewards.ALL.stream().mapToInt(AdminAbuseRewards.Outcome::weight).sum());
-        var reached = new java.util.HashSet<AdminAbuseRewards.Outcome>();
-        for (long seed = 0; seed < 1000; seed++) reached.add(AdminAbuseRewards.select(RandomSource.create(seed)));
-        assertEquals(Set.copyOf(AdminAbuseRewards.ALL), reached);
+    @Test void adminPoolIsExactlyEightEqualWeightsWithDeterministicBranchReachability() {
+        assertEquals(8, AdminAbuseRewards.ALL.size());
+        assertEquals(8, AdminAbuseRewards.ALL.stream().mapToInt(AdminAbuseRewards.Outcome::weight).sum());
+        assertTrue(AdminAbuseRewards.ALL.stream().allMatch(value -> value.weight() == 1));
+        for (int index = 0; index < 8; index++) {
+            int selected = index;
+            var random = new net.minecraft.world.level.levelgen.LegacyRandomSource(0) {
+                @Override public int nextInt(int bound) { assertEquals(8, bound); return selected; }
+            };
+            assertEquals(AdminAbuseRewards.ALL.get(index), AdminAbuseRewards.select(random));
+        }
+        assertEquals(.125, (double) AdminAbuseRewards.ALL.getFirst().weight()
+                / AdminAbuseRewards.ALL.stream().mapToInt(AdminAbuseRewards.Outcome::weight).sum());
     }
 
-    @Test void randomWeaponSkinGeneratorIsExactEqualFiveWayLooseSkinPool() {
+    @Test void randomWeaponSkinGeneratorIsExactEqualSevenWayLooseSkinPool() {
         var name = AnimatedLootboxItem.displayName(AnimatedLootboxItem.Kind.RANDOM_WEAPON_SKIN_GENERATOR);
         assertEquals("Random Weapon Skin Generator", name.getString());
         assertEquals(0xF5B431, color(name));
         assertTrue(name.getStyle().isBold());
         var lore = AnimatedLootboxItem.randomWeaponSkinLore();
         assertEquals(List.of("Gives one random skin out of:", "• Stormbringer", "• Boosted Chainsaw",
-                        "• Spinal Tap", "• Grim Axe", "• Maui's Hook"),
+                        "• Spinal Tap", "• Grim Axe", "• Maui's Hook", "• Trident of the Deep", "• Firework Rocket"),
                 lore.stream().map(net.minecraft.network.chat.Component::getString).toList());
-        assertEquals(List.of(0xF5B431, 0x224B57, 0xCCA00A, 0x00F02C, 0x4C09B8, 0x404242),
+        assertEquals(List.of(0xF5B431, 0x224B57, 0xCCA00A, 0x00F02C, 0x4C09B8, 0x404242, 0x10B29C, 0xD43700),
                 lore.stream().map(Step8ELootboxTest::color).toList());
         var candidates = Step8ELootboxService.randomWeaponSkinCandidates();
-        assertEquals(5, candidates.size());
+        assertEquals(7, candidates.size());
         assertEquals(Set.of(WeaponSkinDefinitions.STORMBRINGER, WeaponSkinDefinitions.BOOSTED_CHAINSAW,
-                        WeaponSkinDefinitions.SPINAL_TAP, WeaponSkinDefinitions.GRIM_AXE, WeaponSkinDefinitions.MAUIS_HOOK),
+                        WeaponSkinDefinitions.SPINAL_TAP, WeaponSkinDefinitions.GRIM_AXE, WeaponSkinDefinitions.MAUIS_HOOK,
+                        WeaponSkinDefinitions.TRIDENT_OF_THE_DEEP, WeaponSkinDefinitions.FIREWORK_ROCKET),
                 candidates.stream().map(stack -> stack.get(ModDataComponents.WEAPON_SKIN_ITEM.get()).skinId())
                         .collect(Collectors.toSet()));
         assertTrue(candidates.stream().allMatch(stack -> stack.has(ModDataComponents.WEAPON_SKIN_ITEM.get())
@@ -126,18 +133,73 @@ class Step8ELootboxTest {
         var reached = new java.util.HashSet<net.minecraft.resources.Identifier>();
         for (long seed = 0; seed < 1000; seed++) reached.add(Step8ELootboxService.selectRandomWeaponSkin(
                 candidates, RandomSource.create(seed)).get(ModDataComponents.WEAPON_SKIN_ITEM.get()).skinId());
-        assertEquals(5, reached.size());
+        assertEquals(7, reached.size());
+        for (int index = 0; index < candidates.size(); index++) {
+            final int selected = index;
+            var random = new net.minecraft.world.level.levelgen.LegacyRandomSource(0) {
+                @Override public int nextInt(int bound) { assertEquals(7, bound); return selected; }
+            };
+            var reward = Step8ELootboxService.selectRandomWeaponSkin(candidates, random);
+            assertEquals(candidates.get(index).get(ModDataComponents.WEAPON_SKIN_ITEM.get()),
+                    reward.get(ModDataComponents.WEAPON_SKIN_ITEM.get()));
+            assertNotSame(candidates.get(index), reward);
+        }
     }
 
     @Test void adminNamesAndLootboxPresentationUseCanonicalStyles() {
         assertSingleStyle(AdminAbuseRewardFactory.name(AdminAbuseRewards.Outcome.GHOSTLY_VEIL),
-                "Ghostly Veil", 0x345FA8);
+                "Ghostly Veil", 0x061630);
         assertSingleStyle(AdminAbuseRewardFactory.name(AdminAbuseRewards.Outcome.COVERT_CLOAK),
-                "Covert Cloak", 0x345FA8);
+                "Covert Cloak", 0x061630);
         assertSegments(AdminAbuseRewardFactory.name(AdminAbuseRewards.Outcome.NANKADA), "Nankada",
-                List.of(0xB8B8B8, 0xFFE578, 0xB8B8B8));
+                List.of(0x555555, 0xFFE578, 0x555555));
         assertSegments(AdminAbuseRewardFactory.name(AdminAbuseRewards.Outcome.ASHOKA), "Ashoka",
-                List.of(0xFFFFFF, 0x397AB8, 0xFFFFFF));
+                List.of(0xFFFFFF, 0x103963, 0xFFFFFF));
+        assertEquals("✦~=- Idaten -=~✦", AdminAbuseRewardFactory.name(AdminAbuseRewards.Outcome.IDATEN).getString());
+        assertEquals("~ -= Freeman Walkers =- ~", AdminAbuseRewardFactory.name(AdminAbuseRewards.Outcome.FREEMAN_WALKERS).getString());
+        assertEquals("-=/=- Izanagi -=\\=-", AdminAbuseRewardFactory.name(AdminAbuseRewards.Outcome.IZANAGI).getString());
+        assertEquals("~=- Eternal Striders -=~", AdminAbuseRewardFactory.name(AdminAbuseRewards.Outcome.ETERNAL_STRIDERS).getString());
+        assertCharacterColors(AdminAbuseRewardFactory.name(AdminAbuseRewards.Outcome.IDATEN),
+                "✦~=- Idaten -=~✦", value -> value == '=' ? 0x555555 : 0xAA0000);
+        assertCharacterColors(AdminAbuseRewardFactory.name(AdminAbuseRewards.Outcome.FREEMAN_WALKERS),
+                "~ -= Freeman Walkers =- ~", value -> value == '~' ? 0xFFFFFF
+                        : value == '-' || value == '=' ? 0xAA00AA : 0xFF55FF);
+        assertCharacterColors(AdminAbuseRewardFactory.name(AdminAbuseRewards.Outcome.IZANAGI),
+                "-=/=- Izanagi -=\\=-", value -> switch (value) {
+                    case '-' -> 0x555555;
+                    case '=' -> 0xAAAAAA;
+                    case '/', '\\' -> 0xFFFFFF;
+                    case 'I', 'a', 'g' -> 0xFFAA00;
+                    default -> 0xFFFF55;
+                });
+        assertCharacterColors(AdminAbuseRewardFactory.name(AdminAbuseRewards.Outcome.ETERNAL_STRIDERS),
+                "~=- Eternal Striders -=~", value -> value == '-' ? 0xFFFFFF : 0x55FFFF);
+        assertEquals(List.of(
+                "Fashioned directly out of liquid darkness. Are you scared yet?",
+                "I solemnly swear that I am up to no good.",
+                "Years of love can be forgotten in a moment of hatred.",
+                "Shhh. Do you hear that? It’s the final seconds of your life.",
+                "Lightweight and clout flavored. Any time, any place.",
+                "Sandles capable of breaking mach 3 in order to hunt you down.",
+                "Live and die by the blade or forever be alone.",
+                "A timeless piece of a timeless legend."),
+                AdminAbuseRewards.ALL.stream().map(value -> value.flavor().getString()).toList());
+        for (var outcome : AdminAbuseRewards.ALL) {
+            var flavorStyle = outcome.flavor().getStyle();
+            assertTrue(flavorStyle.isItalic());
+            boolean omni = outcome == AdminAbuseRewards.Outcome.GHOSTLY_VEIL
+                    || outcome == AdminAbuseRewards.Outcome.COVERT_CLOAK;
+            assertEquals(omni, flavorStyle.isBold());
+            assertEquals(omni ? 0x0C2B66 : switch (outcome) {
+                case NANKADA -> 0xFFE578;
+                case ASHOKA -> 0x103963;
+                case IDATEN -> 0xAA0000;
+                case FREEMAN_WALKERS -> 0xFF55FF;
+                case IZANAGI -> 0xFFAA00;
+                case ETERNAL_STRIDERS -> 0x55FFFF;
+                default -> throw new AssertionError(outcome);
+            }, color(outcome.flavor()));
+        }
         var name = AnimatedLootboxItem.adminName();
         assertEquals("Admin Abuse", name.getString());
         var letters = name.getSiblings().stream().filter(part -> !part.getString().isBlank()).toList();
@@ -146,6 +208,13 @@ class Step8ELootboxTest {
                 letters.stream().map(Step8ELootboxTest::color).toList());
         assertTrue(name.getSiblings().stream().allMatch(part -> part.getStyle().isBold()
                 && part.getStyle().isItalic() && part.getStyle().isStrikethrough()));
+        var flavor = AnimatedLootboxItem.adminFlavor();
+        assertEquals("Admin! He’s doing it sideways!!!", flavor.getString());
+        var flavorLetters = flavor.getSiblings().stream().filter(part -> Character.isLetter(part.getString().charAt(0))).toList();
+        for (int index = 0; index < flavorLetters.size(); index++)
+            assertEquals(index % 2 == 0 ? 0xD41432 : 0x8F1022, color(flavorLetters.get(index)));
+        assertTrue(flavor.getSiblings().stream().allMatch(part -> part.getStyle().isItalic()
+                && !part.getStyle().isStrikethrough()));
     }
 
     @Test void lootboxNamesAndSecretCacheFlavorUseFinalPresentation() {
@@ -211,5 +280,17 @@ class Step8ELootboxTest {
 
     private static int color(net.minecraft.network.chat.Component component) {
         return java.util.Objects.requireNonNull(component.getStyle().getColor()).getValue();
+    }
+
+    private static void assertCharacterColors(net.minecraft.network.chat.Component component, String text,
+            java.util.function.IntUnaryOperator expectedColor) {
+        assertEquals(text, component.getString());
+        assertEquals(text.length(), component.getSiblings().size());
+        for (int index = 0; index < text.length(); index++) {
+            var part = component.getSiblings().get(index);
+            assertEquals(Character.toString(text.charAt(index)), part.getString());
+            assertEquals(expectedColor.applyAsInt(text.charAt(index)), color(part));
+            assertTrue(part.getStyle().isItalic());
+        }
     }
 }

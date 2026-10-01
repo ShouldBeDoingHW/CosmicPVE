@@ -86,6 +86,26 @@ class MaskFoundationTest {
         assertEquals("Monopoly",lang.get("mask.cosmicpve.monopoly").getAsString());
         assertEquals("Gucci",lang.get("mask.cosmicpve.gucci").getAsString());
     }
+    @Test void tikiAndJesterHaveCanonicalIdentityAndPresentation() throws Exception {
+        var lang=JsonParser.parseReader(new java.io.InputStreamReader(java.util.Objects.requireNonNull(
+                getClass().getResourceAsStream("/assets/cosmicpve/lang/en_us.json")))).getAsJsonObject();
+        var tiki=JsonParser.parseReader(new java.io.InputStreamReader(java.util.Objects.requireNonNull(
+                getClass().getResourceAsStream("/data/cosmicpve/cosmicpve/masks/tiki.json")))).getAsJsonObject();
+        var jester=JsonParser.parseReader(new java.io.InputStreamReader(java.util.Objects.requireNonNull(
+                getClass().getResourceAsStream("/data/cosmicpve/cosmicpve/masks/jester.json")))).getAsJsonObject();
+        assertEquals("#00E8E4",tiki.get("color").getAsString());
+        assertEquals("#F08E1A",jester.get("color").getAsString());
+        assertEquals("tiki",tiki.get("behavior").getAsString());
+        assertEquals("jester",jester.get("behavior").getAsString());
+        assertEquals("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMWY1OTU5NDE2MWQ3ODY2ZDBkZmJjMzYxMjZmM2E1MmQyOTk4NTY0ZTNhNGU4YzhjNmYzN2NiYWRkYzk0NGM2ZCJ9fX0=",
+                tiki.get("profile_texture").getAsString());
+        assertEquals("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMTk2MGJjYWFiMzg1MjQwZjgzNWMxMzgzNmQwNWZmZjcyZWY4MWI0ZTQxODY1OThmMzNiNDRhODk0MzIxY2ZkYiJ9fX0=",
+                jester.get("profile_texture").getAsString());
+        assertEquals("Tiki",lang.get("mask.cosmicpve.tiki").getAsString());
+        assertEquals("Jester",lang.get("mask.cosmicpve.jester").getAsString());
+        assertEquals("Dodging an attack boosts your next outgoing hit by +12%",
+                lang.get("mask.cosmicpve.jester.effect").getAsString());
+    }
     @Test void loreSupportsSingleTwoThreeAndFiveInStableOrder() {
         var definitions=new java.util.ArrayList<com.cosmicpve.content.definition.mask.MaskDefinition>();
         for (int i=0;i<5;i++) definitions.add(new com.cosmicpve.content.definition.mask.MaskDefinition(

@@ -69,7 +69,8 @@ public final class Step8EGameTests {
             }
         }
         var adminFactory = new AdminAbuseRewardFactory();
-        int[] expectedCosmic = {7, 6, 8, 7};
+        int[] expectedCosmic = {7, 8, 10, 10, 8, 8, 10, 8};
+        int[] expectedCapacity = {8, 8, 10, 10, 8, 8, 10, 8};
         int index = 0;
         for (var outcome : AdminAbuseRewards.ALL) {
             var stack = adminFactory.create(outcome, access);
@@ -78,19 +79,46 @@ public final class Step8EGameTests {
             long cosmic = EnchantmentHelper.getEnchantmentsForCrafting(stack).keySet().stream().filter(holder ->
                     holder.unwrapKey().map(key -> key.identifier().getNamespace().equals(CosmicPVE.MOD_ID)).orElse(false)).count();
             helper.assertTrue(identity != null && identity.rewardId().equals(outcome.id()), "Admin reward identity must be exact");
-            helper.assertTrue(metadata != null && metadata.whiteScrollProtected() && metadata.transmogSorted(),
-                    "Admin rewards must be White Scrolled and Transmogged");
+            helper.assertTrue(metadata != null && metadata.whiteScrollProtected() && metadata.transmogSorted()
+                            && new com.cosmicpve.equipment.enchantment.WhiteScrollProtectionService().isProtected(stack)
+                            && com.cosmicpve.equipment.enchantment.HolyWhiteScrollService.isHoly(stack),
+                    "Every Admin reward must retain real White Scroll and Holy protection plus Transmog");
+            var base = switch (outcome) {
+                case GHOSTLY_VEIL -> Items.IRON_HELMET;
+                case COVERT_CLOAK -> Items.IRON_CHESTPLATE;
+                case NANKADA -> Items.NETHERITE_SWORD;
+                case ASHOKA, IZANAGI -> Items.NETHERITE_AXE;
+                case IDATEN -> Items.IRON_LEGGINGS;
+                case FREEMAN_WALKERS, ETERNAL_STRIDERS -> Items.IRON_BOOTS;
+            };
+            helper.assertTrue(stack.is(base), "Admin reward base item must be exact for " + outcome);
+            boolean heroicArmor = outcome != AdminAbuseRewards.Outcome.NANKADA
+                    && outcome != AdminAbuseRewards.Outcome.ASHOKA
+                    && outcome != AdminAbuseRewards.Outcome.IZANAGI;
+            helper.assertTrue(stack.has(ModDataComponents.HEROIC.get()) == heroicArmor,
+                    "Admin reward Heroic armor state must be exact for " + outcome);
+            if (!heroicArmor) {
+                var weapon = stack.get(ModDataComponents.SIGNATURE_WEAPON.get());
+                var expectedSet = switch (outcome) {
+                    case NANKADA -> com.cosmicpve.equipment.armor.ArmorSetIds.YJIKI;
+                    case ASHOKA -> com.cosmicpve.equipment.armor.ArmorSetIds.PHANTOM;
+                    case IZANAGI -> com.cosmicpve.equipment.armor.ArmorSetIds.YETI;
+                    default -> throw new AssertionError(outcome);
+                };
+                helper.assertTrue(weapon != null && weapon.matchingArmorSetId().equals(expectedSet)
+                                && SignatureWeaponCombatService.matches(weapon,
+                                        com.cosmicpve.combat.api.AttackCategory.MELEE, java.util.Optional.of(expectedSet))
+                                && !SignatureWeaponCombatService.matches(weapon,
+                                        com.cosmicpve.combat.api.AttackCategory.MELEE, java.util.Optional.empty()),
+                        "Admin signature weapon must resolve only with its matching active set for " + outcome);
+            }
             helper.assertTrue(cosmic == expectedCosmic[index++], "Admin reward Cosmic enchantment count must be exact");
             helper.assertTrue(new com.cosmicpve.equipment.enchantment.CustomEnchantCapacityService().capacity(stack)
-                    == expectedCosmic[index - 1], "Admin reward capacity must match exact enchantment count");
+                    == expectedCapacity[index - 1], "Admin reward capacity must reflect actual Orb upgrades");
+            verifyExactAdminEnchantments(helper, access, stack, outcome);
             if (outcome == AdminAbuseRewards.Outcome.GHOSTLY_VEIL || outcome == AdminAbuseRewards.Outcome.COVERT_CLOAK)
                 helper.assertTrue(Boolean.TRUE.equals(stack.get(ModDataComponents.OMNI_ARMOR.get()))
                         && stack.has(ModDataComponents.HEROIC.get()), "Admin armor must be typed Omni and Heroic");
-            if (outcome == AdminAbuseRewards.Outcome.ASHOKA)
-                helper.assertTrue(EnchantmentHelper.getItemEnchantmentLevel(
-                        access.lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(
-                                com.cosmicpve.registry.ModEnchantments.INSANITY), stack) == 0,
-                        "Ashoka must not contain Insanity");
             switch (outcome) {
                 case GHOSTLY_VEIL -> helper.assertTrue(level(access, stack,
                         com.cosmicpve.registry.ModEnchantments.PALADIN_ARMORED) == 4
@@ -112,10 +140,47 @@ public final class Step8EGameTests {
                         com.cosmicpve.registry.ModEnchantments.DEEP_BLEED) == 6
                         && level(access, stack, com.cosmicpve.registry.ModEnchantments.SILENCE) == 4
                         && level(access, stack, com.cosmicpve.registry.ModEnchantments.BLEED) == 0
-                        && level(access, stack, com.cosmicpve.registry.ModEnchantments.PUMMEL) == 0,
-                        "Ashoka must use Deep Bleed VI and Silence IV without Pummel or ordinary Bleed");
+                        && level(access, stack, com.cosmicpve.registry.ModEnchantments.PUMMEL) == 3
+                        && level(access, stack, com.cosmicpve.registry.ModEnchantments.INSANITY) == 8,
+                        "Ashoka must use its current ten-enchantment payload without ordinary Bleed");
+                case IDATEN -> helper.assertTrue(stack.is(Items.IRON_LEGGINGS)
+                        && stack.has(ModDataComponents.HEROIC.get())
+                        && stack.get(ModDataComponents.ARMOR_SET_ID.get()).setId().equals(
+                                com.cosmicpve.equipment.armor.ArmorSetIds.DIMENSIONAL_TRAVELER)
+                        && level(access, stack, com.cosmicpve.registry.ModEnchantments.EPIDEMIC_CARRIER) == 7
+                        && level(access, stack, com.cosmicpve.registry.ModEnchantments.PLAGUE_CARRIER) == 0
+                        && level(access, stack, com.cosmicpve.registry.ModEnchantments.LUCK) == 10,
+                        "Idaten must be Heroic Dimensional Traveler with Epidemic VII and Luck X");
+                case FREEMAN_WALKERS -> helper.assertTrue(stack.is(Items.IRON_BOOTS)
+                        && stack.has(ModDataComponents.HEROIC.get())
+                        && stack.get(ModDataComponents.ARMOR_SET_ID.get()).setId().equals(
+                                com.cosmicpve.equipment.armor.ArmorSetIds.ENGINEER),
+                        "Freeman Walkers must be Heroic Engineer boots");
+                case IZANAGI -> helper.assertTrue(stack.is(Items.NETHERITE_AXE)
+                        && stack.get(ModDataComponents.SIGNATURE_WEAPON.get()).matchingArmorSetId().equals(
+                                com.cosmicpve.equipment.armor.ArmorSetIds.YETI)
+                        && level(access, stack, com.cosmicpve.registry.ModEnchantments.MIGHTY_CLEAVE) == 8
+                        && level(access, stack, com.cosmicpve.registry.ModEnchantments.CLEAVE) == 0,
+                        "Izanagi must carry the Yeti weapon bonus and Mighty Cleave VIII");
+                case ETERNAL_STRIDERS -> helper.assertTrue(stack.is(Items.IRON_BOOTS)
+                        && stack.has(ModDataComponents.HEROIC.get())
+                        && stack.get(ModDataComponents.ARMOR_SET_ID.get()).setId().equals(
+                                com.cosmicpve.equipment.armor.ArmorSetIds.DRAGONSLAYER),
+                        "Eternal Striders must be Heroic Dragonslayer boots");
             }
         }
+        var previewPlayer = com.cosmicpve.adventure.AdventureGameTests.player(helper, "adminpreview");
+        var previewSource = new ItemStack(com.cosmicpve.registry.ModItems.ADMIN_ABUSE.get(), 2);
+        previewPlayer.getInventory().setItem(0, previewSource);
+        var preview = Step8ELootboxService.INSTANCE.previewOutcomes(previewPlayer, AnimatedLootboxItem.Kind.ADMIN_ABUSE);
+        helper.assertTrue(preview.size() == 8 && previewSource.getCount() == 2
+                        && !previewPlayer.getData(com.cosmicpve.registry.ModAttachments.LOOT_ANIMATION).valid(),
+                "Admin preview must expose eight results without consuming or persisting a roll");
+        for (int outcomeIndex = 0; outcomeIndex < 8; outcomeIndex++)
+            helper.assertTrue(ItemStack.matches(preview.get(outcomeIndex),
+                            adminFactory.create(AdminAbuseRewards.ALL.get(outcomeIndex), access)),
+                    "Admin preview must contain the unchanged production-equivalent stack at index " + outcomeIndex);
+        previewPlayer.discard();
         var table = new CosmicEnchantmentTableRewards();
         var enchantments = access.lookupOrThrow(Registries.ENCHANTMENT);
         for (int sample = 0; sample < 100; sample++) {
@@ -135,7 +200,7 @@ public final class Step8EGameTests {
             var book = heroicTable.create(enchantments, helper.getLevel().getRandom());
             var data = book.get(ModDataComponents.COSMIC_ENCHANT_BOOK.get());
             helper.assertTrue(data != null && HeroicCosmicEnchantmentTableRewards.POOL.contains(data.enchantmentId()),
-                    "Heroic Table reward must use one of the exact ten replacements");
+                    "Heroic Table reward must use one of the canonical replacements");
             helper.assertTrue(HeroicCosmicEnchantmentTableRewards.SUCCESS.contains(data.successRate())
                     && data.destroyRate() >= 1 && data.destroyRate() <= 100,
                     "Heroic Table rates must be 25/50/75 Success and 1-100 Destroy");
@@ -143,7 +208,7 @@ public final class Step8EGameTests {
                     "Heroic Table books must be maximum level");
             seenHeroics.add(data.enchantmentId());
         }
-        helper.assertTrue(seenHeroics.size() == 13, "Loaded-registry sampling must reach all thirteen Heroics");
+        helper.assertTrue(seenHeroics.size() == 14, "Loaded-registry sampling must reach all fourteen Heroics");
         verifyHeroicConversion(helper, enchantments);
         verifyDamageCategories(helper);
         verifyDragonReductionAndOmniActivation(helper, enchantments);
@@ -185,6 +250,14 @@ public final class Step8EGameTests {
         for (int slot = 0; slot < 36; slot++) player.getInventory().setItem(slot, new ItemStack(Items.STONE, 64));
         var source = new ItemStack(com.cosmicpve.registry.ModItems.RANDOM_WEAPON_SKIN_GENERATOR.get(), 2);
         player.setItemInHand(net.minecraft.world.InteractionHand.OFF_HAND, source);
+        var previews = Step8ELootboxService.INSTANCE.previewOutcomes(
+                player, AnimatedLootboxItem.Kind.RANDOM_WEAPON_SKIN_GENERATOR);
+        helper.assertTrue(previews.size() == 7 && source.getCount() == 2
+                        && !player.getData(com.cosmicpve.registry.ModAttachments.LOOT_ANIMATION).valid(),
+                "Weapon Skin Generator preview must show seven loose skins without consumption or a persisted roll");
+        helper.assertTrue(previews.stream().allMatch(stack -> stack.has(ModDataComponents.WEAPON_SKIN_ITEM.get())
+                        && !stack.has(ModDataComponents.WEAPON_SKIN.get())),
+                "All seven preview entries must be actual loose skins");
         helper.assertTrue(source.use(player.level(), player, net.minecraft.world.InteractionHand.OFF_HAND)
                 instanceof net.minecraft.world.InteractionResult.Success, "Generator must use the standard animation");
         var pending = player.getData(com.cosmicpve.registry.ModAttachments.LOOT_ANIMATION);
@@ -192,7 +265,9 @@ public final class Step8EGameTests {
         helper.assertTrue(source.getCount() == 1 && pending.valid() && pending.allRewards().size() == 1,
                 "Generator consumes exactly one and persists exactly one selected reward");
         helper.assertTrue(reward.has(ModDataComponents.WEAPON_SKIN_ITEM.get())
-                && !reward.has(ModDataComponents.WEAPON_SKIN.get()), "Generator reward must be an actual loose skin");
+                && !reward.has(ModDataComponents.WEAPON_SKIN.get())
+                && previews.stream().anyMatch(stack -> ItemStack.matches(stack, reward)),
+                "Generator reward must be exactly one of the seven actual loose previewed skins");
         player.closeContainer();
         com.cosmicpve.reward.animation.SingleRewardAnimationService.INSTANCE.recover(player);
         com.cosmicpve.reward.animation.SingleRewardAnimationService.INSTANCE.recover(player);
@@ -297,6 +372,28 @@ public final class Step8EGameTests {
         helper.assertTrue(blackScroll.eligibleActualEnchantments(axe).stream()
                 .noneMatch(value -> value.id().equals(com.cosmicpve.registry.ModEnchantments.DEEP_BLEED.identifier())),
                 "Black Scrolls must exclude Heroic enchantments");
+
+        ItemStack leggings = new ItemStack(Items.IRON_LEGGINGS);
+        EnchantmentHelper.updateEnchantments(leggings, mutable -> mutable.set(
+                enchantments.getOrThrow(com.cosmicpve.registry.ModEnchantments.PLAGUE_CARRIER), 7));
+        int priorCapacity = new com.cosmicpve.equipment.enchantment.CustomEnchantCapacityService().capacity(leggings);
+        var epidemicBook = book(com.cosmicpve.registry.ModEnchantments.EPIDEMIC_CARRIER.identifier(), 1, 100, 100);
+        helper.assertTrue(service.apply(epidemicBook, leggings, leggings).outcome()
+                        == com.cosmicpve.equipment.enchantment.CosmicBookApplicationResult.Outcome.SUCCESS,
+                "Epidemic I must convert from Plague Carrier VII through the generic Heroic path");
+        helper.assertTrue(level(helper.getLevel().registryAccess(), leggings,
+                        com.cosmicpve.registry.ModEnchantments.PLAGUE_CARRIER) == 0
+                        && level(helper.getLevel().registryAccess(), leggings,
+                                com.cosmicpve.registry.ModEnchantments.EPIDEMIC_CARRIER) == 1
+                        && new com.cosmicpve.equipment.enchantment.CustomEnchantCapacityService().capacity(leggings)
+                                == priorCapacity,
+                "Epidemic conversion must replace the counterpart in one capacity slot");
+        ItemStack noPlague = new ItemStack(Items.IRON_LEGGINGS);
+        var refused = book(com.cosmicpve.registry.ModEnchantments.EPIDEMIC_CARRIER.identifier(), 1, 100, 100);
+        helper.assertTrue(service.apply(refused, noPlague, noPlague).outcome()
+                        == com.cosmicpve.equipment.enchantment.CosmicBookApplicationResult.Outcome.REJECTED_HEROIC_PREREQUISITE
+                        && refused.getCount() == 1,
+                "Epidemic conversion must require maximum Plague Carrier VII and consume nothing on rejection");
     }
 
     private static ItemStack book(net.minecraft.resources.Identifier id, int level, int success, int destroy) {
@@ -311,5 +408,125 @@ public final class Step8EGameTests {
             ResourceKey<net.minecraft.world.item.enchantment.Enchantment> key) {
         return EnchantmentHelper.getItemEnchantmentLevel(
                 access.lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(key), stack);
+    }
+
+    private static void verifyExactAdminEnchantments(GameTestHelper helper, net.minecraft.core.RegistryAccess access,
+            ItemStack stack, AdminAbuseRewards.Outcome outcome) {
+        var actual = new java.util.HashMap<ResourceKey<net.minecraft.world.item.enchantment.Enchantment>, Integer>();
+        EnchantmentHelper.getEnchantmentsForCrafting(stack).entrySet().forEach(entry ->
+                actual.put(entry.getKey().unwrapKey().orElseThrow(), entry.getIntValue()));
+        var expected = new java.util.HashMap<ResourceKey<net.minecraft.world.item.enchantment.Enchantment>, Integer>();
+        switch (outcome) {
+            case GHOSTLY_VEIL -> {
+                armorVanilla(expected);
+                add(expected, com.cosmicpve.registry.ModEnchantments.MORTAL_COIL, 2,
+                        com.cosmicpve.registry.ModEnchantments.PALADIN_ARMORED, 4,
+                        com.cosmicpve.registry.ModEnchantments.MOLTEN, 4,
+                        com.cosmicpve.registry.ModEnchantments.ALIEN_IMPLANTS, 3,
+                        com.cosmicpve.registry.ModEnchantments.VOODOO, 6,
+                        com.cosmicpve.registry.ModEnchantments.ENDER_SHIFT, 3,
+                        com.cosmicpve.registry.ModEnchantments.GLOWING, 1);
+            }
+            case COVERT_CLOAK -> {
+                armorVanilla(expected);
+                add(expected, com.cosmicpve.registry.ModEnchantments.DEATH_PACT, 5,
+                        com.cosmicpve.registry.ModEnchantments.PERMAFROST, 6,
+                        com.cosmicpve.registry.ModEnchantments.PALADIN_ARMORED, 4,
+                        com.cosmicpve.registry.ModEnchantments.GODLY_OVERLOAD, 3,
+                        com.cosmicpve.registry.ModEnchantments.AEGIS, 6,
+                        com.cosmicpve.registry.ModEnchantments.ANGELIC, 5,
+                        com.cosmicpve.registry.ModEnchantments.FORBIDDEN_CURSE, 5,
+                        com.cosmicpve.registry.ModEnchantments.STORMCALLER, 5);
+            }
+            case NANKADA -> {
+                weaponVanilla(expected); add(expected, Enchantments.FIRE_ASPECT, 2);
+                add(expected, com.cosmicpve.registry.ModEnchantments.SOUL_SIPHON, 4,
+                        com.cosmicpve.registry.ModEnchantments.BLACKOUT, 4,
+                        com.cosmicpve.registry.ModEnchantments.RAGE, 6,
+                        com.cosmicpve.registry.ModEnchantments.DOUBLESTRIKE, 3,
+                        com.cosmicpve.registry.ModEnchantments.PERMANENT_EXECUTE, 5,
+                        com.cosmicpve.registry.ModEnchantments.GREATSWORD, 4,
+                        com.cosmicpve.registry.ModEnchantments.POISON, 3,
+                        com.cosmicpve.registry.ModEnchantments.SILENCE, 4,
+                        com.cosmicpve.registry.ModEnchantments.TITAN_TRAP, 3,
+                        com.cosmicpve.registry.ModEnchantments.THUNDERING_BLOW, 3);
+            }
+            case ASHOKA -> {
+                weaponVanilla(expected);
+                add(expected, com.cosmicpve.registry.ModEnchantments.HERO_KILLER, 3,
+                        com.cosmicpve.registry.ModEnchantments.SOUL_TETHER, 3,
+                        com.cosmicpve.registry.ModEnchantments.SOUL_SIPHON, 4,
+                        com.cosmicpve.registry.ModEnchantments.RAGE, 6,
+                        com.cosmicpve.registry.ModEnchantments.DEEP_BLEED, 6,
+                        com.cosmicpve.registry.ModEnchantments.DEVOUR, 4,
+                        com.cosmicpve.registry.ModEnchantments.SILENCE, 4,
+                        com.cosmicpve.registry.ModEnchantments.PYRE, 3,
+                        com.cosmicpve.registry.ModEnchantments.PUMMEL, 3,
+                        com.cosmicpve.registry.ModEnchantments.INSANITY, 8);
+            }
+            case IDATEN -> {
+                armorVanilla(expected);
+                add(expected, com.cosmicpve.registry.ModEnchantments.PALADIN_ARMORED, 4,
+                        com.cosmicpve.registry.ModEnchantments.MIGHTY_CACTUS, 2,
+                        com.cosmicpve.registry.ModEnchantments.EPIDEMIC_CARRIER, 7,
+                        com.cosmicpve.registry.ModEnchantments.SELF_DESTRUCT, 3,
+                        com.cosmicpve.registry.ModEnchantments.ANGELIC, 5,
+                        com.cosmicpve.registry.ModEnchantments.OBSIDIANSHIELD, 2,
+                        com.cosmicpve.registry.ModEnchantments.TANK, 4,
+                        com.cosmicpve.registry.ModEnchantments.LUCK, 10);
+            }
+            case FREEMAN_WALKERS -> {
+                armorVanilla(expected);
+                add(expected, com.cosmicpve.registry.ModEnchantments.PALADIN_ARMORED, 4,
+                        com.cosmicpve.registry.ModEnchantments.TANK, 4,
+                        com.cosmicpve.registry.ModEnchantments.GEARS, 3,
+                        com.cosmicpve.registry.ModEnchantments.PHOENIX, 3,
+                        com.cosmicpve.registry.ModEnchantments.STORMCALLER, 5,
+                        com.cosmicpve.registry.ModEnchantments.NIMBLE, 4,
+                        com.cosmicpve.registry.ModEnchantments.LUCK, 10,
+                        com.cosmicpve.registry.ModEnchantments.DODGE, 5);
+            }
+            case IZANAGI -> {
+                weaponVanilla(expected);
+                add(expected, com.cosmicpve.registry.ModEnchantments.DEEP_BLEED, 6,
+                        com.cosmicpve.registry.ModEnchantments.MIGHTY_CLEAVE, 8,
+                        com.cosmicpve.registry.ModEnchantments.INSANITY, 8,
+                        com.cosmicpve.registry.ModEnchantments.HEX, 5,
+                        com.cosmicpve.registry.ModEnchantments.DEVOUR, 4,
+                        com.cosmicpve.registry.ModEnchantments.BOSS_SLAYER, 3,
+                        com.cosmicpve.registry.ModEnchantments.BLESSED, 4,
+                        com.cosmicpve.registry.ModEnchantments.BERSERK, 5,
+                        com.cosmicpve.registry.ModEnchantments.ANTI_GANK, 4,
+                        com.cosmicpve.registry.ModEnchantments.OBLITERATE, 3);
+            }
+            case ETERNAL_STRIDERS -> {
+                armorVanilla(expected);
+                add(expected, com.cosmicpve.registry.ModEnchantments.LUCK, 10,
+                        com.cosmicpve.registry.ModEnchantments.DODGE, 5,
+                        com.cosmicpve.registry.ModEnchantments.PALADIN_ARMORED, 4,
+                        com.cosmicpve.registry.ModEnchantments.ENDER_WALKER, 5,
+                        com.cosmicpve.registry.ModEnchantments.GEARS, 3,
+                        com.cosmicpve.registry.ModEnchantments.PHOENIX, 3,
+                        com.cosmicpve.registry.ModEnchantments.NIMBLE, 4,
+                        com.cosmicpve.registry.ModEnchantments.ANGELIC, 5);
+            }
+        }
+        helper.assertTrue(actual.equals(expected), "Exact Admin Abuse enchantment payload differs for " + outcome
+                + ": expected " + expected + ", got " + actual);
+    }
+
+    private static void armorVanilla(java.util.Map<ResourceKey<net.minecraft.world.item.enchantment.Enchantment>, Integer> expected) {
+        add(expected, Enchantments.PROTECTION, 4, Enchantments.UNBREAKING, 3, Enchantments.MENDING, 1);
+    }
+    private static void weaponVanilla(java.util.Map<ResourceKey<net.minecraft.world.item.enchantment.Enchantment>, Integer> expected) {
+        add(expected, Enchantments.SHARPNESS, 5, Enchantments.UNBREAKING, 3, Enchantments.MENDING, 1);
+    }
+    private static void add(java.util.Map<ResourceKey<net.minecraft.world.item.enchantment.Enchantment>, Integer> expected,
+            Object... entries) {
+        for (int i = 0; i < entries.length; i += 2) {
+            @SuppressWarnings("unchecked")
+            var key = (ResourceKey<net.minecraft.world.item.enchantment.Enchantment>) entries[i];
+            expected.put(key, (Integer) entries[i + 1]);
+        }
     }
 }

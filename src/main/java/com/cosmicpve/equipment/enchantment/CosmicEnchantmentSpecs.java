@@ -164,6 +164,8 @@ public final class CosmicEnchantmentSpecs {
             ModEnchantments.SUPERBREAKER.identifier(), 10, CosmicEnchantmentTier.ELITE, "pickaxe");
     public static final CosmicEnchantmentSpec HIGHLIGHT = new CosmicEnchantmentSpec(
             ModEnchantments.HIGHLIGHT.identifier(), 1, CosmicEnchantmentTier.MASTERY, "pickaxe");
+    public static final CosmicEnchantmentSpec EPIDEMIC_CARRIER = new CosmicEnchantmentSpec(
+            ModEnchantments.EPIDEMIC_CARRIER.identifier(), 7, CosmicEnchantmentTier.HEROIC, "leggings");
     public static final CosmicEnchantmentSpec DEEP_BLEED = new CosmicEnchantmentSpec(
             ModEnchantments.DEEP_BLEED.identifier(), 6, CosmicEnchantmentTier.HEROIC, "axe");
     public static final CosmicEnchantmentSpec MIGHTY_CACTUS = new CosmicEnchantmentSpec(
@@ -203,7 +205,7 @@ public final class CosmicEnchantmentSpecs {
                     SUPERBREAKER, HIGHLIGHT,
                     DEEP_BLEED, MIGHTY_CACTUS, PALADIN_ARMORED, BLIGHTED_VIRUS, ALIEN_IMPLANTS,
                     LETHAL_SNIPER, ETERNAL_SNARE, PERMANENT_EXECUTE, MIGHTY_CLEAVE, FORBIDDEN_CURSE,
-                    GODLY_OVERLOAD, TITAN_TRAP, DEATHBRINGER, PLANETARY_DEATHBRINGER);
+                    GODLY_OVERLOAD, TITAN_TRAP, EPIDEMIC_CARRIER, DEATHBRINGER, PLANETARY_DEATHBRINGER);
 
     private CosmicEnchantmentSpecs() {}
 

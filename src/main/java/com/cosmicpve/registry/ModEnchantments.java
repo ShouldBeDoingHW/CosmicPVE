@@ -96,6 +96,7 @@ public final class ModEnchantments {
     public static final ResourceKey<Enchantment> TITAN_TRAP = createKey("titan_trap");
     public static final ResourceKey<Enchantment> SUPERBREAKER = createKey("superbreaker");
     public static final ResourceKey<Enchantment> HIGHLIGHT = createKey("highlight");
+    public static final ResourceKey<Enchantment> EPIDEMIC_CARRIER = createKey("epidemic_carrier");
 
     private ModEnchantments() {}
 

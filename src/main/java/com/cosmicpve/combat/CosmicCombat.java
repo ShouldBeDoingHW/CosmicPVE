@@ -96,6 +96,8 @@ public final class CosmicCombat {
     private static final TrueDamageDeliveryService TRUE_DAMAGE = new TrueDamageDeliveryService();
     private static final ChildCombatActionService CHILD_ACTIONS = new ChildCombatActionService(SEQUENCES, TRUE_DAMAGE);
     private static final CombatStackService STACKS = new CombatStackService(CosmicContent.repository());
+    private static final com.cosmicpve.combat.empowerment.NextHitEmpowermentService NEXT_HITS =
+            new com.cosmicpve.combat.empowerment.NextHitEmpowermentService(MASKS);
     private static final com.cosmicpve.combat.enchantment.NimbleBehavior NIMBLE =
             new com.cosmicpve.combat.enchantment.NimbleBehavior(STACKS);
     private static final com.cosmicpve.combat.enchantment.ThunderingBlowVelocityService THUNDERING_VELOCITY =
@@ -133,7 +135,7 @@ public final class CosmicCombat {
     private static final CosmicEnchantmentBehaviorResolver ENCHANTMENT_BEHAVIORS =
             new CosmicEnchantmentBehaviorResolver(
                     CHILD_ACTIONS, STACKS, BLEED_RUNTIME, ARMOR_SET_IMMUNITIES, COOLDOWNS, SOUL_TETHERS,
-                    ARMOR_SETS, ARMOR_SET_SUPPRESSION, SNARE_ROOTS);
+                    ARMOR_SETS, ARMOR_SET_SUPPRESSION, SNARE_ROOTS, NEXT_HITS);
     private static final NutritionFoodService NUTRITION = new NutritionFoodService(ENCHANTMENTS);
     private static final ExecutionService EXECUTIONS = new ExecutionService(SEQUENCES, TRACES);
     private static final CombatEventBridge EVENTS =
@@ -143,7 +145,7 @@ public final class CosmicCombat {
     private static final ProcHookEventBridge PROC_HOOKS =
             new ProcHookEventBridge(PROC_EVENTS, EXECUTIONS, NUTRITION, SOUL_TETHERS);
     private static final CombatStackEventBridge STACK_EVENTS = new CombatStackEventBridge(STACKS, BLEED_RUNTIME);
-    private static final MaskCombatResolver MASK_COMBAT = new MaskCombatResolver(MASKS, ACTIVITIES);
+    private static final MaskCombatResolver MASK_COMBAT = new MaskCombatResolver(MASKS, ACTIVITIES, STACKS);
     private static final MaskRuntimeEventBridge MASK_EVENTS = new MaskRuntimeEventBridge(
             MASKS, PROC_EVENTS, ENCHANTMENTS, ACTIVITIES, EQUIPPED_EFFECTS, EVENTS);
     private static final com.cosmicpve.combat.enchantment.DodgeProcResolver DODGE =
@@ -188,6 +190,7 @@ public final class CosmicCombat {
         OUTGOING.register(new com.cosmicpve.combat.enchantment.HeroKillerBehavior(ARMOR_SETS));
         OUTGOING.register(new com.cosmicpve.combat.enchantment.VoodooBehavior(STACKS));
         OUTGOING.register(MASK_COMBAT);
+        OUTGOING.register(NEXT_HITS);
         OUTGOING.register(new com.cosmicpve.combat.enchantment.DominateBehavior());
         OUTGOING.register(hex);
         OUTGOING.register(SPIRIT_LINK);
@@ -218,6 +221,7 @@ public final class CosmicCombat {
         PROC_SOURCES.register(ENCHANTMENT_BEHAVIORS);
         PROC_SOURCES.register(WEAPON_SKIN_COMBAT);
         PROC_SOURCES.register(DODGE);
+        PROC_SOURCES.register(NEXT_HITS);
         PROC_SOURCES.register(LETHAL_SNIPER);
         PROC_SOURCES.register(SPIRIT_LINK);
         PROC_SOURCES.register(NIMBLE);
@@ -228,6 +232,7 @@ public final class CosmicCombat {
                 com.cosmicpve.equipment.enchantment.EnchantmentSuppressionService.GLOBAL));
         PROCS.registerActivationListener(NIMBLE);
         PROCS.registerActivationListener(AMULETS);
+        PROCS.registerActivationListener(NEXT_HITS);
         NeoForge.EVENT_BUS.addListener(EventPriority.HIGHEST, SELF_DESTRUCT_EVENTS::onIncomingDamage);
         NeoForge.EVENT_BUS.addListener(EVENTS::onIncomingDamage);
         NeoForge.EVENT_BUS.addListener(EVENTS::onDamageAccepted);
@@ -258,6 +263,8 @@ public final class CosmicCombat {
         NeoForge.EVENT_BUS.addListener(THUNDERING_VELOCITY::onServerTick);
         NeoForge.EVENT_BUS.addListener(SELF_DESTRUCT_EVENTS::onExplosion);
         NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, SPIRIT_LINK::onDeath);
+        NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, NEXT_HITS::onDeath);
+        NeoForge.EVENT_BUS.addListener(NEXT_HITS::onLogout);
         var beltEvents = new com.cosmicpve.equipment.accessory.BeltRuntimeEventBridge(BELTS);
         NeoForge.EVENT_BUS.addListener(beltEvents::onPlayerTick);
         NeoForge.EVENT_BUS.addListener(beltEvents::onDeath);

@@ -9,6 +9,8 @@ import com.cosmicpve.combat.pipeline.IncomingDamageContributor;
 import com.cosmicpve.combat.pipeline.OutgoingDamageContribution;
 import com.cosmicpve.combat.pipeline.OutgoingDamageContributor;
 import com.cosmicpve.content.definition.mask.MaskBehavior;
+import com.cosmicpve.content.definition.stack.StackPolarity;
+import com.cosmicpve.combat.stack.CombatStackService;
 import java.util.List;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
@@ -22,12 +24,19 @@ public final class MaskCombatResolver implements OutgoingDamageContributor, Inco
     public static final net.minecraft.resources.Identifier TURKEY_DODGE = CosmicPVE.id("turkey_mask_dodge");
     private final MaskResolver masks;
     private final com.cosmicpve.activity.ActivityContextService activities;
+    private final CombatStackService stacks;
     public MaskCombatResolver(MaskResolver masks) {
-        this(masks, new com.cosmicpve.activity.ActivityContextService());
+        this(masks, new com.cosmicpve.activity.ActivityContextService(),
+                new CombatStackService(com.cosmicpve.content.CosmicContent.repository()));
     }
     public MaskCombatResolver(MaskResolver masks, com.cosmicpve.activity.ActivityContextService activities) {
+        this(masks, activities, new CombatStackService(com.cosmicpve.content.CosmicContent.repository()));
+    }
+    public MaskCombatResolver(MaskResolver masks, com.cosmicpve.activity.ActivityContextService activities,
+            CombatStackService stacks) {
         this.masks = masks;
         this.activities = activities;
+        this.stacks = stacks;
     }
 
     @Override public List<OutgoingDamageContribution> resolve(CombatContext context) {
@@ -42,6 +51,8 @@ public final class MaskCombatResolver implements OutgoingDamageContributor, Inco
                 && targetHasActualMastery(context.target())) bonus += .06;
         if (equippedMasks.stream().anyMatch(definition -> definition.behavior() == MaskBehavior.MONOPOLY))
             bonus += monopolyOutgoingBonus(holyGearCount(context.attacker()));
+        if (equippedMasks.stream().anyMatch(definition -> definition.behavior() == MaskBehavior.TIKI)
+                && hasNegativeStack(context.attacker())) bonus += .03;
         return bonus == 0.0 ? List.of() : List.of(new OutgoingDamageContribution(CosmicPVE.id("mask_loadout"), bonus));
     }
 
@@ -53,8 +64,18 @@ public final class MaskCombatResolver implements OutgoingDamageContributor, Inco
                     && context.damageSource().is(net.minecraft.world.damagesource.DamageTypes.LIGHTNING_BOLT))
                 return List.of(new IncomingDamageContribution(CosmicPVE.id("zeus_mask_lightning_immunity"), 0.0));
         }
-        return equipped.stream().anyMatch(d -> d.behavior() == MaskBehavior.PARTY) && context.channel() == DamageChannel.ORDINARY
-                ? List.of(new IncomingDamageContribution(CosmicPVE.id("party_mask"), .99)) : List.of();
+        if (context.channel() != DamageChannel.ORDINARY) return List.of();
+        var result = new java.util.ArrayList<IncomingDamageContribution>();
+        if (equipped.stream().anyMatch(d -> d.behavior() == MaskBehavior.PARTY))
+            result.add(new IncomingDamageContribution(CosmicPVE.id("party_mask"), .99));
+        if (equipped.stream().anyMatch(d -> d.behavior() == MaskBehavior.TIKI) && hasNegativeStack(context.target()))
+            result.add(new IncomingDamageContribution(CosmicPVE.id("tiki_mask"), .97));
+        return List.copyOf(result);
+    }
+
+    private boolean hasNegativeStack(net.minecraft.world.entity.LivingEntity entity) {
+        var server = entity.level().getServer();
+        return server != null && !stacks.byPolarity(entity, StackPolarity.NEGATIVE, server.getTickCount()).isEmpty();
     }
 
     static int holyGearCount(net.minecraft.world.entity.LivingEntity entity) {

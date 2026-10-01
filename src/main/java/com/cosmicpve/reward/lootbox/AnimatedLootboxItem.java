@@ -1,6 +1,7 @@
 package com.cosmicpve.reward.lootbox;
 
 import java.util.List;
+import java.util.function.Consumer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -8,6 +9,8 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.Level;
 
 public final class AnimatedLootboxItem extends Item implements com.cosmicpve.reward.preview.LootPreviewProvider {
@@ -20,6 +23,10 @@ public final class AnimatedLootboxItem extends Item implements com.cosmicpve.rew
     @Override public boolean isFoil(ItemStack stack) { return true; }
     @Override public Component getName(ItemStack stack) {
         return displayName(kind);
+    }
+    @Override public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display,
+            Consumer<Component> consumer, TooltipFlag flag) {
+        if (kind == Kind.ADMIN_ABUSE) consumer.accept(adminFlavor());
     }
     static Component displayName(Kind kind) {
         return switch (kind) {
@@ -48,15 +55,20 @@ public final class AnimatedLootboxItem extends Item implements com.cosmicpve.rew
                 ? InteractionResult.SUCCESS_SERVER : InteractionResult.FAIL;
     }
     static MutableComponent adminName() {
+        return alternatingAdminText("Admin Abuse", true);
+    }
+    static MutableComponent adminFlavor() {
+        return alternatingAdminText("Admin! He’s doing it sideways!!!", false);
+    }
+    private static MutableComponent alternatingAdminText(String text, boolean strikethrough) {
         MutableComponent result = Component.empty();
-        String name = "Admin Abuse";
         int letter = 0;
-        for (int index = 0; index < name.length(); index++) {
-            char value = name.charAt(index);
+        for (int index = 0; index < text.length(); index++) {
+            char value = text.charAt(index);
             int color = letter % 2 == 0 ? 0xD41432 : 0x8F1022;
             result.append(Component.literal(Character.toString(value)).withStyle(style -> style.withColor(color)
-                    .withBold(true).withItalic(true).withStrikethrough(true)));
-            if (!Character.isWhitespace(value)) letter++;
+                    .withBold(strikethrough).withItalic(true).withStrikethrough(strikethrough)));
+            if (Character.isLetter(value)) letter++;
         }
         return result;
     }
@@ -72,7 +84,9 @@ public final class AnimatedLootboxItem extends Item implements com.cosmicpve.rew
                 Component.literal("• Boosted Chainsaw").withColor(0xCCA00A),
                 Component.literal("• Spinal Tap").withColor(0x00F02C),
                 Component.literal("• Grim Axe").withColor(0x4C09B8),
-                Component.literal("• Maui's Hook").withColor(0x404242));
+                Component.literal("• Maui's Hook").withColor(0x404242),
+                Component.literal("• Trident of the Deep").withColor(0x10B29C),
+                Component.literal("• Firework Rocket").withColor(0xD43700));
     }
     public enum Kind { SECRET_WEAPON_CACHE, COSMIC_ENCHANTMENT_TABLE, HEROIC_COSMIC_ENCHANTMENT_TABLE,
         ADMIN_ABUSE, MYSTERY_CALL_OF_ADVENTURE, RANDOM_WEAPON_SKIN_GENERATOR }

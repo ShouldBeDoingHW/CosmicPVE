@@ -47,6 +47,7 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
     private final com.cosmicpve.equipment.armor.ArmorSetResolver armorSets;
     private final com.cosmicpve.equipment.armor.ArmorSetSuppressionService armorSetSuppression;
     private final SnareRootService snareRoots;
+    private final com.cosmicpve.combat.empowerment.NextHitEmpowermentService nextHits;
     private final CleaveBehavior cleave;
     private final DeathCoffinBehavior deathCoffin;
     private final PacifyBehavior pacify;
@@ -74,6 +75,17 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
             com.cosmicpve.equipment.armor.ArmorSetResolver armorSets,
             com.cosmicpve.equipment.armor.ArmorSetSuppressionService armorSetSuppression,
             SnareRootService snareRoots) {
+        this(childActions, stacks, bleedRuntime, immunities, cooldowns, soulTethers, armorSets,
+                armorSetSuppression, snareRoots, null);
+    }
+
+    public CosmicEnchantmentBehaviorResolver(
+            ChildCombatActionService childActions, CombatStackService stacks, BleedRuntimeService bleedRuntime,
+            ArmorSetImmunityResolver immunities, CooldownService cooldowns, SoulTetherService soulTethers,
+            com.cosmicpve.equipment.armor.ArmorSetResolver armorSets,
+            com.cosmicpve.equipment.armor.ArmorSetSuppressionService armorSetSuppression,
+            SnareRootService snareRoots,
+            com.cosmicpve.combat.empowerment.NextHitEmpowermentService nextHits) {
         this.childActions = childActions;
         this.stacks = stacks;
         this.bleedRuntime = bleedRuntime;
@@ -83,6 +95,7 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
         this.armorSets = armorSets;
         this.armorSetSuppression = armorSetSuppression;
         this.snareRoots = snareRoots;
+        this.nextHits = nextHits;
         this.cleave = new CleaveBehavior(
                 com.cosmicpve.combat.ownership.GeneralAllyResolver.production(), childActions);
         this.deathCoffin = new DeathCoffinBehavior(
@@ -434,6 +447,22 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
     }
 
     private void addPlagueCarrier(ProcEvent event, List<ProcCandidate> result) {
+        int epidemicLevel = Math.min(7, event.effectiveEnchantments().level(ModEnchantments.EPIDEMIC_CARRIER.identifier()));
+        if (epidemicLevel > 0) {
+            if (event.target() == null || event.attacker() == null
+                    || event.attacker() == event.target() || event.attacker().isDeadOrDying()) return;
+            result.add(deterministicCandidate(ModEnchantments.EPIDEMIC_CARRIER.identifier(), ProcHook.ON_DAMAGE_TAKEN,
+                    1.0, Optional.of(PlagueCarrierBehavior.COOLDOWN_KEY), PlagueCarrierBehavior.COOLDOWN_TICKS,
+                    Optional.empty(), ChildProcEligibility.LIMITED_DEFENSIVE_REACTION,
+                    activation -> {
+                        EpidemicCarrierBehavior.poison(event.attacker());
+                        if (nextHits != null) nextHits.armEpidemic(event.target(), epidemicLevel);
+                    }, provenance(event, ModEnchantments.EPIDEMIC_CARRIER.identifier()),
+                    condition(CosmicPVE.id("epidemic_carrier_below_quarter"), procEvent ->
+                            procEvent.target() != null && EpidemicCarrierBehavior.belowThreshold(
+                                    procEvent.target().getHealth(), procEvent.target().getMaxHealth()))));
+            return;
+        }
         int level = Math.min(7, event.effectiveEnchantments().level(ModEnchantments.PLAGUE_CARRIER.identifier()));
         if (level <= 0 || event.target() == null || event.attacker() == null
                 || event.attacker() == event.target() || event.attacker().isDeadOrDying()) return;

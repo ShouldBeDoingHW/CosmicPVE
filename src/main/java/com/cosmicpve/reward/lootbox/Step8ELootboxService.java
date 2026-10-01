@@ -122,7 +122,7 @@ public final class Step8ELootboxService {
     }
     private boolean openRandomWeaponSkin(ServerPlayer player, ItemStack source) {
         var candidates = randomWeaponSkinCandidates();
-        ItemStack reward = candidates.get(player.getRandom().nextInt(candidates.size())).copy();
+        ItemStack reward = selectRandomWeaponSkin(candidates, player.getRandom());
         return SingleRewardAnimationService.INSTANCE.open(player, reward,
                 LootAnimationPreviewProvider.uniform(candidates), () -> source.shrink(1));
     }
@@ -137,10 +137,14 @@ public final class Step8ELootboxService {
                 com.cosmicpve.equipment.skin.WeaponSkinItemFactory.create(
                         com.cosmicpve.equipment.skin.WeaponSkinDefinitions.GRIM_AXE),
                 com.cosmicpve.equipment.skin.WeaponSkinItemFactory.create(
-                        com.cosmicpve.equipment.skin.WeaponSkinDefinitions.MAUIS_HOOK));
+                        com.cosmicpve.equipment.skin.WeaponSkinDefinitions.MAUIS_HOOK),
+                com.cosmicpve.equipment.skin.WeaponSkinItemFactory.create(
+                        com.cosmicpve.equipment.skin.WeaponSkinDefinitions.TRIDENT_OF_THE_DEEP),
+                com.cosmicpve.equipment.skin.WeaponSkinItemFactory.create(
+                        com.cosmicpve.equipment.skin.WeaponSkinDefinitions.FIREWORK_ROCKET));
     }
     public static ItemStack selectRandomWeaponSkin(List<ItemStack> candidates, net.minecraft.util.RandomSource random) {
-        if (candidates.size() != 5) throw new IllegalArgumentException("Weapon Skin Generator requires five outcomes");
+        if (candidates.size() != 7) throw new IllegalArgumentException("Weapon Skin Generator requires seven outcomes");
         return candidates.get(random.nextInt(candidates.size())).copy();
     }
     public static ItemStack selectSignatureWeapon(List<ItemStack> candidates, net.minecraft.util.RandomSource random) {

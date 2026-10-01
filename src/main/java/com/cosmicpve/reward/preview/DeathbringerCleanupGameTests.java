@@ -139,8 +139,8 @@ public final class DeathbringerCleanupGameTests {
             var outcomes = ((LootPreviewProvider)item).previewOutcomes(player, source);
             helper.assertTrue(!outcomes.isEmpty() && ItemStack.matches(before, source), "Preview enumerates without consumption");
             if (item == ModItems.SPACE_DUST_BUNDLE.get()) helper.assertTrue(outcomes.stream().allMatch(s -> s.getCount() == 10), "Dust preview uses max 10");
-            if (item == ModItems.HEROIC_COSMIC_ENCHANTMENT_TABLE.get()) helper.assertTrue(outcomes.size() == 39,
-                    "Heroic preview includes thirteen enchants and three Success rates, not random Destroy permutations");
+            if (item == ModItems.HEROIC_COSMIC_ENCHANTMENT_TABLE.get()) helper.assertTrue(outcomes.size() == 42,
+                    "Heroic preview includes fourteen enchants and three Success rates, not random Destroy permutations");
             if (item == ModItems.COSMIC_ENCHANTMENT_TABLE.get()) helper.assertTrue(outcomes.size() == 53,
                     "Cosmic preview includes only unique enchantment/level/Success variants");
             if (item == ModItems.MEMORY_CHEST.get()) helper.assertTrue(outcomes.size() == 11,

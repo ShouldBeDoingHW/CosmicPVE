@@ -620,4 +620,10 @@
   ,"enchantment.cosmicpve.highlight":"Highlight"
   ,"enchantment.cosmicpve.superbreaker.description":"Right-click a pickaxe for Haste V for 10 + level seconds. 120s cooldown per pickaxe."
   ,"enchantment.cosmicpve.highlight.description":"Breaking an ore may highlight nearby ores of the same type for 15s."
+  ,"mask.cosmicpve.tiki":"Tiki"
+  ,"mask.cosmicpve.tiki.effect":"While affected by 1 or more negative stacks, deal +3% outgoing damage and take -3% incoming damage."
+  ,"mask.cosmicpve.jester":"Jester"
+  ,"mask.cosmicpve.jester.effect":"Dodging an attack boosts your next outgoing hit by +12%"
+  ,"enchantment.cosmicpve.epidemic_carrier":"Epidemic Carrier"
+  ,"enchantment.cosmicpve.epidemic_carrier.description":"When hit below 25% HP, poison your attacker and empower your next hit to deal more damage and heal you. 30s cooldown."
 }
