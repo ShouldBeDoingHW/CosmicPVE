@@ -26,6 +26,7 @@ public final class CosmicPVEClient {
         modBus.addListener(CosmicPVEClient::registerEntityRenderers);
         modBus.addListener(CosmicPVEClient::registerMenuScreens);
         modBus.addListener(TrialClientPresentation::registerPayloadHandlers);
+        modBus.addListener(HighlightClientPresentation::registerPayloadHandlers);
         modBus.addListener(TrialClientPresentation::registerGuiLayers);
         modBus.addListener(MaskClientPresentation::register);
         modBus.addListener(AmuletClientPresentation::registerState);
@@ -41,6 +42,8 @@ public final class CosmicPVEClient {
         NeoForge.EVENT_BUS.addListener(scrollingTooltips::onScreenRenderPre);
         NeoForge.EVENT_BUS.addListener(scrollingTooltips::onScreenRenderPost);
         NeoForge.EVENT_BUS.addListener(LootPreviewInput::onInteraction);
+        NeoForge.EVENT_BUS.addListener(HighlightClientPresentation::onExtract);
+        NeoForge.EVENT_BUS.addListener(HighlightClientPresentation::onLogout);
     }
 
     private static void registerMenuScreens(RegisterMenuScreensEvent event) {

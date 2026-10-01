@@ -94,6 +94,8 @@ public final class ModEnchantments {
     public static final ResourceKey<Enchantment> FORBIDDEN_CURSE = createKey("forbidden_curse");
     public static final ResourceKey<Enchantment> GODLY_OVERLOAD = createKey("godly_overload");
     public static final ResourceKey<Enchantment> TITAN_TRAP = createKey("titan_trap");
+    public static final ResourceKey<Enchantment> SUPERBREAKER = createKey("superbreaker");
+    public static final ResourceKey<Enchantment> HIGHLIGHT = createKey("highlight");
 
     private ModEnchantments() {}
 

@@ -23,12 +23,13 @@ public final class WeaponSkinDefinitions {
     public static final Identifier THE_CARVER = CosmicPVE.id("the_carver");
     public static final Identifier SPINAL_TAP = CosmicPVE.id("spinal_tap");
     public static final Identifier FIREWORK_ROCKET = CosmicPVE.id("firework_rocket");
+    public static final Identifier TRIDENT_OF_THE_DEEP = CosmicPVE.id("trident_of_the_deep");
 
     private static final Map<Identifier, WeaponSkinDefinition> DEFINITIONS = List.of(
             definition(BOOSTED_CHAINSAW, 0xCCA00A, WeaponSkinDefinition.WeaponKind.AXE,
                     List.of(Component.translatable("weapon_skin.cosmicpve.boosted_chainsaw.effect")),
                     List.of(new VirtualEnchantmentGrant(
-                            ModEnchantments.DOUBLESTRIKE.identifier(), 3, BOOSTED_CHAINSAW))),
+                            ModEnchantments.DOUBLESTRIKE.identifier(), 5, BOOSTED_CHAINSAW))),
             definition(MAUIS_HOOK, 0x404242, WeaponSkinDefinition.WeaponKind.SWORD,
                     List.of(Component.translatable("weapon_skin.cosmicpve.mauis_hook.effect.damage"),
                             Component.translatable("weapon_skin.cosmicpve.mauis_hook.effect.steal")), List.of()),
@@ -49,6 +50,10 @@ public final class WeaponSkinDefinitions {
                     List.of(new VirtualEnchantmentGrant(ModEnchantments.DEVOUR.identifier(), 4, THE_CARVER))),
             definition(SPINAL_TAP, 0x00F02C, WeaponSkinDefinition.WeaponKind.SWORD,
                     List.of(Component.translatable("weapon_skin.cosmicpve.spinal_tap.effect")), List.of()),
+            definition(TRIDENT_OF_THE_DEEP, 0x10B29C, WeaponSkinDefinition.WeaponKind.SWORD,
+                    List.of(Component.translatable("weapon_skin.cosmicpve.trident_of_the_deep.effect")),
+                    List.of(new VirtualEnchantmentGrant(
+                            ModEnchantments.BLACKOUT.identifier(), 6, TRIDENT_OF_THE_DEEP))),
             definition(FIREWORK_ROCKET, 0xD43700, WeaponSkinDefinition.WeaponKind.AXE,
                     List.of(Component.translatable("weapon_skin.cosmicpve.firework_rocket.effect")),
                     List.of(new VirtualEnchantmentGrant(

@@ -312,7 +312,7 @@ public final class CosmicEnchantmentBehaviorResolver implements ProcCandidateRes
     }
 
     private void addBlackout(ProcEvent event, List<ProcCandidate> result) {
-        int level = Math.min(4, event.effectiveEnchantments().level(ModEnchantments.BLACKOUT.identifier()));
+        int level = event.effectiveEnchantments().level(ModEnchantments.BLACKOUT.identifier());
         if (level <= 0 || event.target() == null || armorSets == null || armorSetSuppression == null
                 || armorSets.resolve(event.target()).isEmpty()) return;
         result.add(candidate(ModEnchantments.BLACKOUT.identifier(), ProcHook.ON_VALID_HIT,

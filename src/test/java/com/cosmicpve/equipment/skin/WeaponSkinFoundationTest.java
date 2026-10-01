@@ -37,7 +37,7 @@ class WeaponSkinFoundationTest {
                 WeaponSkinDefinitions.GRIM_AXE, WeaponSkinDefinitions.SEASONS_BEATINGS,
                 WeaponSkinDefinitions.SPINAL_TAP, WeaponSkinDefinitions.STORMBRINGER,
                 WeaponSkinDefinitions.THE_CARVER, WeaponSkinDefinitions.WHISK_TAKER,
-                WeaponSkinDefinitions.FIREWORK_ROCKET).stream()
+                WeaponSkinDefinitions.FIREWORK_ROCKET, WeaponSkinDefinitions.TRIDENT_OF_THE_DEEP).stream()
                 .sorted(java.util.Comparator.comparing(Identifier::toString)).toList(), WeaponSkinDefinitions.ids());
         assertTrue(WeaponSkinDefinitions.find(WeaponSkinDefinitions.BOOSTED_CHAINSAW).orElseThrow()
                 .accepts(new ItemStack(Items.WOODEN_AXE)));
@@ -173,18 +173,29 @@ class WeaponSkinFoundationTest {
         service.apply(skin, axe, skin, axe);
         var grants = resolver.virtualEnchantments(axe);
         assertEquals(1, grants.size());
-        assertEquals(3, grants.getFirst().level());
+        assertEquals(5, grants.getFirst().level());
         assertEquals(WeaponSkinDefinitions.BOOSTED_CHAINSAW, grants.getFirst().sourceId());
         assertFalse(EnchantmentHelper.hasAnyEnchantments(axe));
         var effective = new EffectiveEnchantmentsResolver().resolveSources(
                 List.of(new ActualEnchantmentGrant(ModEnchantments.DOUBLESTRIKE.identifier(), 2,
                         CosmicPVE.id("actual_item"))), grants);
-        assertEquals(3, effective.level(ModEnchantments.DOUBLESTRIKE.identifier()));
+        assertEquals(5, effective.level(ModEnchantments.DOUBLESTRIKE.identifier()));
+        assertEquals(0.05, com.cosmicpve.combat.enchantment.DoublestrikeBehavior.chance(
+                effective.level(ModEnchantments.DOUBLESTRIKE.identifier())), 1.0E-12);
         assertTrue(effective.get(ModEnchantments.DOUBLESTRIKE.identifier()).orElseThrow().provenance().stream()
                 .anyMatch(value -> value.kind() == EnchantmentSourceKind.VIRTUAL
                         && value.sourceId().equals(WeaponSkinDefinitions.BOOSTED_CHAINSAW)));
         service.remove(axe, axe, true);
         assertTrue(resolver.virtualEnchantments(axe).isEmpty());
+    }
+
+    @Test void boostedChainsawLoreNamesItsVirtualLevel() throws Exception {
+        try (var reader = new InputStreamReader(java.util.Objects.requireNonNull(getClass().getResourceAsStream(
+                "/assets/cosmicpve/lang/en_us.json")))) {
+            var language = JsonParser.parseReader(reader).getAsJsonObject();
+            assertEquals("Grants Doublestrike V.",
+                    language.get("weapon_skin.cosmicpve.boosted_chainsaw.effect").getAsString());
+        }
     }
 
     @Test void canonicalBehaviorConstantsAndLeatherSoundPitchesRemainExact() {

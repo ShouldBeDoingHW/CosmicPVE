@@ -79,6 +79,8 @@ public final class ModItems {
     public static final DeferredItem<AmuletItem> ICICLE_AMULET = amulet("icicle_amulet", AmuletDefinition.ICICLE);
     public static final DeferredItem<AmuletItem> BLACK_HEART_AMULET = amulet("black_heart_amulet",
             AmuletDefinition.BLACK_HEART);
+    public static final DeferredItem<AmuletItem> LUAU_LEI_AMULET = amulet("luau_lei_amulet",
+            AmuletDefinition.LUAU_LEI);
     public static final DeferredItem<BeltItem> SHOCK_THERAPY_BELT = belt("shock_therapy_belt", BeltDefinition.SHOCK_THERAPY);
     public static final DeferredItem<BeltItem> BANDOLIER_BELT = belt("bandolier_belt", BeltDefinition.BANDOLIER);
     public static final DeferredItem<BeltItem> JELLY_ROLL_BELT = belt("jelly_roll_belt", BeltDefinition.JELLY_ROLL);

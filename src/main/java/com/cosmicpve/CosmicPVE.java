@@ -118,6 +118,10 @@ public final class CosmicPVE {
         var miningEnchantments = new MiningEnchantmentEventBridge();
         NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, miningEnchantments::onBlockDrops);
         NeoForge.EVENT_BUS.addListener(miningEnchantments::onBreakSpeed);
+        var highlight = new com.cosmicpve.equipment.enchantment.HighlightService();
+        NeoForge.EVENT_BUS.addListener(EventPriority.LOWEST, highlight::onBlockDrops);
+        NeoForge.EVENT_BUS.addListener(highlight::onServerTick);
+        NeoForge.EVENT_BUS.addListener(new com.cosmicpve.equipment.enchantment.SuperbreakerEventBridge()::onRightClickItem);
         var repairs = new RepairScrollEventBridge();
         NeoForge.EVENT_BUS.addListener(repairs::onStacked);
         var trialTrinkets = new TrialTrinketEventBridge();

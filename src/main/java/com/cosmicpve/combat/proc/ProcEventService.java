@@ -144,6 +144,17 @@ public final class ProcEventService {
         return engine.evaluate(event, List.of(candidate));
     }
 
+    /** Mining-specific dispatch uses the broken tool, not all equipped enchantments. */
+    public ProcDispatchResult dispatchMiningCandidate(
+            net.minecraft.server.level.ServerPlayer player, net.minecraft.world.item.ItemStack tool,
+            ProcCandidate candidate) {
+        var sequence = sequences.nextRoot();
+        var event = create(ProcHook.ON_BLOCK_BREAK, player, player, null, sequence.id(), sequence.parentId(),
+                RecursionPolicy.NORMAL, Optional.of(player.getUUID()), enchantments.resolve(player, tool, List.of()),
+                serverRandom(player), Set.of(), Optional.empty());
+        return engine.evaluate(event, List.of(candidate));
+    }
+
     /** Dispatches the no-direct-damage virtual parent created by Inversion. */
     public ProcDispatchResult dispatchInvertedOffense(
             LivingEntity defender, LivingEntity originalAttacker, net.minecraft.world.item.ItemStack attackerWeapon,

@@ -56,6 +56,11 @@ public final class ModDataComponents {
             COMPONENTS.registerComponentType("omni_socket_success", builder -> builder
                     .persistent(Codec.intRange(1, 100)).networkSynchronized(ByteBufCodecs.VAR_INT).cacheEncoding());
 
+    /** Absolute overworld game-time expiry carried by one Superbreaker pickaxe, not its player. */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Long>> SUPERBREAKER_READY_AT =
+            COMPONENTS.registerComponentType("superbreaker_ready_at", builder -> builder
+                    .persistent(Codec.LONG).networkSynchronized(ByteBufCodecs.VAR_LONG).cacheEncoding());
+
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<CustomEnchantMetadata>> CUSTOM_ENCHANT_META =
             COMPONENTS.registerComponentType(
                     "custom_enchant_meta",

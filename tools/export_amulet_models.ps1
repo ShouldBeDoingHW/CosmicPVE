@@ -4,7 +4,8 @@ $ErrorActionPreference = 'Stop'
 $models = @(
     @{ Source='blockbench/amulets/blood_diamond/blood_diamond.bbmodel'; Runtime='blood_diamond' },
     @{ Source='blockbench/amulets/icicle/icicle.bbmodel'; Runtime='icicle' },
-    @{ Source='blockbench/amulets/blackened_heart/blackened_heart.bbmodel'; Runtime='black_heart' }
+    @{ Source='blockbench/amulets/blackened_heart/blackened_heart.bbmodel'; Runtime='black_heart' },
+    @{ Source='blockbench/amulets/Luau_Lei/Luau_Lei.bbmodel'; Runtime='luau_lei' }
 )
 $modelDir = Join-Path $RepositoryRoot 'src/main/resources/assets/cosmicpve/models/item/amulet'
 $textureDir = Join-Path $RepositoryRoot 'src/main/resources/assets/cosmicpve/textures/item/amulet'
@@ -31,7 +32,7 @@ function Add-Face([Collections.Generic.List[string]]$lines, $points, $uvs, [ref]
     for($i=0;$i -lt $points.Count;$i++) {
         $p=Runtime-Point $points[$i]
         $lines.Add(('v {0:F7} {1:F7} {2:F7}' -f $p[0],$p[1],$p[2]))
-        $lines.Add(('vt {0:F7} {1:F7}' -f ([double]$uvs[$i][0]/32.0),([double]$uvs[$i][1]/32.0)))
+        $lines.Add(('vt {0:F7} {1:F7}' -f ([double]$uvs[$i][0]/$script:textureWidth),([double]$uvs[$i][1]/$script:textureHeight)))
         $indices += ('{0}/{1}' -f $vIndex.Value,$tIndex.Value)
         $vIndex.Value++; $tIndex.Value++
     }
@@ -40,6 +41,8 @@ function Add-Face([Collections.Generic.List[string]]$lines, $points, $uvs, [ref]
 
 foreach($entry in $models) {
     $json=Get-Content -Raw (Join-Path $RepositoryRoot $entry.Source) | ConvertFrom-Json
+    $script:textureWidth=[double]$json.resolution.width
+    $script:textureHeight=[double]$json.resolution.height
     $allPoints=@()
     foreach($element in $json.elements) {
         $rotation=if($null -eq $element.rotation){@(0,0,0)}else{$element.rotation}

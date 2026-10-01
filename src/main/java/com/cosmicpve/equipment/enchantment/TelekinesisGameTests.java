@@ -40,6 +40,8 @@ public final class TelekinesisGameTests {
             DeferredRegister.create(Registries.TEST_FUNCTION, CosmicPVE.MOD_ID);
     private static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> FINAL_DROPS =
             FUNCTIONS.register("telekinesis_final_drops", ignored -> TelekinesisGameTests::finalDrops);
+    private static final DeferredHolder<Consumer<GameTestHelper>, Consumer<GameTestHelper>> SUPERBREAKER =
+            FUNCTIONS.register("superbreaker_activation", ignored -> TelekinesisGameTests::superbreakerActivation);
 
     private TelekinesisGameTests() {}
 
@@ -55,6 +57,58 @@ public final class TelekinesisGameTests {
                 ResourceKey.create(Registries.TEST_FUNCTION, CosmicPVE.id("telekinesis_final_drops")),
                 new TestData<>(environment, CosmicPVE.id("trial/development_room"), 100, 0, true,
                         Rotation.NONE, false, 1, 1, false)));
+        event.registerTest(CosmicPVE.id("superbreaker_activation"), new FunctionGameTestInstance(
+                ResourceKey.create(Registries.TEST_FUNCTION, CosmicPVE.id("superbreaker_activation")),
+                new TestData<>(environment, CosmicPVE.id("trial/development_room"), 100, 0, true,
+                        Rotation.NONE, false, 1, 1, false)));
+    }
+
+    private static void superbreakerActivation(GameTestHelper helper) {
+        var player = connectedTestPlayer(helper);
+        var service = new SuperbreakerService();
+        var pickaxe = new ItemStack(Items.DIAMOND_PICKAXE);
+        helper.assertTrue(!service.activate(player, pickaxe), "Unenchanted pickaxe cannot activate");
+        var holder = helper.getLevel().registryAccess().lookupOrThrow(Registries.ENCHANTMENT)
+                .getOrThrow(ModEnchantments.SUPERBREAKER);
+        EnchantmentHelper.updateEnchantments(pickaxe, mutable -> mutable.set(holder, 1));
+        helper.assertTrue(!service.activate(player, new ItemStack(Items.DIAMOND_SWORD)), "Wrong tool rejected");
+        long tick = helper.getLevel().getServer().getTickCount();
+        EnchantmentSuppressionService.GLOBAL.suppressEnchantment(player, CosmicPVE.id("test_suppression"),
+                ModEnchantments.SUPERBREAKER.identifier(), 20, tick);
+        helper.assertTrue(!service.activate(player, pickaxe), "Suppressed Superbreaker rejected");
+        var activePlayer = connectedTestPlayer(helper);
+        helper.assertTrue(service.activate(activePlayer, pickaxe), "Effective Superbreaker activates");
+        var haste = activePlayer.getEffect(net.minecraft.world.effect.MobEffects.HASTE);
+        helper.assertTrue(haste != null && haste.getAmplifier() == 4 && haste.getDuration() == 220,
+                "Level I grants exactly 11 seconds of Haste V");
+        long gameTime = helper.getLevel().getServer().overworld().getGameTime();
+        helper.assertTrue(SuperbreakerService.remainingTicks(pickaxe, gameTime) == 2400,
+                "First pickaxe owns its 120s cooldown");
+        helper.assertTrue(!service.activate(activePlayer, pickaxe), "Same pickaxe cannot reactivate immediately");
+        var replacement = new ItemStack(Items.IRON_PICKAXE);
+        EnchantmentHelper.updateEnchantments(replacement, mutable -> mutable.set(holder, 10));
+        helper.assertTrue(SuperbreakerService.remainingTicks(replacement, gameTime) == 0,
+                "A separate enchanted pickaxe starts ready");
+        helper.assertTrue(service.activate(activePlayer, replacement), "Second pickaxe activates independently");
+        helper.assertTrue(activePlayer.getEffect(net.minecraft.world.effect.MobEffects.HASTE).getDuration() == 400,
+                "Level X grants 20 seconds of Haste V");
+        helper.assertTrue(SuperbreakerService.remainingTicks(replacement, gameTime) == 2400,
+                "Second pickaxe receives its own cooldown");
+        helper.assertTrue(SuperbreakerService.remainingTicks(pickaxe, gameTime) == 2400,
+                "Second activation does not reset the first pickaxe");
+        var third = new ItemStack(Items.STONE_PICKAXE);
+        EnchantmentHelper.updateEnchantments(third, mutable -> mutable.set(holder, 1));
+        helper.assertTrue(service.activate(activePlayer, third),
+                "Third ready pickaxe can activate while longer Haste V is already active");
+        helper.assertTrue(SuperbreakerService.remainingTicks(third, gameTime) == 2400
+                && activePlayer.getEffect(net.minecraft.world.effect.MobEffects.HASTE).getDuration() == 400,
+                "Third activation preserves longer Haste and starts only its own cooldown");
+        helper.assertTrue(!service.activate(activePlayer, replacement), "Second pickaxe remains blocked");
+        helper.assertTrue(SuperbreakerService.remainingTicks(pickaxe, gameTime) == 2400,
+                "Rejected activation never alters another item's cooldown");
+        helper.assertTrue(SuperbreakerService.remainingTicks(pickaxe.copy(), gameTime) == 2400,
+                "Item cooldown survives a normal stack copy");
+        helper.succeed();
     }
 
     private static void finalDrops(GameTestHelper helper) {

@@ -11,7 +11,9 @@ public enum AmuletDefinition {
     ICICLE("icicle", "Amulet: Icicle", 0xBDF0FF,
             "Hitting an enemy that has Slowness has a 10% chance to give them a Bleed stack."),
     BLACK_HEART("black_heart", "Amulet: Black Heart", 0x310082,
-            "Gain +5% outgoing damage for 4s when a hostile Mastery or Heroic enchantment proc affects you.");
+            "Gain +5% outgoing damage for 4s when a hostile Mastery or Heroic enchantment proc affects you."),
+    LUAU_LEI("luau_lei", "Amulet: Luau Lei", 0x26EDAD,
+            "Deal 1.15x damage while above 80% health.");
 
     private final Identifier id;
     private final String displayName;

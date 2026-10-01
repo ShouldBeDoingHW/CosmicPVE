@@ -31,6 +31,7 @@ public final class AmuletCombatService implements OutgoingDamageContributor, Pro
     public static final double BLOOD_DIAMOND_PER_STACK = 0.01;
     public static final double ICICLE_CHANCE = 0.10;
     public static final double BLACK_HEART_BONUS = 0.05;
+    public static final double LUAU_LEI_BONUS = 0.15;
     public static final net.minecraft.resources.Identifier ICICLE_PROC = CosmicPVE.id("icicle_amulet");
     private final AccessoryResolver accessories;
     private final CombatStackService stacks;
@@ -57,7 +58,13 @@ public final class AmuletCombatService implements OutgoingDamageContributor, Pro
         if (accessories.hasAmulet(context.attacker(), AmuletDefinition.BLACK_HEART)
                 && blackHeart.active(context.attacker(), tick))
             result.add(new OutgoingDamageContribution(AmuletDefinition.BLACK_HEART.id(), BLACK_HEART_BONUS));
+        if (accessories.hasAmulet(context.attacker(), AmuletDefinition.LUAU_LEI)
+                && aboveLuauThreshold(context.attacker().getHealth(), context.attacker().getMaxHealth()))
+            result.add(new OutgoingDamageContribution(AmuletDefinition.LUAU_LEI.id(), LUAU_LEI_BONUS));
         return List.copyOf(result);
+    }
+    public static boolean aboveLuauThreshold(float health, float effectiveMaxHealth) {
+        return effectiveMaxHealth > 0.0F && health > effectiveMaxHealth * 0.80F;
     }
     @Override public List<ProcCandidate> resolve(ProcEvent event) {
         if (event.hook() != ProcHook.ON_VALID_HIT || event.attacker() == null || event.target() == null

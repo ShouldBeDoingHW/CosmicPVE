@@ -13,6 +13,7 @@ public final class AmuletItemFactory {
             case BLOOD_DIAMOND -> ModItems.BLOOD_DIAMOND_AMULET.get();
             case ICICLE -> ModItems.ICICLE_AMULET.get();
             case BLACK_HEART -> ModItems.BLACK_HEART_AMULET.get();
+            case LUAU_LEI -> ModItems.LUAU_LEI_AMULET.get();
         };
         var stack = new ItemStack(item);
         stack.set(ModDataComponents.ACCESSORY_ITEM.get(),
